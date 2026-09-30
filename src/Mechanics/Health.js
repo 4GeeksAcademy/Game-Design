@@ -1,26 +1,28 @@
 
 
 
-const character = {
-    health: 100,
-    mana: 50
-};
 
-const attack = {
-    state: false,
-    damage: 10
-};
 
-function attackCharacter() {
-    attack.state = true;
+function attackCharacter(ATK, attacker, defender) {
 
-    currentHealth(attack, character);
+    if (attacker.mana >= ATK.cost) {
 
-    attack.state = false;
+        attacker.mana = attacker.mana - ATK.cost;
+
+        ATK.state = true;
+        currentHealth(ATK, defender);
+        ATK.state = false;
+
+    } else {
+        console.log("Not enough mana!");
+    }
 }
 
+
 function currentHealth(ATK, HP) {
+
     if (ATK.state == true && ATK.damage > 0 && HP.health > 0) {
+
         HP.health = HP.health - ATK.damage;
 
         if (HP.health <= 0) {
@@ -28,3 +30,4 @@ function currentHealth(ATK, HP) {
             console.log("Game over");
         }
     }
+}
