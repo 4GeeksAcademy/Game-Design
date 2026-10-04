@@ -1,3 +1,6 @@
+import React from "react";
+
+
 function AttackOptions() {
 
 // Temporarily hardcoded attacks to see if i can make it functional

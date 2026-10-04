@@ -1,3 +1,6 @@
+import React from "react";
+import './BattleUI.css';
+
 function Opponent() {
 
     return (

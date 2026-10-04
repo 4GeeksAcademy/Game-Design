@@ -1,6 +1,7 @@
-import Opponent from "./components/Opponent";
-import Character from "./components/Character";
-import AttackOptions from "./components/AttackOptions";
+import Opponent from "./Opponent.jsx";
+import Character from "./Character.jsx";
+import AttackOptions from "./AttackOptions.jsx";
+import React from "react";
 
 function App() {
 
@@ -18,3 +19,4 @@ function App() {
 }
 
 export default App;
+
