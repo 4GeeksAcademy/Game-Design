@@ -1,3 +1,48 @@
 #opponent {
 
 }
+
+#character #character {
+  background-color: #ffffff;
+  border: 2px solid #0d6efd;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#character:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(13, 110, 253, 0.25);
+}
+
+#character .card-header {
+  background-color: #0d6efd;
+  color: #ffffff;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 10px;
+}
+
+#character .card-body {
+  padding: 20px;
+}
+
+#character .card-body h2 {
+  font-size: 1.5rem;
+  color: #212529;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+#character .card-body p {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+  color: #495057;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #e9ecef;
+  padding-bottom: 4px;
+}
