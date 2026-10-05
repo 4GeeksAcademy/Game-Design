@@ -9,14 +9,97 @@ function AttackOptions() {
         <div className="card-header text-center">Attack Options</div>
 
         <div className="card-body">
-          <div className="d-flex flex-row flex-nowrap gap-2 overflow-x-auto pb-2">
-            <button className="btn btn-primary text-nowrap">Attack 1</button>
-            <button className="btn btn-primary text-nowrap">Attack 2</button>
-            <button className="btn btn-secondary text-nowrap" disabled>
-              Attack 3
+          <div className="d-flex flex-row flex-nowrap gap-3 overflow-x-auto pb-2">
+            {/* Attack 1 */}
+            <button className="card btn btn-primary text-start p-3"
+              style={{ minWidth: "200px" }}>
+
+              <h5 className="text-center">
+                Acid Shot
+              </h5>
+
+              <p className="mb-1">
+                Damage: 20
+              </p>
+
+              <p className="mb-3">
+                Mana: 10
+              </p>
+
+              <span className="btn btn-light w-100">
+                ATTACK
+              </span>
+
             </button>
-            <button className="btn btn-secondary text-nowrap card h-100" disabled>
-              Attack 4
+
+            {/* Attack 2 */}
+            <button className="card btn btn-primary text-start p-3"
+              style={{ minWidth: "200px" }}>
+
+              <h5 className="text-center">
+                Acid Bomb
+              </h5>
+
+              <p className="mb-1">
+                Damage: 30
+              </p>
+
+              <p className="mb-3">
+                Mana: 15
+              </p>
+
+              <span className="btn btn-light w-100">
+                ATTACK
+              </span>
+
+            </button>
+            {/* Attack 3 */}
+            <button
+              className="card btn btn-secondary text-start p-3"
+              style={{ minWidth: "200px" }}
+              disabled
+            >
+
+              <h5 className="text-center">
+                Acid Rain
+              </h5>
+
+              <p className="mb-1">
+                Damage: 40
+              </p>
+
+              <p className="mb-3">
+                Mana: 20
+              </p>
+
+              <span className="btn btn-light w-100">
+                DISABLED
+              </span>
+
+            </button>
+             {/* Attack 4 */}
+            <button
+              className="card btn btn-secondary text-start p-3"
+              style={{ minWidth: "200px" }}
+              disabled
+            >
+
+              <h5 className="text-center">
+                Acid Storm
+              </h5>
+
+              <p className="mb-1">
+                Damage: 50
+              </p>
+
+              <p className="mb-3">
+                Mana: 25
+              </p>
+
+              <span className="btn btn-light w-100">
+                DISABLED
+              </span>
+
             </button>
           </div>
         </div>
