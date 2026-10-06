@@ -2,3 +2,44 @@
 
 }
 
+/* Card Button Base Style (Dark/Primary by Default) */
+#attackButton {
+  flex: 0 0 180px;
+  display: flex;
+  flex-direction: column;
+  background-color: #0d6efd; /* Primary Blue background */
+  color: #ffffff;            /* White text */
+  border: 2px solid #0d6efd;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Base Text Styles inside Card */
+#attackButton #attackCardTitle,
+#attackButton #attackDesc {
+  color: #ffffff;
+}
+
+/* Hover State (Inverted / Conversed Colors) */
+#attackButton:hover:not(:disabled) {
+  background-color: #0052cdd5 ; /* Inverts to White background */
+  color: #ffffff ;            /* Inverts text to Blue */
+  border-color: #0d6efd;
+  transform: translateY(-7px);
+  box-shadow: 0 8px 32px rgba(2, 50, 121, 0.279);
+}
+
+
+
+/* Disabled State */
+#attackButton:disabled {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(60%);
+}
