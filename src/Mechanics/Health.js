@@ -1,4 +1,4 @@
-
+import React from "react";
 
 
 
@@ -19,14 +19,14 @@ function attackCharacter(ATK, attacker, defender) {
 }
 
 
-function currentHealth(ATK, HP) {
+function currentHealth(ATK, character) {
 
-    if (ATK.state == true && ATK.damage > 0 && HP.health > 0) {
+    if (ATK.state == true && ATK.damage > 0 && character.health > 0) {
 
-        HP.health = HP.health - ATK.damage;
+        character.health = character.health - ATK.damage;
 
-        if (HP.health <= 0) {
-            HP.health = 0;
+        if (character.health <= 0) {
+            character.health = 0;
             console.log("Game over");
         }
     }

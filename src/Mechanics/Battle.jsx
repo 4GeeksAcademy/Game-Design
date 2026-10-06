@@ -5,31 +5,47 @@ import VictoryScreen from "./VictoryScreen.jsx";
 import React from "react";
 import { useState } from "react";
 
+function App() {
+  const [character, setCharacter] = useState({
+    health: 100,
+    mana: 50,
+    maximumMana: 50,
+    manaRegen: 5,
+    turnFinished: false,
+  });
+  const [opponent, setOpponent] = useState({
+    health: 100,
+    mana: 50,
+    maximumMana: 50,
+    manaRegen: 5,
+    turnFinished: false,
+  });
+  const [opponentHealth, setOpponentHealth] = useState(100);
+  const [damageDealt, setDamageDealt] = useState(0);
+  const [attacksUsed, setAttacksUsed] = useState(0);
 
-  function App() {
-    const [opponentHealth, setOpponentHealth] = useState(100);
-    const [damageDealt, setDamageDealt] = useState(0);
-    const [attacksUsed, setAttacksUsed] = useState(0);
+  return (
+    <div className="container mt-4">
+      {opponentHealth === 0 ? (
+        <VictoryScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
+      ) : (
+        <>
+          <Opponent health={opponent.health} mana={opponent.mana} />
 
-    return (
-      <div className="container mt-4">
-        {opponentHealth === 0 ? (
-          <VictoryScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
-        ) : (
-          <>
-            <Opponent health={opponentHealth} />
+          <Character health={character.health} mana={character.mana} />
 
-            <Character />
+          <AttackOptions
+            character={character}
+            opponent={opponent}
+            setCharacter={setCharacter}
+            setOpponent={setOpponent}
+            setDamageDealt={setDamageDealt}
+            setAttacksUsed={setAttacksUsed}
+          />
+        </>
+      )}
+    </div>
+  );
+}
 
-            <AttackOptions
-              setOpponentHealth={setOpponentHealth}
-              setDamageDealt={setDamageDealt}
-              setAttacksUsed={setAttacksUsed}
-            />
-          </>
-        )}
-      </div>
-    );
-  }
-  
 export default App;

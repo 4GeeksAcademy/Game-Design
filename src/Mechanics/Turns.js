@@ -1,4 +1,10 @@
+import React from "react";
+
+
+
 let turns = 1;
+
+
 
 function regenerateMana(HP) {
 
