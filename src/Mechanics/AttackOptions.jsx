@@ -2,7 +2,7 @@ import React from "react";
 import "./BattleUI.css";
 import mina from "./Mina_AshidoStats";
 
-function AttackOptions() {
+function AttackOptions({ setOpponentHealth, setDamageDealt, setAttacksUsed }) {
   // Temporarily hardcoded attacks to see if i can make it functional
 
   return (
@@ -18,6 +18,15 @@ function AttackOptions() {
                 id="attackButton"
                 style={{ minWidth: "200px" }}
                 key={attack.name}
+                onClick={() => {
+                  setOpponentHealth((health) =>
+                    Math.max(0, health - attack.damage),
+                  );
+
+                  setDamageDealt((damage) => damage + attack.damage);
+
+                  setAttacksUsed((attacks) => attacks + 1);
+                }}
               >
                 <img
                   src="https://placehold.co/600x400"
@@ -25,21 +34,13 @@ function AttackOptions() {
                   alt={attack.name}
                 />
 
-                <h5 className="text-center">
-                  {attack.name}
-                </h5>
+                <h5 className="text-center">{attack.name}</h5>
 
-                <p className="mb-1">
-                  Damage: {attack.damage}
-                </p>
+                <p className="mb-1">Damage: {attack.damage}</p>
 
-                <p className="mb-3">
-                  Mana: {attack.cost}
-                </p>
+                <p className="mb-3">Mana: {attack.cost}</p>
 
-                <span className="btn btn-success w-100">
-                  ATTACK
-                </span>
+                <span className="btn btn-success w-100">ATTACK</span>
               </button>
             ))}
           </div>

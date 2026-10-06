@@ -1,8 +1,9 @@
 import React from "react";
 import './BattleUI.css';
 
-function Opponent() {
+function Opponent({ health }) {
 
+    
     return (
         <div className="card mb-4" id="opponent">
 
@@ -14,7 +15,7 @@ function Opponent() {
 
                 <h2>Opponent Character</h2>
 
-                <p>Health: 100</p>
+                <p>Health: {health}</p>
                 <p>Mana: 50</p>
                 <p>Attack: 20</p>
                 <p>Defense: 10</p>
