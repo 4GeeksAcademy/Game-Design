@@ -16,6 +16,11 @@ import React from "react";
       console.log("Not enough mana!");
       return null;
     }
+
+    if (ATK.state === false) {
+    console.log("Attack already used!");
+    return null;
+  }
   }
 
 function currentHealth(ATK, character) {

@@ -2,28 +2,28 @@ const acidShot = {
     name: "Acid Shot",
     damage: 20,
     cost: 10,
-    state: false
+    state: true
 };
 
 const acidBomb = {
     name: "Acid Bomb",
     damage: 30,
     cost: 15,
-    state: false
+    state: true
 };
 
 const acidRain = {
     name: "Acid Rain",
     damage: 40,
     cost: 20,
-    state: false
+    state: true
 };
 
 const acidStorm = {
     name: "Acid Storm",
     damage: 50,
     cost: 25,
-    state: false
+    state: true
 };
 
 export { acidShot, acidBomb, acidRain, acidStorm };
