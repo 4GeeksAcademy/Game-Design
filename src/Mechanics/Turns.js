@@ -6,13 +6,12 @@ let turns = 1;
 
 
 
-function regenerateMana(HP) {
+function regenerateMana(character) {
 
-    HP.mana = HP.mana + HP.manaRegen;
-
-    if (HP.mana > HP.maximumMana) {
-        HP.mana = HP.maximumMana;
-    }
+     character.mana = Math.min(
+        character.maximumMana,
+        character.mana + character.manaRegen
+    );
 }
 
 
@@ -27,6 +26,8 @@ function turn(playerOne, playerTwo) {
 
         playerOne.turnFinished = false;
         playerTwo.turnFinished = false;
-        attack.state = true
+        
     }
 }
+
+export { regenerateMana, turn };

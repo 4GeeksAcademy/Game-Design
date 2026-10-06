@@ -1,6 +1,7 @@
 import React from "react";
 
-function Character() {
+
+function Character({ health, mana }) {
   return (
     <div className="d-flex justify-content-center w-100 my-3">
     <div className="card m-3 shadow-sm" style={{ width: "18rem" }} id="Character">
@@ -17,9 +18,8 @@ function Character() {
 
                 <h2>Your Character</h2>
 
-                <p>Health: 100</p>
-                <p>Mana: 50</p>
-                <p>Attack: 20</p>
+                <p>Health: {health}</p>
+                <p>Mana: {mana}</p>
                 <p>Defense: 10</p>
 
             </div>

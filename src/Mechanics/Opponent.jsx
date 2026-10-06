@@ -1,7 +1,7 @@
 import React from "react";
 import './BattleUI.css';
 
-function Opponent({ health }) {
+function Opponent({ health, mana }) {
 
     
     return (
@@ -16,7 +16,7 @@ function Opponent({ health }) {
                 <h2>Opponent Character</h2>
 
                 <p>Health: {health}</p>
-                <p>Mana: 50</p>
+                <p>Mana: {mana}</p>
                 <p>Attack: 20</p>
                 <p>Defense: 10</p>
 

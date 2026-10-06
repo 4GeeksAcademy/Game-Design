@@ -20,7 +20,6 @@ function App() {
     manaRegen: 5,
     turnFinished: false,
   });
-  const [opponentHealth, setOpponentHealth] = useState(100);
   const [damageDealt, setDamageDealt] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
 
