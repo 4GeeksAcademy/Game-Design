@@ -11,6 +11,8 @@ function Opponent({ opponent, setOpponent }) {
 
         <p>Health: {opponent.health}</p>
         <p>Mana: {opponent.mana}</p>
+        <p>Cooldown: {opponent.cooldown}</p>
+        <p>Defense: {opponent.defense.amount}</p>
         <button
           className="btn btn-danger"
           onClick={() => {

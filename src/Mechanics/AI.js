@@ -23,7 +23,12 @@ function aiTurn(ai, player, showAttack, hideAttack) {
     showAttack(attack);
 
     setTimeout(() => {
-      attackCharacter(attack, ai, player);
+      if (player.blocked === false) {
+        attackCharacter(attack, ai, player);
+      }
+
+      player.blocked = false;
+
       aiFinishTurn(ai);
       hideAttack();
     }, 7000);

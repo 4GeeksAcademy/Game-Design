@@ -40,6 +40,7 @@ function App() {
     maximumMana: 50,
     manaRegen: 5,
     turnFinished: false,
+    blocked: false,
   });
 
   // Shows opponents stats and available attacks on his side
@@ -128,6 +129,7 @@ function App() {
                     blockAttack(character, aiAttack);
 
                     character.cooldown -= 1;
+                    character.blocked = true;
 
                     setCharacter({
                       ...character,

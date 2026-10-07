@@ -27,7 +27,7 @@ const mina = {
   cooldown: 3,
   recovery: 1,
   defense: {
-    amount: 5,
+    amount: 25,
     active: true,
   },
 
