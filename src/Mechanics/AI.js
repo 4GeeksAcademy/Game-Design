@@ -25,4 +25,4 @@ function aiFinishTurn(ai) {
   ai.turnFinished = true;
 }
 
-export { aiAttack };
+export { aiAttack, aiFinishTurn};
