@@ -1,10 +1,8 @@
 import { attackCharacter } from "./Health.js";
 
+function aiAttack(ai, player) {
 
-
-function aiTurn(ai, player, attacks) {
-
-  let availableAttacks = attacks.filter((attack) => {
+  let availableAttacks = ai.attacks.filter((attack) => {
     return attack.state === true && ai.mana >= attack.cost;
   });
 
@@ -19,6 +17,8 @@ function aiTurn(ai, player, attacks) {
     ];
 
   attackCharacter(randomAttack, ai, player);
+
+  return randomAttack;
 }
 
-export { aiTurn };
+export { aiAttack };
