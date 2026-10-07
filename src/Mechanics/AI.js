@@ -21,4 +21,8 @@ function aiAttack(ai, player) {
   return randomAttack;
 }
 
+function aiFinishTurn(ai) {
+  ai.turnFinished = true;
+}
+
 export { aiAttack };
