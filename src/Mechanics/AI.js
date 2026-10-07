@@ -1,28 +1,37 @@
 import { attackCharacter } from "./Health.js";
 
-function aiAttack(ai, player) {
-
+function aiChooseAttack(ai) {
   let availableAttacks = ai.attacks.filter((attack) => {
     return attack.state === true && ai.mana >= attack.cost;
   });
 
   if (availableAttacks.length === 0) {
     console.log("AI has no available attacks!");
-    return;
+    return null;
   }
 
   let randomAttack =
-    availableAttacks[
-      Math.floor(Math.random() * availableAttacks.length)
-    ];
-
-  attackCharacter(randomAttack, ai, player);
+    availableAttacks[Math.floor(Math.random() * availableAttacks.length)];
 
   return randomAttack;
+}
+
+function aiTurn(ai, player, showAttack, hideAttack) {
+  let attack = aiChooseAttack(ai);
+
+  if (attack) {
+    showAttack(attack);
+
+    setTimeout(() => {
+      attackCharacter(attack, ai, player);
+      aiFinishTurn(ai);
+      hideAttack();
+    }, 1000);
+  }
 }
 
 function aiFinishTurn(ai) {
   ai.turnFinished = true;
 }
 
-export { aiAttack, aiFinishTurn};
+export { aiChooseAttack, aiTurn, aiFinishTurn };

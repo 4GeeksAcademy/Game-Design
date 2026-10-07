@@ -1,6 +1,6 @@
 import React from "react";
 
-function Character({  character, setCharacter }) {
+function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
   return (
     <div className="d-flex justify-content-center w-100 my-3">
       <div
@@ -29,11 +29,14 @@ function Character({  character, setCharacter }) {
         <button
           className="btn btn-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg"
           style={{ width: "90px", height: "90px", fontWeight: "bold" }}
+          disabled={currentTurn !== "player"}
           onClick={() => {
             setCharacter({
               ...character,
               turnFinished: true,
             });
+
+            setCurrentTurn("ai");
           }}
         >
           Finish

@@ -9,7 +9,8 @@ function AttackOptions({
   setCharacter,
   setOpponent,
   setDamageDealt,
-  setAttacksUsed
+  setAttacksUsed,
+  currentTurn
 }) {
 
   return (
@@ -31,7 +32,7 @@ function AttackOptions({
                 id="attackButton"
                 style={{ minWidth: "200px" }}
                 key={attack.name}
-                disabled={!attack.state}
+                disabled={currentTurn !== "player" || !attack.state}
 
                 onClick={() => {
 
