@@ -14,8 +14,13 @@ function regenerateMana(character) {
     );
 }
 
+function resetAttacks(attacks) {
+  attacks.forEach((attack) => {
+    attack.state = true;
+  });
+}
 
-function turn(playerOne, playerTwo) {
+function turn(playerOne, playerTwo, attacks) {
 
     if (playerOne.turnFinished && playerTwo.turnFinished) {
 
@@ -26,8 +31,10 @@ function turn(playerOne, playerTwo) {
 
         playerOne.turnFinished = false;
         playerTwo.turnFinished = false;
-        
+        resetAttacks(attacks)
     }
 }
 
-export { regenerateMana, turn };
+
+
+export { regenerateMana, resetAttacks, turn };

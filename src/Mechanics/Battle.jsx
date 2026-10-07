@@ -2,10 +2,15 @@ import Opponent from "./Opponent.jsx";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import VictoryScreen from "./VictoryScreen.jsx";
-import React, { useState } from "react";
+import { turn } from "./Turns.js";
+
+// Characters ATM
+import mina from "./Mina_AshidoStats";
+
+
+import React, { useState, useEffect } from "react";
 
 function App() {
-
   const [character, setCharacter] = useState({
     health: 100,
     mana: 50,
@@ -25,28 +30,29 @@ function App() {
   const [damageDealt, setDamageDealt] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
 
+  useEffect(() => {
+    if (character.turnFinished && opponent.turnFinished) {
+      turn(character, opponent, mina.attacks);
+
+      setCharacter({
+        ...character,
+      });
+
+      setOpponent({
+        ...opponent,
+      });
+    }
+  }, [character, opponent]);
+
   return (
     <div className="container mt-4">
-
       {opponent.health === 0 ? (
-
-        <VictoryScreen
-          damageDealt={damageDealt}
-          attacksUsed={attacksUsed}
-        />
-
+        <VictoryScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
       ) : (
-
         <>
-          <Opponent
-            health={opponent.health}
-            mana={opponent.mana}
-          />
+          <Opponent opponent={opponent} setOpponent={setOpponent} />
 
-          <Character
-            health={character.health}
-            mana={character.mana}
-          />
+          <Character character={character} setCharacter={setCharacter} />
 
           <AttackOptions
             character={character}
@@ -57,9 +63,7 @@ function App() {
             setAttacksUsed={setAttacksUsed}
           />
         </>
-
       )}
-
     </div>
   );
 }
