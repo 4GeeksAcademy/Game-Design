@@ -6,6 +6,7 @@ import { turn } from "./Turns.js";
 
 // Characters list for now
 import mina from "./Mina_AshidoStats";
+import rockLee from "./Rock_LeeStats";
 
 // Artificial Intelligence (Bot)
 import { aiTurn, aiFinishTurn } from "./AI.js";
@@ -25,9 +26,11 @@ function App() {
     turnFinished: false,
   });
 
+
+  // Shows opponents stats and available attacks on his side
   const [opponent, setOpponent] = useState({
-    ...mina,
-    attacks: mina.attacks.map((attack) => ({
+    ...rockLee,
+    attacks: rockLee.attacks.map((attack) => ({
       ...attack,
     })),
     health: 100,

@@ -26,7 +26,7 @@ function aiTurn(ai, player, showAttack, hideAttack) {
       attackCharacter(attack, ai, player);
       aiFinishTurn(ai);
       hideAttack();
-    }, 1000);
+    }, 3000);
   }
 }
 

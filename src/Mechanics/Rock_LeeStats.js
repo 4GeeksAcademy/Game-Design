@@ -28,3 +28,5 @@ const rockLee = {
         }
     ]
 };
+
+export default rockLee;
