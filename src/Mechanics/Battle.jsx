@@ -102,54 +102,61 @@ function App() {
         <VictoryScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
       ) : (
         <>
-          <Opponent opponent={opponent} setOpponent={setOpponent} />
-
-          {aiAttack && (
-            <>
-              <div
-                className="card mx-auto my-3 shadow"
-                style={{ width: "200px" }}
-              >
-                <div className="card-header text-center">AI Attack</div>
-
-                <div className="card-body text-center">
-                  <h5>{aiAttack.name}</h5>
-
-                  <p>Damage: {aiAttack.damage}</p>
-
-                  <p>Mana: {aiAttack.cost}</p>
-                </div>
+          <div className="container mt-4">
+            <div className="row justify-content-center">
+              <div className="col-md-5 d-flex">
+                <Opponent opponent={opponent} setOpponent={setOpponent} />
               </div>
 
-              <button
-                className="btn btn-primary d-block mx-auto"
-                disabled={character.cooldown <= 0}
-                onClick={() => {
-                  if (character.cooldown > 0) {
-                    blockAttack(character, aiAttack);
+              {aiAttack && (
+                <>
+                  <div
+                    className="card mx-auto my-3 shadow-sm border-danger"
+                    style={{ maxWidth: "220px" }}
+                  >
+                    <div className="card-header text-center">AI Attack</div>
 
-                    character.cooldown -= 1;
-                    character.blocked = true;
+                    <div className="card-body text-center">
+                      <h5>{aiAttack.name}</h5>
 
-                    setCharacter({
-                      ...character,
-                    });
+                      <p>Damage: {aiAttack.damage}</p>
 
-                    setAiAttack(null);
-                  }
-                }}
-              >
-                Block
-              </button>
-            </>
-          )}
+                      <p>Mana: {aiAttack.cost}</p>
+                    </div>
+                  </div>
 
-          <Character
-            character={character}
-            setCharacter={setCharacter}
-            currentTurn={currentTurn}
-            setCurrentTurn={setCurrentTurn}
-          />
+                  <button
+                    className="btn btn-primary d-block mx-auto"
+                    disabled={character.cooldown <= 0}
+                    onClick={() => {
+                      if (character.cooldown > 0) {
+                        blockAttack(character, aiAttack);
+
+                        character.cooldown -= 1;
+                        character.blocked = true;
+
+                        setCharacter({
+                          ...character,
+                        });
+
+                        setAiAttack(null);
+                      }
+                    }}
+                  >
+                    Block
+                  </button>
+                </>
+              )}
+              <div className="col-12 d-flex">
+                <Character
+                  character={character}
+                  setCharacter={setCharacter}
+                  currentTurn={currentTurn}
+                  setCurrentTurn={setCurrentTurn}
+                />
+              </div>
+            </div>
+          </div>
 
           <AttackOptions
             character={character}

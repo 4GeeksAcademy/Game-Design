@@ -18,7 +18,7 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
         </div>
 
         <div className="card-body text-center">
-          <h2>Your Character</h2>
+          <h2>{character.name}</h2>
 
           <p>Health: {character.health}</p>
           <p>Mana: {character.mana}</p>
