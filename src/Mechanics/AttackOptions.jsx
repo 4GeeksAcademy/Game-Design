@@ -1,6 +1,6 @@
 import React from "react";
 import "./BattleUI.css";
-import mina from "./Mina_AshidoStats";
+
 import { attackCharacter } from "./Health.js";
 
 function AttackOptions({
@@ -24,13 +24,14 @@ function AttackOptions({
 
           <div className="d-flex flex-row flex-nowrap gap-3 overflow-x-auto pb-2">
 
-            {mina.attacks.map((attack) => (
+            {character.attacks.map((attack) => (
 
               <button
                 className="card btn btn-light text-start p-3"
                 id="attackButton"
                 style={{ minWidth: "200px" }}
                 key={attack.name}
+                disabled={!attack.state}
 
                 onClick={() => {
 

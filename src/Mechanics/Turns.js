@@ -1,4 +1,4 @@
-import React from "react";
+
 
 
 
@@ -15,12 +15,13 @@ function regenerateMana(character) {
 }
 
 function resetAttacks(attacks) {
-  attacks.forEach((attack) => {
-    attack.state = true;
-  });
+  return attacks.map((attack) => ({
+    ...attack,
+    state: true,
+  }));
 }
 
-function turn(playerOne, playerTwo, attacks) {
+function turn(playerOne, playerTwo) {
 
     if (playerOne.turnFinished && playerTwo.turnFinished) {
 
@@ -31,7 +32,8 @@ function turn(playerOne, playerTwo, attacks) {
 
         playerOne.turnFinished = false;
         playerTwo.turnFinished = false;
-        resetAttacks(attacks)
+        playerOne.attacks = resetAttacks(playerOne.attacks);
+        playerTwo.attacks = resetAttacks(playerTwo.attacks);
     }
 }
 

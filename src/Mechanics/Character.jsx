@@ -1,6 +1,6 @@
 import React from "react";
 
-function Character({ turnFinished, character, setCharacter }) {
+function Character({  character, setCharacter }) {
   return (
     <div className="d-flex justify-content-center w-100 my-3">
       <div

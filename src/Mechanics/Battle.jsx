@@ -7,11 +7,14 @@ import { turn } from "./Turns.js";
 // Characters ATM
 import mina from "./Mina_AshidoStats";
 
-
 import React, { useState, useEffect } from "react";
 
 function App() {
   const [character, setCharacter] = useState({
+    ...mina,
+    attacks: mina.attacks.map((attack) => ({
+      ...attack,
+    })),
     health: 100,
     mana: 50,
     maximumMana: 50,
@@ -20,6 +23,10 @@ function App() {
   });
 
   const [opponent, setOpponent] = useState({
+    ...mina,
+    attacks: mina.attacks.map((attack) => ({
+      ...attack,
+    })),
     health: 100,
     mana: 50,
     maximumMana: 50,
@@ -32,7 +39,7 @@ function App() {
 
   useEffect(() => {
     if (character.turnFinished && opponent.turnFinished) {
-      turn(character, opponent, mina.attacks);
+      turn(character, opponent);
 
       setCharacter({
         ...character,
