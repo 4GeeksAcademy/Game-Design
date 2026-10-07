@@ -1,9 +1,4 @@
-import {
-    acidShot,
-    acidBomb,
-    acidRain,
-    acidStorm
-} from "./Attack";
+import { acidShot, acidBomb, acidRain, acidStorm } from "./Attack(list)";
 
 // const mina = {
 //     name: "Mina Ashido",
@@ -22,31 +17,35 @@ import {
 //     ]
 // };
 
-
 const mina = {
-    name: "Mina Ashido",
+  name: "Mina Ashido",
 
-    health: 100,
-    mana: 50,
-    maximumMana: 50,
-    manaRegen: 5,
+  health: 100,
+  mana: 50,
+  maximumMana: 50,
+  manaRegen: 5,
+  cooldown: 3,
+  recovery: 1,
+  defense: {
+    amount: 5,
+    active: true,
+  },
 
-    attacks: [
-        {
-            name: "Acid Shot",
-            damage: 20,
-            cost: 10,
-            state: true
-        },
+  attacks: [
+    {
+      name: "Acid Shot",
+      damage: 20,
+      cost: 10,
+      state: true,
+    },
 
-        {
-            name: "Acid Blast",
-            damage: 30,
-            cost: 25,
-            state: true
-        }
-    ]
+    {
+      name: "Acid Blast",
+      damage: 30,
+      cost: 25,
+      state: true,
+    },
+  ],
 };
-
 
 export default mina;

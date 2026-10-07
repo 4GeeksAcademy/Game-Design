@@ -13,6 +13,22 @@ import { aiTurn, aiFinishTurn } from "./AI.js";
 
 import React, { useState, useEffect } from "react";
 
+function blockAttack(character, attack) {
+  let reducedDamage = attack.damage - character.defense.amount;
+
+  if (reducedDamage < 0) {
+    reducedDamage = 0;
+  }
+
+  character.health -= reducedDamage;
+
+  if (character.health < 0) {
+    character.health = 0;
+  }
+
+  return reducedDamage;
+}
+
 function App() {
   const [character, setCharacter] = useState({
     ...mina,
@@ -25,7 +41,6 @@ function App() {
     manaRegen: 5,
     turnFinished: false,
   });
-
 
   // Shows opponents stats and available attacks on his side
   const [opponent, setOpponent] = useState({
@@ -63,14 +78,10 @@ function App() {
 
   // Switches to AI's turn
   useEffect(() => {
-  if (currentTurn === "ai") {
-    console.log("AI TURN!");
+    if (currentTurn === "ai") {
+      console.log("AI TURN!");
 
-    aiTurn(
-      opponent,
-      character,
-      setAiAttack,
-      () => {
+      aiTurn(opponent, character, setAiAttack, () => {
         setOpponent({
           ...opponent,
         });
@@ -80,10 +91,9 @@ function App() {
         });
 
         setAiAttack(null);
-      }
-    );
-  }
-}, [currentTurn]);
+      });
+    }
+  }, [currentTurn]);
 
   return (
     <div className="container mt-4">
@@ -94,20 +104,42 @@ function App() {
           <Opponent opponent={opponent} setOpponent={setOpponent} />
 
           {aiAttack && (
-            <div
-              className="card mx-auto my-3 shadow"
-              style={{ width: "200px" }}
-            >
-              <div className="card-header text-center">AI Attack</div>
+            <>
+              <div
+                className="card mx-auto my-3 shadow"
+                style={{ width: "200px" }}
+              >
+                <div className="card-header text-center">AI Attack</div>
 
-              <div className="card-body text-center">
-                <h5>{aiAttack.name}</h5>
+                <div className="card-body text-center">
+                  <h5>{aiAttack.name}</h5>
 
-                <p>Damage: {aiAttack.damage}</p>
+                  <p>Damage: {aiAttack.damage}</p>
 
-                <p>Mana: {aiAttack.cost}</p>
+                  <p>Mana: {aiAttack.cost}</p>
+                </div>
               </div>
-            </div>
+
+              <button
+                className="btn btn-primary d-block mx-auto"
+                disabled={character.cooldown <= 0}
+                onClick={() => {
+                  if (character.cooldown > 0) {
+                    blockAttack(character, aiAttack);
+
+                    character.cooldown -= 1;
+
+                    setCharacter({
+                      ...character,
+                    });
+
+                    setAiAttack(null);
+                  }
+                }}
+              >
+                Block
+              </button>
+            </>
           )}
 
           <Character

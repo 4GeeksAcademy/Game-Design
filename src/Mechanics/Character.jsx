@@ -22,7 +22,8 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
 
           <p>Health: {character.health}</p>
           <p>Mana: {character.mana}</p>
-          <p>Defense: 10</p>
+          <p>Defense: {character.defense.amount}</p>
+          <p>cooldown: {character.cooldown}</p>
         </div>
       </div>
       <div className="text-left my-3">
