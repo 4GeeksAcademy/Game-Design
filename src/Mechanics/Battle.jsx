@@ -35,10 +35,10 @@ function App() {
     attacks: mina.attacks.map((attack) => ({
       ...attack,
     })),
-    health: 100,
-    mana: 50,
-    maximumMana: 50,
-    manaRegen: 5,
+    health: mina.health,
+    mana: mina.mana,
+    maximumMana: mina.maximumMana,
+    manaRegen: mina.manaRegen,
     turnFinished: false,
     blocked: false,
   });
@@ -49,10 +49,10 @@ function App() {
     attacks: rockLee.attacks.map((attack) => ({
       ...attack,
     })),
-    health: 100,
-    mana: 50,
-    maximumMana: 50,
-    manaRegen: 5,
+    health: rockLee.health,
+    mana: rockLee.mana,
+    maximumMana: rockLee.maximumMana,
+    manaRegen: rockLee.manaRegen,
     turnFinished: false,
   });
 

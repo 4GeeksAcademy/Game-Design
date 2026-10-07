@@ -4,7 +4,7 @@ const rockLee = {
     health: 100,
     mana: 50,
     maximumMana: 50,
-    manaRegen: 5,
+    manaRegen: 10,
     cooldown: 5,
     recovery: 2,
     defense: {

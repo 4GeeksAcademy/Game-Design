@@ -21,9 +21,9 @@ const mina = {
   name: "Mina Ashido",
 
   health: 100,
-  mana: 50,
+  mana: 70,
   maximumMana: 50,
-  manaRegen: 5,
+  manaRegen: 20,
   cooldown: 3,
   recovery: 1,
   defense: {

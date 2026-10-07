@@ -31,6 +31,7 @@ function turn(playerOne, playerTwo) {
 }
 
 function recoverCooldown(character) {
+  console.log(character.name, "is regenerating", character.manaRegen, "mana");
   character.cooldown = Math.min(3, character.cooldown + character.recovery);
 }
 
