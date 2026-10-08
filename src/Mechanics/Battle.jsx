@@ -98,79 +98,95 @@ function App() {
 
   return (
     <div className="container mt-4">
-      {opponent.health === 0 ? (
-        <VictoryScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
-      ) : (
-        <>
-          <div className="container mt-4">
-            <div className="row justify-content-center">
-              <div className="col-md-5 d-flex">
-                <Opponent opponent={opponent} setOpponent={setOpponent} />
+  {opponent.health === 0 ? (
+    <VictoryScreen
+      damageDealt={damageDealt}
+      attacksUsed={attacksUsed}
+    />
+  ) : (
+    <>
+      {/* Opponent Area */}
+      <div className="d-flex flex-column align-items-center">
+        <Opponent
+          opponent={opponent}
+          setOpponent={setOpponent}
+        />
+
+        {/* AI Attack */}
+        {aiAttack && (
+          <div className="d-flex flex-column align-items-center mt-3">
+            <div
+              className="card shadow-sm border-danger"
+              style={{ width: "200px" }}
+            >
+              <div className="card-header text-center">
+                AI Attack
               </div>
 
-              {aiAttack && (
-                <>
-                  <div
-                    className="card mx-auto my-3 shadow-sm border-danger"
-                    style={{ maxWidth: "220px" }}
-                  >
-                    <div className="card-header text-center">AI Attack</div>
+              <div className="card-body text-center p-2">
+                <h5 className="mb-2">{aiAttack.name}</h5>
 
-                    <div className="card-body text-center">
-                      <h5>{aiAttack.name}</h5>
+                <p className="mb-1">
+                  Damage: {aiAttack.damage}
+                </p>
 
-                      <p>Damage: {aiAttack.damage}</p>
-
-                      <p>Mana: {aiAttack.cost}</p>
-                    </div>
-                  </div>
-
-                  <button
-                    className="btn btn-primary d-block mx-auto"
-                    disabled={character.cooldown <= 0}
-                    onClick={() => {
-                      if (character.cooldown > 0) {
-                        blockAttack(character, aiAttack);
-
-                        character.cooldown -= 1;
-                        character.blocked = true;
-
-                        setCharacter({
-                          ...character,
-                        });
-
-                        setAiAttack(null);
-                      }
-                    }}
-                  >
-                    Block
-                  </button>
-                </>
-              )}
-              <div className="col-12 d-flex">
-                <Character
-                  character={character}
-                  setCharacter={setCharacter}
-                  currentTurn={currentTurn}
-                  setCurrentTurn={setCurrentTurn}
-                />
+                <p className="mb-2">
+                  Mana: {aiAttack.cost}
+                </p>
               </div>
             </div>
-          </div>
 
-          <AttackOptions
-            character={character}
-            opponent={opponent}
-            setCharacter={setCharacter}
-            setOpponent={setOpponent}
-            setDamageDealt={setDamageDealt}
-            setAttacksUsed={setAttacksUsed}
-            currentTurn={currentTurn}
-          />
-        </>
-      )}
-    </div>
+            <button
+              className="btn btn-primary mt-2"
+              disabled={character.cooldown <= 0}
+              onClick={() => {
+                if (character.cooldown > 0) {
+                  blockAttack(character, aiAttack);
+
+                  character.cooldown -= 1;
+                  character.blocked = true;
+
+                  setCharacter({
+                    ...character,
+                  });
+
+                  setAiAttack(null);
+                }
+              }}
+            >
+              Block
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Player Area */}
+      <div className="d-flex justify-content-center mt-5">
+        <Character
+          character={character}
+          setCharacter={setCharacter}
+          currentTurn={currentTurn}
+          setCurrentTurn={setCurrentTurn}
+        />
+      </div>
+
+      {/* Player Attacks */}
+      <div className="mt-4">
+        <AttackOptions
+          character={character}
+          opponent={opponent}
+          setCharacter={setCharacter}
+          setOpponent={setOpponent}
+          setDamageDealt={setDamageDealt}
+          setAttacksUsed={setAttacksUsed}
+          currentTurn={currentTurn}
+        />
+      </div>
+    </>
+  )}
+</div>
   );
+
 }
 
 export default App;

@@ -2,9 +2,11 @@ import React from "react";
 
 function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
   return (
-    <div className="d-flex justify-content-center w-100 my-3">
+    <div className="position-relative d-flex justify-content-center w-100 my-4">
+
+      {/* Character Card */}
       <div
-        className="card m-3 shadow-sm"
+        className="card shadow-sm"
         style={{ width: "18rem" }}
         id="Character"
       >
@@ -13,6 +15,7 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
           className="card-img-top"
           alt="Your Character"
         />
+
         <div className="card-header text-center bg-primary text-white fw-bold">
           Your Character
         </div>
@@ -20,13 +23,22 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
         <div className="card-body text-center">
           <h2>{character.name}</h2>
 
-          <p>Health: {character.health}</p>
-          <p>Mana: {character.mana}</p>
-          <p>Defense: {character.defense.amount}</p>
-          <p>cooldown: {character.cooldown}</p>
+          <p className="mb-1">Health: {character.health}</p>
+          <p className="mb-1">Mana: {character.mana}</p>
+          <p className="mb-1">Defense: {character.defense.amount}</p>
+          <p className="mb-1">Cooldown: {character.cooldown}</p>
         </div>
       </div>
-      <div className="text-left my-3">
+
+      {/* Finish Turn Button */}
+      <div
+        className="position-absolute"
+        style={{
+          left: "calc(50% + 160px)",
+          top: "50%",
+          transform: "translateY(-50%)",
+        }}
+      >
         <button
           className="btn btn-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg"
           style={{ width: "90px", height: "90px", fontWeight: "bold" }}
@@ -45,6 +57,7 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
           Turn
         </button>
       </div>
+
     </div>
   );
 }
