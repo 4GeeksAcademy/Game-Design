@@ -14,22 +14,6 @@ import { aiTurn, aiFinishTurn } from "./AI.js";
 
 import React, { useState, useEffect } from "react";
 
-// function blockAttack(character, attack) {
-//   let reducedDamage = attack.damage - character.defense.amount;
-
-//   if (reducedDamage < 0) {
-//     reducedDamage = 0;
-//   }
-
-//   character.health -= reducedDamage;
-
-//   if (character.health < 0) {
-//     character.health = 0;
-//   }
-
-//   return reducedDamage;
-// }
-
 function App() {
   const [character, setCharacter] = useState({
     ...mina,
@@ -98,127 +82,118 @@ function App() {
   }, [currentTurn]);
 
   return (
-    <div className="container mt-4">
-  {opponent.health === 0 ? (
-    <VictoryScreen
-      damageDealt={damageDealt}
-      attacksUsed={attacksUsed}
-    />
-  ) : (
-    <>
-      {/* Opponent Area */}
-      <div className="d-flex flex-column align-items-center">
-        <Opponent
-          opponent={opponent}
-          setOpponent={setOpponent}
-        />
-
-        {/* AI Attack */}
-{aiAttack && (
-  <div className="d-flex flex-column align-items-center mt-3">
-    <div
-      className="card shadow-sm border-danger"
-      style={{ width: "200px" }}
-    >
-      <div className="card-header text-center">
-        AI Attack
-      </div>
-
-      <div className="card-body text-center p-2">
-        <h5 className="mb-2">{aiAttack.name}</h5>
-
-        <p className="mb-1">
-          Damage: {aiAttack.damage}
-        </p>
-
-        <p className="mb-1">
-          Mana: {aiAttack.cost}
-        </p>
-
-        <p className="mb-2">
-          Speed: {aiAttack.speed}
-        </p>
-      </div>
+    <div className="container-fluid mt-3" id="gameContainer">
+      {" "}
+      {opponent.health === 0 ? (
+        <div id="victorySection">
+          {" "}
+          <VictoryScreen
+            damageDealt={damageDealt}
+            attacksUsed={attacksUsed}
+          />{" "}
+        </div>
+      ) : (
+        <>
+          {" "}
+          {/* Battle Arena */}{" "}
+          <div id="battleArena">
+            {" "}
+            {/* Opponent */}{" "}
+            <div id="opponentSection">
+              {" "}
+              <Opponent opponent={opponent} setOpponent={setOpponent} />{" "}
+            </div>{" "}
+            {/* AI Attack and Defensive Actions */}{" "}
+            {aiAttack && (
+              <div id="aiAttackSection">
+                {" "}
+                <div id="aiAttackCard">
+                  {" "}
+                  <div id="aiAttackHeader"> OPPONENT ATTACK </div>{" "}
+                  <div id="aiAttackInfo">
+                    {" "}
+                    <h5 id="aiAttackName">{aiAttack.name}</h5>{" "}
+                    <div id="aiAttackStats">
+                      {" "}
+                      <span>⚔ {aiAttack.damage}</span>{" "}
+                      <span>◆ {aiAttack.cost}</span>{" "}
+                      <span>⚡ {aiAttack.speed}</span>{" "}
+                    </div>{" "}
+                  </div>{" "}
+                </div>{" "}
+                <div id="defensiveActions">
+                  {" "}
+                  {/* Defend */}{" "}
+                  <button
+                    id="defendButton"
+                    disabled={character.cooldown <= 0}
+                    onClick={() => {
+                      const result = attackCharacter(
+                        aiAttack,
+                        opponent,
+                        character,
+                        character.defense.amount,
+                      );
+                      if (result) {
+                        character.cooldown -= 1;
+                        character.blocked = true;
+                        setOpponent({ ...result.attacker });
+                        setCharacter({ ...result.defender });
+                        setAiAttack(null);
+                      }
+                    }}
+                  >
+                    {" "}
+                    <span id="defendButtonIcon">🛡</span>{" "}
+                    <span>Defend</span>{" "}
+                  </button>{" "}
+                  {/* Evade */}{" "}
+                  <button
+                    id="evadeButton"
+                    onClick={() => {
+                      character.cooldown -= 1;
+                      const result = evadeAttack(aiAttack, opponent, character);
+                      if (result) {
+                        character.blocked = true;
+                        setOpponent({ ...result.attacker });
+                        setCharacter({ ...result.defender });
+                        setAiAttack(null);
+                      }
+                    }}
+                  >
+                    {" "}
+                    <span id="evadeButtonIcon">💨</span> <span>Evade</span>{" "}
+                  </button>{" "}
+                </div>{" "}
+              </div>
+            )}{" "}
+            {/* Player */}{" "}
+            <div id="characterSection">
+              {" "}
+              <Character
+                character={character}
+                setCharacter={setCharacter}
+                currentTurn={currentTurn}
+                setCurrentTurn={setCurrentTurn}
+              />{" "}
+            </div>{" "}
+          </div>{" "}
+          {/* Player Attack Options */}{" "}
+          <div id="attackSection">
+            {" "}
+            <AttackOptions
+              character={character}
+              opponent={opponent}
+              setCharacter={setCharacter}
+              setOpponent={setOpponent}
+              setDamageDealt={setDamageDealt}
+              setAttacksUsed={setAttacksUsed}
+              currentTurn={currentTurn}
+            />{" "}
+          </div>{" "}
+        </>
+      )}{" "}
     </div>
-
-    {/* Defend */}
-    <button
-      className="btn btn-primary mt-2"
-      disabled={character.cooldown <= 0}
-      onClick={() => {
-        const result = attackCharacter(
-          aiAttack,
-          opponent,
-          character,
-          character.defense.amount
-        );
-
-        if (result) {
-          character.cooldown -= 1;
-          character.blocked = true;
-
-          setOpponent({ ...result.attacker });
-          setCharacter({ ...result.defender });
-          setAiAttack(null);
-        }
-      }}
-    >
-      Defend
-    </button>
-
-    {/* Evade */}
-    <button
-      className="btn btn-success mt-2"
-      onClick={() => {
-        character.cooldown -= 1;
-        const result = evadeAttack(
-          aiAttack,
-          opponent,
-          character
-        );
-
-        if (result) {
-          character.blocked = true;
-
-          setOpponent({ ...result.attacker });
-          setCharacter({ ...result.defender });
-          setAiAttack(null);
-        }
-      }}
-    >
-      Evade
-    </button>
-  </div>
-
-)} 
-</div>
-      {/* Player Area */}
-      <div className="d-flex justify-content-center mt-5">
-        <Character
-          character={character}
-          setCharacter={setCharacter}
-          currentTurn={currentTurn}
-          setCurrentTurn={setCurrentTurn}
-        />
-      </div>
-
-      {/* Player Attacks */}
-      <div className="mt-4">
-        <AttackOptions
-          character={character}
-          opponent={opponent}
-          setCharacter={setCharacter}
-          setOpponent={setOpponent}
-          setDamageDealt={setDamageDealt}
-          setAttacksUsed={setAttacksUsed}
-          currentTurn={currentTurn}
-        />
-      </div>
-    </>
-  )}
-</div>
   );
-
 }
-
 export default App;

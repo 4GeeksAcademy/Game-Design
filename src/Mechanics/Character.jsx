@@ -1,48 +1,53 @@
 import React from "react";
+import "./BattleUI.css";
 
 function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
   return (
-    <div className="position-relative d-flex justify-content-center w-100 my-4">
-
-      {/* Character Card */}
-      <div
-        className="card shadow-sm"
-        style={{ width: "18rem" }}
-        id="Character"
-      >
+    <div id="characterSection">
+      <div id="character" className="battle-status-panel">
         <img
-          src="https://placehold.co/600x400"
-          className="card-img-top"
-          alt="Your Character"
+          id="characterImage"
+          src="https://placehold.co/300x400"
+          alt={character.name}
         />
 
-        <div className="card-header text-center bg-primary text-white fw-bold">
-          Your Character
-        </div>
+        <div id="characterInfo">
+          <p id="characterHeader">YOUR CHARACTER</p>
 
-        <div className="card-body text-center">
-          <h2>{character.name}</h2>
+          <h2 id="characterName">{character.name}</h2>
 
-          <p className="mb-1">Health: {character.health}</p>
-          <p className="mb-1">Mana: {character.mana}</p>
-          <p className="mb-1">Defense: {character.defense.amount}</p>
-          <p className="mb-1">Cooldown: {character.cooldown}</p>
-          <h1 className="mb-1">Speed: {character.agility}</h1>
+          <div id="characterStats">
+            <p id="characterHealth">
+              <span>❤️ Health</span>
+              <strong>{character.health}</strong>
+            </p>
+
+            <p id="characterMana">
+              <span>💧 Mana</span>
+              <strong>{character.mana}</strong>
+            </p>
+
+            <p id="characterCooldown">
+              <span>◷ Cooldown</span>
+              <strong>{character.cooldown}</strong>
+            </p>
+
+            <p id="characterDefense">
+              <span>🛡 Defense</span>
+              <strong>{character.defense.amount}</strong>
+            </p>
+
+            <p id="characterSpeed">
+              <span>⚡ Speed</span>
+              <strong>{character.agility}</strong>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Finish Turn Button */}
-      <div
-        className="position-absolute"
-        style={{
-          left: "calc(50% + 160px)",
-          top: "50%",
-          transform: "translateY(-50%)",
-        }}
-      >
+      <div id="finishTurnArea">
         <button
-          className="btn btn-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg"
-          style={{ width: "90px", height: "90px", fontWeight: "bold" }}
+          id="finishTurnButton"
           disabled={currentTurn !== "player"}
           onClick={() => {
             setCharacter({
@@ -53,14 +58,14 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
             setCurrentTurn("ai");
           }}
         >
-          Finish
-          <br />
-          Turn
+          <span>Finish</span>
+          <span>Turn</span>
+          <span id="finishTurnArrow">➜</span>
         </button>
       </div>
-
     </div>
   );
 }
 
 export default Character;
+
