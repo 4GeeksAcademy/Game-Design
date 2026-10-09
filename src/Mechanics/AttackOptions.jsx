@@ -1,7 +1,6 @@
 import React from "react";
+import { aiDefendOrEvade } from "./AI.js";
 import "./BattleUI.css";
-
-import { attackCharacter } from "./Health.js";
 
 
 
@@ -29,30 +28,13 @@ function AttackOptions({
                 key={attack.name}
                 disabled={currentTurn !== "player" || !attack.state}
                 onClick={() => {
-                  let defense = 0;
-
-                  if (opponent.cooldown > 0) {
-                    defense = opponent.defense.amount;
-                    opponent.cooldown -= 1;
-                  }
-
-                  const result = attackCharacter(
-                    attack,
-                    character,
-                    opponent,
-                    defense,
-                  );
+                  const result = aiDefendOrEvade(attack, character, opponent);
 
                   if (result) {
-                    setCharacter({
-                      ...result.attacker,
-                    });
+                    setCharacter({ ...result.attacker });
+                    setOpponent({ ...result.defender });
 
-                    setOpponent({
-                      ...result.defender,
-                    });
-
-                    setDamageDealt((damage) => damage + attack.damage);
+                    setDamageDealt((damage) => damage + result.damageReceived);
 
                     setAttacksUsed((attacks) => attacks + 1);
                   }

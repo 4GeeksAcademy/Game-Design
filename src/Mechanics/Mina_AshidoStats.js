@@ -26,6 +26,7 @@ const mina = {
   manaRegen: 20,
   cooldown: 3,
   recovery: 1,
+  agility: 30,
   defense: {
     amount: 25,
     active: true,
@@ -35,6 +36,7 @@ const mina = {
     {
       name: "Acid Shot",
       damage: 20,
+      speed: 40,
       cost: 10,
       state: true,
     },
@@ -42,6 +44,7 @@ const mina = {
     {
       name: "Acid Blast",
       damage: 30,
+      speed: 30,
       cost: 25,
       state: true,
     },

@@ -2,6 +2,7 @@ import Opponent from "./Opponent.jsx";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import VictoryScreen from "./VictoryScreen.jsx";
+import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
 
 // Characters list for now
@@ -13,21 +14,21 @@ import { aiTurn, aiFinishTurn } from "./AI.js";
 
 import React, { useState, useEffect } from "react";
 
-function blockAttack(character, attack) {
-  let reducedDamage = attack.damage - character.defense.amount;
+// function blockAttack(character, attack) {
+//   let reducedDamage = attack.damage - character.defense.amount;
 
-  if (reducedDamage < 0) {
-    reducedDamage = 0;
-  }
+//   if (reducedDamage < 0) {
+//     reducedDamage = 0;
+//   }
 
-  character.health -= reducedDamage;
+//   character.health -= reducedDamage;
 
-  if (character.health < 0) {
-    character.health = 0;
-  }
+//   if (character.health < 0) {
+//     character.health = 0;
+//   }
 
-  return reducedDamage;
-}
+//   return reducedDamage;
+// }
 
 function App() {
   const [character, setCharacter] = useState({
@@ -113,53 +114,84 @@ function App() {
         />
 
         {/* AI Attack */}
-        {aiAttack && (
-          <div className="d-flex flex-column align-items-center mt-3">
-            <div
-              className="card shadow-sm border-danger"
-              style={{ width: "200px" }}
-            >
-              <div className="card-header text-center">
-                AI Attack
-              </div>
-
-              <div className="card-body text-center p-2">
-                <h5 className="mb-2">{aiAttack.name}</h5>
-
-                <p className="mb-1">
-                  Damage: {aiAttack.damage}
-                </p>
-
-                <p className="mb-2">
-                  Mana: {aiAttack.cost}
-                </p>
-              </div>
-            </div>
-
-            <button
-              className="btn btn-primary mt-2"
-              disabled={character.cooldown <= 0}
-              onClick={() => {
-                if (character.cooldown > 0) {
-                  blockAttack(character, aiAttack);
-
-                  character.cooldown -= 1;
-                  character.blocked = true;
-
-                  setCharacter({
-                    ...character,
-                  });
-
-                  setAiAttack(null);
-                }
-              }}
-            >
-              Block
-            </button>
-          </div>
-        )}
+{aiAttack && (
+  <div className="d-flex flex-column align-items-center mt-3">
+    <div
+      className="card shadow-sm border-danger"
+      style={{ width: "200px" }}
+    >
+      <div className="card-header text-center">
+        AI Attack
       </div>
 
+      <div className="card-body text-center p-2">
+        <h5 className="mb-2">{aiAttack.name}</h5>
+
+        <p className="mb-1">
+          Damage: {aiAttack.damage}
+        </p>
+
+        <p className="mb-1">
+          Mana: {aiAttack.cost}
+        </p>
+
+        <p className="mb-2">
+          Speed: {aiAttack.speed}
+        </p>
+      </div>
+    </div>
+
+    {/* Defend */}
+    <button
+      className="btn btn-primary mt-2"
+      disabled={character.cooldown <= 0}
+      onClick={() => {
+        const result = attackCharacter(
+          aiAttack,
+          opponent,
+          character,
+          character.defense.amount
+        );
+
+        if (result) {
+          character.cooldown -= 1;
+          character.blocked = true;
+
+          setOpponent({ ...result.attacker });
+          setCharacter({ ...result.defender });
+          setAiAttack(null);
+        }
+      }}
+    >
+      Defend
+    </button>
+
+    {/* Evade */}
+    <button
+      className="btn btn-success mt-2"
+      onClick={() => {
+        character.cooldown -= 1;
+        const result = evadeAttack(
+          aiAttack,
+          opponent,
+          character
+        );
+
+        if (result) {
+          character.blocked = true;
+
+          setOpponent({ ...result.attacker });
+          setCharacter({ ...result.defender });
+          setAiAttack(null);
+        }
+      }}
+    >
+      Evade
+    </button>
+  </div>
+
+)} 
+</div>
       {/* Player Area */}
       <div className="d-flex justify-content-center mt-5">
         <Character

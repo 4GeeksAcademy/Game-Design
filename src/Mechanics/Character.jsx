@@ -27,6 +27,7 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
           <p className="mb-1">Mana: {character.mana}</p>
           <p className="mb-1">Defense: {character.defense.amount}</p>
           <p className="mb-1">Cooldown: {character.cooldown}</p>
+          <h1 className="mb-1">Speed: {character.agility}</h1>
         </div>
       </div>
 
