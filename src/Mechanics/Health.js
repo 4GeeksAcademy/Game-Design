@@ -1,26 +1,48 @@
 import React from "react";
 
 function attackCharacter(ATK, attacker, defender, defense = 0) {
-  if (attacker.mana >= ATK.cost && ATK.state === true) {
-    attacker.mana = attacker.mana - ATK.cost;
+  if (!ATK || !attacker || !defender) {
+    return null;
+  }
 
-    currentHealth(ATK, defender, defense);
-
-    ATK.state = false;
-
-    return {
-      attacker: attacker,
-      defender: defender,
-    };
-  } else if (attacker.mana < ATK.cost) {
+  if (attacker.mana < ATK.cost) {
     console.log("Not enough mana!");
     return null;
   }
 
-  if (ATK.state === false) {
+  if (ATK.state !== true) {
     console.log("Attack already used!");
     return null;
   }
+
+  // Pay the mana cost once.
+  attacker.mana -= ATK.cost;
+
+  // Apply a buff instead of dealing damage.
+  if (ATK.buff) {
+    if (ATK.buff.defense) {
+      attacker.defense.amount += ATK.buff.defense;
+    }
+
+    ATK.state = false;
+
+    return {
+      attacker,
+      defender,
+      damageReceived: 0,
+      action: "buff",
+    };
+  }
+
+  // Normal attack.
+  currentHealth(ATK, defender, defense);
+
+  ATK.state = false;
+
+  return {
+    attacker,
+    defender,
+  };
 }
 
 function currentHealth(ATK, character, defense = 0) {
@@ -54,10 +76,7 @@ function evadeAttack(ATK, attacker, defender) {
   attacker.mana -= ATK.cost;
 
   // Calculate the agility needed to evade.
-  const agilityNeeded = Math.max(
-    0,
-    ATK.speed - defender.agility
-  );
+  const agilityNeeded = Math.max(0, ATK.speed - defender.agility);
 
   let evaded = false;
   let manaSpent = 0;

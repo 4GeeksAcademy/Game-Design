@@ -51,6 +51,14 @@ function AttackOptions({
                       });
                     }
 
+                    if (result.action === "buff") {
+                      setCombatMessage({
+                        id: Date.now(),
+                        text: `🛡️ DEFENSE +${attack.buff.defense}!`,
+                        type: "buff",
+                      });
+                    }
+
                     if (result.action === "evade") {
                       setCombatMessage({
                         id: Date.now(),
