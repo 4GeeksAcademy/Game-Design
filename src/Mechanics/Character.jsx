@@ -1,4 +1,5 @@
 import React from "react";
+import StatBar from "./StatBar.jsx";
 import "./BattleUI.css";
 
 function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
@@ -17,30 +18,43 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
           <h2 id="characterName">{character.name}</h2>
 
           <div id="characterStats">
-            <p id="characterHealth">
-              <span>❤️ Health</span>
-              <strong>{character.health}</strong>
-            </p>
+            <StatBar
+              label="Health"
+              icon="❤️"
+              current={character.health}
+              maximum={character.maximumHealth}
+              color={
+                character.health / character.maximumHealth <= 0.25
+                  ? "danger"
+                  : character.health / character.maximumHealth <= 0.5
+                    ? "warning"
+                    : "success"
+              }
+            />
 
-            <p id="characterMana">
-              <span>💧 Mana</span>
-              <strong>{character.mana}</strong>
-            </p>
+            <StatBar
+              label="Mana"
+              icon="🔵"
+              current={character.mana}
+              maximum={character.maximumMana}
+              color="info"
+            />
 
-            <p id="characterCooldown">
-              <span>◷ Cooldown</span>
-              <strong>{character.cooldown}</strong>
-            </p>
+            <StatBar
+              label="Defense"
+              icon="🛡️"
+              current={character.defense.amount}
+              maximum={100}
+              color="secondary"
+            />
 
-            <p id="characterDefense">
-              <span>🛡 Defense</span>
-              <strong>{character.defense.amount}</strong>
-            </p>
-
-            <p id="characterSpeed">
-              <span>⚡ Speed</span>
-              <strong>{character.agility}</strong>
-            </p>
+            <StatBar
+              label="Agility"
+              icon="⚡"
+              current={character.agility}
+              maximum={100}
+              color="warning"
+            />
           </div>
         </div>
       </div>
@@ -68,4 +82,3 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
 }
 
 export default Character;
-
