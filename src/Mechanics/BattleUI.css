@@ -1,15 +1,27 @@
-/* ================================
+
+/* =========================================
    GLOBAL BATTLE SCREEN
-================================ */
+========================================= */
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #080d1c;
+  font-family: Arial, Helvetica, sans-serif;
+}
 
 #gameContainer {
   min-height: 100vh;
-  padding: 30px 20px;
+  padding: 28px 20px 45px;
   color: #f1f5ff;
   background:
-    radial-gradient(ellipse at top, #192c52 0%, transparent 65%),
-    linear-gradient(145deg, #080d1c, #111a31 55%, #080d1c);
-  font-family: Arial, Helvetica, sans-serif;
+    radial-gradient(ellipse at 50% 0%, #1b3158 0%, transparent 65%),
+    linear-gradient(145deg, #080d1c, #111d37 55%, #080d1c);
 }
 
 #battleArena {
@@ -18,257 +30,394 @@
   margin: 0 auto;
 }
 
-/* ================================
-   OPPONENT CARD
-================================ */
+/* =========================================
+   CHARACTER AND OPPONENT SECTIONS
+========================================= */
 
-/* ================================ HORIZONTAL BATTLE STATUS PANELS ================================ */
 #opponentSection,
 #characterSection {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin: 20px auto !important;
+  margin: 24px auto !important;
 }
+
 #characterSection {
   align-items: center;
-  gap: 24px;
-} /* Shared horizontal panel */
+  gap: 22px;
+}
+
+/* =========================================
+   COMPACT FUTURISTIC STATUS PANELS
+========================================= */
+
 .battle-status-panel {
-  display: flex;
-  align-items: stretch;
-  gap: 18px;
+  --panel-accent: #13d5ff;
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 145px minmax(0, 1fr);
+  grid-template-rows: 130px;
+  align-items: center;
+  gap: 0 18px;
+
   width: 100%;
-  max-width: 620px;
-  min-height: 220px;
-  padding: 14px;
-  color: #edf4ff;
-  background: linear-gradient(120deg, #111c31, #080f1c);
-  border-radius: 16px;
-  overflow: hidden;
-} /* Opponent theme */
-#opponent {
-  border: 2px solid #ff405f;
-  box-shadow: 0 0 18px #ff405f25;
-} /* Player theme */
-#character {
-  border: 2px solid #17c8ff;
-  box-shadow: 0 0 18px #17c8ff25;
-} /* Portraits */
-#opponentImage,
-#characterImage {
-  flex: 0 0 170px;
-  width: 170px;
-  height: 190px !important;
-  margin: 0;
-  object-fit: cover;
-  border-radius: 8px;
-}
-#opponentImage {
-  border: 2px solid #ff405f;
-}
-#characterImage {
-  border: 2px solid #17c8ff;
-} /* Information area */
-#opponentInfo,
-#characterInfo {
-  flex: 1;
+  max-width: 650px;
   min-width: 0;
-  padding: 0;
-  text-align: left;
+  padding: 32px 16px 12px;
+
+  color: #edf4ff;
+  background: linear-gradient(
+    125deg,
+    #0b1b35 0%,
+    #071120 65%,
+    #101c34 100%
+  );
+
+  border: 1px solid var(--panel-accent);
+  border-radius: 0;
+
+  clip-path: polygon(
+    0 0,
+    38% 0,
+    43% 12px,
+    70% 12px,
+    75% 24px,
+    100% 24px,
+    100% 88%,
+    96% 100%,
+    4% 100%,
+    0 90%
+  );
+
+  filter: drop-shadow(0 0 10px #16cfff25);
+  transition: filter 0.2s;
 }
+
+/* Opponent: red theme */
+
+#opponent {
+  --panel-accent: #ff3159;
+
+  background: linear-gradient(
+    125deg,
+    #27101f,
+    #0b1324 65%,
+    #251021
+  );
+}
+
+/* Player: cyan theme */
+
+#character {
+  --panel-accent: #13d5ff;
+
+  background: linear-gradient(
+    125deg,
+    #08233c,
+    #071322 65%,
+    #092746
+  );
+}
+
+#opponent:hover {
+  filter: drop-shadow(0 0 15px #ff315955);
+}
+
+#character:hover {
+  filter: drop-shadow(0 0 15px #13d5ff55);
+}
+
+/* =========================================
+   CHARACTER NAMES IN THE TOP-LEFT HUMP
+========================================= */
+
+/* Hide the redundant OPPONENT and YOUR CHARACTER labels */
+
 #opponentHeader,
 #characterHeader {
-  margin: 0 0 5px;
-  padding: 0;
-  background: transparent !important;
-  border: none;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 1px;
+  display: none !important;
 }
-#opponentHeader {
-  color: #ff607a;
+
+/* The info wrapper no longer controls the layout.
+   Its children can be positioned in the panel grid. */
+
+#opponentInfo,
+#characterInfo {
+  display: contents;
 }
-#characterHeader {
-  color: #42d9ff;
-}
+
+/* Names appear above the portraits */
+
 #opponentName,
 #characterName {
-  margin: 0 0 10px;
-  padding-bottom: 8px;
-  color: #f5f7ff;
-  border-bottom: 1px solid #ffffff26;
-  font-size: 1.4rem;
-  font-weight: 800;
-} /* Stat rows */
+  position: absolute;
+  top: 3px;
+  left: 16px;
+  z-index: 2;
+
+  width: 36%;
+  margin: 0;
+  padding: 0;
+
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  border: none;
+}
+
+/* =========================================
+   CHARACTER PORTRAITS
+========================================= */
+
+#opponentImage,
+#characterImage {
+  grid-column: 1;
+  grid-row: 1;
+
+  display: block;
+  width: 145px;
+  height: 130px !important;
+  min-width: 0;
+  margin: 0;
+
+  object-fit: cover;
+  object-position: center;
+
+  background: #101a2c;
+  border: 2px solid var(--panel-accent);
+  border-radius: 0;
+
+  clip-path: polygon(
+    0 0,
+    88% 0,
+    100% 12%,
+    100% 100%,
+    0 100%
+  );
+}
+
+#opponentImage {
+  border-color: #ff3159;
+}
+
+#characterImage {
+  border-color: #13d5ff;
+}
+
+/* =========================================
+   CHARACTER STATISTICS
+========================================= */
+
 #opponentStats,
 #characterStats {
+  grid-column: 2;
+  grid-row: 1;
+
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-self: stretch;
+
+  min-width: 0;
   gap: 0;
+  padding: 0;
+  margin: 0;
 }
+
 #opponentStats p,
 #characterStats p {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+
+  min-width: 0;
   margin: 0;
   padding: 5px 2px;
-  color: #dce7fa;
+
+  color: #d9e9ff;
   background: transparent;
-  border: none;
-  border-bottom: 1px solid #ffffff12;
+  border: 0;
+  border-bottom: 1px solid #ffffff16;
   border-radius: 0;
-  font-size: 0.85rem;
+
+  font-size: 0.82rem;
+  line-height: 1.2;
 }
+
 #opponentStats p span,
 #characterStats p span {
+  min-width: 0;
   white-space: nowrap;
 }
+
 #opponentStats p strong,
 #characterStats p strong {
+  flex-shrink: 0;
   color: #ffffff;
-  font-weight: 700;
-} /* Finish Turn button */
+  font-weight: 800;
+}
+
+/* =========================================
+   FINISH TURN BUTTON
+========================================= */
+
 #finishTurnArea {
   position: static !important;
   flex-shrink: 0;
   transform: none !important;
 }
+
 #finishTurnButton {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  width: 125px !important;
-  height: 125px !important;
-  padding: 12px;
-  color: white;
-  background: linear-gradient(145deg, #087dce, #102e75);
-  border: 3px solid #28d2ff;
+  gap: 3px;
+
+  width: 112px !important;
+  height: 112px !important;
+  padding: 10px;
+
+  color: #ffffff;
+  background: radial-gradient(
+    circle at 35% 25%,
+    #168fff,
+    #0750ac 65%,
+    #061c4c
+  );
+
+  border: 4px solid #20d7ff;
   border-radius: 50%;
+  outline: 2px solid #0879db;
+  outline-offset: 4px;
+
   box-shadow:
-    0 0 0 6px #17c8ff20,
-    0 0 20px #17c8ff55;
-  font-size: 1.15rem;
-  font-weight: 800;
+    0 0 12px #12bfff,
+    inset 0 0 16px #50d9ff55;
+
+  font-size: 1rem;
+  font-weight: 900;
+
   transition:
     transform 0.2s,
     box-shadow 0.2s;
 }
+
 #finishTurnButton:hover:not(:disabled) {
   transform: scale(1.05);
   box-shadow:
-    0 0 0 8px #17c8ff25,
-    0 0 28px #17c8ff88;
+    0 0 20px #12bfff,
+    inset 0 0 20px #50d9ff88;
 }
+
 #finishTurnButton:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
 #finishTurnArrow {
-  margin-top: 2px;
   font-size: 1.4rem;
-} /* Smaller screens */
-@media (max-width: 650px) {
-  #characterSection {
-    flex-direction: column;
-    gap: 16px;
-  }
-  .battle-status-panel {
-    max-width: 100%;
-    min-height: 0;
-    gap: 12px;
-    padding: 10px;
-  }
-  #opponentImage,
-  #characterImage {
-    flex-basis: 115px;
-    width: 115px;
-    height: 165px !important;
-  }
-  #opponentName,
-  #characterName {
-    font-size: 1.1rem;
-  }
-  #opponentStats p,
-  #characterStats p {
-    font-size: 0.78rem;
-  }
-  #finishTurnButton {
-    width: 85px !important;
-    height: 85px !important;
-    font-size: 0.9rem;
-  }
-}
-@media (max-width: 380px) {
-  #opponentImage,
-  #characterImage {
-    flex-basis: 90px;
-    width: 90px;
-    height: 145px !important;
-  }
-  .battle-status-panel {
-    gap: 9px;
-    padding: 8px;
-  }
 }
 
-/* ================================
+/* =========================================
    ATTACK OPTIONS PANEL
-================================ */
+========================================= */
 
 #attackSection {
+  width: 100%;
   max-width: 1100px;
   margin: 30px auto !important;
 }
 
 #attack {
   overflow: hidden;
+
   color: #f1f5ff;
-  background: linear-gradient(145deg, #101d35, #080f1e);
+  background: linear-gradient(
+    145deg,
+    #101d35,
+    #080f1e
+  );
+
   border: 1px solid #367cff;
   border-radius: 16px;
+
   box-shadow: 0 0 22px #246bff1c;
 }
 
 #attackHeader {
-  padding: 15px;
+  padding: 14px;
+
   color: #c9dcff;
-  background: linear-gradient(90deg, #182c50, #101a30);
+  background: linear-gradient(
+    90deg,
+    #182c50,
+    #101a30
+  );
+
   border-bottom: 1px solid #367cff66;
-  font-size: 1.15rem;
+
+  font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
 
 #attackBody {
-  padding: 18px;
+  padding: 16px;
 }
 
 #attackList {
-  gap: 16px !important;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 14px !important;
+
+  overflow-x: auto;
+  padding: 4px 3px 12px;
+
   scrollbar-color: #367cff #101a30;
   scrollbar-width: thin;
 }
 
-/* ================================
+/* =========================================
    INDIVIDUAL ATTACK CARDS
-================================ */
+========================================= */
 
 [id^="attackButton"] {
+  display: flex;
   flex: 0 0 200px;
+  flex-direction: column;
+  align-items: stretch;
+
   min-width: 200px !important;
+  padding: 12px;
+
   overflow: hidden;
+
   color: #e8efff !important;
-  background: linear-gradient(160deg, #172747, #0a1223) !important;
+  text-align: left;
+
+  background: linear-gradient(
+    160deg,
+    #172747,
+    #0a1223
+  ) !important;
+
   border: 1px solid #355c9b !important;
   border-radius: 12px !important;
+
   box-shadow: 0 4px 12px #00000033;
+
   transition:
     transform 0.2s,
     border-color 0.2s,
@@ -276,7 +425,7 @@
 }
 
 [id^="attackButton"]:hover:not(:disabled) {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   border-color: #55cfff !important;
   box-shadow: 0 0 18px #22c7ff33;
 }
@@ -288,53 +437,72 @@
 }
 
 [id^="attackImage"] {
+  display: block;
   width: 100%;
   height: 105px;
-  margin-bottom: 12px;
+  margin: 0 0 12px;
+
   object-fit: cover;
+
   border: 1px solid #4169a5;
   border-radius: 8px;
 }
 
 [id^="attackName"] {
-  min-height: 28px;
-  margin-bottom: 12px;
+  min-height: 26px;
+  margin: 0 0 10px;
+
   color: #77dfff;
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 800;
+  text-align: center;
 }
 
 [id^="attackStats"] {
-  padding: 10px 0;
+  padding: 8px 0;
   border-top: 1px solid #ffffff12;
 }
 
 [id^="attackDamage"],
 [id^="attackMana"] {
+  margin-bottom: 6px;
   color: #d5e3ff;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 [id^="attackLabel"] {
   display: block;
-  margin-top: 5px;
+  width: 100%;
+  margin-top: auto;
   padding: 10px;
-  color: white !important;
-  background: linear-gradient(90deg, #087d51, #0ca66b) !important;
+
+  color: #ffffff !important;
+  background: linear-gradient(
+    90deg,
+    #087d51,
+    #0ca66b
+  ) !important;
+
   border: 1px solid #35f0a1 !important;
   border-radius: 8px;
+
   font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 1px;
+  text-align: center;
 }
 
-/* ================================
-   AI ATTACK CARD (IF PRESENT)
-================================ */
+/* =========================================
+   AI ATTACK CARD
+========================================= */
 
 #aiAttackSection {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+
+  width: 100%;
   margin: 20px auto;
 }
 
@@ -342,17 +510,26 @@
   width: 100%;
   max-width: 320px;
   overflow: hidden;
+
   color: #f1f5ff;
-  background: linear-gradient(145deg, #291526, #101020);
+  background: linear-gradient(
+    145deg,
+    #291526,
+    #101020
+  );
+
   border: 1px solid #ff496b;
   border-radius: 14px;
+
   box-shadow: 0 0 22px #ff315b33;
 }
 
 #aiAttackHeader {
   padding: 12px;
-  color: white;
+
+  color: #ffffff;
   background: #8f1e3c;
+
   font-weight: 800;
   text-align: center;
 }
@@ -371,16 +548,16 @@
   color: #d9e3fa;
 }
 
-/* ================================
+/* =========================================
    DEFEND AND EVADE BUTTONS
-   (IF PRESENT)
-================================ */
+========================================= */
 
 #defensiveActions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
+
   margin: 15px auto;
 }
 
@@ -388,21 +565,34 @@
 #evadeButton {
   min-width: 120px;
   padding: 12px 18px;
-  color: white;
+
+  color: #ffffff;
   border-radius: 10px;
+
   font-weight: 800;
+
   transition:
     transform 0.2s,
     opacity 0.2s;
 }
 
 #defendButton {
-  background: linear-gradient(135deg, #b87914, #e6a52c);
+  background: linear-gradient(
+    135deg,
+    #b87914,
+    #e6a52c
+  );
+
   border: 1px solid #ffcf69;
 }
 
 #evadeButton {
-  background: linear-gradient(135deg, #087d51, #0ca66b);
+  background: linear-gradient(
+    135deg,
+    #087d51,
+    #0ca66b
+  );
+
   border: 1px solid #35f0a1;
 }
 
@@ -417,23 +607,90 @@
   cursor: not-allowed;
 }
 
-/* ================================
+/* =========================================
    MOBILE RESPONSIVENESS
-================================ */
+========================================= */
+
+@media (max-width: 850px) {
+  #characterSection {
+    gap: 16px;
+  }
+
+  .battle-status-panel {
+    max-width: 620px;
+    grid-template-columns: 125px minmax(0, 1fr);
+    grid-template-rows: 120px;
+    gap: 0 12px;
+    padding: 30px 12px 10px;
+  }
+
+  #opponentImage,
+  #characterImage {
+    width: 125px;
+    height: 120px !important;
+  }
+
+  #opponentStats p,
+  #characterStats p {
+    padding: 4px 1px;
+    font-size: 0.76rem;
+  }
+
+  #opponentName,
+  #characterName {
+    font-size: 1.05rem;
+  }
+
+  #finishTurnButton {
+    width: 95px !important;
+    height: 95px !important;
+    font-size: 0.9rem;
+  }
+}
 
 @media (max-width: 600px) {
   #gameContainer {
-    padding: 18px 10px;
+    padding: 18px 10px 30px;
+  }
+
+  #opponentSection,
+  #characterSection {
+    margin: 20px auto !important;
   }
 
   #characterSection {
     flex-direction: column;
-    gap: 15px;
+    gap: 18px;
   }
 
-  #opponent,
-  #character {
-    max-width: 100%;
+  .battle-status-panel {
+    width: 100%;
+    max-width: 520px;
+    grid-template-columns: 110px minmax(0, 1fr);
+    grid-template-rows: 112px;
+    gap: 0 10px;
+    padding: 28px 10px 10px;
+  }
+
+  #opponentImage,
+  #characterImage {
+    width: 110px;
+    height: 112px !important;
+  }
+
+  #opponentName,
+  #characterName {
+    top: 3px;
+    left: 12px;
+    width: 45%;
+    font-size: 0.95rem;
+  }
+
+  #opponentStats p,
+  #characterStats p {
+    gap: 4px;
+    padding: 4px 0;
+    font-size: 0.69rem;
   }
 
   #finishTurnArea {
@@ -441,30 +698,297 @@
   }
 
   #finishTurnButton {
-    width: 72px !important;
-    height: 72px !important;
-    font-size: 0.8rem;
+    width: 82px !important;
+    height: 82px !important;
+    font-size: 0.82rem;
+  }
+
+  #finishTurnArrow {
+    font-size: 1.15rem;
+  }
+
+  #attackSection {
+    margin: 24px auto !important;
   }
 
   #attackBody {
-    padding: 12px;
+    padding: 10px;
   }
 
   #attackList {
-    gap: 12px !important;
+    gap: 10px !important;
   }
 
   [id^="attackButton"] {
-    flex-basis: 175px;
-    min-width: 175px !important;
+    flex-basis: 170px;
+    min-width: 170px !important;
+    padding: 10px;
   }
 
   [id^="attackImage"] {
     height: 90px;
   }
 
-  #opponentStats,
-  #characterStats {
-    gap: 6px;
+  #aiAttackCard {
+    max-width: 290px;
+  }
+}
+
+@media (max-width: 370px) {
+  .battle-status-panel {
+    grid-template-columns: 90px minmax(0, 1fr);
+    grid-template-rows: 105px;
+    gap: 0 8px;
+    padding: 27px 8px 8px;
+  }
+
+  #opponentImage,
+  #characterImage {
+    width: 90px;
+    height: 105px !important;
+  }
+
+  #opponentName,
+  #characterName {
+    font-size: 0.85rem;
+  }
+
+  #opponentStats p,
+  #characterStats p {
+    font-size: 0.64rem;
+  }
+}
+
+/* =========================================
+   VICTORY SCREEN
+========================================= */
+
+#victoryScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 70vh;
+  padding: 30px 16px;
+
+  color: #f1f5ff;
+}
+
+#victoryCard {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  padding: 35px 30px 25px;
+
+  text-align: center;
+
+  background:
+    radial-gradient(
+      ellipse at top,
+      #153d50 0%,
+      transparent 65%
+    ),
+    linear-gradient(
+      145deg,
+      #101d35,
+      #080f1e
+    );
+
+  border: 1px solid #17d8ff;
+  border-radius: 18px;
+
+  box-shadow:
+    0 0 12px #17d8ff30,
+    0 0 35px #087dce20;
+}
+
+/* Trophy */
+
+#victoryIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 82px;
+  height: 82px;
+  margin: 0 auto 15px;
+
+  font-size: 2.8rem;
+
+  background: #132d49;
+  border: 2px solid #25d9ff;
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 15px #17d8ff45,
+    inset 0 0 15px #17d8ff15;
+}
+
+/* Small heading */
+
+#victoryEyebrow {
+  margin: 0 0 8px;
+
+  color: #53dfff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+}
+
+/* Main victory title */
+
+#victoryTitle {
+  margin: 0;
+
+  color: #ffffff;
+  font-size: clamp(2.3rem, 7vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+
+  text-shadow:
+    0 0 10px #16cfff90,
+    0 0 25px #16cfff40;
+}
+
+#victoryMessage {
+  margin: 10px 0 22px;
+
+  color: #b8cce9;
+  font-size: 1rem;
+}
+
+/* Divider */
+
+#victoryDivider {
+  width: 100%;
+  height: 1px;
+  margin: 0 auto 22px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #17d8ff,
+    transparent
+  );
+}
+
+/* Results heading */
+
+#victoryResultsTitle {
+  margin: 0 0 15px;
+
+  color: #d7e7ff;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+/* Result rows */
+
+#victoryStats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.victoryStat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 13px 15px;
+
+  text-align: left;
+
+  background: #0a1528;
+  border: 1px solid #ffffff18;
+  border-radius: 10px;
+}
+
+.victoryStatIcon {
+  font-size: 1.2rem;
+}
+
+.victoryStatLabel {
+  flex: 1;
+
+  color: #c7d8f3;
+  font-size: 0.95rem;
+}
+
+.victoryStat strong {
+  color: #53dfff;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+/* Footer message */
+
+#victoryFooter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+
+  margin-top: 25px;
+}
+
+#victoryFooter p {
+  margin: 0;
+
+  color: #53dfff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+#victoryFooterIcon {
+  color: #53dfff;
+  font-size: 1rem;
+}
+
+/* Small screens */
+
+@media (max-width: 480px) {
+  #victoryScreen {
+    min-height: 60vh;
+    padding: 20px 8px;
+  }
+
+  #victoryCard {
+    padding: 28px 16px 22px;
+  }
+
+  #victoryIcon {
+    width: 68px;
+    height: 68px;
+    font-size: 2.3rem;
+  }
+
+  #victoryEyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+  }
+
+  #victoryMessage {
+    font-size: 0.9rem;
+  }
+
+  .victoryStat {
+    gap: 9px;
+    padding: 12px 10px;
+  }
+
+  .victoryStatLabel {
+    font-size: 0.85rem;
+  }
+
+  .victoryStat strong {
+    font-size: 1rem;
+  }
+
+  #victoryFooter p {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
   }
 }

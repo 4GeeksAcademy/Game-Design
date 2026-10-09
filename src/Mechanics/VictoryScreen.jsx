@@ -1,29 +1,51 @@
 import React from "react";
-
-
+import "./BattleUI.css";
 
 function VictoryScreen({ damageDealt, attacksUsed }) {
+  return (
+    <div id="victoryScreen">
+      <div id="victoryCard">
+        <div id="victoryIcon">🏆</div>
 
+        <p id="victoryEyebrow">BATTLE COMPLETE</p>
 
+        <h1 id="victoryTitle">VICTORY!</h1>
 
-   return (
+        <p id="victoryMessage">
+          Your opponent has been defeated.
+        </p>
 
-            <div className="card-body">
+        <div id="victoryDivider"></div>
 
-        <h1>YOU WIN!</h1>
+        <h2 id="victoryResultsTitle">BATTLE RESULTS</h2>
 
-        <h3>Victory!</h3>
+        <div id="victoryStats">
+          <div className="victoryStat">
+            <span className="victoryStatIcon">⚔️</span>
+            <span className="victoryStatLabel">Damage Dealt</span>
+            <strong>{damageDealt}</strong>
+          </div>
 
-        <hr />
+          <div className="victoryStat">
+            <span className="victoryStatIcon">💥</span>
+            <span className="victoryStatLabel">Attacks Used</span>
+            <strong>{attacksUsed}</strong>
+          </div>
 
-        <p>Damage Dealt: {damageDealt}</p>
+          <div className="victoryStat">
+            <span className="victoryStatIcon">❤️</span>
+            <span className="victoryStatLabel">Opponent Health</span>
+            <strong>0</strong>
+          </div>
+        </div>
 
-        <p>Attacks Used: {attacksUsed}</p>
-
-        <p>Opponent Health: 0</p>
-
+        <div id="victoryFooter">
+          <span id="victoryFooterIcon">✦</span>
+          <p>WELL FOUGHT, PLAYER!</p>
+          <span id="victoryFooterIcon">✦</span>
+        </div>
       </div>
-
+    </div>
   );
 }
 

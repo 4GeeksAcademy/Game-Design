@@ -22,7 +22,7 @@ const mina = {
 
   health: 100,
   mana: 70,
-  maximumMana: 50,
+  maximumMana: 70,
   manaRegen: 20,
   cooldown: 3,
   recovery: 1,
