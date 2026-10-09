@@ -5,22 +5,15 @@ import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
-
-// Characters list for now
 import mina from "./Mina_AshidoStats";
 import rockLee from "./Rock_LeeStats";
-
-// Artificial Intelligence (Bot)
-import { aiTurn, aiFinishTurn } from "./AI.js";
-
+import { aiTurn } from "./AI.js";
 import React, { useState, useEffect } from "react";
 
 function App() {
   const [character, setCharacter] = useState({
     ...mina,
-    attacks: mina.attacks.map((attack) => ({
-      ...attack,
-    })),
+    attacks: mina.attacks.map((attack) => ({ ...attack })),
     health: mina.health,
     maximumHealth: mina.health,
     mana: mina.mana,
@@ -30,12 +23,9 @@ function App() {
     blocked: false,
   });
 
-  // Shows opponents stats and available attacks on his side
   const [opponent, setOpponent] = useState({
     ...rockLee,
-    attacks: rockLee.attacks.map((attack) => ({
-      ...attack,
-    })),
+    attacks: rockLee.attacks.map((attack) => ({ ...attack })),
     health: rockLee.health,
     maximumHealth: rockLee.health,
     mana: rockLee.mana,
@@ -47,67 +37,69 @@ function App() {
   const [damageDealt, setDamageDealt] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
   const [currentTurn, setCurrentTurn] = useState("player");
-  const [combatMessage, setCombatMessage] = useState(null);
+  const [combatMessages, setCombatMessages] = useState([]);
   const [aiAttack, setAiAttack] = useState(null);
 
+  // Queue combat messages so they don't replace one another.
+  useEffect(() => {
+    if (combatMessages.length === 0) return;
+
+    const timer = setTimeout(() => {
+      setCombatMessages((messages) => messages.slice(1));
+    }, 1800);
+
+    return () => clearTimeout(timer);
+  }, [combatMessages]);
+
+  // Advance the turn when both sides finish.
   useEffect(() => {
     if (character.turnFinished && opponent.turnFinished) {
       turn(character, opponent);
-
-      setCharacter({
-        ...character,
-      });
-
-      setOpponent({
-        ...opponent,
-      });
-
+      setCharacter({ ...character });
+      setOpponent({ ...opponent });
       setCurrentTurn("player");
     }
   }, [character, opponent]);
 
-  // Switches to AI's turn
+  // Run the AI turn.
   useEffect(() => {
     if (currentTurn === "ai") {
-      console.log("AI TURN!");
-
       aiTurn(opponent, character, setAiAttack, () => {
-        setOpponent({
-          ...opponent,
-        });
-
-        setCharacter({
-          ...character,
-        });
-
+        setOpponent({ ...opponent });
+        setCharacter({ ...character });
         setAiAttack(null);
       });
     }
   }, [currentTurn]);
 
-  // Evade or block message cooldown
-  useEffect(() => {
-  if (!combatMessage) return;
-
-  const timer = setTimeout(() => {
-    setCombatMessage(null);
-  }, 1500);
-
-  return () => clearTimeout(timer);
-}, [combatMessage]);
+  // Add a message to the queue.
+  function showCombatMessage(text, type) {
+    setCombatMessages((messages) => [
+      ...messages,
+      {
+        id: Date.now() + Math.random(),
+        text,
+        type,
+      },
+    ]);
+  }
 
   return (
     <div className="container-fluid mt-3" id="gameContainer">
-      {" "}
-      {combatMessage && (
-        <div
-          id="combatPopup"
-          className={`combat-popup ${combatMessage.type}`}
-          key={combatMessage.id}
-        >
-          {combatMessage.text}
-        </div>
-      )}
+      {combatMessages.length > 0 && (
+  <div id="combatPopupContainer">
+    {combatMessages.map((message) => (
+      <div
+        id="combatPopup"
+        className={`combat-popup ${message.type}`}
+        key={message.id}
+      >
+        {message.text}
+      </div>
+    ))}
+  </div>
+)}
+
       {character.health <= 0 ? (
         <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
       ) : opponent.health <= 0 ? (
@@ -116,13 +108,11 @@ function App() {
         </div>
       ) : (
         <>
-          {/* Battle Arena */}
           <div id="battleArena">
             <div id="opponentSection">
               <Opponent opponent={opponent} setOpponent={setOpponent} />
             </div>
 
-            {/* AI Attack and Defensive Actions */}
             {aiAttack && (
               <div id="aiAttackSection">
                 <div id="aiAttackCard">
@@ -154,11 +144,9 @@ function App() {
                       if (result) {
                         character.cooldown -= 1;
                         character.blocked = true;
-                        setCombatMessage({
-                          id: Date.now(),
-                          text: "🛡️ BLOCKED!",
-                          type: "blocked",
-                        });
+
+                        showCombatMessage("🛡️ BLOCKED!", "blocked");
+
                         setOpponent({ ...result.attacker });
                         setCharacter({ ...result.defender });
                         setAiAttack(null);
@@ -172,17 +160,17 @@ function App() {
                   <button
                     id="evadeButton"
                     onClick={() => {
-                      character.cooldown -= 1;
-
                       const result = evadeAttack(aiAttack, opponent, character);
 
                       if (result) {
+                        character.cooldown -= 1;
                         character.blocked = true;
-                        setCombatMessage({
-                          id: Date.now(),
-                          text: "💨 EVADED!",
-                          type: "evaded",
-                        });
+
+                        showCombatMessage(
+                          result.evaded ? "💨 EVADED!" : "💥 FAILED TO EVADE!",
+                          result.evaded ? "evaded" : "hit",
+                        );
+
                         setOpponent({ ...result.attacker });
                         setCharacter({ ...result.defender });
                         setAiAttack(null);
@@ -196,7 +184,6 @@ function App() {
               </div>
             )}
 
-            {/* Player */}
             <div id="characterSection">
               <Character
                 character={character}
@@ -207,7 +194,6 @@ function App() {
             </div>
           </div>
 
-          {/* Player Attack Options */}
           <div id="attackSection">
             <AttackOptions
               character={character}
@@ -217,7 +203,7 @@ function App() {
               setDamageDealt={setDamageDealt}
               setAttacksUsed={setAttacksUsed}
               currentTurn={currentTurn}
-              setCombatMessage={setCombatMessage}
+              showCombatMessage={showCombatMessage}
             />
           </div>
         </>
@@ -225,4 +211,5 @@ function App() {
     </div>
   );
 }
+
 export default App;

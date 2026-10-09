@@ -47,7 +47,7 @@ const mina = {
       speed: 30,
       cost: 25,
       buff: {
-    defense: 5
+    defense: 3
     },
       state: true,
     },

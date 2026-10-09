@@ -21,7 +21,10 @@ function attackCharacter(ATK, attacker, defender, defense = 0) {
   // Apply a buff instead of dealing damage.
   if (ATK.buff) {
     if (ATK.buff.defense) {
-      attacker.defense.amount += ATK.buff.defense;
+      attacker.defense = {
+        ...attacker.defense,
+        amount: attacker.defense.amount + ATK.buff.defense,
+      };
     }
 
     ATK.state = false;
@@ -34,7 +37,9 @@ function attackCharacter(ATK, attacker, defender, defense = 0) {
     };
   }
 
-  // Normal attack.
+  // Calculate and apply normal attack damage.
+  const damageReceived = Math.max(0, ATK.damage - defense);
+
   currentHealth(ATK, defender, defense);
 
   ATK.state = false;
@@ -42,6 +47,7 @@ function attackCharacter(ATK, attacker, defender, defense = 0) {
   return {
     attacker,
     defender,
+    damageReceived,
   };
 }
 

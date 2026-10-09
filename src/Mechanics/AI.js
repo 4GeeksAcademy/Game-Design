@@ -19,6 +19,11 @@ function aiChooseAttack(ai) {
 // AI randomly chooses to defend or evade.
 
 function aiDefendOrEvade(attack, attacker, defender) {
+  // Buff cards should activate directly without being blocked or evaded.
+  if (attack.buff) {
+    return attackCharacter(attack, attacker, defender);
+  }
+
   let result;
 
   // Only defend or evade if defensive charges are available.
@@ -27,14 +32,14 @@ function aiDefendOrEvade(attack, attacker, defender) {
       // Defend
       const damageReceived = Math.max(
         0,
-        attack.damage - defender.defense.amount
+        attack.damage - defender.defense.amount,
       );
 
       result = attackCharacter(
         attack,
         attacker,
         defender,
-        defender.defense.amount
+        defender.defense.amount,
       );
 
       if (result) {
@@ -56,7 +61,6 @@ function aiDefendOrEvade(attack, attacker, defender) {
     result = attackCharacter(attack, attacker, defender);
 
     if (result) {
-      result.damageReceived = attack.damage;
       result.action = "take damage";
     }
   }
@@ -68,7 +72,6 @@ function aiDefendOrEvade(attack, attacker, defender) {
 
   return result;
 }
-
 
 function aiTurn(ai, player, showAttack, hideAttack) {
   let attack = aiChooseAttack(ai);
