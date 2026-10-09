@@ -1476,3 +1476,47 @@ body {
   text-shadow: 0 0 12px #a855f780;
   box-shadow: 0 0 25px #a855f755;
 }
+
+
+/* Character stat bars */
+.statBar {
+  width: 100%;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.statBarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.statProgress {
+  height: 12px;
+  overflow: hidden;
+  background-color: #252b3b;
+  border: 1px solid #414b60;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 3px #00000080;
+}
+
+.statProgress .progress-bar {
+  transition: width 0.4s ease;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* Slightly chunkier bars on larger screens */
+@media (min-width: 768px) {
+  .statProgress {
+    height: 14px;
+  }
+
+  .statBarHeader {
+    font-size: 0.9rem;
+  }
+}
