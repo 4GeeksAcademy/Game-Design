@@ -992,3 +992,390 @@ body {
     letter-spacing: 1px;
   }
 }
+
+/* =========================================
+   ENHANCED CHARACTER BATTLE HUD
+========================================= */
+
+/* Shared futuristic panel lighting */
+
+.battle-status-panel {
+  position: relative;
+  isolation: isolate;
+
+  background:
+    radial-gradient(
+      ellipse at 15% 0%,
+      color-mix(in srgb, var(--panel-accent) 17%, transparent),
+      transparent 65%
+    ),
+    linear-gradient(
+      135deg,
+      #111e35 0%,
+      #07101f 55%,
+      #10182b 100%
+    );
+
+  border: 1px solid var(--panel-accent);
+
+  filter:
+    drop-shadow(0 0 5px color-mix(in srgb, var(--panel-accent) 35%, transparent))
+    drop-shadow(0 0 14px color-mix(in srgb, var(--panel-accent) 16%, transparent));
+
+  transition:
+    filter 0.25s ease,
+    background 0.25s ease;
+}
+
+/* Red lighting for Rock Lee's panel */
+
+#opponent {
+  --panel-accent: #ff3159;
+
+  background:
+    radial-gradient(
+      ellipse at 10% 0%,
+      #ff315926,
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      #281321 0%,
+      #0b1020 55%,
+      #210e20 100%
+    );
+}
+
+/* Cyan lighting for Mina's panel */
+
+#character {
+  --panel-accent: #13d5ff;
+
+  background:
+    radial-gradient(
+      ellipse at 10% 0%,
+      #13d5ff26,
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      #0b2942 0%,
+      #071322 55%,
+      #092440 100%
+    );
+}
+
+/* Inner illuminated frame */
+
+.battle-status-panel::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: 0;
+
+  pointer-events: none;
+
+  border: 1px solid
+    color-mix(in srgb, var(--panel-accent) 25%, transparent);
+
+  clip-path: polygon(
+    0 0,
+    38% 0,
+    43% 12px,
+    70% 12px,
+    75% 24px,
+    100% 24px,
+    100% 87%,
+    95% 100%,
+    4% 100%,
+    0 90%
+  );
+}
+
+/* Keep panel content above the inner frame */
+
+#opponentImage,
+#characterImage,
+#opponentStats,
+#characterStats {
+  position: relative;
+  z-index: 1;
+}
+
+/* Character name glow */
+
+#opponentName {
+  color: #fff0f3;
+
+  text-shadow:
+    0 0 8px #ff315940,
+    0 0 18px #ff31591a;
+}
+
+#characterName {
+  color: #effcff;
+
+  text-shadow:
+    0 0 8px #13d5ff40,
+    0 0 18px #13d5ff1a;
+}
+
+/* Portraits look more like framed character art */
+
+#opponentImage,
+#characterImage {
+  background: #08101e;
+
+  box-shadow:
+    0 0 0 2px #050b15,
+    0 0 8px color-mix(in srgb, var(--panel-accent) 35%, transparent);
+
+  transition:
+    filter 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+#opponentImage {
+  border-color: #ff3159;
+  box-shadow:
+    0 0 0 2px #170b17,
+    0 0 10px #ff31594a;
+}
+
+#characterImage {
+  border-color: #13d5ff;
+  box-shadow:
+    0 0 0 2px #071523,
+    0 0 10px #13d5ff4a;
+}
+
+/* Portrait highlight on hover */
+
+#opponent:hover #opponentImage {
+  filter: brightness(1.08) saturate(1.12);
+  box-shadow:
+    0 0 0 2px #170b17,
+    0 0 16px #ff315980;
+}
+
+#character:hover #characterImage {
+  filter: brightness(1.08) saturate(1.12);
+  box-shadow:
+    0 0 0 2px #071523,
+    0 0 16px #13d5ff80;
+}
+
+/* Sharper, more defined stat rows */
+
+#opponentStats p,
+#characterStats p {
+  border-bottom: 1px solid #ffffff12;
+
+  transition:
+    background 0.2s ease,
+    padding 0.2s ease;
+}
+
+#opponentStats p:hover {
+  background: #ff31590c;
+}
+
+#characterStats p:hover {
+  background: #13d5ff0c;
+}
+
+#opponentStats p strong {
+  color: #ffdce3;
+  text-shadow: 0 0 7px #ff315925;
+}
+
+#characterStats p strong {
+  color: #d9faff;
+  text-shadow: 0 0 7px #13d5ff25;
+}
+
+/* Stronger panel glow on hover */
+
+#opponent:hover {
+  filter:
+    drop-shadow(0 0 7px #ff315970)
+    drop-shadow(0 0 19px #ff315935);
+}
+
+#character:hover {
+  filter:
+    drop-shadow(0 0 7px #13d5ff70)
+    drop-shadow(0 0 19px #13d5ff35);
+}
+
+/* =========================================
+   FINISH TURN BUTTON GLOW
+========================================= */
+
+#finishTurnButton {
+  box-shadow:
+    0 0 8px #12bfff,
+    0 0 22px #12bfff65,
+    inset 0 0 16px #50d9ff55;
+}
+
+#finishTurnButton:hover:not(:disabled) {
+  box-shadow:
+    0 0 15px #12bfff,
+    0 0 32px #12bfff90,
+    inset 0 0 20px #50d9ff88;
+}
+
+/* Respect reduced-motion preferences */
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-status-panel,
+  #opponentImage,
+  #characterImage,
+  #finishTurnButton {
+    transition: none;
+  }
+}
+
+/* ================================
+   GAME OVER SCREEN
+================================ */
+
+#gameOverScreen {
+  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 15px;
+}
+
+#gameOverCard {
+  width: 100%;
+  max-width: 520px;
+  padding: 35px 30px;
+  color: #f5f5f5;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at top, #51202a 0%, transparent 65%),
+    linear-gradient(145deg, #21131c, #0c101d 75%);
+  border: 2px solid #ff4059;
+  border-radius: 18px;
+  box-shadow:
+    0 0 12px #ff405955,
+    0 0 35px #ff253522,
+    inset 0 0 25px #ff40590d;
+  animation: gameOverAppear 0.6s ease-out;
+}
+
+#gameOverIcon {
+  margin-bottom: 8px;
+  font-size: 3.5rem;
+  filter: drop-shadow(0 0 12px #ff4059);
+}
+
+#gameOverEyebrow {
+  margin-bottom: 8px;
+  color: #ff8292;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+#gameOverTitle {
+  margin-bottom: 12px;
+  color: #ff4059;
+  font-size: clamp(2.3rem, 7vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 0 0 18px #ff405966;
+}
+
+#gameOverMessage {
+  color: #d9dce8;
+  line-height: 1.6;
+}
+
+#gameOverDivider {
+  width: 75%;
+  height: 2px;
+  margin: 24px auto;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #ff4059,
+    transparent
+  );
+}
+
+#gameOverResultsTitle {
+  margin-bottom: 18px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+#gameOverStats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gameOverStat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #ffffff08;
+  border: 1px solid #ff405926;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.gameOverStat span {
+  color: #dce3f5;
+}
+
+.gameOverStat strong {
+  color: #ff8292;
+  font-size: 1.1rem;
+}
+
+#gameOverFooter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+  color: #ff8292;
+}
+
+#gameOverFooter p {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+@keyframes gameOverAppear {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  #gameOverCard {
+    padding: 28px 18px;
+  }
+
+  .gameOverStat {
+    padding: 10px;
+  }
+}

@@ -2,6 +2,7 @@ import Opponent from "./Opponent.jsx";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import VictoryScreen from "./VictoryScreen.jsx";
+import GameOverScreen from "./GameOverScreen.jsx";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
 
@@ -84,46 +85,38 @@ function App() {
   return (
     <div className="container-fluid mt-3" id="gameContainer">
       {" "}
-      {opponent.health === 0 ? (
+      {character.health <= 0 ? (
+        <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
+      ) : opponent.health <= 0 ? (
         <div id="victorySection">
-          {" "}
-          <VictoryScreen
-            damageDealt={damageDealt}
-            attacksUsed={attacksUsed}
-          />{" "}
+          <VictoryScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
         </div>
       ) : (
         <>
-          {" "}
-          {/* Battle Arena */}{" "}
+          {/* Battle Arena */}
           <div id="battleArena">
-            {" "}
-            {/* Opponent */}{" "}
             <div id="opponentSection">
-              {" "}
-              <Opponent opponent={opponent} setOpponent={setOpponent} />{" "}
-            </div>{" "}
-            {/* AI Attack and Defensive Actions */}{" "}
+              <Opponent opponent={opponent} setOpponent={setOpponent} />
+            </div>
+
+            {/* AI Attack and Defensive Actions */}
             {aiAttack && (
               <div id="aiAttackSection">
-                {" "}
                 <div id="aiAttackCard">
-                  {" "}
-                  <div id="aiAttackHeader"> OPPONENT ATTACK </div>{" "}
+                  <div id="aiAttackHeader">OPPONENT ATTACK</div>
+
                   <div id="aiAttackInfo">
-                    {" "}
-                    <h5 id="aiAttackName">{aiAttack.name}</h5>{" "}
+                    <h5 id="aiAttackName">{aiAttack.name}</h5>
+
                     <div id="aiAttackStats">
-                      {" "}
-                      <span>⚔ {aiAttack.damage}</span>{" "}
-                      <span>◆ {aiAttack.cost}</span>{" "}
-                      <span>⚡ {aiAttack.speed}</span>{" "}
-                    </div>{" "}
-                  </div>{" "}
-                </div>{" "}
+                      <span>⚔ {aiAttack.damage}</span>
+                      <span>◆ {aiAttack.cost}</span>
+                      <span>⚡ {aiAttack.speed}</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div id="defensiveActions">
-                  {" "}
-                  {/* Defend */}{" "}
                   <button
                     id="defendButton"
                     disabled={character.cooldown <= 0}
@@ -134,53 +127,57 @@ function App() {
                         character,
                         character.defense.amount,
                       );
+
                       if (result) {
                         character.cooldown -= 1;
                         character.blocked = true;
+
                         setOpponent({ ...result.attacker });
                         setCharacter({ ...result.defender });
                         setAiAttack(null);
                       }
                     }}
                   >
-                    {" "}
-                    <span id="defendButtonIcon">🛡</span>{" "}
-                    <span>Defend</span>{" "}
-                  </button>{" "}
-                  {/* Evade */}{" "}
+                    <span id="defendButtonIcon">🛡</span>
+                    <span>Defend</span>
+                  </button>
+
                   <button
                     id="evadeButton"
                     onClick={() => {
                       character.cooldown -= 1;
+
                       const result = evadeAttack(aiAttack, opponent, character);
+
                       if (result) {
                         character.blocked = true;
+
                         setOpponent({ ...result.attacker });
                         setCharacter({ ...result.defender });
                         setAiAttack(null);
                       }
                     }}
                   >
-                    {" "}
-                    <span id="evadeButtonIcon">💨</span> <span>Evade</span>{" "}
-                  </button>{" "}
-                </div>{" "}
+                    <span id="evadeButtonIcon">💨</span>
+                    <span>Evade</span>
+                  </button>
+                </div>
               </div>
-            )}{" "}
-            {/* Player */}{" "}
+            )}
+
+            {/* Player */}
             <div id="characterSection">
-              {" "}
               <Character
                 character={character}
                 setCharacter={setCharacter}
                 currentTurn={currentTurn}
                 setCurrentTurn={setCurrentTurn}
-              />{" "}
-            </div>{" "}
-          </div>{" "}
-          {/* Player Attack Options */}{" "}
+              />
+            </div>
+          </div>
+
+          {/* Player Attack Options */}
           <div id="attackSection">
-            {" "}
             <AttackOptions
               character={character}
               opponent={opponent}
@@ -189,10 +186,10 @@ function App() {
               setDamageDealt={setDamageDealt}
               setAttacksUsed={setAttacksUsed}
               currentTurn={currentTurn}
-            />{" "}
-          </div>{" "}
+            />
+          </div>
         </>
-      )}{" "}
+      )}
     </div>
   );
 }
