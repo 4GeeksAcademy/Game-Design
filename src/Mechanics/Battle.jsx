@@ -46,7 +46,7 @@ function App() {
 
     const timer = setTimeout(() => {
       setCombatMessages((messages) => messages.slice(1));
-    }, 1800);
+    }, 3300);
 
     return () => clearTimeout(timer);
   }, [combatMessages]);
@@ -87,18 +87,14 @@ function App() {
   return (
     <div className="container-fluid mt-3" id="gameContainer">
       {combatMessages.length > 0 && (
-  <div id="combatPopupContainer">
-    {combatMessages.map((message) => (
-      <div
-        id="combatPopup"
-        className={`combat-popup ${message.type}`}
-        key={message.id}
-      >
-        {message.text}
-      </div>
-    ))}
-  </div>
-)}
+        <div id="combatPopupContainer">
+          {combatMessages.map((message) => (
+            <div className={`combat-popup ${message.type}`} key={message.id}>
+              {message.text}
+            </div>
+          ))}
+        </div>
+      )}
 
       {character.health <= 0 ? (
         <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />

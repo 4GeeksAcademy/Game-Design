@@ -1,4 +1,3 @@
-
 /* =========================================
    GLOBAL BATTLE SCREEN
 ========================================= */
@@ -1575,7 +1574,10 @@ body {
   pointer-events: none;
 }
 
-/* Fix animations when multiple combat messages appear */
+/* =========================================
+   COMBAT POPUP FIX
+========================================= */
+
 #combatPopupContainer {
   position: fixed;
   top: 25%;
@@ -1589,37 +1591,107 @@ body {
   gap: 10px;
 
   width: max-content;
-  max-width: 90vw;
+  max-width: 90%;
   pointer-events: none;
 }
 
-/* Override the original fixed positioning for each stacked message */
-#combatPopupContainer #combatPopup {
-  position: relative;
-  top: auto;
-  left: auto;
-  transform: none;
-
-  width: max-content;
-  max-width: 90vw;
+.combat-popup {
   min-width: 230px;
+  max-width: 90vw;
+  padding: 18px 28px;
 
-  animation: combatStackPopupAnimation 1.5s ease forwards;
+  background: #101525;
+  border: 3px solid white;
+  border-radius: 10px;
+
+  text-align: center;
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 1px;
+
+  opacity: 0;
+  animation: combatPopupAnimation 1.5s ease forwards;
 }
 
-/* Give each message its own entrance and exit animation */
-@keyframes combatStackPopupAnimation {
+.combat-popup.blocked {
+  color: #ffd66b;
+  border-color: #ffd66b;
+  text-shadow: 0 0 12px #ffd66b80;
+  box-shadow: 0 0 25px #ffd66b55;
+}
+
+.combat-popup.evaded {
+  color: #66f5c4;
+  border-color: #66f5c4;
+  text-shadow: 0 0 12px #66f5c480;
+  box-shadow: 0 0 25px #35e7a455;
+}
+
+.combat-popup.hit,
+.combat-popup.opponent-blocked {
+  color: #ff6278;
+  border-color: #ff4059;
+  text-shadow: 0 0 12px #ff405980;
+  box-shadow: 0 0 25px #ff405955;
+}
+
+.combat-popup.opponent-evaded {
+  color: #c18aff;
+  border-color: #a855f7;
+  text-shadow: 0 0 12px #a855f780;
+  box-shadow: 0 0 25px #a855f755;
+}
+
+.combat-popup.buff {
+  color: #62d9ff;
+  border-color: #00c8ff;
+  text-shadow: 0 0 12px #00c8ff;
+  box-shadow: 0 0 25px #00c8ff66;
+}
+
+@keyframes combatPopupAnimation {
   0% {
     opacity: 0;
-    transform: translateY(-15px) scale(0.7);
+    transform: translateY(15px) scale(0.65);
   }
 
   15% {
     opacity: 1;
-    transform: translateY(0) scale(1.1);
+    transform: translateY(0) scale(1.12);
+  }
+
+  25%,
+  75% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.95);
+  }
+}
+
+
+/* Restore combat popup fade animation */
+#combatPopupContainer .combat-popup {
+  opacity: 0;
+  animation: combatPopupAnimation 1.8s ease-in-out both !important;
+}
+
+@keyframes combatPopupAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.65);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.12);
   }
 
   25% {
+    opacity: 1;
     transform: translateY(0) scale(1);
   }
 
@@ -1630,6 +1702,23 @@ body {
 
   100% {
     opacity: 0;
-    transform: translateY(-15px) scale(0.9);
+    transform: translateY(-18px) scale(0.95);
   }
+}
+
+/* Stagger combat popup messages */
+#combatPopupContainer .combat-popup:nth-child(1) {
+  animation-delay: 0s !important;
+}
+
+#combatPopupContainer .combat-popup:nth-child(2) {
+  animation-delay: 0.5s !important;
+}
+
+#combatPopupContainer .combat-popup:nth-child(3) {
+  animation-delay: 1.5s !important;
+}
+
+#combatPopupContainer .combat-popup:nth-child(n + 4) {
+  animation-delay: 2.5s !important;
 }
