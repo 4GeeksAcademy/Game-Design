@@ -45,6 +45,7 @@ function App() {
   const [damageDealt, setDamageDealt] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
   const [currentTurn, setCurrentTurn] = useState("player");
+  const [combatMessage, setCombatMessage] = useState(null);
   const [aiAttack, setAiAttack] = useState(null);
 
   useEffect(() => {
@@ -82,9 +83,29 @@ function App() {
     }
   }, [currentTurn]);
 
+  // Evade or block message cooldown
+  useEffect(() => {
+  if (!combatMessage) return;
+
+  const timer = setTimeout(() => {
+    setCombatMessage(null);
+  }, 1500);
+
+  return () => clearTimeout(timer);
+}, [combatMessage]);
+
   return (
     <div className="container-fluid mt-3" id="gameContainer">
       {" "}
+      {combatMessage && (
+        <div
+          id="combatPopup"
+          className={`combat-popup ${combatMessage.type}`}
+          key={combatMessage.id}
+        >
+          {combatMessage.text}
+        </div>
+      )}
       {character.health <= 0 ? (
         <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
       ) : opponent.health <= 0 ? (
@@ -131,7 +152,11 @@ function App() {
                       if (result) {
                         character.cooldown -= 1;
                         character.blocked = true;
-
+                        setCombatMessage({
+                          id: Date.now(),
+                          text: "🛡️ BLOCKED!",
+                          type: "blocked",
+                        });
                         setOpponent({ ...result.attacker });
                         setCharacter({ ...result.defender });
                         setAiAttack(null);
@@ -151,7 +176,11 @@ function App() {
 
                       if (result) {
                         character.blocked = true;
-
+                        setCombatMessage({
+                          id: Date.now(),
+                          text: "💨 EVADED!",
+                          type: "evaded",
+                        });
                         setOpponent({ ...result.attacker });
                         setCharacter({ ...result.defender });
                         setAiAttack(null);
@@ -186,6 +215,7 @@ function App() {
               setDamageDealt={setDamageDealt}
               setAttacksUsed={setAttacksUsed}
               currentTurn={currentTurn}
+              setCombatMessage={setCombatMessage}
             />
           </div>
         </>

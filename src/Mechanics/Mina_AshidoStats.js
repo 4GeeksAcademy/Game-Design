@@ -48,6 +48,16 @@ const mina = {
       cost: 25,
       state: true,
     },
+
+    {
+    name: "Acid Bomb",
+    damage: 60,
+    speed: 10,
+    cost: 40,
+    state: true
+   },
+
+   
   ],
 };
 

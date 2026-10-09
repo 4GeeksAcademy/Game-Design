@@ -1379,3 +1379,100 @@ body {
     padding: 10px;
   }
 }
+
+
+
+/* =========================================
+   COMBAT EVENT POPUP
+========================================= */
+
+#gameContainer {
+  position: relative;
+}
+
+#combatPopup {
+  position: fixed;
+  top: 25%;
+  left: 50%;
+  z-index: 1000;
+
+  min-width: 230px;
+  padding: 18px 28px;
+
+  text-align: center;
+  font-size: clamp(1.5rem, 4vw, 2.3rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+
+  background: #101525;
+  border: 3px solid white;
+  border-radius: 10px;
+
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+
+  animation: combatPopupAnimation 1.5s ease forwards;
+}
+
+#combatPopup.blocked {
+  color: #ffd66b;
+  border-color: #ffd66b;
+  text-shadow: 0 0 12px #ffd66b80;
+  box-shadow: 0 0 25px #ffd66b55;
+}
+
+#combatPopup.evaded {
+  color: #66f5c4;
+  border-color: #66f5c4;
+  text-shadow: 0 0 12px #66f5c480;
+  box-shadow: 0 0 25px #35e7a455;
+}
+
+#combatPopup.hit {
+  color: #ff6278;
+  border-color: #ff4059;
+  text-shadow: 0 0 12px #ff405980;
+  box-shadow: 0 0 25px #ff405955;
+}
+
+@keyframes combatPopupAnimation {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -35%) scale(0.65);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+
+  25% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -70%) scale(0.95);
+  }
+}
+
+
+/* Opponent successfully blocked Mina's attack */
+#combatPopup.opponent-blocked {
+  color: #ff667a;
+  border-color: #ff4059;
+  text-shadow: 0 0 12px #ff405980;
+  box-shadow: 0 0 25px #ff405955;
+}
+
+/* Opponent evaded Mina's attack */
+#combatPopup.opponent-evaded {
+  color: #c18aff;
+  border-color: #a855f7;
+  text-shadow: 0 0 12px #a855f780;
+  box-shadow: 0 0 25px #a855f755;
+}

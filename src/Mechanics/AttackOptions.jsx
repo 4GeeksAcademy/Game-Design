@@ -9,6 +9,7 @@ function AttackOptions({
   setDamageDealt,
   setAttacksUsed,
   currentTurn,
+  setCombatMessage,
 }) {
   return (
     <div
@@ -42,6 +43,21 @@ function AttackOptions({
                 onClick={() => {
                   const result = aiDefendOrEvade(attack, character, opponent);
                   if (result) {
+                    if (result.action === "defend") {
+                      setCombatMessage({
+                        id: Date.now(),
+                        text: `🛡️ ${opponent.name.toUpperCase()} BLOCKED!`,
+                        type: "opponent-blocked",
+                      });
+                    }
+
+                    if (result.action === "evade") {
+                      setCombatMessage({
+                        id: Date.now(),
+                        text: `💨 ${opponent.name.toUpperCase()} EVADED!`,
+                        type: "opponent-evaded",
+                      });
+                    }
                     setCharacter({ ...result.attacker });
                     setOpponent({ ...result.defender });
                     setDamageDealt((damage) => damage + result.damageReceived);
