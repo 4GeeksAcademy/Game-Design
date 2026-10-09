@@ -23,7 +23,7 @@ import { AppRoutes } from "./Backend/routes.jsx";
 const root = ReactDOM.createRoot(document.getElementById('app'));
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/Game-Design">
       <AppRoutes />
     </BrowserRouter>
   </React.StrictMode>
