@@ -8,10 +8,10 @@ const rockLee = {
     mana: 50,
     maximumMana: 50,
     manaRegen: 10,
-    cooldown: 5,
-    maximumCooldown: 3,
+    cooldown: 4,
+    maximumCooldown: 4,
     recovery: 2,
-    agility: 35,
+    agility: 40,
     defense: {
     amount: 12,
     active: true
