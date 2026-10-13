@@ -1,6 +1,7 @@
-/* =========================================
+/* =========================================================
    GLOBAL BATTLE SCREEN
-========================================= */
+   Consolidated stylesheet â€” duplicate overrides removed
+   ========================================================= */
 
 html,
 body,
@@ -15,30 +16,31 @@ body {
 }
 
 #gameContainer {
+  position: relative;
   min-height: 100vh;
-  padding: 28px 20px 45px;
+  padding: 18px 24px 35px;
   color: #f1f5ff;
   background:
-    radial-gradient(ellipse at 50% 0%, #1b3158 0%, transparent 65%),
-    linear-gradient(145deg, #080d1c, #111d37 55%, #080d1c);
+    radial-gradient(ellipse at 50% 35%, #17243b 0%, transparent 65%),
+    linear-gradient(180deg, #070a12 0%, #101525 55%, #080b14 100%);
 }
 
 #battleArena {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-/* =========================================
+/* =========================================================
    CHARACTER AND OPPONENT SECTIONS
-========================================= */
+   ========================================================= */
 
 #opponentSection,
 #characterSection {
-  width: 100%;
   display: flex;
   justify-content: center;
-  margin: 24px auto !important;
+  width: 100%;
+  margin: 12px auto !important;
 }
 
 #characterSection {
@@ -46,37 +48,27 @@ body {
   gap: 22px;
 }
 
-/* =========================================
-   COMPACT FUTURISTIC STATUS PANELS
-========================================= */
+/* =========================================================
+   SHARED FIGHTER PANELS
+   ========================================================= */
 
 .battle-status-panel {
   --panel-accent: #13d5ff;
-
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: 145px minmax(0, 1fr);
-  grid-template-rows: 130px;
+  grid-template-columns: 155px minmax(0, 1fr);
+  grid-template-rows: 138px;
   align-items: center;
   gap: 0 18px;
-
   width: 100%;
-  max-width: 650px;
+  max-width: 760px;
   min-width: 0;
-  padding: 32px 16px 12px;
-
+  padding: 32px 18px 12px;
   color: #edf4ff;
-  background: linear-gradient(
-    125deg,
-    #0b1b35 0%,
-    #071120 65%,
-    #101c34 100%
-  );
-
-  border: 1px solid var(--panel-accent);
+  background: linear-gradient(115deg, #111e35, #07101f 58%, #10182b);
+  border: 2px solid var(--panel-accent);
   border-radius: 0;
-
   clip-path: polygon(
     0 0,
     38% 0,
@@ -89,184 +81,409 @@ body {
     4% 100%,
     0 90%
   );
-
-  filter: drop-shadow(0 0 10px #16cfff25);
-  transition: filter 0.2s;
+  box-shadow: inset 0 0 20px #00000050;
+  filter:
+    drop-shadow(0 0 5px color-mix(in srgb, var(--panel-accent) 35%, transparent))
+    drop-shadow(0 0 14px color-mix(in srgb, var(--panel-accent) 16%, transparent));
+  transition: filter 0.25s ease, background 0.25s ease;
 }
 
-/* Opponent: red theme */
+.battle-status-panel::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: 0;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--panel-accent) 25%, transparent);
+  clip-path: polygon(
+    0 0,
+    38% 0,
+    43% 12px,
+    70% 12px,
+    75% 24px,
+    100% 24px,
+    100% 87%,
+    95% 100%,
+    4% 100%,
+    0 90%
+  );
+}
 
 #opponent {
-  --panel-accent: #ff3159;
-
-  background: linear-gradient(
-    125deg,
-    #27101f,
-    #0b1324 65%,
-    #251021
-  );
+  --panel-accent: #ff304f;
+  background: linear-gradient(115deg, #35101b, #10121d 58%, #210e19);
 }
 
-/* Player: cyan theme */
-
 #character {
-  --panel-accent: #13d5ff;
-
-  background: linear-gradient(
-    125deg,
-    #08233c,
-    #071322 65%,
-    #092746
-  );
+  --panel-accent: #16dfff;
+  background: linear-gradient(115deg, #0b2d42, #10121d 58%, #09243b);
 }
 
 #opponent:hover {
-  filter: drop-shadow(0 0 15px #ff315955);
+  filter: drop-shadow(0 0 7px #ff315970) drop-shadow(0 0 19px #ff315935);
 }
 
 #character:hover {
-  filter: drop-shadow(0 0 15px #13d5ff55);
+  filter: drop-shadow(0 0 7px #13d5ff70) drop-shadow(0 0 19px #13d5ff35);
 }
 
-/* =========================================
-   CHARACTER NAMES IN THE TOP-LEFT HUMP
-========================================= */
-
-/* Hide the redundant OPPONENT and YOUR CHARACTER labels */
-
+/* Hide redundant panel labels; let info children participate in the grid. */
 #opponentHeader,
 #characterHeader {
   display: none !important;
 }
-
-/* The info wrapper no longer controls the layout.
-   Its children can be positioned in the panel grid. */
 
 #opponentInfo,
 #characterInfo {
   display: contents;
 }
 
-/* Names appear above the portraits */
+/* =========================================================
+   FIGHTER NAMES AND PORTRAITS
+   ========================================================= */
 
 #opponentName,
 #characterName {
-  position: absolute;
-  top: 3px;
-  left: 16px;
   z-index: 2;
-
   width: 36%;
   margin: 0;
   padding: 0;
-
-  color: #ffffff;
-  font-size: 1.15rem;
+  overflow: hidden;
+  color: #fff;
+  font-size: 1.2rem;
   font-weight: 900;
   line-height: 1.2;
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
-
-  border: none;
+  border: 0;
+  letter-spacing: 0.5px;
 }
 
-/* =========================================
-   CHARACTER PORTRAITS
-========================================= */
+#opponentName {
+  position: absolute;
+  top: 4px;
+  left: 18px;
+  color: #fff0f3;
+  text-shadow: 0 0 8px #ff315940, 0 0 18px #ff31591a;
+}
+
+#characterName {
+  position: static;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  justify-self: start;
+  width: 100%;
+  padding: 0 0 8px 4px;
+  text-align: left;
+  color: #effcff;
+  text-shadow: 0 0 8px #13d5ff40, 0 0 18px #13d5ff1a;
+}
 
 #opponentImage,
 #characterImage {
+  display: block;
   grid-column: 1;
   grid-row: 1;
-
-  display: block;
-  width: 145px;
-  height: 130px !important;
+  width: 155px;
+  height: 138px !important;
   min-width: 0;
   margin: 0;
-
   object-fit: cover;
   object-position: center;
-
-  background: #101a2c;
+  background: #08101e;
   border: 2px solid var(--panel-accent);
   border-radius: 0;
-
-  clip-path: polygon(
-    0 0,
-    88% 0,
-    100% 12%,
-    100% 100%,
-    0 100%
-  );
+  clip-path: polygon(0 0, 88% 0, 100% 12%, 100% 100%, 0 100%);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--panel-accent) 35%, transparent);
+  transition: filter 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  z-index: 1;
 }
 
 #opponentImage {
   border-color: #ff3159;
+  box-shadow: 0 0 0 2px #170b17, 0 0 10px #ff31594a;
 }
 
 #characterImage {
   border-color: #13d5ff;
+  box-shadow: 0 0 0 2px #071523, 0 0 10px #13d5ff4a;
 }
 
-/* =========================================
-   CHARACTER STATISTICS
-========================================= */
+#opponent:hover #opponentImage {
+  filter: brightness(1.08) saturate(1.12);
+  box-shadow: 0 0 0 2px #170b17, 0 0 16px #ff315980;
+}
 
-#opponentStats,
-#characterStats {
+#character:hover #characterImage {
+  filter: brightness(1.08) saturate(1.12);
+  box-shadow: 0 0 0 2px #071523, 0 0 16px #13d5ff80;
+}
+
+/* =========================================================
+   OPPONENT STATISTICS
+   ========================================================= */
+
+#opponentStats {
   grid-column: 2;
   grid-row: 1;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-self: stretch;
-
   min-width: 0;
   gap: 0;
   padding: 0;
   margin: 0;
+  position: relative;
+  z-index: 1;
 }
 
-#opponentStats p,
-#characterStats p {
+#opponentStats p {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-
   min-width: 0;
   margin: 0;
-  padding: 5px 2px;
-
+  padding: 6px 4px;
   color: #d9e9ff;
   background: transparent;
   border: 0;
-  border-bottom: 1px solid #ffffff16;
+  border-bottom: 1px solid #ffffff20;
   border-radius: 0;
-
-  font-size: 0.82rem;
+  font-size: 0.86rem;
   line-height: 1.2;
+  transition: background 0.2s ease, padding 0.2s ease;
 }
 
-#opponentStats p span,
-#characterStats p span {
+#opponentStats p span {
   min-width: 0;
   white-space: nowrap;
 }
 
-#opponentStats p strong,
-#characterStats p strong {
+#opponentStats p strong {
   flex-shrink: 0;
-  color: #ffffff;
+  color: #ffdce3;
   font-weight: 800;
+  text-shadow: 0 0 7px #ff315925;
 }
 
-/* =========================================
+#opponentStats p:hover {
+  background: #ff31590c;
+}
+
+/* =========================================================
+   PLAYER CHARACTER HUD
+   ========================================================= */
+
+#character.battle-status-panel {
+  grid-template-columns: 190px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  align-items: center;
+  column-gap: 22px;
+  row-gap: 10px;
+  padding: 16px 14px 12px;
+  min-height: 0;
+}
+
+#characterPortraitWrapper {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  width: 190px;
+  min-width: 0;
+}
+
+#character #characterImage {
+  width: 112px;
+  height: 190px !important;
+  min-height: 0;
+  flex: 0 0 112px;
+  object-fit: cover;
+}
+
+/* Vertical Health and Mana meters */
+#characterSideMeters {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  justify-content: center;
+  gap: 14px;
+  width: 56px;
+}
+
+#characterSideMeters .verticalMeterGroup {
+  display: flex;
+  flex: 1;
+  min-width: 22px;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+#characterSideMeters .verticalMeter {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  width: 100%;
+  min-width: 22px;
+  height: 190px;
+  background: #091321;
+  border: 1px solid #ffffff25;
+  border-radius: 6px;
+}
+
+#characterSideMeters .verticalMeterFill {
+  width: 100%;
+  flex-shrink: 0;
+  transition: height 0.3s ease;
+}
+
+#characterSideMeters .healthMeter {
+  border-color: #ff456650;
+}
+
+#characterSideMeters .healthMeter .verticalMeterFill {
+  background: linear-gradient(to top, #b91e42, #ff4566);
+  box-shadow: 0 0 10px #ff456650;
+}
+
+#characterSideMeters .manaMeter {
+  border-color: #13d5ff50;
+}
+
+#characterSideMeters .manaMeter .verticalMeterFill {
+  background: linear-gradient(to top, #0874d1, #13d5ff);
+  box-shadow: 0 0 10px #13d5ff50;
+}
+
+#characterSideMeters .verticalMeter span {
+  position: absolute;
+  bottom: 3px;
+  left: 0;
+  width: 100%;
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 900;
+  text-align: center;
+  text-shadow: 0 1px 3px #000;
+}
+
+#characterSideMeters .verticalMeterValue {
+  color: #fff;
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+#characterSideMeters .verticalMeterGroup small {
+  color: #a9c7d9;
+  font-size: 9px;
+  line-height: 1.2;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Defense and Agility bars */
+#character #characterStats {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+  width: 100%;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+#character #characterStats .statBar {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  text-align: left;
+}
+
+#character #characterStats .statBarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 7px;
+  color: #f1f5f9;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#character #characterStats .statBarHeader span:last-child {
+  flex-shrink: 0;
+  color: #fff;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+#character #characterStats .statProgress {
+  width: 100%;
+  height: 16px !important;
+  overflow: hidden;
+  background-color: #252b3b;
+  border: 1px solid #414b60;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 3px #00000080;
+}
+
+#character #characterStats .progress-bar {
+  border-radius: 6px;
+  box-shadow: 0 0 8px currentColor;
+  transition: width 0.35s ease;
+}
+
+/* Cooldown and Recovery chips */
+#characterCompactStats {
+  grid-column: 2;
+  grid-row: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-self: start;
+  gap: 8px;
+  min-width: 0;
+  margin-top: 0;
+}
+
+#characterCompactStats .compactStat {
+  display: flex;
+  flex: 1 1 110px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 10px;
+  color: #b9cde0;
+  font-size: 0.7rem;
+  background: linear-gradient(135deg, #14263a, #0a1423);
+  border: 1px solid #13d5ff45;
+  border-left: 3px solid #13d5ff;
+  border-radius: 4px;
+}
+
+#characterCompactStats .compactStat strong {
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* =========================================================
    FINISH TURN BUTTON
-========================================= */
+   ========================================================= */
 
 #finishTurnArea {
   position: static !important;
@@ -280,40 +497,29 @@ body {
   align-items: center;
   justify-content: center;
   gap: 3px;
-
   width: 112px !important;
   height: 112px !important;
   padding: 10px;
-
-  color: #ffffff;
-  background: radial-gradient(
-    circle at 35% 25%,
-    #168fff,
-    #0750ac 65%,
-    #061c4c
-  );
-
-  border: 4px solid #20d7ff;
+  color: #fff;
+  background: radial-gradient(circle at 35% 25%, #198fff, #07418c 70%, #06152f);
+  border: 4px solid #45e5ff;
   border-radius: 50%;
   outline: 2px solid #0879db;
   outline-offset: 4px;
-
   box-shadow:
-    0 0 12px #12bfff,
-    inset 0 0 16px #50d9ff55;
-
+    0 0 12px #12bfff99,
+    0 0 28px #12bfff30,
+    inset 0 0 15px #50d9ff40;
   font-size: 1rem;
   font-weight: 900;
-
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 #finishTurnButton:hover:not(:disabled) {
   transform: scale(1.05);
   box-shadow:
-    0 0 20px #12bfff,
+    0 0 15px #12bfff,
+    0 0 32px #12bfff90,
     inset 0 0 20px #50d9ff88;
 }
 
@@ -326,47 +532,33 @@ body {
   font-size: 1.4rem;
 }
 
-/* =========================================
-   ATTACK OPTIONS PANEL
-========================================= */
+/* =========================================================
+   ATTACK OPTIONS PANEL AND CARDS
+   ========================================================= */
 
 #attackSection {
   width: 100%;
-  max-width: 1100px;
-  margin: 30px auto !important;
+  max-width: 1200px;
+  margin: 22px auto !important;
 }
 
 #attack {
   overflow: hidden;
-
   color: #f1f5ff;
-  background: linear-gradient(
-    145deg,
-    #101d35,
-    #080f1e
-  );
-
-  border: 1px solid #367cff;
-  border-radius: 16px;
-
-  box-shadow: 0 0 22px #246bff1c;
+  background: linear-gradient(145deg, #121a2b, #080c16);
+  border: 2px solid #344c72;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px #00000055;
 }
 
 #attackHeader {
-  padding: 14px;
-
-  color: #c9dcff;
-  background: linear-gradient(
-    90deg,
-    #182c50,
-    #101a30
-  );
-
-  border-bottom: 1px solid #367cff66;
-
-  font-size: 1.05rem;
+  padding: 13px 18px;
+  color: #fff;
+  background: linear-gradient(90deg, #243b60, #111827 75%);
+  border-bottom: 2px solid #4b8cff;
+  font-size: 1rem;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   text-transform: uppercase;
 }
 
@@ -380,53 +572,33 @@ body {
   flex-wrap: nowrap;
   align-items: stretch;
   gap: 14px !important;
-
   overflow-x: auto;
   padding: 4px 3px 12px;
-
   scrollbar-color: #367cff #101a30;
   scrollbar-width: thin;
 }
 
-/* =========================================
-   INDIVIDUAL ATTACK CARDS
-========================================= */
-
 [id^="attackButton"] {
   display: flex;
-  flex: 0 0 200px;
+  flex: 0 0 210px;
   flex-direction: column;
   align-items: stretch;
-
-  min-width: 200px !important;
-  padding: 12px;
-
+  min-width: 210px !important;
+  padding: 10px;
   overflow: hidden;
-
   color: #e8efff !important;
   text-align: left;
-
-  background: linear-gradient(
-    160deg,
-    #172747,
-    #0a1223
-  ) !important;
-
-  border: 1px solid #355c9b !important;
-  border-radius: 12px !important;
-
-  box-shadow: 0 4px 12px #00000033;
-
-  transition:
-    transform 0.2s,
-    border-color 0.2s,
-    box-shadow 0.2s;
+  background: linear-gradient(160deg, #1b2940, #0b101c) !important;
+  border: 1px solid #465b7c !important;
+  border-radius: 6px !important;
+  box-shadow: 0 5px 12px #00000040;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 [id^="attackButton"]:hover:not(:disabled) {
   transform: translateY(-4px);
-  border-color: #55cfff !important;
-  box-shadow: 0 0 18px #22c7ff33;
+  border-color: #20dfff !important;
+  box-shadow: 0 0 18px #20dfff35;
 }
 
 [id^="attackButton"]:disabled {
@@ -438,22 +610,20 @@ body {
 [id^="attackImage"] {
   display: block;
   width: 100%;
-  height: 105px;
+  height: 115px;
   margin: 0 0 12px;
-
   object-fit: cover;
-
-  border: 1px solid #4169a5;
-  border-radius: 8px;
+  border: 1px solid #536b91;
+  border-radius: 4px;
 }
 
 [id^="attackName"] {
   min-height: 26px;
   margin: 0 0 10px;
-
-  color: #77dfff;
-  font-size: 1.02rem;
+  color: #8cecff;
+  font-size: 1rem;
   font-weight: 800;
+  letter-spacing: 0.3px;
   text-align: center;
 }
 
@@ -474,33 +644,25 @@ body {
   width: 100%;
   margin-top: auto;
   padding: 10px;
-
-  color: #ffffff !important;
-  background: linear-gradient(
-    90deg,
-    #087d51,
-    #0ca66b
-  ) !important;
-
+  color: #fff !important;
+  background: linear-gradient(90deg, #087d51, #0ca66b) !important;
   border: 1px solid #35f0a1 !important;
   border-radius: 8px;
-
   font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 1px;
   text-align: center;
 }
 
-/* =========================================
+/* =========================================================
    AI ATTACK CARD
-========================================= */
+   ========================================================= */
 
 #aiAttackSection {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 14px;
-
   width: 100%;
   margin: 20px auto;
 }
@@ -509,27 +671,19 @@ body {
   width: 100%;
   max-width: 320px;
   overflow: hidden;
-
   color: #f1f5ff;
-  background: linear-gradient(
-    145deg,
-    #291526,
-    #101020
-  );
-
-  border: 1px solid #ff496b;
-  border-radius: 14px;
-
-  box-shadow: 0 0 22px #ff315b33;
+  background: linear-gradient(145deg, #291526, #101020);
+  border: 2px solid #ff496b;
+  border-radius: 8px;
+  box-shadow: 0 0 22px #ff315b25;
 }
 
 #aiAttackHeader {
   padding: 12px;
-
-  color: #ffffff;
-  background: #8f1e3c;
-
+  color: #fff;
+  background: linear-gradient(90deg, #a51e3d, #54182b);
   font-weight: 800;
+  letter-spacing: 1.5px;
   text-align: center;
 }
 
@@ -547,16 +701,15 @@ body {
   color: #d9e3fa;
 }
 
-/* =========================================
+/* =========================================================
    DEFEND AND EVADE BUTTONS
-========================================= */
+   ========================================================= */
 
 #defensiveActions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
-
   margin: 15px auto;
 }
 
@@ -564,34 +717,20 @@ body {
 #evadeButton {
   min-width: 120px;
   padding: 12px 18px;
-
-  color: #ffffff;
-  border-radius: 10px;
-
-  font-weight: 800;
-
-  transition:
-    transform 0.2s,
-    opacity 0.2s;
+  color: #fff;
+  border-radius: 5px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  transition: transform 0.2s, opacity 0.2s;
 }
 
 #defendButton {
-  background: linear-gradient(
-    135deg,
-    #b87914,
-    #e6a52c
-  );
-
+  background: linear-gradient(135deg, #b87914, #e6a52c);
   border: 1px solid #ffcf69;
 }
 
 #evadeButton {
-  background: linear-gradient(
-    135deg,
-    #087d51,
-    #0ca66b
-  );
-
+  background: linear-gradient(135deg, #087d51, #0ca66b);
   border: 1px solid #35f0a1;
 }
 
@@ -606,9 +745,417 @@ body {
   cursor: not-allowed;
 }
 
-/* =========================================
-   MOBILE RESPONSIVENESS
-========================================= */
+/* =========================================================
+   VICTORY SCREEN
+   ========================================================= */
+
+#victoryScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 30px 16px;
+  color: #f1f5ff;
+}
+
+#victoryCard {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  padding: 35px 30px 25px;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at top, #153d50 0%, transparent 65%),
+    linear-gradient(145deg, #101d35, #080f1e);
+  border: 1px solid #17d8ff;
+  border-radius: 18px;
+  box-shadow: 0 0 12px #17d8ff30, 0 0 35px #087dce20;
+}
+
+#victoryIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 82px;
+  height: 82px;
+  margin: 0 auto 15px;
+  font-size: 2.8rem;
+  background: #132d49;
+  border: 2px solid #25d9ff;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #17d8ff45, inset 0 0 15px #17d8ff15;
+}
+
+#victoryEyebrow {
+  margin: 0 0 8px;
+  color: #53dfff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+}
+
+#victoryTitle {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.3rem, 7vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px #16cfff90, 0 0 25px #16cfff40;
+}
+
+#victoryMessage {
+  margin: 10px 0 22px;
+  color: #b8cce9;
+  font-size: 1rem;
+}
+
+#victoryDivider {
+  width: 100%;
+  height: 1px;
+  margin: 0 auto 22px;
+  background: linear-gradient(90deg, transparent, #17d8ff, transparent);
+}
+
+#victoryResultsTitle {
+  margin: 0 0 15px;
+  color: #d7e7ff;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+#victoryStats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.victoryStat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  text-align: left;
+  background: #0a1528;
+  border: 1px solid #ffffff18;
+  border-radius: 10px;
+}
+
+.victoryStatIcon {
+  font-size: 1.2rem;
+}
+
+.victoryStatLabel {
+  flex: 1;
+  color: #c7d8f3;
+  font-size: 0.95rem;
+}
+
+.victoryStat strong {
+  color: #53dfff;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+#victoryFooter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+#victoryFooter p {
+  margin: 0;
+  color: #53dfff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+#victoryFooterIcon {
+  color: #53dfff;
+  font-size: 1rem;
+}
+
+/* =========================================================
+   GAME OVER SCREEN
+   ========================================================= */
+
+#gameOverScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 30px 15px;
+}
+
+#gameOverCard {
+  width: 100%;
+  max-width: 520px;
+  padding: 35px 30px;
+  color: #f5f5f5;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at top, #51202a 0%, transparent 65%),
+    linear-gradient(145deg, #21131c, #0c101d 75%);
+  border: 2px solid #ff4059;
+  border-radius: 18px;
+  box-shadow: 0 0 12px #ff405955, 0 0 35px #ff253522, inset 0 0 25px #ff40590d;
+  animation: gameOverAppear 0.6s ease-out;
+}
+
+#gameOverIcon {
+  margin-bottom: 8px;
+  font-size: 3.5rem;
+  filter: drop-shadow(0 0 12px #ff4059);
+}
+
+#gameOverEyebrow {
+  margin-bottom: 8px;
+  color: #ff8292;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+#gameOverTitle {
+  margin-bottom: 12px;
+  color: #ff4059;
+  font-size: clamp(2.3rem, 7vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 0 0 18px #ff405966;
+}
+
+#gameOverMessage {
+  color: #d9dce8;
+  line-height: 1.6;
+}
+
+#gameOverDivider {
+  width: 75%;
+  height: 2px;
+  margin: 24px auto;
+  background: linear-gradient(90deg, transparent, #ff4059, transparent);
+}
+
+#gameOverResultsTitle {
+  margin-bottom: 18px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+#gameOverStats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gameOverStat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  text-align: left;
+  background: #ffffff08;
+  border: 1px solid #ff405926;
+  border-radius: 8px;
+}
+
+.gameOverStat span {
+  color: #dce3f5;
+}
+
+.gameOverStat strong {
+  color: #ff8292;
+  font-size: 1.1rem;
+}
+
+#gameOverFooter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+  color: #ff8292;
+}
+
+#gameOverFooter p {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+/* =========================================================
+   COMBAT EVENT POPUPS
+   ========================================================= */
+
+#combatPopupContainer {
+  position: fixed !important;
+  top: 25%;
+  right: 170px !important;
+  left: auto !important;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 40px);
+  transform: none !important;
+  pointer-events: none;
+}
+
+.combat-popup {
+  min-width: 230px;
+  max-width: min(280px, 90vw);
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  padding: 18px 28px;
+  color: #fff;
+  background: #101525;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  text-align: center;
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 1px;
+  opacity: 0;
+  animation: combatPopupAnimation 1.8s ease-in-out both;
+}
+
+.combat-popup.blocked {
+  color: #ffd66b;
+  border-color: #ffd66b;
+  text-shadow: 0 0 12px #ffd66b80;
+  box-shadow: 0 0 25px #ffd66b55;
+}
+
+.combat-popup.evaded {
+  color: #66f5c4;
+  border-color: #66f5c4;
+  text-shadow: 0 0 12px #66f5c480;
+  box-shadow: 0 0 25px #35e7a455;
+}
+
+.combat-popup.hit,
+.combat-popup.opponent-blocked {
+  color: #ff6278;
+  border-color: #ff4059;
+  text-shadow: 0 0 12px #ff405980;
+  box-shadow: 0 0 25px #ff405955;
+}
+
+.combat-popup.opponent-evaded {
+  color: #c18aff;
+  border-color: #a855f7;
+  text-shadow: 0 0 12px #a855f780;
+  box-shadow: 0 0 25px #a855f755;
+}
+
+.combat-popup.buff {
+  color: #62d9ff;
+  border-color: #00c8ff;
+  text-shadow: 0 0 12px #00c8ff;
+  box-shadow: 0 0 25px #00c8ff66;
+}
+
+#combatPopup {
+  position: fixed;
+  top: 25%;
+  left: 50%;
+  z-index: 1000;
+  min-width: 230px;
+  padding: 18px 28px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  color: #fff;
+  background: #101525;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  text-align: center;
+  font-size: clamp(1.5rem, 4vw, 2.3rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  animation: combatPopupAnimation 1.5s ease forwards;
+}
+
+#combatPopup.blocked {
+  color: #ffd66b;
+  border-color: #ffd66b;
+  text-shadow: 0 0 12px #ffd66b80;
+  box-shadow: 0 0 25px #ffd66b55;
+}
+
+#combatPopup.evaded {
+  color: #66f5c4;
+  border-color: #66f5c4;
+  text-shadow: 0 0 12px #66f5c480;
+  box-shadow: 0 0 25px #35e7a455;
+}
+
+#combatPopup.hit,
+#combatPopup.opponent-blocked {
+  color: #ff6278;
+  border-color: #ff4059;
+  text-shadow: 0 0 12px #ff405980;
+  box-shadow: 0 0 25px #ff405955;
+}
+
+#combatPopup.opponent-evaded {
+  color: #c18aff;
+  border-color: #a855f7;
+  text-shadow: 0 0 12px #a855f780;
+  box-shadow: 0 0 25px #a855f755;
+}
+
+#combatPopup.buff {
+  color: #62d9ff;
+  border-color: #00c8ff;
+  text-shadow: 0 0 12px #00c8ff;
+  box-shadow: 0 0 25px #00c8ff66;
+}
+
+@keyframes combatPopupAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.65);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.12);
+  }
+  25%,
+  75% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.95);
+  }
+}
+
+#combatPopupContainer .combat-popup:nth-child(1) {
+  animation-delay: 0s;
+}
+
+#combatPopupContainer .combat-popup:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+#combatPopupContainer .combat-popup:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+/* =========================================================
+   RESPONSIVE LAYOUT
+   ========================================================= */
 
 @media (max-width: 850px) {
   #characterSection {
@@ -623,20 +1170,17 @@ body {
     padding: 30px 12px 10px;
   }
 
-  #opponentImage,
-  #characterImage {
+  #opponentImage {
     width: 125px;
     height: 120px !important;
   }
 
-  #opponentStats p,
-  #characterStats p {
+  #opponentStats p {
     padding: 4px 1px;
     font-size: 0.76rem;
   }
 
-  #opponentName,
-  #characterName {
+  #opponentName {
     font-size: 1.05rem;
   }
 
@@ -649,7 +1193,7 @@ body {
 
 @media (max-width: 600px) {
   #gameContainer {
-    padding: 18px 10px 30px;
+    padding: 12px 8px 25px;
   }
 
   #opponentSection,
@@ -662,34 +1206,82 @@ body {
     gap: 18px;
   }
 
-  .battle-status-panel {
+  /* Opponent card */
+  #opponent.battle-status-panel {
     width: 100%;
     max-width: 520px;
-    grid-template-columns: 110px minmax(0, 1fr);
+    grid-template-columns: 105px minmax(0, 1fr);
     grid-template-rows: 112px;
     gap: 0 10px;
-    padding: 28px 10px 10px;
+    padding: 28px 10px 9px;
   }
 
-  #opponentImage,
-  #characterImage {
-    width: 110px;
+  #opponentImage {
+    width: 105px;
     height: 112px !important;
   }
 
-  #opponentName,
-  #characterName {
+  #opponentName {
     top: 3px;
     left: 12px;
     width: 45%;
     font-size: 0.95rem;
   }
 
-  #opponentStats p,
-  #characterStats p {
+  #opponentStats p {
     gap: 4px;
-    padding: 4px 0;
-    font-size: 0.69rem;
+    padding: 4px 1px;
+    font-size: 0.7rem;
+  }
+
+  /* Player card: preserve the larger vertical meters and stacked stats */
+  #character.battle-status-panel {
+    grid-template-columns: 145px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    column-gap: 12px;
+    row-gap: 10px;
+    padding: 16px 10px 12px;
+  }
+
+  #characterPortraitWrapper {
+    width: 145px;
+    gap: 10px;
+  }
+
+  #character #characterImage {
+    width: 85px;
+    height: 165px !important;
+    flex-basis: 85px;
+  }
+
+  #characterSideMeters {
+    width: 45px;
+    gap: 8px;
+  }
+
+  #characterSideMeters .verticalMeter {
+    height: 165px;
+  }
+
+  #characterSideMeters .verticalMeterValue {
+    font-size: 8px;
+  }
+
+  #character #characterStats {
+    gap: 14px;
+  }
+
+  #character #characterStats .statBarHeader {
+    font-size: 0.72rem;
+  }
+
+  #character #characterStats .statProgress {
+    height: 14px !important;
+  }
+
+  #characterCompactStats .compactStat {
+    flex-basis: 100%;
+    padding: 6px 7px;
   }
 
   #finishTurnArea {
@@ -719,8 +1311,8 @@ body {
   }
 
   [id^="attackButton"] {
-    flex-basis: 170px;
-    min-width: 170px !important;
+    flex-basis: 175px;
+    min-width: 175px !important;
     padding: 10px;
   }
 
@@ -731,224 +1323,7 @@ body {
   #aiAttackCard {
     max-width: 290px;
   }
-}
 
-@media (max-width: 370px) {
-  .battle-status-panel {
-    grid-template-columns: 90px minmax(0, 1fr);
-    grid-template-rows: 105px;
-    gap: 0 8px;
-    padding: 27px 8px 8px;
-  }
-
-  #opponentImage,
-  #characterImage {
-    width: 90px;
-    height: 105px !important;
-  }
-
-  #opponentName,
-  #characterName {
-    font-size: 0.85rem;
-  }
-
-  #opponentStats p,
-  #characterStats p {
-    font-size: 0.64rem;
-  }
-}
-
-/* =========================================
-   VICTORY SCREEN
-========================================= */
-
-#victoryScreen {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  min-height: 70vh;
-  padding: 30px 16px;
-
-  color: #f1f5ff;
-}
-
-#victoryCard {
-  position: relative;
-  width: 100%;
-  max-width: 580px;
-  padding: 35px 30px 25px;
-
-  text-align: center;
-
-  background:
-    radial-gradient(
-      ellipse at top,
-      #153d50 0%,
-      transparent 65%
-    ),
-    linear-gradient(
-      145deg,
-      #101d35,
-      #080f1e
-    );
-
-  border: 1px solid #17d8ff;
-  border-radius: 18px;
-
-  box-shadow:
-    0 0 12px #17d8ff30,
-    0 0 35px #087dce20;
-}
-
-/* Trophy */
-
-#victoryIcon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  width: 82px;
-  height: 82px;
-  margin: 0 auto 15px;
-
-  font-size: 2.8rem;
-
-  background: #132d49;
-  border: 2px solid #25d9ff;
-  border-radius: 50%;
-
-  box-shadow:
-    0 0 15px #17d8ff45,
-    inset 0 0 15px #17d8ff15;
-}
-
-/* Small heading */
-
-#victoryEyebrow {
-  margin: 0 0 8px;
-
-  color: #53dfff;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 4px;
-}
-
-/* Main victory title */
-
-#victoryTitle {
-  margin: 0;
-
-  color: #ffffff;
-  font-size: clamp(2.3rem, 7vw, 3.5rem);
-  font-weight: 900;
-  letter-spacing: 3px;
-
-  text-shadow:
-    0 0 10px #16cfff90,
-    0 0 25px #16cfff40;
-}
-
-#victoryMessage {
-  margin: 10px 0 22px;
-
-  color: #b8cce9;
-  font-size: 1rem;
-}
-
-/* Divider */
-
-#victoryDivider {
-  width: 100%;
-  height: 1px;
-  margin: 0 auto 22px;
-
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #17d8ff,
-    transparent
-  );
-}
-
-/* Results heading */
-
-#victoryResultsTitle {
-  margin: 0 0 15px;
-
-  color: #d7e7ff;
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
-
-/* Result rows */
-
-#victoryStats {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.victoryStat {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  padding: 13px 15px;
-
-  text-align: left;
-
-  background: #0a1528;
-  border: 1px solid #ffffff18;
-  border-radius: 10px;
-}
-
-.victoryStatIcon {
-  font-size: 1.2rem;
-}
-
-.victoryStatLabel {
-  flex: 1;
-
-  color: #c7d8f3;
-  font-size: 0.95rem;
-}
-
-.victoryStat strong {
-  color: #53dfff;
-  font-size: 1.1rem;
-  font-weight: 900;
-}
-
-/* Footer message */
-
-#victoryFooter {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-
-  margin-top: 25px;
-}
-
-#victoryFooter p {
-  margin: 0;
-
-  color: #53dfff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
-
-#victoryFooterIcon {
-  color: #53dfff;
-  font-size: 1rem;
-}
-
-/* Small screens */
-
-@media (max-width: 480px) {
   #victoryScreen {
     min-height: 60vh;
     padding: 20px 8px;
@@ -990,165 +1365,270 @@ body {
     font-size: 0.65rem;
     letter-spacing: 1px;
   }
+
+  #gameOverCard {
+    padding: 28px 18px;
+  }
+
+  .gameOverStat {
+    padding: 10px;
+  }
+
+  #combatPopupContainer {
+    right: 12px !important;
+    max-width: calc(100vw - 24px);
+  }
+
+  .combat-popup {
+    min-width: 0;
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
 }
 
-/* =========================================
-   ENHANCED CHARACTER BATTLE HUD
-========================================= */
-
-/* Shared futuristic panel lighting */
-
-.battle-status-panel {
-  position: relative;
-  isolation: isolate;
-
-  background:
-    radial-gradient(
-      ellipse at 15% 0%,
-      color-mix(in srgb, var(--panel-accent) 17%, transparent),
-      transparent 65%
-    ),
-    linear-gradient(
-      135deg,
-      #111e35 0%,
-      #07101f 55%,
-      #10182b 100%
-    );
-
-  border: 1px solid var(--panel-accent);
-
-  filter:
-    drop-shadow(0 0 5px color-mix(in srgb, var(--panel-accent) 35%, transparent))
-    drop-shadow(0 0 14px color-mix(in srgb, var(--panel-accent) 16%, transparent));
-
-  transition:
-    filter 0.25s ease,
-    background 0.25s ease;
+@media (max-width: 480px) {
+  .gameOverStat {
+    padding: 10px;
+  }
 }
 
-/* Red lighting for Rock Lee's panel */
+@media (max-width: 370px) {
+  #opponent.battle-status-panel {
+    grid-template-columns: 90px minmax(0, 1fr);
+    grid-template-rows: 105px;
+    gap: 0 8px;
+    padding: 27px 8px 8px;
+  }
 
+  #opponentImage {
+    width: 90px;
+    height: 105px !important;
+  }
+
+  #opponentName {
+    font-size: 0.85rem;
+  }
+
+  #opponentStats p {
+    font-size: 0.64rem;
+  }
+
+  #character.battle-status-panel {
+    grid-template-columns: 125px minmax(0, 1fr);
+    column-gap: 8px;
+  }
+
+  #characterPortraitWrapper {
+    width: 125px;
+    gap: 8px;
+  }
+
+  #character #characterImage {
+    width: 75px;
+    height: 155px !important;
+    flex-basis: 75px;
+  }
+
+  #characterSideMeters {
+    width: 42px;
+    gap: 6px;
+  }
+
+  #characterSideMeters .verticalMeter {
+    height: 155px;
+  }
+
+  #character #characterStats .statBarHeader {
+    font-size: 0.65rem;
+  }
+
+  #characterCompactStats .compactStat {
+    font-size: 0.64rem;
+  }
+}
+
+/* =========================================================
+   ANIMATIONS AND ACCESSIBILITY
+   ========================================================= */
+
+@keyframes gameOverAppear {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-status-panel,
+  #opponentImage,
+  #characterImage,
+  #finishTurnButton,
+  #characterSideMeters .verticalMeterFill,
+  #character #characterStats .progress-bar {
+    transition: none;
+  }
+}
+
+.combat-popup {
+    min-width: 280px;
+    max-width: 420px;
+    width: max-content;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+
+/* Opponent layout matching the updated character HUD */
 #opponent {
-  --panel-accent: #ff3159;
-
-  background:
-    radial-gradient(
-      ellipse at 10% 0%,
-      #ff315926,
-      transparent 60%
-    ),
-    linear-gradient(
-      135deg,
-      #281321 0%,
-      #0b1020 55%,
-      #210e20 100%
-    );
+  display: grid;
+  grid-template-columns: minmax(190px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
 }
 
-/* Cyan lighting for Mina's panel */
-
-#character {
-  --panel-accent: #13d5ff;
-
-  background:
-    radial-gradient(
-      ellipse at 10% 0%,
-      #13d5ff26,
-      transparent 60%
-    ),
-    linear-gradient(
-      135deg,
-      #0b2942 0%,
-      #071322 55%,
-      #092440 100%
-    );
+#opponentPortraitWrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
 }
 
-/* Inner illuminated frame */
+#opponentSideMeters {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
 
-.battle-status-panel::before {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  z-index: 0;
+#opponentInfo {
+  min-width: 0;
+}
 
-  pointer-events: none;
+#opponentStats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-  border: 1px solid
-    color-mix(in srgb, var(--panel-accent) 25%, transparent);
+#opponentCompactStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
 
-  clip-path: polygon(
-    0 0,
-    38% 0,
-    43% 12px,
-    70% 12px,
-    75% 24px,
-    100% 24px,
-    100% 87%,
-    95% 100%,
-    4% 100%,
-    0 90%
+#opponentImage {
+  width: 112px;
+  height: 190px;
+  object-fit: cover;
+}
+
+@media (max-width: 600px) {
+  #opponent {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  #opponentPortraitWrapper {
+    gap: 10px;
+  }
+
+  #opponentImage {
+    width: 85px;
+    height: 165px;
+  }
+}
+
+
+.combat-popup {
+  min-width: 280px;
+  max-width: 420px;
+  width: max-content;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+
+
+/* =========================================================
+   OPPONENT HUD FIX — MATCH CHARACTER METERS AND ARCADE STYLE
+   Add this at the VERY BOTTOM of BattleUI.css
+   ========================================================= */
+
+#opponent.battle-status-panel {
+  --panel-accent: #ff304f;
+
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  grid-template-rows: 190px auto;
+  align-items: center;
+  column-gap: 22px;
+  row-gap: 10px;
+  padding: 32px 18px 12px;
+
+  /* Restore the red arcade panel effects */
+  background: linear-gradient(
+    115deg,
+    #35101b,
+    #10121d 58%,
+    #210e19
   );
+
+  border: 2px solid #ff304f;
+  box-shadow: inset 0 0 20px #00000050;
+  filter:
+    drop-shadow(0 0 5px #ff304f59)
+    drop-shadow(0 0 14px #ff304f29);
+  transition: filter 0.25s ease, background 0.25s ease;
 }
 
-/* Keep panel content above the inner frame */
+/* Preserve the angular inner frame */
+#opponent.battle-status-panel::before {
+  border-color: #ff304f40;
+}
 
-#opponentImage,
-#characterImage,
-#opponentStats,
-#characterStats {
+/* Portrait and meters occupy the same left column as the character */
+#opponentPortraitWrapper {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  width: 190px;
+  height: 190px;
+  min-width: 0;
   position: relative;
   z-index: 1;
 }
 
-/* Character name glow */
-
-#opponentName {
-  color: #fff0f3;
-
-  text-shadow:
-    0 0 8px #ff315940,
-    0 0 18px #ff31591a;
-}
-
-#characterName {
-  color: #effcff;
-
-  text-shadow:
-    0 0 8px #13d5ff40,
-    0 0 18px #13d5ff1a;
-}
-
-/* Portraits look more like framed character art */
-
-#opponentImage,
-#characterImage {
+/* Override the old opponent image dimensions */
+#opponent #opponentImage {
+  display: block;
+  position: relative;
+  flex: 0 0 112px;
+  width: 112px !important;
+  min-width: 112px;
+  height: 190px !important;
+  min-height: 0;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
   background: #08101e;
-
-  box-shadow:
-    0 0 0 2px #050b15,
-    0 0 8px color-mix(in srgb, var(--panel-accent) 35%, transparent);
-
-  transition:
-    filter 0.25s ease,
-    box-shadow 0.25s ease;
-}
-
-#opponentImage {
-  border-color: #ff3159;
+  border: 2px solid #ff3159;
+  border-radius: 0;
+  clip-path: polygon(0 0, 88% 0, 100% 12%, 100% 100%, 0 100%);
   box-shadow:
     0 0 0 2px #170b17,
     0 0 10px #ff31594a;
+  transition: filter 0.25s ease, box-shadow 0.25s ease;
 }
-
-#characterImage {
-  border-color: #13d5ff;
-  box-shadow:
-    0 0 0 2px #071523,
-    0 0 10px #13d5ff4a;
-}
-
-/* Portrait highlight on hover */
 
 #opponent:hover #opponentImage {
   filter: brightness(1.08) saturate(1.12);
@@ -1157,1004 +1637,176 @@ body {
     0 0 16px #ff315980;
 }
 
-#character:hover #characterImage {
-  filter: brightness(1.08) saturate(1.12);
-  box-shadow:
-    0 0 0 2px #071523,
-    0 0 16px #13d5ff80;
-}
-
-/* Sharper, more defined stat rows */
-
-#opponentStats p,
-#characterStats p {
-  border-bottom: 1px solid #ffffff12;
-
-  transition:
-    background 0.2s ease,
-    padding 0.2s ease;
-}
-
-#opponentStats p:hover {
-  background: #ff31590c;
-}
-
-#characterStats p:hover {
-  background: #13d5ff0c;
-}
-
-#opponentStats p strong {
-  color: #ffdce3;
-  text-shadow: 0 0 7px #ff315925;
-}
-
-#characterStats p strong {
-  color: #d9faff;
-  text-shadow: 0 0 7px #13d5ff25;
-}
-
-/* Stronger panel glow on hover */
-
-#opponent:hover {
-  filter:
-    drop-shadow(0 0 7px #ff315970)
-    drop-shadow(0 0 19px #ff315935);
-}
-
-#character:hover {
-  filter:
-    drop-shadow(0 0 7px #13d5ff70)
-    drop-shadow(0 0 19px #13d5ff35);
-}
-
-/* =========================================
-   FINISH TURN BUTTON GLOW
-========================================= */
-
-#finishTurnButton {
-  box-shadow:
-    0 0 8px #12bfff,
-    0 0 22px #12bfff65,
-    inset 0 0 16px #50d9ff55;
-}
-
-#finishTurnButton:hover:not(:disabled) {
-  box-shadow:
-    0 0 15px #12bfff,
-    0 0 32px #12bfff90,
-    inset 0 0 20px #50d9ff88;
-}
-
-/* Respect reduced-motion preferences */
-
-@media (prefers-reduced-motion: reduce) {
-  .battle-status-panel,
-  #opponentImage,
-  #characterImage,
-  #finishTurnButton {
-    transition: none;
-  }
-}
-
-/* ================================
-   GAME OVER SCREEN
-================================ */
-
-#gameOverScreen {
-  min-height: 80vh;
+/* Health and Mana vertical meters */
+#opponentSideMeters {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 30px 15px;
-}
-
-#gameOverCard {
-  width: 100%;
-  max-width: 520px;
-  padding: 35px 30px;
-  color: #f5f5f5;
-  text-align: center;
-  background:
-    radial-gradient(ellipse at top, #51202a 0%, transparent 65%),
-    linear-gradient(145deg, #21131c, #0c101d 75%);
-  border: 2px solid #ff4059;
-  border-radius: 18px;
-  box-shadow:
-    0 0 12px #ff405955,
-    0 0 35px #ff253522,
-    inset 0 0 25px #ff40590d;
-  animation: gameOverAppear 0.6s ease-out;
-}
-
-#gameOverIcon {
-  margin-bottom: 8px;
-  font-size: 3.5rem;
-  filter: drop-shadow(0 0 12px #ff4059);
-}
-
-#gameOverEyebrow {
-  margin-bottom: 8px;
-  color: #ff8292;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 3px;
-}
-
-#gameOverTitle {
-  margin-bottom: 12px;
-  color: #ff4059;
-  font-size: clamp(2.3rem, 7vw, 3.5rem);
-  font-weight: 900;
-  letter-spacing: 2px;
-  text-shadow: 0 0 18px #ff405966;
-}
-
-#gameOverMessage {
-  color: #d9dce8;
-  line-height: 1.6;
-}
-
-#gameOverDivider {
-  width: 75%;
-  height: 2px;
-  margin: 24px auto;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #ff4059,
-    transparent
-  );
-}
-
-#gameOverResultsTitle {
-  margin-bottom: 18px;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
-
-#gameOverStats {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.gameOverStat {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  background: #ffffff08;
-  border: 1px solid #ff405926;
-  border-radius: 8px;
-  text-align: left;
-}
-
-.gameOverStat span {
-  color: #dce3f5;
-}
-
-.gameOverStat strong {
-  color: #ff8292;
-  font-size: 1.1rem;
-}
-
-#gameOverFooter {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-top: 25px;
-  color: #ff8292;
-}
-
-#gameOverFooter p {
-  margin: 0;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-}
-
-@keyframes gameOverAppear {
-  from {
-    opacity: 0;
-    transform: translateY(15px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@media (max-width: 480px) {
-  #gameOverCard {
-    padding: 28px 18px;
-  }
-
-  .gameOverStat {
-    padding: 10px;
-  }
-}
-
-
-
-/* =========================================
-   COMBAT EVENT POPUP
-========================================= */
-
-#gameContainer {
-  position: relative;
-}
-
-#combatPopup {
-  position: fixed;
-  top: 25%;
-  left: 50%;
-  z-index: 1000;
-
-  min-width: 230px;
-  padding: 18px 28px;
-
-  text-align: center;
-  font-size: clamp(1.5rem, 4vw, 2.3rem);
-  font-weight: 900;
-  letter-spacing: 2px;
-
-  background: #101525;
-  border: 3px solid white;
-  border-radius: 10px;
-
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-
-  animation: combatPopupAnimation 1.5s ease forwards;
-}
-
-#combatPopup.blocked {
-  color: #ffd66b;
-  border-color: #ffd66b;
-  text-shadow: 0 0 12px #ffd66b80;
-  box-shadow: 0 0 25px #ffd66b55;
-}
-
-#combatPopup.evaded {
-  color: #66f5c4;
-  border-color: #66f5c4;
-  text-shadow: 0 0 12px #66f5c480;
-  box-shadow: 0 0 25px #35e7a455;
-}
-
-#combatPopup.hit {
-  color: #ff6278;
-  border-color: #ff4059;
-  text-shadow: 0 0 12px #ff405980;
-  box-shadow: 0 0 25px #ff405955;
-}
-
-@keyframes combatPopupAnimation {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -35%) scale(0.65);
-  }
-
-  15% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.12);
-  }
-
-  25% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  75% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -70%) scale(0.95);
-  }
-}
-
-
-/* Opponent successfully blocked Mina's attack */
-#combatPopup.opponent-blocked {
-  color: #ff667a;
-  border-color: #ff4059;
-  text-shadow: 0 0 12px #ff405980;
-  box-shadow: 0 0 25px #ff405955;
-}
-
-/* Opponent evaded Mina's attack */
-#combatPopup.opponent-evaded {
-  color: #c18aff;
-  border-color: #a855f7;
-  text-shadow: 0 0 12px #a855f780;
-  box-shadow: 0 0 25px #a855f755;
-}
-
-
-/* Character stat bars */
-.statBar {
-  width: 100%;
-  margin-bottom: 12px;
-  text-align: left;
-}
-
-.statBarHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 5px;
-  color: #f1f5f9;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.statProgress {
-  height: 12px;
-  overflow: hidden;
-  background-color: #252b3b;
-  border: 1px solid #414b60;
-  border-radius: 3px;
-  box-shadow: inset 0 1px 3px #00000080;
-}
-
-.statProgress .progress-bar {
-  transition: width 0.4s ease;
-  box-shadow: 0 0 8px currentColor;
-}
-
-/* Slightly chunkier bars on larger screens */
-@media (min-width: 768px) {
-  .statProgress {
-    height: 14px;
-  }
-
-  .statBarHeader {
-    font-size: 0.9rem;
-  }
-}
-
-/* Compact character stat bars */
-.statBar {
-  width: 100%;
-  min-width: 0;
-  margin-bottom: 7px;
-}
-
-.statBarHeader {
-  gap: 4px;
-  margin-bottom: 3px;
-  font-size: 0.72rem;
-}
-
-.statProgress {
-  height: 8px;
-  width: 100%;
-}
-
-.statBarHeader span {
-  min-width: 0;
-}
-
-/* Keep long labels and values from overflowing */
-.statBarHeader span:last-child {
-  white-space: nowrap;
-  font-size: 0.68rem;
-}
-
-.statProgress .progress-bar {
-  transition: width 0.4s ease;
-}
-
-#combatPopup.buff {
-  color: #62d9ff;
-  border-color: #00c8ff;
-  text-shadow: 0 0 12px #00c8ff;
-  box-shadow: 0 0 25px #00c8ff66;
-}
-
-#combatPopupContainer {
-  position: fixed;
-  top: 25%;
-  left: 20px;
-  right: auto;
-  transform: none;
-  z-index: 1000;
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-
-  width: max-content;
-  max-width: calc(100vw - 40px);
-  pointer-events: none;
-}
-
-/* =========================================
-   COMBAT POPUP FIX
-========================================= */
-
-#combatPopupContainer {
-  position: fixed !important;
-  top: 25%;
-  right: 170px !important;
-  left: auto !important;
-  transform: none !important;
-  z-index: 1000;
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-
-  width: max-content;
-  max-width: calc(100vw - 40px);
-  pointer-events: none;
-}
-
-.combat-popup {
-  font-size: 12px;
-  padding: 8px 12px;
-  max-width: 280px;
-  box-sizing: border-box;
-  overflow-wrap: anywhere;
-}
-
-.combat-popup {
-  min-width: 230px;
-  max-width: 90vw;
-  padding: 18px 28px;
-
-  background: #101525;
-  border: 3px solid white;
-  border-radius: 10px;
-
-  text-align: center;
-  font-size: clamp(1.2rem, 4vw, 2rem);
-  font-weight: 900;
-  letter-spacing: 1px;
-
-  opacity: 0;
-  animation: combatPopupAnimation 1.5s ease forwards;
-}
-
-.combat-popup.blocked {
-  color: #ffd66b;
-  border-color: #ffd66b;
-  text-shadow: 0 0 12px #ffd66b80;
-  box-shadow: 0 0 25px #ffd66b55;
-}
-
-.combat-popup.evaded {
-  color: #66f5c4;
-  border-color: #66f5c4;
-  text-shadow: 0 0 12px #66f5c480;
-  box-shadow: 0 0 25px #35e7a455;
-}
-
-.combat-popup.hit,
-.combat-popup.opponent-blocked {
-  color: #ff6278;
-  border-color: #ff4059;
-  text-shadow: 0 0 12px #ff405980;
-  box-shadow: 0 0 25px #ff405955;
-}
-
-.combat-popup.opponent-evaded {
-  color: #c18aff;
-  border-color: #a855f7;
-  text-shadow: 0 0 12px #a855f780;
-  box-shadow: 0 0 25px #a855f755;
-}
-
-.combat-popup.buff {
-  color: #62d9ff;
-  border-color: #00c8ff;
-  text-shadow: 0 0 12px #00c8ff;
-  box-shadow: 0 0 25px #00c8ff66;
-}
-
-@keyframes combatPopupAnimation {
-  0% {
-    opacity: 0;
-    transform: translateY(15px) scale(0.65);
-  }
-
-  15% {
-    opacity: 1;
-    transform: translateY(0) scale(1.12);
-  }
-
-  25%,
-  75% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(-18px) scale(0.95);
-  }
-}
-
-
-/* Restore combat popup fade animation */
-#combatPopupContainer .combat-popup {
-  opacity: 0;
-  animation: combatPopupAnimation 1.8s ease-in-out both !important;
-}
-
-@keyframes combatPopupAnimation {
-  0% {
-    opacity: 0;
-    transform: translateY(15px) scale(0.65);
-  }
-
-  15% {
-    opacity: 1;
-    transform: translateY(0) scale(1.12);
-  }
-
-  25% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  75% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(-18px) scale(0.95);
-  }
-}
-
-#combatPopupContainer .combat-popup:nth-child(1) {
-  animation-delay: 0s !important;
-}
-
-#combatPopupContainer .combat-popup:nth-child(2) {
-  animation-delay: 0.3s !important;
-}
-
-#combatPopupContainer .combat-popup:nth-child(3) {
-  animation-delay: 0.6s !important;
-}
-
-/* Slightly enlarge the character and opponent status panels */
-#character,
-#opponent {
-  min-width: 340px;
-  min-height: 260px;
-}
-
-/* Give the stat section more room */
-#characterInfo,
-#opponentInfo {
   flex: 1;
-  min-width: 0;
-}
-
-#characterStats {
-  row-gap: 6px;
-}
-
-
-/* Keep both status panels aligned and evenly spaced */
-#character,
-#opponent {
-  box-sizing: border-box;
-  width: min(100%, 760px);
-  min-width: 0;
-  min-height: 0;
-  height: auto;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 14px;
-}
-
-/* Keep the character image at a consistent size */
-#characterImage,
-#opponentImage {
-  width: 125px;
-  height: 165px;
-  flex: 0 0 125px;
-  object-fit: cover;
-}
-
-/* Give the name and stat bars enough room */
-#characterInfo,
-#opponentInfo {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-/* Stack the stat bars consistently */
-#characterStats {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-/* Prevent stat bars from overflowing their panels */
-#characterStats > * {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-/* Keep the two status panels responsive on smaller screens */
-@media (max-width: 600px) {
-  #character,
-  #opponent {
-    gap: 10px;
-    padding: 10px;
-  }
-
-  #characterImage,
-  #opponentImage {
-    width: 85px;
-    height: 120px;
-    flex-basis: 85px;
-  }
-}
-
-
-/* =========================================
-   ARCADE FIGHTING GAME RESTYLE
-========================================= */
-
-/* Sharper, more dramatic battlefield */
-#gameContainer {
-  padding: 18px 24px 35px;
-  background:
-    radial-gradient(ellipse at 50% 35%, #17243b 0%, transparent 65%),
-    linear-gradient(180deg, #070a12 0%, #101525 55%, #080b14 100%);
-}
-
-/* Keep the arena compact */
-#battleArena {
-  max-width: 1200px;
-}
-
-/* Bring the fighters closer together */
-#opponentSection,
-#characterSection {
-  margin: 12px auto !important;
-}
-
-/* Character panels: stronger arcade HUD */
-.battle-status-panel {
-  max-width: 760px;
-  grid-template-columns: 155px minmax(0, 1fr);
-  grid-template-rows: 138px;
-  gap: 0 18px;
-  padding: 32px 18px 12px;
-  border-width: 2px;
-  box-shadow: inset 0 0 20px #00000050;
-}
-
-/* Rock Lee: aggressive red */
-#opponent {
-  --panel-accent: #ff304f;
-  background:
-    linear-gradient(115deg, #35101b, #10121d 58%, #210e19);
-}
-
-/* Mina: electric cyan */
-#character {
-  --panel-accent: #16dfff;
-  background:
-    linear-gradient(115deg, #0b2d42, #10121d 58%, #09243b);
-}
-
-/* Character portraits */
-#opponentImage,
-#characterImage {
-  width: 155px;
-  height: 138px !important;
-  border-width: 2px;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--panel-accent) 35%, transparent);
-}
-
-/* Make names stand out */
-#opponentName,
-#characterName {
-  top: 4px;
-  left: 18px;
-  font-size: 1.2rem;
-  letter-spacing: 0.5px;
-  text-shadow: 0 2px 8px #000000;
-}
-
-/* Cleaner, more readable stat rows */
-#opponentStats p,
-#characterStats p {
-  padding: 6px 4px;
-  font-size: 0.86rem;
-  border-bottom-color: #ffffff20;
-}
-
-/* Finish turn button */
-#finishTurnButton {
-  background: radial-gradient(circle at 35% 25%, #198fff, #07418c 70%, #06152f);
-  border-color: #45e5ff;
-  box-shadow:
-    0 0 12px #12bfff99,
-    0 0 28px #12bfff30,
-    inset 0 0 15px #50d9ff40;
-}
-
-/* Attack area: more like an arcade selection screen */
-#attackSection {
-  max-width: 1200px;
-  margin: 22px auto !important;
-}
-
-#attack {
-  background: linear-gradient(145deg, #121a2b, #080c16);
-  border: 2px solid #344c72;
-  border-radius: 8px;
-  box-shadow: 0 8px 25px #00000055;
-}
-
-#attackHeader {
-  padding: 13px 18px;
-  color: #ffffff;
-  background: linear-gradient(90deg, #243b60, #111827 75%);
-  border-bottom: 2px solid #4b8cff;
-  font-size: 1rem;
-  letter-spacing: 3px;
-}
-
-/* Attack cards */
-[id^="attackButton"] {
-  flex-basis: 210px;
-  min-width: 210px !important;
-  padding: 10px;
-  background: linear-gradient(160deg, #1b2940, #0b101c) !important;
-  border: 1px solid #465b7c !important;
-  border-radius: 6px !important;
-  box-shadow: 0 5px 12px #00000040;
-}
-
-[id^="attackButton"]:hover:not(:disabled) {
-  transform: translateY(-4px);
-  border-color: #20dfff !important;
-  box-shadow: 0 0 18px #20dfff35;
-}
-
-[id^="attackImage"] {
-  height: 115px;
-  border-radius: 4px;
-  border-color: #536b91;
-}
-
-[id^="attackName"] {
-  color: #8cecff;
-  font-size: 1rem;
-  letter-spacing: 0.3px;
-}
-
-/* AI attack: keep the red visual identity */
-#aiAttackCard {
-  border-width: 2px;
-  border-radius: 8px;
-  box-shadow: 0 0 22px #ff315b25;
-}
-
-#aiAttackHeader {
-  background: linear-gradient(90deg, #a51e3d, #54182b);
-  letter-spacing: 1.5px;
-}
-
-/* Defensive actions */
-#defendButton,
-#evadeButton {
-  border-radius: 5px;
-  font-weight: 900;
-  letter-spacing: 0.5px;
-}
-
-/* Smaller screens */
-@media (max-width: 600px) {
-  #gameContainer {
-    padding: 12px 8px 25px;
-  }
-
-  .battle-status-panel {
-    grid-template-columns: 105px minmax(0, 1fr);
-    grid-template-rows: 112px;
-    gap: 0 10px;
-    padding: 28px 10px 9px;
-  }
-
-  #opponentImage,
-  #characterImage {
-    width: 105px;
-    height: 112px !important;
-  }
-
-  #opponentStats p,
-  #characterStats p {
-    font-size: 0.7rem;
-    padding: 4px 1px;
-  }
-
-  [id^="attackButton"] {
-    flex-basis: 175px;
-    min-width: 175px !important;
-  }
-}
-
-
-
-
-
-/* =========================================
-   CHARACTER HUD - CLEAN LAYOUT
-========================================= */
-
-#character.battle-status-panel {
-  display: grid;
-  grid-template-columns: 155px minmax(0, 1fr);
-  grid-template-rows: auto;
-  align-items: center;
-  gap: 0 18px;
-  padding: 34px 20px 16px;
-  min-height: 0;
-}
-
-#characterPortraitWrapper {
-  grid-column: 1;
-  grid-row: 1;
-  display: flex;
   align-items: stretch;
-  gap: 8px;
-  width: 155px;
+  justify-content: center;
+  gap: 14px;
+  width: 56px;
   min-width: 0;
 }
 
-#character #characterImage {
-  width: 112px;
-  height: 170px !important;
-  min-height: 0;
-  flex-shrink: 0;
-  object-fit: cover;
-}
-
-#characterSideMeters {
+#opponentSideMeters .verticalMeterGroup {
   display: flex;
-  justify-content: center;
-  gap: 5px;
-  width: 35px;
   flex: 1;
+  min-width: 22px;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
-#characterSideMeters .verticalMeter {
+#opponentSideMeters .verticalMeter {
   position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: flex-end;
   overflow: hidden;
-  min-width: 10px;
-  height: 170px;
+  width: 100%;
+  min-width: 22px;
+  height: 190px;
   background: #091321;
   border: 1px solid #ffffff25;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-#characterSideMeters .verticalMeterFill {
+#opponentSideMeters .verticalMeterFill {
   width: 100%;
   flex-shrink: 0;
   transition: height 0.3s ease;
 }
 
-#characterSideMeters .healthMeter {
+#opponentSideMeters .healthMeter {
   border-color: #ff456650;
 }
 
-#characterSideMeters .healthMeter .verticalMeterFill {
+#opponentSideMeters .healthMeter .verticalMeterFill {
   background: linear-gradient(to top, #b91e42, #ff4566);
   box-shadow: 0 0 10px #ff456650;
 }
 
-#characterSideMeters .manaMeter {
+#opponentSideMeters .manaMeter {
   border-color: #13d5ff50;
 }
 
-#characterSideMeters .manaMeter .verticalMeterFill {
+#opponentSideMeters .manaMeter .verticalMeterFill {
   background: linear-gradient(to top, #0874d1, #13d5ff);
   box-shadow: 0 0 10px #13d5ff50;
 }
 
-#characterSideMeters .verticalMeter span {
+#opponentSideMeters .verticalMeter span {
   position: absolute;
   bottom: 3px;
   left: 0;
   width: 100%;
-  color: #ffffff;
+  color: #fff;
   font-size: 0.58rem;
   font-weight: 900;
   text-align: center;
-  text-shadow: 0 1px 3px #000000;
+  text-shadow: 0 1px 3px #000;
 }
 
-/* Preserve the existing name position and stat layout */
-#character #characterInfo {
-  display: contents;
+#opponentSideMeters .verticalMeterValue {
+  color: #fff;
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: nowrap;
 }
 
-#character #characterName {
-  grid-column: 1 / -1;
-  grid-row: 1;
+#opponentSideMeters .verticalMeterGroup small {
+  color: #a9c7d9;
+  font-size: 9px;
+  line-height: 1.2;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Keep the opponent name at the upper-left */
+#opponent #opponentName {
   position: absolute;
-  top: 3px;
-  left: 16px;
+  top: 4px;
+  left: 18px;
+  z-index: 2;
+  width: 36%;
   margin: 0;
+  color: #fff0f3;
+  text-shadow: 0 0 8px #ff315940, 0 0 18px #ff31591a;
 }
 
-/* Four main stats in a tidy two-column grid */
-#character #characterStats {
+/* Defense and Agility bars */
+#opponent #opponentStats {
   grid-column: 2;
   grid-row: 1;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-content: center;
-  gap: 13px 15px;
-  min-width: 0;
-}
-
-/* Keep stat labels and values readable */
-#character #characterStats .statBar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-self: stretch;
+  gap: 22px;
+  width: 100%;
   min-width: 0;
   margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
 }
 
-#character #characterStats .statBarHeader {
+#opponent #opponentStats .statBar {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  text-align: left;
+}
+
+#opponent #opponentStats .statBarHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 5px;
-  margin-bottom: 5px;
-  font-size: 0.75rem;
+  margin-bottom: 7px;
+  color: #f1f5f9;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-#character #characterStats .statBarHeader span:last-child {
+#opponent #opponentStats .statBarHeader span:last-child {
   flex-shrink: 0;
+  color: #fff;
   font-weight: 800;
-  color: #ffffff;
+  white-space: nowrap;
 }
 
-#character #characterStats .statProgress {
-  height: 8px;
-  border-radius: 3px;
+#opponent #opponentStats .statProgress {
+  width: 100%;
+  height: 16px !important;
+  overflow: hidden;
+  background-color: #252b3b;
+  border: 1px solid #414b60;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 3px #00000080;
+}
+
+#opponent #opponentStats .progress-bar {
+  border-radius: 6px;
+  box-shadow: 0 0 8px currentColor;
+  transition: width 0.35s ease;
 }
 
 /* Cooldown and Recovery chips */
-#characterCompactStats {
+#opponentCompactStats {
   grid-column: 2;
   grid-row: 2;
   display: flex;
   flex-wrap: wrap;
+  align-self: start;
   gap: 8px;
   min-width: 0;
-  margin-top: 12px;
+  margin-top: 0;
 }
 
-#characterCompactStats .compactStat {
+#opponentCompactStats .compactStat {
   display: flex;
   flex: 1 1 110px;
   justify-content: space-between;
@@ -2162,373 +1814,177 @@ body {
   gap: 8px;
   min-width: 0;
   padding: 8px 10px;
-  background: linear-gradient(135deg, #14263a, #0a1423);
-  border: 1px solid #13d5ff45;
-  border-left: 3px solid #13d5ff;
-  border-radius: 4px;
   color: #b9cde0;
   font-size: 0.7rem;
+  background: linear-gradient(135deg, #301521, #0a1423);
+  border: 1px solid #ff304f45;
+  border-left: 3px solid #ff304f;
+  border-radius: 4px;
 }
 
-#characterCompactStats .compactStat strong {
-  color: #ffffff;
+#opponentCompactStats .compactStat strong {
+  color: #fff;
   font-size: 0.82rem;
   font-weight: 900;
   white-space: nowrap;
 }
 
-/* Mobile */
-@media (max-width: 600px) {
-  #character.battle-status-panel {
-    grid-template-columns: 100px minmax(0, 1fr);
-    gap: 0 10px;
-    padding: 30px 10px 12px;
-  }
-
-  #characterPortraitWrapper {
-    width: 100px;
-    gap: 5px;
-  }
-
-  #character #characterImage {
-    width: 68px;
-    height: 145px !important;
-  }
-
-  #characterSideMeters {
-    gap: 3px;
-  }
-
-  #characterSideMeters .verticalMeter {
-    height: 145px;
-  }
-
-  #character #characterStats {
-    gap: 12px 8px;
-  }
-
-  #character #characterStats .statBarHeader {
-    font-size: 0.65rem;
-  }
-
-  #characterCompactStats .compactStat {
-    flex-basis: 100%;
-    padding: 6px 7px;
-  }
+/* Widen popups without removing their existing colors or animations */
+#combatPopupContainer {
+  width: auto;
+  max-width: calc(100vw - 40px);
 }
 
-
-/* Character name gets its own row */
-#character.battle-status-panel {
-  grid-template-rows: auto auto auto;
-  row-gap: 10px;
-  padding-top: 16px;
+#combatPopupContainer .combat-popup {
+  width: max-content;
+  min-width: 280px;
+  max-width: min(420px, calc(100vw - 40px));
+  padding: 18px 24px;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
-#character #characterName {
-  position: static;
-  grid-column: 1 / -1;
-  grid-row: 1;
-  margin: 0;
-  padding: 0 0 8px;
-  width: 100%;
-  text-align: center;
-  z-index: 1;
-}
-
-/* Portrait and remaining stats sit beneath the name */
-#character #characterPortraitWrapper {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-#character #characterStats {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-#character #characterCompactStats {
-  grid-column: 2;
-  grid-row: 3;
-  align-self: start;
-  margin-top: 0;
-}
-
-/* Stack each vertical meter with its value underneath */
-#characterSideMeters {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  gap: 6px;
-  width: 35px;
-}
-
-#characterSideMeters .verticalMeterGroup {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-
-#characterSideMeters .verticalMeter {
-  width: 100%;
-  flex: 1;
-  min-height: 100px;
-}
-
-#characterSideMeters .verticalMeterValue {
-  font-size: 9px;
-  line-height: 1.2;
-  color: #fff;
-  white-space: nowrap;
-}
-
-#characterSideMeters .verticalMeterGroup small {
-  font-size: 9px;
-  line-height: 1;
-  color: #a9c7d9;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-
-/* --- Character card layout refinements --- */
-
-#character.battle-status-panel {
-  grid-template-columns: 165px minmax(0, 1fr);
-  grid-template-rows: auto auto auto;
-  column-gap: 20px;
-  row-gap: 10px;
-}
-
-/* Name aligned left above the portrait */
-#character #characterName {
-  position: static;
-  grid-column: 1 / -1;
-  grid-row: 1;
-  justify-self: start;
-  text-align: left;
-  width: 100%;
-  margin: 0;
-  padding: 0 0 8px 4px;
-}
-
-/* Portrait and meters remain on the left */
-#character #characterPortraitWrapper {
-  grid-column: 1;
-  grid-row: 2;
-  width: 165px;
-  gap: 12px;
-}
-
-/* Slightly larger portrait */
-#character #characterImage {
-  width: 112px;
-  height: 180px !important;
-}
-
-/* More separation and a little more width for both meters */
-#characterSideMeters {
-  width: 41px;
-  flex: 1;
-  gap: 9px;
-}
-
-#characterSideMeters .verticalMeterGroup {
-  flex: 1;
-  min-width: 15px;
-}
-
-#characterSideMeters .verticalMeter {
-  min-width: 15px;
-  height: 180px;
-  border-radius: 5px;
-}
-
-#characterSideMeters .verticalMeterValue {
-  font-size: 9px;
-  white-space: nowrap;
-}
-
-/* Defense and Agility stacked vertically */
-#character #characterStats {
-  grid-column: 2;
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 18px;
-  min-width: 0;
-  width: 100%;
-}
-
-/* Keep the cooldown and recovery chips underneath the bars */
-#character #characterCompactStats {
-  grid-column: 2;
-  grid-row: 3;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-self: start;
-  margin-top: 0;
-}
-
-/* Keep the stat bars readable when stacked */
-#character #characterStats .statBar {
-  width: 100%;
-  min-width: 0;
-}
-
-#character #characterStats .statProgress {
-  height: 9px;
-}
-
-/* Smaller screens */
-@media (max-width: 600px) {
-  #character.battle-status-panel {
-    grid-template-columns: 125px minmax(0, 1fr);
-    column-gap: 12px;
-  }
-
-  #character #characterPortraitWrapper {
-    width: 125px;
-    gap: 8px;
-  }
-
-  #character #characterImage {
-    width: 80px;
-    height: 155px !important;
-  }
-
-  #characterSideMeters {
-    width: 37px;
-    gap: 6px;
-  }
-
-  #characterSideMeters .verticalMeter {
-    height: 155px;
-  }
-
-  #character #characterStats {
-    gap: 14px;
-  }
-}
-
-
-/* --- Final vertical meter spacing --- */
-
-#character #characterPortraitWrapper {
-  width: 190px;
-  gap: 18px;
-}
-
-#character #characterImage {
-  width: 112px;
-  height: 190px !important;
-}
-
-/* Wider gap and larger meters */
-#characterSideMeters {
-  width: 56px;
-  flex: 1;
-  gap: 14px;
-  align-items: stretch;
-}
-
-#characterSideMeters .verticalMeterGroup {
-  flex: 1;
-  min-width: 22px;
-  gap: 5px;
-}
-
-#characterSideMeters .verticalMeter {
-  width: 100%;
-  min-width: 22px;
-  height: 190px;
-  border-radius: 6px;
-}
-
-/* Keep the values readable and separated */
-#characterSideMeters .verticalMeterValue {
-  font-size: 10px;
-  line-height: 1.3;
-  white-space: nowrap;
-}
-
-#characterSideMeters .verticalMeterGroup small {
-  font-size: 9px;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-/* Give the portrait column more room */
-#character.battle-status-panel {
-  grid-template-columns: 190px minmax(0, 1fr);
-  column-gap: 22px;
-}
-
-/* Scale down appropriately on smaller screens */
-@media (max-width: 600px) {
-  #character.battle-status-panel {
+/* Responsive opponent HUD */
+@media (max-width: 850px) {
+  #opponent.battle-status-panel {
     grid-template-columns: 145px minmax(0, 1fr);
+    grid-template-rows: 165px auto;
     column-gap: 12px;
+    padding: 30px 12px 10px;
   }
 
-  #character #characterPortraitWrapper {
+  #opponentPortraitWrapper {
     width: 145px;
+    height: 165px;
     gap: 10px;
   }
 
-  #character #characterImage {
-    width: 85px;
+  #opponent #opponentImage {
+    flex-basis: 85px;
+    width: 85px !important;
+    min-width: 85px;
     height: 165px !important;
   }
 
-  #characterSideMeters {
-    width: 45px;
+  #opponentSideMeters {
     gap: 8px;
+    width: 45px;
   }
 
-  #characterSideMeters .verticalMeter {
+  #opponentSideMeters .verticalMeter {
     height: 165px;
   }
 
-  #characterSideMeters .verticalMeterValue {
+  #opponentSideMeters .verticalMeterValue {
     font-size: 8px;
   }
 }
 
+@media (max-width: 600px) {
+  #opponent.battle-status-panel {
+    grid-template-columns: 145px minmax(0, 1fr);
+    grid-template-rows: 165px auto;
+    column-gap: 12px;
+    row-gap: 10px;
+    padding: 30px 10px 12px;
+  }
 
-/* --- Wider, thicker Defense and Agility bars --- */
+  #opponentPortraitWrapper {
+    width: 145px;
+    height: 165px;
+    gap: 10px;
+  }
 
-#character #characterStats {
-  width: 100%;
-  gap: 22px;
+  #opponent #opponentImage {
+    flex-basis: 85px;
+    width: 85px !important;
+    min-width: 85px;
+    height: 165px !important;
+  }
+
+  #opponentSideMeters {
+    gap: 8px;
+    width: 45px;
+  }
+
+  #opponentSideMeters .verticalMeter {
+    height: 165px;
+  }
+
+  #opponentSideMeters .verticalMeterValue {
+    font-size: 8px;
+  }
+
+  #opponent #opponentStats {
+    gap: 14px;
+  }
+
+  #opponent #opponentStats .statBarHeader {
+    font-size: 0.72rem;
+  }
+
+  #opponent #opponentStats .statProgress {
+    height: 14px !important;
+  }
+
+  #opponentCompactStats .compactStat {
+    flex-basis: 100%;
+    padding: 6px 7px;
+  }
+
+  #combatPopupContainer {
+    right: 12px !important;
+    left: auto !important;
+    width: auto;
+    max-width: calc(100vw - 24px);
+  }
+
+  #combatPopupContainer .combat-popup {
+    width: max-content;
+    min-width: min(280px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
 }
 
-#character #characterStats .statBar {
-  width: 100%;
-  min-width: 0;
+@media (max-width: 370px) {
+  #opponent.battle-status-panel {
+    grid-template-columns: 125px minmax(0, 1fr);
+    grid-template-rows: 155px auto;
+    column-gap: 8px;
+    padding: 28px 8px 10px;
+  }
+
+  #opponentPortraitWrapper {
+    width: 125px;
+    height: 155px;
+    gap: 8px;
+  }
+
+  #opponent #opponentImage {
+    flex-basis: 75px;
+    width: 75px !important;
+    min-width: 75px;
+    height: 155px !important;
+  }
+
+  #opponentSideMeters {
+    gap: 6px;
+    width: 42px;
+  }
+
+  #opponentSideMeters .verticalMeter {
+    height: 155px;
+  }
+
+  #opponent #opponentStats .statBarHeader {
+    font-size: 0.65rem;
+  }
+
+  #opponentCompactStats .compactStat {
+    font-size: 0.64rem;
+  }
 }
 
-/* Make the labels and values easier to read */
-#character #characterStats .statBarHeader {
-  font-size: 14px;
-  margin-bottom: 7px;
-}
-
-/* Thicker progress bars */
-#character #characterStats .statProgress {
-  height: 16px !important;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-/* Smooth arcade-style fill */
-#character #characterStats .progress-bar {
-  border-radius: 6px;
-  transition: width 0.35s ease;
-}
 

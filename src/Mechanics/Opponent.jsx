@@ -3,41 +3,71 @@ import StatBar from "./StatBar.jsx";
 import "./BattleUI.css";
 
 function Opponent({ opponent, setOpponent }) {
+  const healthPercentage =
+    opponent.maximumHealth > 0
+      ? Math.min(
+          100,
+          Math.max(0, (opponent.health / opponent.maximumHealth) * 100),
+        )
+      : 0;
+
+  const manaPercentage =
+    opponent.maximumMana > 0
+      ? Math.min(
+          100,
+          Math.max(0, (opponent.mana / opponent.maximumMana) * 100),
+        )
+      : 0;
+
   return (
     <div id="opponentSection">
       <div id="opponent" className="battle-status-panel">
-        <img
-          id="opponentImage"
-          src="https://placehold.co/300x400"
-          alt={opponent.name}
-        />
+        <div id="opponentPortraitWrapper">
+          <img
+            id="opponentImage"
+            src="https://placehold.co/300x400"
+            alt={opponent.name}
+          />
+
+          <div id="opponentSideMeters">
+            <div className="verticalMeterGroup">
+              <div className="verticalMeter healthMeter" title="Health">
+                <div
+                  className="verticalMeterFill"
+                  style={{ height: `${healthPercentage}%` }}
+                />
+                <span>H</span>
+              </div>
+
+              <strong className="verticalMeterValue">
+                {opponent.health}/{opponent.maximumHealth}
+              </strong>
+              <small>Health</small>
+            </div>
+
+            <div className="verticalMeterGroup">
+              <div className="verticalMeter manaMeter" title="Mana">
+                <div
+                  className="verticalMeterFill"
+                  style={{ height: `${manaPercentage}%` }}
+                />
+                <span>M</span>
+              </div>
+
+              <strong className="verticalMeterValue">
+                {opponent.mana}/{opponent.maximumMana}
+              </strong>
+              <small>Mana</small>
+            </div>
+          </div>
+        </div>
 
         <div id="opponentInfo">
           <p id="opponentHeader">OPPONENT</p>
 
           <h2 id="opponentName">{opponent.name}</h2>
 
-          <div id="characterStats">
-            <StatBar
-              label="Health"
-              icon="❤️"
-              current={opponent.health}
-              maximum={opponent.maximumHealth}
-              color={
-                opponent.health / opponent.maximumHealth <= 0.25
-                  ? "danger"
-                  : opponent.health / opponent.maximumHealth <= 0.5
-                    ? "warning"
-                    : "success"
-              }
-            />
-            <StatBar
-              label="Mana"
-              icon="🔵"
-              current={opponent.mana}
-              maximum={opponent.maximumMana}
-              color="info"
-            />
+          <div id="opponentStats">
             <StatBar
               label="Defense"
               icon="🛡️"
@@ -45,6 +75,7 @@ function Opponent({ opponent, setOpponent }) {
               maximum={100}
               color="secondary"
             />
+
             <StatBar
               label="Agility"
               icon="⚡"
@@ -52,22 +83,20 @@ function Opponent({ opponent, setOpponent }) {
               maximum={100}
               color="warning"
             />
-          
-            {/* <StatBar
-              label="Cooldown"
-              icon="⏳"
-              current={opponent.cooldown ?? 0}
-              maximum={opponent.maximumCooldown ?? 3}
-              color="secondary"
-            />
-            <StatBar
-              label="Recovery"
-              icon="🔄"
-              current={opponent.recovery ?? 0}
-              maximum={Math.max(5, opponent.recovery ?? 0)}
-              color="info"
-            /> */}
-    
+          </div>
+
+          <div id="opponentCompactStats">
+            <div className="compactStat">
+              <span>⏳ Cooldown</span>
+              <strong>
+                {opponent.cooldown ?? 0}/{opponent.maximumCooldown ?? 3}
+              </strong>
+            </div>
+
+            <div className="compactStat">
+              <span>🔄 Recovery</span>
+              <strong>{opponent.recovery ?? 0}</strong>
+            </div>
           </div>
         </div>
       </div>
@@ -76,3 +105,4 @@ function Opponent({ opponent, setOpponent }) {
 }
 
 export default Opponent;
+
