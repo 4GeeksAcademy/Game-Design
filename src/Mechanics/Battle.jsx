@@ -1,4 +1,5 @@
 import Opponent from "./Opponent.jsx";
+import { useLocation } from "react-router-dom";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import VictoryScreen from "./VictoryScreen.jsx";
@@ -11,28 +12,43 @@ import { aiTurn } from "./AI.js";
 import React, { useState, useEffect } from "react";
 
 function App() {
-  const [character, setCharacter] = useState({
-    ...mina,
-    attacks: mina.attacks.map((attack) => ({ ...attack })),
-    health: mina.health,
-    maximumHealth: mina.health,
-    mana: mina.mana,
-    maximumMana: mina.maximumMana,
-    manaRegen: mina.manaRegen,
-    turnFinished: false,
-    blocked: false,
-  });
+  const location = useLocation();
 
-  const [opponent, setOpponent] = useState({
-    ...rockLee,
-    attacks: rockLee.attacks.map((attack) => ({ ...attack })),
-    health: rockLee.health,
-    maximumHealth: rockLee.health,
-    mana: rockLee.mana,
-    maximumMana: rockLee.maximumMana,
-    manaRegen: rockLee.manaRegen,
-    turnFinished: false,
-  });
+const fighterData = {
+  mina,
+  rockLee,
+};
+
+const playerData =
+  fighterData[location.state?.playerId] ?? mina;
+
+const opponentData =
+  fighterData[location.state?.opponentId] ??
+  (playerData === mina ? rockLee : mina);
+
+const [character, setCharacter] = useState(() => ({
+  ...playerData,
+  attacks: playerData.attacks.map((attack) => ({ ...attack })),
+  health: playerData.health,
+  maximumHealth: playerData.health,
+  mana: playerData.mana,
+  maximumMana: playerData.maximumMana,
+  manaRegen: playerData.manaRegen,
+  turnFinished: false,
+  blocked: false,
+}));
+
+const [opponent, setOpponent] = useState(() => ({
+  ...opponentData,
+  attacks: opponentData.attacks.map((attack) => ({ ...attack })),
+  health: opponentData.health,
+  maximumHealth: opponentData.health,
+  mana: opponentData.mana,
+  maximumMana: opponentData.maximumMana,
+  manaRegen: opponentData.manaRegen,
+  turnFinished: false,
+  blocked: false,
+}));
 
   const [damageDealt, setDamageDealt] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
