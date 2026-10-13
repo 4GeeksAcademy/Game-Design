@@ -15,9 +15,8 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
     <div id="characterSection">
       <div id="character" className="battle-status-panel">
         <div id="characterPortraitWrapper">
-          <img
+          <img src={character.image} 
             id="characterImage"
-            src="https://placehold.co/300x400"
             alt={character.name}
           />
 

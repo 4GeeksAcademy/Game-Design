@@ -16,9 +16,11 @@ import { acidShot, acidBomb, acidRain, acidStorm } from "./Attack(list)";
 //         acidStorm
 //     ]
 // };
+import minaArenaImage from "../assets/img/MinaAshidoArena.jpg";
 
 const mina = {
   name: "Mina Ashido",
+  image: minaArenaImage,
 
   health: 100,
   mana: 70,
@@ -89,31 +91,7 @@ const mina = {
       state: true,
     },
 
-    {
-      name: "Ultimate Acid Overload",
-      damage: 25,
-      speed: 30,
-      cost: 10,
-      buff: {
-        health: 10,
-        mana: 10,
-        defense: 5,
-        agility: 5,
-        cooldown: 2,
-        maximumCooldown: 2,
-        recovery: 1,
-      },
-      debuff: {
-        health: 10,
-        mana: 10,
-        defense: 5,
-        agility: 5,
-        cooldown: 2,
-        maximumCooldown: 2,
-        recovery: 1,
-      },
-      state: true,
-    },
+   
   ],
 };
 

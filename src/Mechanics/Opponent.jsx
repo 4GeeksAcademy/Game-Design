@@ -25,7 +25,7 @@ function Opponent({ opponent, setOpponent }) {
         <div id="opponentPortraitWrapper">
           <img
             id="opponentImage"
-            src="https://placehold.co/300x400"
+            src={opponent.image} 
             alt={opponent.name}
           />
 
