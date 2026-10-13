@@ -1810,3 +1810,725 @@ body {
   }
 }
 
+
+/* =========================================
+   ARCADE FIGHTING GAME RESTYLE
+========================================= */
+
+/* Sharper, more dramatic battlefield */
+#gameContainer {
+  padding: 18px 24px 35px;
+  background:
+    radial-gradient(ellipse at 50% 35%, #17243b 0%, transparent 65%),
+    linear-gradient(180deg, #070a12 0%, #101525 55%, #080b14 100%);
+}
+
+/* Keep the arena compact */
+#battleArena {
+  max-width: 1200px;
+}
+
+/* Bring the fighters closer together */
+#opponentSection,
+#characterSection {
+  margin: 12px auto !important;
+}
+
+/* Character panels: stronger arcade HUD */
+.battle-status-panel {
+  max-width: 760px;
+  grid-template-columns: 155px minmax(0, 1fr);
+  grid-template-rows: 138px;
+  gap: 0 18px;
+  padding: 32px 18px 12px;
+  border-width: 2px;
+  box-shadow: inset 0 0 20px #00000050;
+}
+
+/* Rock Lee: aggressive red */
+#opponent {
+  --panel-accent: #ff304f;
+  background:
+    linear-gradient(115deg, #35101b, #10121d 58%, #210e19);
+}
+
+/* Mina: electric cyan */
+#character {
+  --panel-accent: #16dfff;
+  background:
+    linear-gradient(115deg, #0b2d42, #10121d 58%, #09243b);
+}
+
+/* Character portraits */
+#opponentImage,
+#characterImage {
+  width: 155px;
+  height: 138px !important;
+  border-width: 2px;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--panel-accent) 35%, transparent);
+}
+
+/* Make names stand out */
+#opponentName,
+#characterName {
+  top: 4px;
+  left: 18px;
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px #000000;
+}
+
+/* Cleaner, more readable stat rows */
+#opponentStats p,
+#characterStats p {
+  padding: 6px 4px;
+  font-size: 0.86rem;
+  border-bottom-color: #ffffff20;
+}
+
+/* Finish turn button */
+#finishTurnButton {
+  background: radial-gradient(circle at 35% 25%, #198fff, #07418c 70%, #06152f);
+  border-color: #45e5ff;
+  box-shadow:
+    0 0 12px #12bfff99,
+    0 0 28px #12bfff30,
+    inset 0 0 15px #50d9ff40;
+}
+
+/* Attack area: more like an arcade selection screen */
+#attackSection {
+  max-width: 1200px;
+  margin: 22px auto !important;
+}
+
+#attack {
+  background: linear-gradient(145deg, #121a2b, #080c16);
+  border: 2px solid #344c72;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px #00000055;
+}
+
+#attackHeader {
+  padding: 13px 18px;
+  color: #ffffff;
+  background: linear-gradient(90deg, #243b60, #111827 75%);
+  border-bottom: 2px solid #4b8cff;
+  font-size: 1rem;
+  letter-spacing: 3px;
+}
+
+/* Attack cards */
+[id^="attackButton"] {
+  flex-basis: 210px;
+  min-width: 210px !important;
+  padding: 10px;
+  background: linear-gradient(160deg, #1b2940, #0b101c) !important;
+  border: 1px solid #465b7c !important;
+  border-radius: 6px !important;
+  box-shadow: 0 5px 12px #00000040;
+}
+
+[id^="attackButton"]:hover:not(:disabled) {
+  transform: translateY(-4px);
+  border-color: #20dfff !important;
+  box-shadow: 0 0 18px #20dfff35;
+}
+
+[id^="attackImage"] {
+  height: 115px;
+  border-radius: 4px;
+  border-color: #536b91;
+}
+
+[id^="attackName"] {
+  color: #8cecff;
+  font-size: 1rem;
+  letter-spacing: 0.3px;
+}
+
+/* AI attack: keep the red visual identity */
+#aiAttackCard {
+  border-width: 2px;
+  border-radius: 8px;
+  box-shadow: 0 0 22px #ff315b25;
+}
+
+#aiAttackHeader {
+  background: linear-gradient(90deg, #a51e3d, #54182b);
+  letter-spacing: 1.5px;
+}
+
+/* Defensive actions */
+#defendButton,
+#evadeButton {
+  border-radius: 5px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+/* Smaller screens */
+@media (max-width: 600px) {
+  #gameContainer {
+    padding: 12px 8px 25px;
+  }
+
+  .battle-status-panel {
+    grid-template-columns: 105px minmax(0, 1fr);
+    grid-template-rows: 112px;
+    gap: 0 10px;
+    padding: 28px 10px 9px;
+  }
+
+  #opponentImage,
+  #characterImage {
+    width: 105px;
+    height: 112px !important;
+  }
+
+  #opponentStats p,
+  #characterStats p {
+    font-size: 0.7rem;
+    padding: 4px 1px;
+  }
+
+  [id^="attackButton"] {
+    flex-basis: 175px;
+    min-width: 175px !important;
+  }
+}
+
+
+
+
+
+/* =========================================
+   CHARACTER HUD - CLEAN LAYOUT
+========================================= */
+
+#character.battle-status-panel {
+  display: grid;
+  grid-template-columns: 155px minmax(0, 1fr);
+  grid-template-rows: auto;
+  align-items: center;
+  gap: 0 18px;
+  padding: 34px 20px 16px;
+  min-height: 0;
+}
+
+#characterPortraitWrapper {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 155px;
+  min-width: 0;
+}
+
+#character #characterImage {
+  width: 112px;
+  height: 170px !important;
+  min-height: 0;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+#characterSideMeters {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  width: 35px;
+  flex: 1;
+}
+
+#characterSideMeters .verticalMeter {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  min-width: 10px;
+  height: 170px;
+  background: #091321;
+  border: 1px solid #ffffff25;
+  border-radius: 4px;
+}
+
+#characterSideMeters .verticalMeterFill {
+  width: 100%;
+  flex-shrink: 0;
+  transition: height 0.3s ease;
+}
+
+#characterSideMeters .healthMeter {
+  border-color: #ff456650;
+}
+
+#characterSideMeters .healthMeter .verticalMeterFill {
+  background: linear-gradient(to top, #b91e42, #ff4566);
+  box-shadow: 0 0 10px #ff456650;
+}
+
+#characterSideMeters .manaMeter {
+  border-color: #13d5ff50;
+}
+
+#characterSideMeters .manaMeter .verticalMeterFill {
+  background: linear-gradient(to top, #0874d1, #13d5ff);
+  box-shadow: 0 0 10px #13d5ff50;
+}
+
+#characterSideMeters .verticalMeter span {
+  position: absolute;
+  bottom: 3px;
+  left: 0;
+  width: 100%;
+  color: #ffffff;
+  font-size: 0.58rem;
+  font-weight: 900;
+  text-align: center;
+  text-shadow: 0 1px 3px #000000;
+}
+
+/* Preserve the existing name position and stat layout */
+#character #characterInfo {
+  display: contents;
+}
+
+#character #characterName {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  position: absolute;
+  top: 3px;
+  left: 16px;
+  margin: 0;
+}
+
+/* Four main stats in a tidy two-column grid */
+#character #characterStats {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: center;
+  gap: 13px 15px;
+  min-width: 0;
+}
+
+/* Keep stat labels and values readable */
+#character #characterStats .statBar {
+  min-width: 0;
+  margin: 0;
+}
+
+#character #characterStats .statBarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  font-size: 0.75rem;
+}
+
+#character #characterStats .statBarHeader span:last-child {
+  flex-shrink: 0;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+#character #characterStats .statProgress {
+  height: 8px;
+  border-radius: 3px;
+}
+
+/* Cooldown and Recovery chips */
+#characterCompactStats {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  margin-top: 12px;
+}
+
+#characterCompactStats .compactStat {
+  display: flex;
+  flex: 1 1 110px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, #14263a, #0a1423);
+  border: 1px solid #13d5ff45;
+  border-left: 3px solid #13d5ff;
+  border-radius: 4px;
+  color: #b9cde0;
+  font-size: 0.7rem;
+}
+
+#characterCompactStats .compactStat strong {
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  #character.battle-status-panel {
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: 0 10px;
+    padding: 30px 10px 12px;
+  }
+
+  #characterPortraitWrapper {
+    width: 100px;
+    gap: 5px;
+  }
+
+  #character #characterImage {
+    width: 68px;
+    height: 145px !important;
+  }
+
+  #characterSideMeters {
+    gap: 3px;
+  }
+
+  #characterSideMeters .verticalMeter {
+    height: 145px;
+  }
+
+  #character #characterStats {
+    gap: 12px 8px;
+  }
+
+  #character #characterStats .statBarHeader {
+    font-size: 0.65rem;
+  }
+
+  #characterCompactStats .compactStat {
+    flex-basis: 100%;
+    padding: 6px 7px;
+  }
+}
+
+
+/* Character name gets its own row */
+#character.battle-status-panel {
+  grid-template-rows: auto auto auto;
+  row-gap: 10px;
+  padding-top: 16px;
+}
+
+#character #characterName {
+  position: static;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  margin: 0;
+  padding: 0 0 8px;
+  width: 100%;
+  text-align: center;
+  z-index: 1;
+}
+
+/* Portrait and remaining stats sit beneath the name */
+#character #characterPortraitWrapper {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+#character #characterStats {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+#character #characterCompactStats {
+  grid-column: 2;
+  grid-row: 3;
+  align-self: start;
+  margin-top: 0;
+}
+
+/* Stack each vertical meter with its value underneath */
+#characterSideMeters {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 6px;
+  width: 35px;
+}
+
+#characterSideMeters .verticalMeterGroup {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+#characterSideMeters .verticalMeter {
+  width: 100%;
+  flex: 1;
+  min-height: 100px;
+}
+
+#characterSideMeters .verticalMeterValue {
+  font-size: 9px;
+  line-height: 1.2;
+  color: #fff;
+  white-space: nowrap;
+}
+
+#characterSideMeters .verticalMeterGroup small {
+  font-size: 9px;
+  line-height: 1;
+  color: #a9c7d9;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+
+/* --- Character card layout refinements --- */
+
+#character.battle-status-panel {
+  grid-template-columns: 165px minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  column-gap: 20px;
+  row-gap: 10px;
+}
+
+/* Name aligned left above the portrait */
+#character #characterName {
+  position: static;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  justify-self: start;
+  text-align: left;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 8px 4px;
+}
+
+/* Portrait and meters remain on the left */
+#character #characterPortraitWrapper {
+  grid-column: 1;
+  grid-row: 2;
+  width: 165px;
+  gap: 12px;
+}
+
+/* Slightly larger portrait */
+#character #characterImage {
+  width: 112px;
+  height: 180px !important;
+}
+
+/* More separation and a little more width for both meters */
+#characterSideMeters {
+  width: 41px;
+  flex: 1;
+  gap: 9px;
+}
+
+#characterSideMeters .verticalMeterGroup {
+  flex: 1;
+  min-width: 15px;
+}
+
+#characterSideMeters .verticalMeter {
+  min-width: 15px;
+  height: 180px;
+  border-radius: 5px;
+}
+
+#characterSideMeters .verticalMeterValue {
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* Defense and Agility stacked vertically */
+#character #characterStats {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Keep the cooldown and recovery chips underneath the bars */
+#character #characterCompactStats {
+  grid-column: 2;
+  grid-row: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-self: start;
+  margin-top: 0;
+}
+
+/* Keep the stat bars readable when stacked */
+#character #characterStats .statBar {
+  width: 100%;
+  min-width: 0;
+}
+
+#character #characterStats .statProgress {
+  height: 9px;
+}
+
+/* Smaller screens */
+@media (max-width: 600px) {
+  #character.battle-status-panel {
+    grid-template-columns: 125px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  #character #characterPortraitWrapper {
+    width: 125px;
+    gap: 8px;
+  }
+
+  #character #characterImage {
+    width: 80px;
+    height: 155px !important;
+  }
+
+  #characterSideMeters {
+    width: 37px;
+    gap: 6px;
+  }
+
+  #characterSideMeters .verticalMeter {
+    height: 155px;
+  }
+
+  #character #characterStats {
+    gap: 14px;
+  }
+}
+
+
+/* --- Final vertical meter spacing --- */
+
+#character #characterPortraitWrapper {
+  width: 190px;
+  gap: 18px;
+}
+
+#character #characterImage {
+  width: 112px;
+  height: 190px !important;
+}
+
+/* Wider gap and larger meters */
+#characterSideMeters {
+  width: 56px;
+  flex: 1;
+  gap: 14px;
+  align-items: stretch;
+}
+
+#characterSideMeters .verticalMeterGroup {
+  flex: 1;
+  min-width: 22px;
+  gap: 5px;
+}
+
+#characterSideMeters .verticalMeter {
+  width: 100%;
+  min-width: 22px;
+  height: 190px;
+  border-radius: 6px;
+}
+
+/* Keep the values readable and separated */
+#characterSideMeters .verticalMeterValue {
+  font-size: 10px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+#characterSideMeters .verticalMeterGroup small {
+  font-size: 9px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Give the portrait column more room */
+#character.battle-status-panel {
+  grid-template-columns: 190px minmax(0, 1fr);
+  column-gap: 22px;
+}
+
+/* Scale down appropriately on smaller screens */
+@media (max-width: 600px) {
+  #character.battle-status-panel {
+    grid-template-columns: 145px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+
+  #character #characterPortraitWrapper {
+    width: 145px;
+    gap: 10px;
+  }
+
+  #character #characterImage {
+    width: 85px;
+    height: 165px !important;
+  }
+
+  #characterSideMeters {
+    width: 45px;
+    gap: 8px;
+  }
+
+  #characterSideMeters .verticalMeter {
+    height: 165px;
+  }
+
+  #characterSideMeters .verticalMeterValue {
+    font-size: 8px;
+  }
+}
+
+
+/* --- Wider, thicker Defense and Agility bars --- */
+
+#character #characterStats {
+  width: 100%;
+  gap: 22px;
+}
+
+#character #characterStats .statBar {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Make the labels and values easier to read */
+#character #characterStats .statBarHeader {
+  font-size: 14px;
+  margin-bottom: 7px;
+}
+
+/* Thicker progress bars */
+#character #characterStats .statProgress {
+  height: 16px !important;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Smooth arcade-style fill */
+#character #characterStats .progress-bar {
+  border-radius: 6px;
+  transition: width 0.35s ease;
+}
+

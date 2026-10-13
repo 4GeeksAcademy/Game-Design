@@ -296,14 +296,14 @@ function evadeAttack(ATK, attacker, defender) {
   }
 
   // Effects resolve even when the attack's damage is evaded.
-  let buffsApplied = {};
-let debuffsApplied = {};
+  const buffsApplied = applyEffects(ATK.buff, attacker);
 
-// Only apply effects if the attack was not successfully evaded.
-if (!evaded) {
-  buffsApplied = applyEffects(ATK.buff, attacker);
-  debuffsApplied = applyEffects(ATK.debuff, defender, -1);
-}
+  // Debuffs only apply if the opponent fails to evade.
+  let debuffsApplied = {};
+
+  if (!evaded) {
+    debuffsApplied = applyEffects(ATK.debuff, defender, -1);
+  }
 
   let damageReceived = 0;
 

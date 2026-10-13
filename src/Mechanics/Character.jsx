@@ -3,14 +3,79 @@ import StatBar from "./StatBar.jsx";
 import "./BattleUI.css";
 
 function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
+  const healthPercentage =
+    character.maximumHealth > 0
+      ? Math.min(
+          100,
+          Math.max(0, (character.health / character.maximumHealth) * 100),
+        )
+      : 0;
+
   return (
     <div id="characterSection">
       <div id="character" className="battle-status-panel">
-        <img
-          id="characterImage"
-          src="https://placehold.co/300x400"
-          alt={character.name}
-        />
+        <div id="characterPortraitWrapper">
+          <img
+            id="characterImage"
+            src="https://placehold.co/300x400"
+            alt={character.name}
+          />
+
+          <div id="characterSideMeters">
+            <div className="verticalMeterGroup">
+              <div className="verticalMeter healthMeter" title="Health">
+                <div
+                  className="verticalMeterFill"
+                  style={{
+                    height: `${
+                      character.maximumHealth > 0
+                        ? Math.min(
+                            100,
+                            Math.max(
+                              0,
+                              (character.health / character.maximumHealth) *
+                                100,
+                            ),
+                          )
+                        : 0
+                    }%`,
+                  }}
+                />
+                <span>H</span>
+              </div>
+              <strong className="verticalMeterValue">
+                {character.health}/{character.maximumHealth}
+              </strong>
+              <small>Health</small>
+            </div>
+
+            <div className="verticalMeterGroup">
+              <div className="verticalMeter manaMeter" title="Mana">
+                <div
+                  className="verticalMeterFill"
+                  style={{
+                    height: `${
+                      character.maximumMana > 0
+                        ? Math.min(
+                            100,
+                            Math.max(
+                              0,
+                              (character.mana / character.maximumMana) * 100,
+                            ),
+                          )
+                        : 0
+                    }%`,
+                  }}
+                />
+                <span>M</span>
+              </div>
+              <strong className="verticalMeterValue">
+                {character.mana}/{character.maximumMana}
+              </strong>
+              <small>Mana</small>
+            </div>
+          </div>
+        </div>
 
         <div id="characterInfo">
           <p id="characterHeader">YOUR CHARACTER</p>
@@ -18,26 +83,7 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
           <h2 id="characterName">{character.name}</h2>
 
           <div id="characterStats">
-            <StatBar
-              label="Health"
-              icon="❤️"
-              current={character.health}
-              maximum={character.maximumHealth}
-              color={
-                character.health / character.maximumHealth <= 0.25
-                  ? "danger"
-                  : character.health / character.maximumHealth <= 0.5
-                    ? "warning"
-                    : "success"
-              }
-            />
-            <StatBar
-              label="Mana"
-              icon="🔵"
-              current={character.mana}
-              maximum={character.maximumMana}
-              color="info"
-            />
+           
             <StatBar
               label="Defense"
               icon="🛡️"
@@ -45,6 +91,7 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
               maximum={100}
               color="secondary"
             />
+
             <StatBar
               label="Agility"
               icon="⚡"
@@ -52,20 +99,20 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
               maximum={100}
               color="warning"
             />
-            <StatBar
-              label="Cooldown"
-              icon="⏳"
-              current={character.cooldown ?? 0}
-              maximum={character.maximumCooldown ?? 3}
-              color="secondary"
-            />{" "}
-            <StatBar
-              label="Recovery"
-              icon="🔄"
-              current={character.recovery ?? 0}
-              maximum={Math.max(5, character.recovery ?? 0)}
-              color="info"
-            />
+          </div>
+
+          <div id="characterCompactStats">
+            <div className="compactStat">
+              <span>⏳ Cooldown</span>
+              <strong>
+                {character.cooldown ?? 0}/{character.maximumCooldown ?? 3}
+              </strong>
+            </div>
+
+            <div className="compactStat">
+              <span>🔄 Recovery</span>
+              <strong>{character.recovery ?? 0}</strong>
+            </div>
           </div>
         </div>
       </div>
