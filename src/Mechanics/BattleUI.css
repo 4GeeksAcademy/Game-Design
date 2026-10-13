@@ -1560,17 +1560,20 @@ body {
 }
 
 #combatPopupContainer {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;
+  top: 25%;
+  left: 20px;
+  right: auto;
+  transform: none;
   z-index: 1000;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
+
   width: max-content;
-  max-width: 90%;
+  max-width: calc(100vw - 40px);
   pointer-events: none;
 }
 
@@ -1579,20 +1582,29 @@ body {
 ========================================= */
 
 #combatPopupContainer {
-  position: fixed;
+  position: fixed !important;
   top: 25%;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 170px !important;
+  left: auto !important;
+  transform: none !important;
   z-index: 1000;
 
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-end;
+  gap: 8px;
 
   width: max-content;
-  max-width: 90%;
+  max-width: calc(100vw - 40px);
   pointer-events: none;
+}
+
+.combat-popup {
+  font-size: 12px;
+  padding: 8px 12px;
+  max-width: 280px;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 
 .combat-popup {
@@ -1706,19 +1718,95 @@ body {
   }
 }
 
-/* Stagger combat popup messages */
 #combatPopupContainer .combat-popup:nth-child(1) {
   animation-delay: 0s !important;
 }
 
 #combatPopupContainer .combat-popup:nth-child(2) {
-  animation-delay: 0.5s !important;
+  animation-delay: 0.3s !important;
 }
 
 #combatPopupContainer .combat-popup:nth-child(3) {
-  animation-delay: 1.5s !important;
+  animation-delay: 0.6s !important;
 }
 
-#combatPopupContainer .combat-popup:nth-child(n + 4) {
-  animation-delay: 2.5s !important;
+/* Slightly enlarge the character and opponent status panels */
+#character,
+#opponent {
+  min-width: 340px;
+  min-height: 260px;
 }
+
+/* Give the stat section more room */
+#characterInfo,
+#opponentInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+#characterStats {
+  row-gap: 6px;
+}
+
+
+/* Keep both status panels aligned and evenly spaced */
+#character,
+#opponent {
+  box-sizing: border-box;
+  width: min(100%, 760px);
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px;
+}
+
+/* Keep the character image at a consistent size */
+#characterImage,
+#opponentImage {
+  width: 125px;
+  height: 165px;
+  flex: 0 0 125px;
+  object-fit: cover;
+}
+
+/* Give the name and stat bars enough room */
+#characterInfo,
+#opponentInfo {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Stack the stat bars consistently */
+#characterStats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Prevent stat bars from overflowing their panels */
+#characterStats > * {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Keep the two status panels responsive on smaller screens */
+@media (max-width: 600px) {
+  #character,
+  #opponent {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  #characterImage,
+  #opponentImage {
+    width: 85px;
+    height: 120px;
+    flex-basis: 85px;
+  }
+}
+

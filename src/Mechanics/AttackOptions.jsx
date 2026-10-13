@@ -38,45 +38,62 @@ function AttackOptions({
                 key={attack.name}
                 disabled={currentTurn !== "player" || !attack.state}
                 onClick={() => {
-                  const result = aiDefendOrEvade(
-                    attack,
-                    character,
-                    opponent
-                  );
+                  const result = aiDefendOrEvade(attack, character, opponent);
 
                   if (result) {
-                    // Show the attack or buff first.
+                    // Announce the attack.
                     showCombatMessage(
-                      attack.buff
-                        ? `✨ ${character.name} uses ${attack.name}!`
-                        : `⚔️ ${character.name} attacks with ${attack.name}!`,
-                      attack.buff ? "buff" : "hit"
+                      `⚔️ ${character.name} uses ${attack.name}!`,
+                      "hit",
                     );
 
-                    // Show the opponent's response next.
+                    // Show damage when the attack actually deals damage.
+                    if (result.damageReceived > 0) {
+                      showCombatMessage(
+                        `💥 ${opponent.name.toUpperCase()} TOOK ${result.damageReceived} DAMAGE!`,
+                        "hit",
+                      );
+                    }
+
+                    // Show the effects applied to the attacker.
+                    // Show each buff individually.
+                    Object.entries(result.buffsApplied ?? {}).forEach(
+                      ([stat, amount]) => {
+                        if (amount !== 0) {
+                          showCombatMessage(
+                            `✨ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}!`,
+                            amount > 0 ? "buff" : "debuff",
+                          );
+                        }
+                      },
+                    );
+
+                    // Show each debuff individually.
+                    Object.entries(result.debuffsApplied ?? {}).forEach(
+                      ([stat, amount]) => {
+                        if (amount !== 0) {
+                          showCombatMessage(
+                            `💢 ${opponent.name.toUpperCase()} ${stat.toUpperCase()} ${amount}!`,
+                            "debuff",
+                          );
+                        }
+                      },
+                    );
+
+                   
+
+                    // Show defensive responses for normal attacks.
                     if (result.action === "defend") {
                       showCombatMessage(
                         `🛡️ ${opponent.name.toUpperCase()} BLOCKED!`,
-                        "opponent-blocked"
+                        "opponent-blocked",
                       );
                     } else if (result.action === "evade") {
                       showCombatMessage(
                         result.evaded
                           ? `💨 ${opponent.name.toUpperCase()} EVADED!`
                           : `💥 ${opponent.name.toUpperCase()} FAILED TO EVADE!`,
-                        result.evaded
-                          ? "opponent-evaded"
-                          : "hit"
-                      );
-                    } else if (result.action === "take damage") {
-                      showCombatMessage(
-                        `💥 ${opponent.name.toUpperCase()} TOOK ${result.damageReceived ?? attack.damage} DAMAGE!`,
-                        "hit"
-                      );
-                    } else if (result.action === "buff") {
-                      showCombatMessage(
-                        `🛡️ DEFENSE +${attack.buff.defense}!`,
-                        "buff"
+                        result.evaded ? "opponent-evaded" : "hit",
                       );
                     }
 
@@ -84,8 +101,7 @@ function AttackOptions({
                     setOpponent({ ...result.defender });
 
                     setDamageDealt(
-                      (damage) =>
-                        damage + (result.damageReceived || 0)
+                      (damage) => damage + (result.damageReceived || 0),
                     );
 
                     setAttacksUsed((attacks) => attacks + 1);
@@ -101,26 +117,17 @@ function AttackOptions({
                 />
 
                 {/* Attack Name */}
-                <h5
-                  id={`attackName${index}`}
-                  className="text-center"
-                >
+                <h5 id={`attackName${index}`} className="text-center">
                   {attack.name}
                 </h5>
 
                 {/* Attack Stats */}
                 <div id={`attackStats${index}`}>
-                  <p
-                    id={`attackDamage${index}`}
-                    className="mb-1"
-                  >
+                  <p id={`attackDamage${index}`} className="mb-1">
                     Damage: {attack.damage ?? 0}
                   </p>
 
-                  <p
-                    id={`attackMana${index}`}
-                    className="mb-3"
-                  >
+                  <p id={`attackMana${index}`} className="mb-3">
                     Mana: {attack.cost}
                   </p>
                 </div>

@@ -31,7 +31,6 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
                     : "success"
               }
             />
-
             <StatBar
               label="Mana"
               icon="🔵"
@@ -39,7 +38,6 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
               maximum={character.maximumMana}
               color="info"
             />
-
             <StatBar
               label="Defense"
               icon="🛡️"
@@ -47,13 +45,26 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
               maximum={100}
               color="secondary"
             />
-
             <StatBar
               label="Agility"
               icon="⚡"
               current={character.agility}
               maximum={100}
               color="warning"
+            />
+            <StatBar
+              label="Cooldown"
+              icon="⏳"
+              current={character.cooldown ?? 0}
+              maximum={character.maximumCooldown ?? 3}
+              color="secondary"
+            />{" "}
+            <StatBar
+              label="Recovery"
+              icon="🔄"
+              current={character.recovery ?? 0}
+              maximum={Math.max(5, character.recovery ?? 0)}
+              color="info"
             />
           </div>
         </div>

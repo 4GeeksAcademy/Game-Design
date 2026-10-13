@@ -41,15 +41,17 @@ function App() {
   const [aiAttack, setAiAttack] = useState(null);
 
   // Queue combat messages so they don't replace one another.
+  const firstMessageId = combatMessages[0]?.id;
+
   useEffect(() => {
-    if (combatMessages.length === 0) return;
+    if (firstMessageId === undefined) return;
 
     const timer = setTimeout(() => {
-      setCombatMessages((messages) => messages.slice(1));
-    }, 3300);
+      setCombatMessages((messages) => messages.slice(3));
+    }, 2500);
 
     return () => clearTimeout(timer);
-  }, [combatMessages]);
+  }, [firstMessageId]);
 
   // Advance the turn when both sides finish.
   useEffect(() => {
@@ -88,7 +90,7 @@ function App() {
     <div className="container-fluid mt-3" id="gameContainer">
       {combatMessages.length > 0 && (
         <div id="combatPopupContainer">
-          {combatMessages.map((message) => (
+          {combatMessages.slice(0, 3).map((message) => (
             <div className={`combat-popup ${message.type}`} key={message.id}>
               {message.text}
             </div>

@@ -6,29 +6,30 @@ const rockLee = {
     maximumMana: 50,
     manaRegen: 10,
     cooldown: 5,
+    maximumCooldown: 3,
     recovery: 2,
-    agility: 40,
+    agility: 35,
     defense: {
     amount: 12,
     active: true
 },
 
     attacks: [
-        {
-            name: "Leaf Hurricane",
-            damage: 25,
-            speed: 45,
-            cost: 12,
-            state: true
-        },
+        // {
+        //     name: "Leaf Hurricane",
+        //     damage: 25,
+        //     speed: 45,
+        //     cost: 12,
+        //     state: true
+        // },
 
-        {
-            name: "Rapid Fists",
-            damage: 10,
-            speed: 60,
-            cost: 5,
-            state: true
-        },
+        // {
+        //     name: "Rapid Fists",
+        //     damage: 10,
+        //     speed: 60,
+        //     cost: 5,
+        //     state: true
+        // },
         {
             name: "Ultra Wave",
             damage: 70,

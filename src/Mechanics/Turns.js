@@ -1,9 +1,30 @@
+
 let turns = 1;
 
 function regenerateMana(character) {
   character.mana = Math.min(
     character.maximumMana,
-    character.mana + character.manaRegen,
+    character.mana + character.manaRegen
+  );
+}
+
+function recoverCooldown(character) {
+  const recovery = character.recovery ?? 1;
+  const maximumCooldown = character.maximumCooldown ?? 3;
+
+  character.cooldown = Math.min(
+    maximumCooldown,
+    (character.cooldown ?? 0) + recovery
+  );
+
+  console.log(
+    character.name,
+    "recovered",
+    recovery,
+    "cooldown. Current cooldown:",
+    character.cooldown,
+    "/",
+    maximumCooldown
   );
 }
 
@@ -21,18 +42,21 @@ function turn(playerOne, playerTwo) {
     regenerateMana(playerOne);
     regenerateMana(playerTwo);
 
-    playerOne.turnFinished = false;
-    playerTwo.turnFinished = false;
-    playerOne.attacks = resetAttacks(playerOne.attacks);
-    playerTwo.attacks = resetAttacks(playerTwo.attacks);
     recoverCooldown(playerOne);
     recoverCooldown(playerTwo);
+
+    playerOne.turnFinished = false;
+    playerTwo.turnFinished = false;
+
+    playerOne.attacks = resetAttacks(playerOne.attacks);
+    playerTwo.attacks = resetAttacks(playerTwo.attacks);
   }
 }
 
-function recoverCooldown(character) {
-  console.log(character.name, "is regenerating", character.manaRegen, "mana");
-  character.cooldown = Math.min(3, character.cooldown + character.recovery);
-}
+export {
+  regenerateMana,
+  recoverCooldown,
+  resetAttacks,
+  turn,
+};
 
-export { regenerateMana, resetAttacks, turn };
