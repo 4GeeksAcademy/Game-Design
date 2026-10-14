@@ -23,13 +23,13 @@ const mina = {
   image: minaArenaImage,
 
   health: 100,
-  mana: 70,
-  maximumMana: 70,
+  mana: 80,
+  maximumMana: 80,
   manaRegen: 25,
   cooldown: 3,
   maximumCooldown: 3,
   recovery: 1,
-  agility: 30,
+  agility: 20,
   defense: {
     amount: 25,
     active: true,
@@ -38,12 +38,12 @@ const mina = {
   attacks: [
     {
       name: "Acid Shot",
-      damage: 25,
+      damage: 15,
       speed: 40,
-      cost: 10,
+      cost: 12,
       state: true,
       debuff: {
-        health: 3,
+        health: 2,
         mana: 20,
         agility: 5,
 
@@ -52,14 +52,14 @@ const mina = {
 
     {
       name: "Acid Blast",
-      damage: 30,
+      damage: 20,
       speed: 30,
       cost: 22,
       buff: {
         defense: 3,
       },
       debuff: {
-        health: 5,
+        health: 3,
         },
       state: true,
     },
@@ -67,9 +67,9 @@ const mina = {
 
     {
       name: "Acid Bomb",
-      damage: 60,
+      damage: 40,
       speed: 10,
-      cost: 40,
+      cost: 55,
       buff: {
         
         defense: 6,
@@ -84,7 +84,7 @@ const mina = {
 
     {
       name: "Acid Corrosion",
-      damage: 25,
+      damage: 10,
       speed: 20,
       cost: 35,
       debuff: { health: 3, defense: 10, agility: 10, cooldown: 1, recovery: 1, },

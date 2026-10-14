@@ -902,7 +902,7 @@ body {
   border: 2px solid #ff4059;
   border-radius: 18px;
   box-shadow: 0 0 12px #ff405955, 0 0 35px #ff253522, inset 0 0 25px #ff40590d;
-  animation: gameOverAppear 0.6s ease-out;
+  animation: gameOverAppear 1s ease-out;
 }
 
 #gameOverIcon {
@@ -1141,16 +1141,25 @@ body {
   }
 }
 
-#combatPopupContainer .combat-popup:nth-child(1) {
-  animation-delay: 0s;
+/* Message types */
+.combat-popup.blocked {
+  border: 2px solid #42a5f5;
 }
 
-#combatPopupContainer .combat-popup:nth-child(2) {
-  animation-delay: 0.3s;
+.combat-popup.evaded {
+  border: 2px solid #4de1a1;
 }
 
-#combatPopupContainer .combat-popup:nth-child(3) {
-  animation-delay: 0.6s;
+.combat-popup.hit {
+  border: 2px solid #ff5263;
+}
+
+/* Keep the animation comfortable on smaller screens */
+@media (prefers-reduced-motion: reduce) {
+  #combatPopupContainer .combat-popup {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+  }
 }
 
 /* =========================================================
@@ -2266,3 +2275,126 @@ body {
 .attack-card-wrapper:focus-within .attack-effects-popup {
   pointer-events: auto;
 }
+
+/* Smooth horizontal stat bars */
+.statProgress .progress-bar {
+  transition: width 1s ease-in-out !important;
+}
+
+/* Smooth vertical stat bars */
+.verticalMeterFill {
+  transition: height 0.7s ease-in-out !important;
+}
+
+
+/* =========================================
+   BATTLE ARENA + SIDE COMBAT LOG
+========================================= */
+
+#battleLayout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  width: 100%;
+}
+
+#battleArena {
+  min-width: 0;
+}
+
+
+#battleLayout #battleArena {
+  grid-column: 2;
+  grid-row: 1;
+}
+/* Combat log sidebar */
+#battleLayout #combatLog {
+
+  grid-column: 1;
+  grid-row: 1;
+  position: sticky;
+  top: 20px;
+
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 20px 0;
+
+  box-sizing: border-box;
+  overflow: hidden;
+
+  color: #f2f5f9;
+  background: linear-gradient(160deg, #151e2c, #0b101b);
+  border: 1px solid #13d5ff80;
+  border-radius: 10px;
+
+  box-shadow:
+    0 0 12px #13d5ff15,
+    inset 0 0 12px #00000030;
+}
+
+#battleLayout #combatLogHeader {
+  padding: 14px;
+  background: #101b2d;
+  border-bottom: 1px solid #13d5ff50;
+}
+
+#battleLayout #combatLogHeader h4 {
+  color: #13d5ff;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+}
+
+#battleLayout #combatLogHeader span {
+  white-space: nowrap;
+  font-size: 0.75rem;
+}
+
+#battleLayout #combatLogEntries {
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 8px 12px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #13d5ff #101b2d;
+}
+
+#battleLayout .combat-log-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 2px;
+}
+
+#battleLayout .combat-log-time {
+  font-size: 0.7rem;
+}
+
+#battleLayout .combat-log-text {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* On smaller screens, place the log below the fighters */
+@media (max-width: 1100px) {
+  #battleLayout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  #battleLayout #combatLog {
+    position: static;
+    max-width: 700px;
+    margin: 20px auto;
+  }
+
+  #battleLayout #combatLogEntries {
+    max-height: 260px;
+  }
+}
+
+#combatPopupContainer .combat-popup {
+  animation: combatPopupAnimation 2.5s ease-in-out forwards;
+}
+
