@@ -6,8 +6,9 @@ import rockLee from "../All_Character_Stats/Rock_LeeStats.js";
 import RockLeeArena from "../../assets/img/RockLeeArena.jpg";
 import Usopp from "../All_Character_Stats/UsoppStats.js";
 import UsoppArenaImage from "../../assets/img/UsoppArena.png";
+import Chad from "../All_Character_Stats/ChadStats.js";
+import ChadImage from "../../assets/img/Chad.jpeg";
 import "./CharacterSelection.css";
-
 
 const roster = [
   {
@@ -30,6 +31,13 @@ const roster = [
     data: Usopp,
     color: "usopp",
     description: "SNIPER KING",
+  },
+  {
+    id: "chad",
+    image: ChadImage,
+    data: Chad,
+    color: "Chad",
+    description: "DEADLY STRIKER",
   },
 ];
 
@@ -114,7 +122,15 @@ function CharacterSelection() {
         return;
       }
 
-      setCpuIndex((current) => (current === 0 ? 1 : 0));
+      setCpuIndex((current) => {
+        let randomIndex;
+
+        do {
+          randomIndex = Math.floor(Math.random() * roster.length);
+        } while (roster.length > 1 && randomIndex === current);
+
+        return randomIndex;
+      });
     }, 350);
 
     return () => clearInterval(animation);
@@ -140,7 +156,7 @@ function CharacterSelection() {
       {
         name: "HEALTH",
         value: stats.health,
-        maximum: 300,
+        maximum: 200,
         color: "health",
       },
       {

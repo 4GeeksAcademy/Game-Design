@@ -4,7 +4,7 @@ const rockLee = {
     name: "Rock Lee",
     image: RockLeeArena,
 
-    health: 100,
+    health: 80,
     mana: 50,
     maximumMana: 50,
     manaRegen: 10,

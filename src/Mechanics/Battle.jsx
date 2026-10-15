@@ -9,6 +9,7 @@ import { turn } from "./Turns.js";
 import mina from "./All_Character_Stats/Mina_AshidoStats.js";
 import rockLee from "./All_Character_Stats/Rock_LeeStats.js";
 import Usopp from "./All_Character_Stats/UsoppStats.js";
+import Chad from "./All_Character_Stats/ChadStats.js";
 import { aiTurn } from "./AI.js";
 import React, { useState, useEffect } from "react";
 
@@ -16,10 +17,11 @@ function App() {
   const location = useLocation();
 
   const fighterData = {
-    mina,
-    rockLee,
-    Usopp,
-  };
+  mina: mina,
+  rockLee: rockLee,
+  usopp: Usopp,
+  chad: Chad,
+};
 
   const playerData = fighterData[location.state?.playerId] ?? mina;
 

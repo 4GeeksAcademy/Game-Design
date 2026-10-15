@@ -22,7 +22,7 @@ const mina = {
   name: "Mina Ashido",
   image: minaArenaImage,
 
-  health: 100,
+  health: 95,
   mana: 80,
   maximumMana: 80,
   manaRegen: 25,

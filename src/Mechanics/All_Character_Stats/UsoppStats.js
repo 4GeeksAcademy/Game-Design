@@ -10,7 +10,7 @@ const Usopp = {
   name: "Ussop",
   image: UsoppArenaImage,
 
-  health: 95,
+  health: 100,
   mana: 90,
   maximumMana: 90,
   manaRegen: 15,
