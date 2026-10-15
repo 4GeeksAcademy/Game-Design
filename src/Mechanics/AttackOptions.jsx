@@ -89,10 +89,7 @@ function AttackOptions({
                     const result = aiDefendOrEvade(attack, character, opponent);
 
                     if (!result) {
-                      showCombatMessage(
-                        "Not enough mana!",
-                        "hit",
-                      );
+                      showCombatMessage("Not enough mana!", "hit");
                       return;
                     }
 
@@ -113,9 +110,15 @@ function AttackOptions({
                     );
 
                     if (result.action === "defend") {
-                      showCombatMessage( `${opponent.name} blocked ${attack.name}!`, "blocked");
+                      showCombatMessage(
+                        `${opponent.name} blocked ${attack.name}!`,
+                        "blocked",
+                      );
                     } else if (result.action === "evade") {
-                      showCombatMessage(`${opponent.name} evaded ${attack.name}!`, "evaded");
+                      showCombatMessage(
+                        `${opponent.name} evaded ${attack.name}!`,
+                        "evaded",
+                      );
                     } else if (
                       result.action === "attack" &&
                       result.evaded === false
@@ -139,9 +142,10 @@ function AttackOptions({
                 >
                   <img
                     id={`attackImage${index}`}
-                    src="https://placehold.co/600x400"
-                    className="card-img-top"
+                    src={attack.image}
+                    className="card-img-top attack-image"
                     alt={attack.name}
+                    loading="lazy"
                   />
 
                   <h5 id={`attackName${index}`} className="text-center">

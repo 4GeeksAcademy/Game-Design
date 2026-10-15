@@ -4,6 +4,8 @@ import mina from "../All_Character_Stats/Mina_AshidoStats.js";
 import minaArena from "../../assets/img/MinaAshidoArena.jpg";
 import rockLee from "../All_Character_Stats/Rock_LeeStats.js";
 import RockLeeArena from "../../assets/img/RockLeeArena.jpg";
+import Usopp from "../All_Character_Stats/UsoppStats.js";
+import UsoppArenaImage from "../../assets/img/UsoppArena.png";
 import "./CharacterSelection.css";
 
 
@@ -21,6 +23,13 @@ const roster = [
     data: rockLee,
     color: "lee",
     description: "THE TAIJUTSU SPECIALIST",
+  },
+  {
+    id: "usopp",
+    image: UsoppArenaImage,
+    data: Usopp,
+    color: "usopp",
+    description: "SNIPER KING",
   },
 ];
 

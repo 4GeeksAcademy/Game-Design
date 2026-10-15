@@ -8,6 +8,7 @@ import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
 import mina from "./All_Character_Stats/Mina_AshidoStats.js";
 import rockLee from "./All_Character_Stats/Rock_LeeStats.js";
+import Usopp from "./All_Character_Stats/UsoppStats.js";
 import { aiTurn } from "./AI.js";
 import React, { useState, useEffect } from "react";
 
@@ -17,6 +18,7 @@ function App() {
   const fighterData = {
     mina,
     rockLee,
+    Usopp,
   };
 
   const playerData = fighterData[location.state?.playerId] ?? mina;
