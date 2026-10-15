@@ -1,9 +1,9 @@
 import ChadImage from "../../assets/img/Chad.jpeg";
 
-import HeavyBlow from "../../assets/img/HeavyBlow.jpeg";
-import GiantArmSmash from "../../assets/img/ChadArm.jpeg";
-import ElDirecto from "../../assets/img/ElDirecto.jpeg";
-import LaMuerte from "../../assets/img/LaMuerte.jpeg";
+import HeavyBlow from "../../assets/img/Attack_IMAGES/HeavyBlow.jpeg";
+import GiantArmSmash from "../../assets/img/Attack_IMAGES/ChadArm.jpeg";
+import ElDirecto from "../../assets/img/Attack_IMAGES/ElDirecto.jpeg";
+import LaMuerte from "../../assets/img/Attack_IMAGES/LaMuerte.jpeg";
 
 
 

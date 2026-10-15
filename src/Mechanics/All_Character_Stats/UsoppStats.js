@@ -1,18 +1,18 @@
 import UsoppArenaImage from "../../assets/img/UsoppArena.png";
 
-import ExplodingPineconeImage from "../../assets/img/ExplodingPinecone.jpeg";
-import TabascoStarImage from "../../assets/img/TabascoStar.jpeg";
-import FireBirdStarImage from "../../assets/img/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/GasStar.jpeg";
-import FakeHammerImage from "../../assets/img/FakeHammer.jpeg";
+import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
+import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
+import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
+import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
+import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
 
 const Usopp = {
   name: "Ussop",
   image: UsoppArenaImage,
 
   health: 100,
-  mana: 90,
-  maximumMana: 90,
+  mana: 65,
+  maximumMana: 65,
   manaRegen: 15,
   cooldown: 4,
   maximumCooldown: 4,
@@ -59,7 +59,6 @@ const Usopp = {
     state: true,
     debuff: {
       defense: 10,
-      recovery: 1,
       cooldown: 1,
     },
   },
@@ -83,14 +82,12 @@ const Usopp = {
     image: FakeHammerImage,
     damage: 1,
     speed: 30,
-    cost: 5,
+    cost: 10,
     state: true,
     debuff: {
       defense: 8,
       agility: 3,
       cooldown: 2,
-      maximumCooldown: 1,
-      recovery: 1,
     },
   },
 ],
