@@ -1,4 +1,4 @@
-import RockLeeArena from "../assets/img/RockLeeArena.jpg";
+import RockLeeArena from "../../assets/img/RockLeeArena.jpg";
 
 const rockLee = {
     name: "Rock Lee",

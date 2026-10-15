@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import mina from "../Mina_AshidoStats.js";
-import minaImage from "../../assets/img/minaSelection.png";
+import mina from "../All_Character_Stats/Mina_AshidoStats.js";
 import minaArena from "../../assets/img/MinaAshidoArena.jpg";
-import rockLee from "../Rock_LeeStats.js";
+import rockLee from "../All_Character_Stats/Rock_LeeStats.js";
 import RockLeeArena from "../../assets/img/RockLeeArena.jpg";
 import "./CharacterSelection.css";
 

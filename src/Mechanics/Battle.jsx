@@ -6,8 +6,8 @@ import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
-import mina from "./Mina_AshidoStats";
-import rockLee from "./Rock_LeeStats";
+import mina from "./All_Character_Stats/Mina_AshidoStats.js";
+import rockLee from "./All_Character_Stats/Rock_LeeStats.js";
 import { aiTurn } from "./AI.js";
 import React, { useState, useEffect } from "react";
 

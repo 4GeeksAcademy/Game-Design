@@ -1,4 +1,4 @@
-import { acidShot, acidBomb, acidRain, acidStorm } from "./Attack(list)";
+import { acidShot, acidBomb, acidRain, acidStorm } from "../Attack(list)";
 
 // const mina = {
 //     name: "Mina Ashido",
@@ -16,7 +16,7 @@ import { acidShot, acidBomb, acidRain, acidStorm } from "./Attack(list)";
 //         acidStorm
 //     ]
 // };
-import minaArenaImage from "../assets/img/MinaAshidoArena.jpg";
+import minaArenaImage from "../../assets/img/MinaAshidoArena.jpg";
 
 const mina = {
   name: "Mina Ashido",
