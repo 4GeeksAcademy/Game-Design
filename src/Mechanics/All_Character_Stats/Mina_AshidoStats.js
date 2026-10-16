@@ -25,7 +25,7 @@ const mina = {
   health: 95,
   mana: 80,
   maximumMana: 80,
-  manaRegen: 25,
+  manaRegen: 30,
   cooldown: 3,
   maximumCooldown: 3,
   recovery: 1,
@@ -42,19 +42,22 @@ const mina = {
       speed: 40,
       cost: 12,
       state: true,
+      buff: {
+        mana: 20,
+      },
       debuff: {
         health: 2,
-        mana: 20,
-        agility: 5,
+        mana: 5,
+        agility: 2,
 
     },
   },
 
     {
       name: "Acid Blast",
-      damage: 20,
+      damage: 25,
       speed: 30,
-      cost: 22,
+      cost: 17,
       buff: {
         defense: 3,
       },

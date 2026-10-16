@@ -8,8 +8,16 @@ import Usopp from "../All_Character_Stats/UsoppStats.js";
 import UsoppArenaImage from "../../assets/img/UsoppArena.png";
 import Chad from "../All_Character_Stats/ChadStats.js";
 import ChadImage from "../../assets/img/Chad.jpeg";
+import Picolo from "../All_Character_Stats/PicoloStats.js";
+import PicoloImage from "../../assets/img/picolo.jpg";
+import TenTen from "../All_Character_Stats/TenTenStats.js";
+import TenTenImage from "../../assets/img/Tenten.jpg";
+import Kirishima from "../All_Character_Stats/KirishimaStats.js";
+import KirishimaImage from "../../assets/img/Kirishima.png";
 import "./CharacterSelection.css";
 
+
+// Yoruichi Shihōin
 const roster = [
   {
     id: "mina",
@@ -38,6 +46,27 @@ const roster = [
     data: Chad,
     color: "Chad",
     description: "DEADLY STRIKER",
+  },
+  {
+    id: "picolo",
+    image: PicoloImage,
+    data: Picolo,
+    color: "Picolo",
+    description: "REGENERATION EXPERT",
+  },
+  {
+    id: "tenten",
+    image: TenTenImage,
+    data: TenTen,
+    color: "TenTen",
+    description: "WEAPONS SPECIALIST",
+  },
+  {
+    id: "kirishima",
+    image: KirishimaImage,
+    data: Kirishima,
+    color: "Kirishima",
+    description: "HARDEN",
   },
 ];
 

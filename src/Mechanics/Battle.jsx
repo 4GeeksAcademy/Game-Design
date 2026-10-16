@@ -10,6 +10,9 @@ import mina from "./All_Character_Stats/Mina_AshidoStats.js";
 import rockLee from "./All_Character_Stats/Rock_LeeStats.js";
 import Usopp from "./All_Character_Stats/UsoppStats.js";
 import Chad from "./All_Character_Stats/ChadStats.js";
+import Picolo from "./All_Character_Stats/PicoloStats.js";
+import TenTen from "./All_Character_Stats/TenTenStats.js";
+import Kirishima from "./All_Character_Stats/KirishimaStats.js";
 import { aiTurn } from "./AI.js";
 import React, { useState, useEffect } from "react";
 
@@ -21,6 +24,9 @@ function App() {
   rockLee: rockLee,
   usopp: Usopp,
   chad: Chad,
+  picolo: Picolo,
+  tenten: TenTen,
+  kirishima: Kirishima,
 };
 
   const playerData = fighterData[location.state?.playerId] ?? mina;
