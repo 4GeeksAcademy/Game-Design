@@ -14,6 +14,8 @@ import TenTen from "../All_Character_Stats/TenTenStats.js";
 import TenTenImage from "../../assets/img/Tenten.jpg";
 import Kirishima from "../All_Character_Stats/KirishimaStats.js";
 import KirishimaImage from "../../assets/img/Kirishima.png";
+import Ochaco from "../All_Character_Stats/OchacoStats.js";
+import OchacoArenaImage from "../../assets/img/Ochaco.png";
 import "./CharacterSelection.css";
 
 
@@ -67,6 +69,13 @@ const roster = [
     data: Kirishima,
     color: "Kirishima",
     description: "HARDEN",
+  },
+  {
+    id: "ochaco",
+    image: OchacoArenaImage,
+    data: Ochaco,
+    color: "ochaco",
+    description: "UGRAVITY",
   },
 ];
 

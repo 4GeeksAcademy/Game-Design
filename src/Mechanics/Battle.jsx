@@ -13,6 +13,7 @@ import Chad from "./All_Character_Stats/ChadStats.js";
 import Picolo from "./All_Character_Stats/PicoloStats.js";
 import TenTen from "./All_Character_Stats/TenTenStats.js";
 import Kirishima from "./All_Character_Stats/KirishimaStats.js";
+import Ochaco from "./All_Character_Stats/OchacoStats.js";
 import { aiTurn } from "./AI.js";
 import React, { useState, useEffect } from "react";
 
@@ -27,6 +28,7 @@ function App() {
   picolo: Picolo,
   tenten: TenTen,
   kirishima: Kirishima,
+  ochaco: Ochaco,
 };
 
   const playerData = fighterData[location.state?.playerId] ?? mina;
