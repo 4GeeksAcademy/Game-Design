@@ -8,7 +8,7 @@ import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
 
 const Naruto = {
   name: "Naruto Uzumaki",
-  image: null,
+  image: NarutoArenaImage,
 
   health: 110,
   mana: 75,

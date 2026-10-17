@@ -36,7 +36,9 @@ function AttackEffects({ attack }) {
 
       {debuffs.length > 0 && (
         <div className="attack-effect-group">
-          <span className="attack-effect-heading debuff-heading">DEBUFFS</span>
+          <span className="attack-effect-heading debuff-heading">
+            DEBUFFS
+          </span>
 
           <div className="attack-effect-list">
             {debuffs.map(([stat, amount]) => (
@@ -86,7 +88,11 @@ function AttackOptions({
                   style={{ minWidth: "200px" }}
                   disabled={currentTurn !== "player" || !attack.state}
                   onClick={() => {
-                    const result = aiDefendOrEvade(attack, character, opponent);
+                    const result = aiDefendOrEvade(
+                      attack,
+                      character,
+                      opponent,
+                    );
 
                     if (!result) {
                       showCombatMessage("Not enough mana!", "hit");
@@ -128,12 +134,29 @@ function AttackOptions({
                       showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
                     }
 
+                    // Display buffs applied by the attack.
                     Object.entries(result.buffsApplied ?? {}).forEach(
                       ([stat, amount]) => {
-                        if (amount !== 0) {
+                        if (typeof amount === "number" && amount !== 0) {
                           showCombatMessage(
-                            `✨ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
+                            `✨ ${stat.toUpperCase()} ${
+                              amount > 0 ? "+" : ""
+                            }${amount}`,
                             "buff",
+                          );
+                        }
+                      },
+                    );
+
+                    // Display debuffs applied by the attack.
+                    Object.entries(result.debuffsApplied ?? {}).forEach(
+                      ([stat, amount]) => {
+                        if (typeof amount === "number" && amount !== 0) {
+                          showCombatMessage(
+                            `💀 ${stat.toUpperCase()} ${
+                              amount > 0 ? "+" : ""
+                            }${amount}`,
+                            "debuff",
                           );
                         }
                       },

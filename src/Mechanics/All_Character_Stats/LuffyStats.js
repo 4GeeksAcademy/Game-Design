@@ -8,7 +8,7 @@ import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
 
 const Luffy = {
   name: "Monkey D. Luffy",
-  image: null,
+  image: LuffyArenaImage,
 
   health: 110,
   mana: 75,

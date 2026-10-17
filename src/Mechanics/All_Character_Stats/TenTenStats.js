@@ -8,7 +8,7 @@ import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
 
 const TenTen = {
   name: "Tenten",
-  image: TentenArenaImage,
+  image: TenTenArenaImage,
 
   health: 95,
   mana: 85,
