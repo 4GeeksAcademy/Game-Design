@@ -19,25 +19,26 @@ import Ichigo from "./All_Character_Stats/IchigoStats.js";
 import Naruto from "./All_Character_Stats/NarutoStats.js";
 import Yoruichi from "./All_Character_Stats/YoruichiStats.js";
 import { aiTurn } from "./AI.js";
-import React, { useState, useEffect } from "react";
+import { addCoins } from "./currency.js";
+import React, { useState, useEffect, useRef } from "react";
 
 function App() {
   const location = useLocation();
 
   const fighterData = {
-  mina: mina,
-  rockLee: rockLee,
-  usopp: Usopp,
-  chad: Chad,
-  picolo: Picolo,
-  tenten: TenTen,
-  kirishima: Kirishima,
-  ochaco: Ochaco,
-  luffy: Luffy,
-  ichigo: Ichigo,
-  naruto: Naruto,
-  yoruichi: Yoruichi,
-};
+    mina: mina,
+    rockLee: rockLee,
+    usopp: Usopp,
+    chad: Chad,
+    picolo: Picolo,
+    tenten: TenTen,
+    kirishima: Kirishima,
+    ochaco: Ochaco,
+    luffy: Luffy,
+    ichigo: Ichigo,
+    naruto: Naruto,
+    yoruichi: Yoruichi,
+  };
 
   const playerData = fighterData[location.state?.playerId] ?? mina;
 
@@ -70,6 +71,20 @@ function App() {
   }));
 
   const [damageDealt, setDamageDealt] = useState(0);
+  const lastRewardedDamage = useRef(0);
+
+  useEffect(() => {
+    const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
+
+    // Update the tracker before awarding the coins.
+    lastRewardedDamage.current = damageDealt;
+
+    if (damageSinceLastUpdate > 0) {
+      addCoins(Math.floor(damageSinceLastUpdate));
+    }
+  }, [damageDealt]);
+
+  
   const [attacksUsed, setAttacksUsed] = useState(0);
   const [currentTurn, setCurrentTurn] = useState("player");
 

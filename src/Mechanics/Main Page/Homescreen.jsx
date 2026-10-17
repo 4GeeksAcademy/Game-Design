@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCoins } from "../currency.js";
 import "./Homescreen.css";
 
 function Homescreen() {
@@ -32,6 +33,20 @@ function Homescreen() {
       },
     });
   };
+
+  const [coins, setCoins] = useState(() => getCoins());
+
+  useEffect(() => {
+    const updateCoins = () => {
+      setCoins(getCoins());
+    };
+
+    window.addEventListener("coinsUpdated", updateCoins);
+
+    return () => {
+      window.removeEventListener("coinsUpdated", updateCoins);
+    };
+  }, []);
 
   const renderHome = () => (
     <>
@@ -244,7 +259,15 @@ function Homescreen() {
           <span className="logo-name">FIGHTER'S ARENA</span>
         </div>
 
-        <span className="header-tag">PLAYER 1</span>
+        <div className="home-header-right">
+          <div className="currency-display" aria-label={`${coins} coins`}>
+            <span className="currency-icon">◈</span>
+            <span>{coins.toLocaleString()}</span>
+            <span className="currency-label">COINS</span>
+          </div>
+
+          <span className="header-tag">PLAYER 1</span>
+        </div>
       </header>
 
       <section className="home-content" key={menu}>

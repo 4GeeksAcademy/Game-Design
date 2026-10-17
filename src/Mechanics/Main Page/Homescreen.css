@@ -463,3 +463,53 @@
     transition: none;
   }
 }
+
+
+/* HEADER CURRENCY DISPLAY */
+
+.home-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.currency-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid rgba(54, 230, 160, 0.55);
+  background: rgba(54, 230, 160, 0.08);
+  color: #36e6a0;
+  font-size: 14px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 14px rgba(54, 230, 160, 0.08);
+}
+
+.currency-icon {
+  font-size: 19px;
+}
+
+.currency-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+@media (max-width: 480px) {
+  .home-header-right {
+    gap: 7px;
+  }
+
+  .currency-display {
+    gap: 5px;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .currency-label {
+    font-size: 8px;
+  }
+}
