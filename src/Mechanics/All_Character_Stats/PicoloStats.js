@@ -6,7 +6,7 @@ import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg"
 import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
 import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
 
-const piccolo = {
+const Picolo = {
   name: "Piccolo",
   image: PicoloArenaImage,
 
