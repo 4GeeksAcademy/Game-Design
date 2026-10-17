@@ -7,7 +7,7 @@ import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
 import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
 
 const Naruto = {
-  name: "Monkey D. Naruto",
+  name: "Naruto Uzumaki",
   image: null,
 
   health: 110,
@@ -23,36 +23,58 @@ const Naruto = {
     active: true,
   },
 
-  attacks: [
+ attacks: [
     {
-      name: "Gum-Gum Pistol",
+      name: "Shadow Clone Barrage",
       image: null,
       damage: 25,
-      speed: 70,
+      speed: 75,
       cost: 10,
       state: true,
     },
     {
-      name: "Gum-Gum Gatling",
+      name: "Multiple Shadow Clone Jutsu",
       image: null,
-      damage: 42,
-      speed: 55,
+      damage: 35,
+      speed: 65,
+      cost: 20,
+      state: true,
+    },
+    {
+      name: "Rasengan",
+      image: null,
+      damage: 45,
+      speed: 60,
       cost: 25,
       state: true,
     },
     {
-      name: "Gum-Gum Bazooka",
+      name: "Wind Style: Rasenshuriken",
       image: null,
       damage: 65,
-      speed: 35,
+      speed: 40,
       cost: 40,
       state: true,
+      debuff: {
+        agility: -5,
+      },
     },
     {
-      name: "Gum-Gum Red Hawk",
+      name: "Sage Mode Strike",
+      image: null,
+      damage: 55,
+      speed: 50,
+      cost: 35,
+      state: true,
+      buff: {
+        agility: 10,
+      },
+    },
+    {
+      name: "Kurama Chakra Strike",
       image: null,
       damage: 95,
-      speed: 45,
+      speed: 50,
       cost: 65,
       state: true,
       buff: {

@@ -10,87 +10,94 @@ const Kirishima = {
   name: "Kirishima Eijiro",
   image: KirishimaArenaImage,
 
-  health: 100,
-  mana: 65,
-  maximumMana: 65,
+  health: 125,
+  maximumHealth: 125,
+
+  mana: 70,
+  maximumMana: 70,
   manaRegen: 15,
-  cooldown: 4,
-  maximumCooldown: 4,
+
+  cooldown: 3,
+  maximumCooldown: 3,
   recovery: 1,
-  agility: 15,
+
+  agility: 20,
+
   defense: {
-    amount: 15,
-    active: true,
+    amount: 25,
   },
 
   attacks: [
-  {
-    name: "Green Star: Exploding Pinecone",
-    image: ExplodingPineconeImage,
-    damage: 15,
-    speed: 40,
-    cost: 8,
-    state: true,
-    debuff: {
-      agility: 5,
-      defense: 3,
+    {
+      name: "Red Gauntlet",
+      damage: 20,
+      speed: 40,
+      cost: 10,
+      state: true,
     },
-  },
-
-  {
-    name: "Tabasco Star",
-    image: TabascoStarImage,
-    damage: 10,
-    speed: 45,
-    cost: 10,
-    state: true,
-    debuff: {
-      health: 3,
-      mana: 10,
+    {
+      name: "Hardening Strike",
+      damage: 28,
+      speed: 30,
+      cost: 15,
+      state: true,
     },
-  },
-
-  {
-    name: "Fire Bird Star",
-    image: FireBirdStarImage,
-    damage: 60,
-    speed: 50,
-    cost: 30,
-    state: true,
-    debuff: {
-      defense: 10,
-      cooldown: 1,
+    {
+      name: "Red Counter",
+      damage: 15,
+      speed: 35,
+      cost: 12,
+      state: true,
+      buff: {
+        defense: 8,
+      },
     },
-  },
-
-  {
-    name: "Green Star: Gas Star",
-    image: GasStarImage,
-    damage: 20,
-    speed: 25,
-    cost: 18,
-    state: true,
-    debuff: {
-      health: 10,
-      defense: 5,
-      agility: 15,
+    {
+      name: "Unbreakable Guard",
+      damage: 0,
+      speed: 10,
+      cost: 18,
+      state: true,
+      buff: {
+        defense: 18,
+      },
     },
-  },
-
-  {
-    name: "Fake Hammer",
-    image: FakeHammerImage,
-    damage: 1,
-    speed: 30,
-    cost: 10,
-    state: true,
-    debuff: {
-      defense: 8,
-      agility: 3,
-      cooldown: 2,
+    {
+      name: "Red Riot Rush",
+      damage: 35,
+      speed: 35,
+      cost: 22,
+      state: true,
     },
-  },
-],
+    {
+      name: "Crimson Crush",
+      damage: 42,
+      speed: 25,
+      cost: 30,
+      state: true,
+      debuff: {
+        agility: 5,
+      },
+    },
+    {
+      name: "Red Riot Unbreakable",
+      damage: 0,
+      speed: 5,
+      cost: 25,
+      state: true,
+      buff: {
+        defense: 25,
+        agility: 5,
+      },
+    },
+    {
+      name: "Red Riot: Unbreakable Smash",
+      damage: 55,
+      speed: 20,
+      cost: 40,
+      state: true,
+    },
+  ],
 };
 
 export default Kirishima;
