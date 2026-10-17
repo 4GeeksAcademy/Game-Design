@@ -8,7 +8,7 @@ import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
 
 const piccolo = {
   name: "Piccolo",
-  image: PiccoloArenaImage,
+  image: PicoloArenaImage,
 
   health: 100,
   mana: 65,
