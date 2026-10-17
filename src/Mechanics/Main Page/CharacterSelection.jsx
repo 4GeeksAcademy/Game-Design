@@ -16,11 +16,40 @@ import Kirishima from "../All_Character_Stats/KirishimaStats.js";
 import KirishimaImage from "../../assets/img/Kirishima.png";
 import Ochaco from "../All_Character_Stats/OchacoStats.js";
 import OchacoArenaImage from "../../assets/img/Ochaco.png";
+import Luffy from "../All_Character_Stats/LuffyStats.js";
+import LuffyArenaImage from "../../assets/img/Luffy.png";
+import Ichigo from "../All_Character_Stats/IchigoStats.js";
+import IchigoArenaImage from "../../assets/img/Ichigo.png";
+import Naruto from "../All_Character_Stats/NarutoStats.js";
+import NarutoArenaImage from "../../assets/img/Naruto.png";
+import Yoruichi from "../All_Character_Stats/YoruichiStats.js";
+import YoruichiArenaImage from "../../assets/img/Yoruichi.png";
 import "./CharacterSelection.css";
 
 
-// Yoruichi Shihōin
+
 const roster = [
+  {
+    id: "luffy",
+    image: LuffyArenaImage,
+    data: Luffy,
+    color: "luffy",
+    description: "RUBBER TEEN",
+  },
+  {
+    id: "ichigo",
+    image: IchigoArenaImage,
+    data: Ichigo,
+    color: "ichigo",
+    description: "THE SUBSTITUTE SOUL REAPER",
+    },
+    {
+    id: "naruto",
+    image: NarutoArenaImage,
+    data: Naruto,
+    color: "naruto",
+    description: "THE NINE TAILS JINCHURIKI",
+  },
   {
     id: "mina",
     image: minaArena,
@@ -77,6 +106,14 @@ const roster = [
     color: "ochaco",
     description: "UGRAVITY",
   },
+  {
+    id: "Yoruichi",
+    image: YoruichiArenaImage,
+    data: Yoruichi,
+    color: "yoruichi",
+    description: "THE THUNDER GOD",
+  },
+  
 ];
 
 function CharacterSelection() {
