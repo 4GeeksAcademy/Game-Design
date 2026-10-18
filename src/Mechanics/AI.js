@@ -88,6 +88,7 @@ function aiTurn(ai, player, showAttack, hideAttack) {
   showAttack(attack);
 
   setTimeout(() => {
+    // Apply damage only if the player did not defend or evade.
     if (player.blocked === false) {
       attackCharacter(attack, ai, player);
     }
@@ -96,27 +97,20 @@ function aiTurn(ai, player, showAttack, hideAttack) {
 
     aiFinishTurn(ai);
     hideAttack();
-  }, 7000);
+  }, 4500);
 }
 
 function aiFinishTurn(ai) {
   ai.turnFinished = true;
 }
 
-
-
-
-
 function aiDefendOrEvade(attack, attacker, defender) {
   // Attacks that apply effects resolve directly.
   // Pure effect abilities cannot be blocked or evaded.
-// Attacks that also deal damage can still be defended against.
-if (
-  (attack.buff || attack.debuff) &&
-  !(attack.damage > 0)
-) {
-  return attackCharacter(attack, attacker, defender);
-}
+  // Attacks that also deal damage can still be defended against.
+  if ((attack.buff || attack.debuff) && !(attack.damage > 0)) {
+    return attackCharacter(attack, attacker, defender);
+  }
 
   let result;
 
@@ -124,14 +118,14 @@ if (
     if (Math.random() < 0.5) {
       const damageReceived = Math.max(
         0,
-        attack.damage - defender.defense.amount
+        attack.damage - defender.defense.amount,
       );
 
       result = attackCharacter(
         attack,
         attacker,
         defender,
-        defender.defense.amount
+        defender.defense.amount,
       );
 
       if (result) {

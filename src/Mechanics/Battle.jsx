@@ -84,9 +84,14 @@ function App() {
     }
   }, [damageDealt]);
 
-
   const [attacksUsed, setAttacksUsed] = useState(0);
-  const [currentTurn, setCurrentTurn] = useState("player");
+  const [currentTurn, setCurrentTurn] = useState("intro");
+
+  const [roundNumber, setRoundNumber] = useState(1);
+  const [showRoundIntro, setShowRoundIntro] = useState(true);
+
+  const [knockout, setKnockout] = useState(null);
+  const [showResults, setShowResults] = useState(false);
 
   // Temporary popup queue and permanent combat history.
   const [combatMessages, setCombatMessages] = useState([]);
@@ -108,16 +113,59 @@ function App() {
     return () => clearTimeout(timer);
   }, [firstMessageId]);
 
-  // Advance the turn when both sides finish.
+  // Advance to the next round after both fighters finish.
   useEffect(() => {
-    if (character.turnFinished && opponent.turnFinished) {
+    if (
+      character.turnFinished &&
+      opponent.turnFinished &&
+      character.health > 0 &&
+      opponent.health > 0 &&
+      !knockout
+    ) {
       turn(character, opponent);
 
       setCharacter({ ...character });
       setOpponent({ ...opponent });
-      setCurrentTurn("player");
+
+      setRoundNumber((round) => round + 1);
+      setShowRoundIntro(true);
+      setCurrentTurn("intro");
     }
-  }, [character, opponent]);
+  }, [character, opponent, knockout]);
+
+  // Pause combat and show the knockout announcement.
+  useEffect(() => {
+    if (knockout) {
+      const timer = setTimeout(() => {
+        setShowResults(true);
+      }, 2800);
+
+      return () => clearTimeout(timer);
+    }
+  }, [knockout]);
+
+  // Detect a knockout only once.
+  useEffect(() => {
+    if (knockout) return;
+
+    if (character.health <= 0) {
+      setKnockout({
+        defeated: character.name,
+        winner: opponent.name,
+      });
+    } else if (opponent.health <= 0) {
+      setKnockout({
+        defeated: opponent.name,
+        winner: character.name,
+      });
+    }
+  }, [
+    character.health,
+    opponent.health,
+    character.name,
+    opponent.name,
+    knockout,
+  ]);
 
   // Run the AI turn.
   useEffect(() => {
@@ -129,6 +177,19 @@ function App() {
       });
     }
   }, [currentTurn]);
+
+  // Display the round announcement before allowing combat.
+  useEffect(() => {
+    if (!showRoundIntro) return;
+
+    // Give the CSS fade-out time to finish before removing the overlay.
+    const timer = setTimeout(() => {
+      setShowRoundIntro(false);
+      setCurrentTurn("player");
+    }, 2400);
+
+    return () => clearTimeout(timer);
+  }, [showRoundIntro]);
 
   // Add messages to the popup queue and permanent combat log.
   function showCombatMessage(text, type) {
@@ -152,6 +213,35 @@ function App() {
 
   return (
     <div className="container-fluid mt-3" id="gameContainer">
+      {/* Full-screen round announcement */}
+      {showRoundIntro && !knockout && (
+        <div id="roundIntroOverlay">
+          <div id="roundIntroContent">
+            <span id="roundIntroEyebrow">FIGHT!</span>
+
+            <h1 key={roundNumber}>ROUND {roundNumber}</h1>
+
+            <div id="roundIntroLine" />
+
+            <p>GET READY</p>
+          </div>
+        </div>
+      )}
+
+      {/* Full-screen knockout announcement */}
+      {knockout && !showResults && (
+        <div id="knockoutOverlay">
+          <div id="knockoutContent">
+            <span id="knockoutEyebrow">BATTLE OVER</span>
+
+            <h1>K.O.!</h1>
+
+            <p id="knockoutDefeated">{knockout.defeated} DEFEATED</p>
+
+            <p id="knockoutWinner">{knockout.winner} WINS!</p>
+          </div>
+        </div>
+      )}
       {/* Show only one animated popup at a time. */}
       {combatMessages.length > 0 && (
         <div id="combatPopupContainer">
@@ -169,7 +259,7 @@ function App() {
         </div>
       )}
 
-      {character.health <= 0 ? (
+      {knockout && !showResults ? null : character.health <= 0 ? (
         <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
       ) : opponent.health <= 0 ? (
         <div id="victorySection">
@@ -180,7 +270,10 @@ function App() {
           {/* Fighters and combat log share one layout. */}
           <div id="battleLayout">
             <div id="battleArena">
-              <div id="opponentSection">
+              <div
+                id="opponentSection"
+                className={aiAttack ? "opponent-is-attacking" : ""}
+              >
                 <Opponent opponent={opponent} setOpponent={setOpponent} />
               </div>
 
