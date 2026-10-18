@@ -940,3 +940,513 @@
     font-size: 9px;
   }
 }
+
+
+
+/* =========================================
+   CHARACTER SELECT - ARCADE ANIMATIONS
+========================================= */
+
+/* Bring the screen in smoothly */
+.character-select-screen {
+  animation: select-screen-enter 0.45s ease-out both;
+}
+
+.select-header {
+  animation: select-header-enter 0.5s ease-out both;
+}
+
+.select-heading {
+  animation: select-heading-impact 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+/* Player and CPU panels enter from opposite sides */
+.player-side {
+  animation: player-panel-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.cpu-side {
+  animation: cpu-panel-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.versus-divider {
+  animation: versus-impact 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+}
+
+/* Fighter roster cards enter one after another */
+.character-roster-grid .roster-tile {
+  animation: fighter-card-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.character-roster-grid .roster-tile:nth-child(1)  { animation-delay: 0.05s; }
+.character-roster-grid .roster-tile:nth-child(2)  { animation-delay: 0.09s; }
+.character-roster-grid .roster-tile:nth-child(3)  { animation-delay: 0.13s; }
+.character-roster-grid .roster-tile:nth-child(4)  { animation-delay: 0.17s; }
+.character-roster-grid .roster-tile:nth-child(5)  { animation-delay: 0.21s; }
+.character-roster-grid .roster-tile:nth-child(6)  { animation-delay: 0.25s; }
+.character-roster-grid .roster-tile:nth-child(7)  { animation-delay: 0.29s; }
+.character-roster-grid .roster-tile:nth-child(8)  { animation-delay: 0.33s; }
+.character-roster-grid .roster-tile:nth-child(9)  { animation-delay: 0.37s; }
+.character-roster-grid .roster-tile:nth-child(10) { animation-delay: 0.41s; }
+.character-roster-grid .roster-tile:nth-child(11) { animation-delay: 0.45s; }
+.character-roster-grid .roster-tile:nth-child(12) { animation-delay: 0.49s; }
+
+/* Make the current player selection feel active */
+.roster-tile.p1-selected {
+  border-color: var(--select-cyan);
+  box-shadow:
+    inset 0 0 22px rgba(19, 213, 255, 0.12),
+    0 0 14px rgba(19, 213, 255, 0.25);
+}
+
+.roster-tile.p1-selected .roster-tile-info {
+  background: linear-gradient(
+    135deg,
+    rgba(19, 213, 255, 0.16),
+    #101a2d 75%
+  );
+}
+
+/* CPU selection stays red */
+.roster-tile.cpu-selected:not(.p1-selected) {
+  border-color: var(--select-red);
+  box-shadow:
+    inset 0 0 22px rgba(255, 49, 89, 0.12),
+    0 0 14px rgba(255, 49, 89, 0.25);
+}
+
+/* A stronger card hover without the old hover glitches */
+.roster-tile:hover:not(:disabled) {
+  transform: translateY(-4px) scale(1.015);
+  filter: brightness(1.08);
+  z-index: 2;
+}
+
+.roster-tile:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Animate the artwork slightly when hovering over a card */
+.roster-tile:hover:not(:disabled) .roster-portrait img {
+  transform: scale(1.055);
+}
+
+/* Navigation buttons get a satisfying press effect */
+.select-back-button,
+.roster-nav-button,
+.confirm-fighter-button {
+  transition:
+    transform 0.16s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.select-back-button:hover:not(:disabled),
+.roster-nav-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 14px rgba(19, 213, 255, 0.16);
+}
+
+.select-back-button:active:not(:disabled),
+.roster-nav-button:active:not(:disabled),
+.confirm-fighter-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Give the main confirmation button a gentle idle glow */
+.confirm-fighter-button:not(:disabled) {
+  animation: confirm-button-ready 2s ease-in-out infinite;
+}
+
+.confirm-fighter-button:hover:not(:disabled) {
+  filter: brightness(1.12);
+  box-shadow:
+    0 0 26px rgba(255, 49, 89, 0.45),
+    4px 4px 0 #79172c;
+}
+
+/* Keyframes */
+@keyframes select-screen-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes select-header-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes select-heading-impact {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes player-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes cpu-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateX(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes versus-impact {
+  0% {
+    opacity: 0;
+    transform: skew(-8deg) scale(0.5);
+  }
+  75% {
+    opacity: 1;
+    transform: skew(-8deg) scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: skew(-8deg) scale(1);
+  }
+}
+
+@keyframes fighter-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes confirm-button-ready {
+  0%, 100% {
+    box-shadow: 4px 4px 0 #79172c;
+  }
+  50% {
+    box-shadow:
+      0 0 17px rgba(255, 49, 89, 0.24),
+      4px 4px 0 #79172c;
+  }
+}
+
+/* Explicitly retain the entrance animations with reduced-motion enabled */
+@media (prefers-reduced-motion: reduce) {
+  .character-select-screen {
+    animation: select-screen-enter 0.45s ease-out both !important;
+  }
+
+  .select-header {
+    animation: select-header-enter 0.5s ease-out both !important;
+  }
+
+  .select-heading {
+    animation: select-heading-impact 0.65s ease-out 0.08s both !important;
+  }
+
+  .player-side {
+    animation: player-panel-enter 0.55s ease-out 0.12s both !important;
+  }
+
+  .cpu-side {
+    animation: cpu-panel-enter 0.55s ease-out 0.2s both !important;
+  }
+
+  .versus-divider {
+    animation: versus-impact 0.5s ease-out 0.25s both !important;
+  }
+
+  .character-roster-grid .roster-tile {
+    animation: fighter-card-enter 0.4s ease-out backwards !important;
+  }
+
+  .character-roster-grid .roster-tile:nth-child(1)  { animation-delay: 0.05s !important; }
+  .character-roster-grid .roster-tile:nth-child(2)  { animation-delay: 0.09s !important; }
+  .character-roster-grid .roster-tile:nth-child(3)  { animation-delay: 0.13s !important; }
+  .character-roster-grid .roster-tile:nth-child(4)  { animation-delay: 0.17s !important; }
+  .character-roster-grid .roster-tile:nth-child(5)  { animation-delay: 0.21s !important; }
+  .character-roster-grid .roster-tile:nth-child(6)  { animation-delay: 0.25s !important; }
+  .character-roster-grid .roster-tile:nth-child(7)  { animation-delay: 0.29s !important; }
+  .character-roster-grid .roster-tile:nth-child(8)  { animation-delay: 0.33s !important; }
+  .character-roster-grid .roster-tile:nth-child(9)  { animation-delay: 0.37s !important; }
+  .character-roster-grid .roster-tile:nth-child(10) { animation-delay: 0.41s !important; }
+  .character-roster-grid .roster-tile:nth-child(11) { animation-delay: 0.45s !important; }
+  .character-roster-grid .roster-tile:nth-child(12) { animation-delay: 0.49s !important; }
+
+  .confirm-fighter-button:not(:disabled) {
+    animation: confirm-button-ready 2s ease-in-out infinite !important;
+  }
+}
+
+
+
+/* ================================
+   CHARACTER SELECT ANIMATIONS
+================================ */
+
+/* Smooth movement and glow changes */
+.roster-tile {
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
+}
+
+/* Impact animation when the selected fighter changes */
+.roster-tile.p1-selected {
+  animation: fighterSelectPop 0.38s cubic-bezier(.16, 1, .3, 1) both;
+  border-color: #13d5ff;
+  box-shadow:
+    0 0 10px rgba(19, 213, 255, 0.65),
+    0 0 25px rgba(19, 213, 255, 0.35);
+  z-index: 2;
+}
+
+/* Make the character portrait feel alive */
+.roster-tile.p1-selected .roster-portrait {
+  animation: fighterPortraitFlash 0.45s ease-out both;
+}
+
+/* Selected fighter pops into focus */
+@keyframes fighterSelectPop {
+  0% {
+    transform: scale(0.94);
+    filter: brightness(0.75);
+  }
+
+  65% {
+    transform: scale(1.06);
+    filter: brightness(1.3);
+  }
+
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* Quick neon flash on the portrait */
+@keyframes fighterPortraitFlash {
+  0% {
+    filter: brightness(0.65) saturate(0.8);
+  }
+
+  55% {
+    filter: brightness(1.45) saturate(1.3);
+  }
+
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+}
+
+/* Animate the player selection cursor */
+.roster-cursor.p1-cursor {
+  animation: cursor-pop 0.3s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+/* Keep these animations active even when reduced motion is enabled */
+@media (prefers-reduced-motion: reduce) {
+  .roster-tile.p1-selected {
+    animation: fighterSelectPop 0.38s cubic-bezier(.16, 1, .3, 1) both !important;
+  }
+
+  .roster-tile.p1-selected .roster-portrait {
+    animation: fighterPortraitFlash 0.45s ease-out both !important;
+  }
+
+  .roster-cursor.p1-cursor {
+    animation: cursor-pop 0.3s cubic-bezier(.16, 1, .3, 1) both !important;
+  }
+}
+
+/* =========================================
+   FIGHTER STATS - SELECTION ANIMATIONS
+========================================= */
+
+/* Player stats: cyan impact */
+.player-side .roster-fighter-info {
+  transform-origin: left center;
+}
+
+.player-side .roster-fighter-info .roster-fighter-portrait {
+  overflow: hidden;
+}
+
+.player-side .roster-fighter-portrait img {
+  transition: filter 0.25s ease;
+}
+
+.player-side .roster-fighter-info .roster-stat-fill {
+  transform-origin: left center;
+}
+
+/* CPU stats: red impact */
+.cpu-side .roster-fighter-info {
+  transform-origin: right center;
+}
+
+.cpu-side .roster-fighter-info .roster-fighter-portrait {
+  overflow: hidden;
+}
+
+.cpu-side .roster-fighter-portrait img {
+  transition: filter 0.25s ease;
+}
+
+/* Play when React mounts the new fighter info */
+.roster-fighter-info {
+  animation: fighter-info-impact 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.roster-fighter-info .roster-fighter-portrait img {
+  animation: fighter-portrait-flash 0.5s ease-out both;
+}
+
+.roster-fighter-info .roster-stat {
+  animation: fighter-stat-reveal 0.35s ease-out both;
+}
+
+.roster-fighter-info .roster-stat:nth-child(1) {
+  animation-delay: 0.04s;
+}
+
+.roster-fighter-info .roster-stat:nth-child(2) {
+  animation-delay: 0.09s;
+}
+
+.roster-fighter-info .roster-stat:nth-child(3) {
+  animation-delay: 0.14s;
+}
+
+.roster-fighter-info .roster-stat:nth-child(4) {
+  animation-delay: 0.19s;
+}
+
+.roster-fighter-info .roster-moves {
+  animation: fighter-moves-reveal 0.35s ease-out 0.2s both;
+}
+
+/* Smoothly animate stat bars when their values change */
+.roster-stat-fill {
+  transition: width 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Keyframes */
+@keyframes fighter-info-impact {
+  0% {
+    opacity: 0.35;
+    transform: translateY(10px) scale(0.97);
+    filter: brightness(0.75);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.01);
+    filter: brightness(1.2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes fighter-portrait-flash {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.92);
+    filter: brightness(0.6) saturate(0.7);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.035);
+    filter: brightness(1.3) saturate(1.2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@keyframes fighter-stat-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fighter-moves-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Keep the animations working with reduced-motion enabled */
+@media (prefers-reduced-motion: reduce) {
+  .roster-fighter-info {
+    animation: fighter-info-impact 0.42s ease-out both !important;
+  }
+
+  .roster-fighter-info .roster-fighter-portrait img {
+    animation: fighter-portrait-flash 0.5s ease-out both !important;
+  }
+
+  .roster-fighter-info .roster-stat {
+    animation: fighter-stat-reveal 0.35s ease-out both !important;
+  }
+
+  .roster-fighter-info .roster-moves {
+    animation: fighter-moves-reveal 0.35s ease-out 0.2s both !important;
+  }
+
+  .roster-stat-fill {
+    transition: width 0.55s ease !important;
+  }
+}

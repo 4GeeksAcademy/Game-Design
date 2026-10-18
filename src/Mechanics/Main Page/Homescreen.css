@@ -513,3 +513,254 @@
     font-size: 8px;
   }
 }
+
+
+
+/* =========================================
+   ARCADE HOMEPAGE ANIMATIONS
+========================================= */
+
+/* Subtle movement in the arcade grid */
+.arcade-background {
+  animation: arcade-grid-drift 18s linear infinite;
+}
+
+/* Give the logo a little fighting-game energy */
+.logo-mark {
+  animation: logo-impact 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.logo-name {
+  animation: logo-name-enter 0.65s ease-out 0.12s both;
+}
+
+/* Make the main content arrive with more impact */
+.home-content {
+  animation: home-screen-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.home-eyebrow {
+  animation: home-text-enter 0.45s ease-out 0.1s both;
+}
+
+.home-title {
+  animation: home-title-impact 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.home-subtitle {
+  animation: home-text-enter 0.5s ease-out 0.2s both;
+}
+
+/* Stagger the menu buttons like an arcade menu */
+.home-menu-buttons > .arcade-button {
+  animation: home-button-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.home-menu-buttons > .arcade-button:nth-child(1) {
+  animation-delay: 0.18s;
+}
+
+.home-menu-buttons > .arcade-button:nth-child(2) {
+  animation-delay: 0.27s;
+}
+
+.home-menu-buttons > .arcade-button:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+.home-menu-buttons > .arcade-button:nth-child(4) {
+  animation-delay: 0.45s;
+}
+
+/* Buttons feel physical when clicked */
+.arcade-button:not(:disabled):active,
+.choice-button:active,
+.difficulty-button:active,
+.back-button:active {
+  transform: scale(0.97);
+}
+
+/* Selected match options get a soft arcade pulse */
+.choice-button.selected {
+  animation: selected-option-pulse 1.8s ease-in-out infinite;
+}
+
+/* Stronger focus and hover response */
+.arcade-button:focus-visible,
+.choice-button:focus-visible,
+.difficulty-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(19, 213, 255, 0.25),
+    0 0 20px rgba(19, 213, 255, 0.25);
+}
+
+.back-button:hover {
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+.currency-display {
+  animation: currency-arrive 0.6s ease-out 0.25s both;
+}
+
+/* Keyframes */
+@keyframes arcade-grid-drift {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 48px 48px, 48px 48px;
+  }
+}
+
+@keyframes logo-impact {
+  0% {
+    opacity: 0;
+    transform: skew(-8deg) scale(0.65) rotate(-8deg);
+  }
+  70% {
+    transform: skew(-8deg) scale(1.12) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: skew(-8deg) scale(1) rotate(0);
+  }
+}
+
+@keyframes logo-name-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes home-screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes home-text-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes home-title-impact {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.015);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes home-button-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes selected-option-pulse {
+  0%, 100% {
+    box-shadow: inset 0 0 22px rgba(255, 49, 89, 0.09),
+      0 0 10px rgba(255, 49, 89, 0.15);
+  }
+  50% {
+    box-shadow: inset 0 0 25px rgba(255, 49, 89, 0.16),
+      0 0 19px rgba(255, 49, 89, 0.3);
+  }
+}
+
+@keyframes currency-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Keep the animations enabled even when the OS requests reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .home-content {
+    animation: home-screen-enter 0.55s ease-out both !important;
+  }
+
+  .home-eyebrow {
+    animation: home-text-enter 0.45s ease-out 0.1s both !important;
+  }
+
+  .home-title {
+    animation: home-title-impact 0.7s ease-out 0.08s both !important;
+  }
+
+  .home-subtitle {
+    animation: home-text-enter 0.5s ease-out 0.2s both !important;
+  }
+
+  .home-menu-buttons > .arcade-button {
+    animation: home-button-enter 0.45s ease-out backwards !important;
+  }
+
+  .home-menu-buttons > .arcade-button:nth-child(1) {
+    animation-delay: 0.18s !important;
+  }
+
+  .home-menu-buttons > .arcade-button:nth-child(2) {
+    animation-delay: 0.27s !important;
+  }
+
+  .home-menu-buttons > .arcade-button:nth-child(3) {
+    animation-delay: 0.36s !important;
+  }
+
+  .home-menu-buttons > .arcade-button:nth-child(4) {
+    animation-delay: 0.45s !important;
+  }
+
+  .logo-mark {
+    animation: logo-impact 0.65s ease-out both !important;
+  }
+
+  .logo-name {
+    animation: logo-name-enter 0.65s ease-out 0.12s both !important;
+  }
+
+  .currency-display {
+    animation: currency-arrive 0.6s ease-out 0.25s both !important;
+  }
+
+  .arcade-background {
+    animation: none !important;
+  }
+
+  .choice-button.selected {
+    animation: none !important;
+  }
+}

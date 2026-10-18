@@ -117,6 +117,98 @@ const roster = [
   },
 ];
 
+function FighterStats({ fighter }) {
+  const stats = fighter.data;
+
+  const statBars = [
+    {
+      name: "HEALTH",
+      value: stats.health,
+      maximum: 200,
+      color: "health",
+    },
+    {
+      name: "MANA",
+      value: stats.maximumMana,
+      maximum: 150,
+      color: "mana",
+    },
+    {
+      name: "DEFENSE",
+      value:
+        typeof stats.defense === "number"
+          ? stats.defense
+          : (stats.defense?.amount ?? 0),
+      maximum: 150,
+      color: "defense",
+    },
+    {
+      name: "AGILITY",
+      value: stats.agility,
+      maximum: 150,
+      color: "agility",
+    },
+  ];
+
+  return (
+    <div className={`roster-fighter-info ${fighter.color}`}>
+      <div className="roster-fighter-layout">
+        <div className="roster-fighter-portrait">
+          <img src={fighter.image} alt={stats.name} />
+        </div>
+
+        <div className="roster-fighter-details">
+          <p className="roster-fighter-description">
+            {fighter.description}
+          </p>
+          <h2>{stats.name}</h2>
+        </div>
+      </div>
+
+      <div className="roster-stat-list">
+        {statBars.map((stat) => {
+          const percentage = Math.min(
+            100,
+            Math.max(0, (stat.value / stat.maximum) * 100)
+          );
+
+          return (
+            <div className="roster-stat" key={stat.name}>
+              <div className="roster-stat-heading">
+                <span>{stat.name}</span>
+                <strong>
+                  {stat.value}/{stat.maximum}
+                </strong>
+              </div>
+
+              <div
+                className={`roster-stat-track ${stat.color}`}
+                role="progressbar"
+                aria-label={stat.name}
+                aria-valuenow={stat.value}
+                aria-valuemin={0}
+                aria-valuemax={stat.maximum}
+              >
+                <div
+                  className="roster-stat-fill"
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="roster-moves">
+        <p>SPECIAL MOVES</p>
+        {stats.attacks.map((attack) => (
+          <span key={attack.name}>{attack.name}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CharacterSelection() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -136,6 +228,8 @@ function CharacterSelection() {
   });
 
   const [cpuIndex, setCpuIndex] = useState(null);
+  const [playerAnimationKey, setPlayerAnimationKey] = useState(0);
+  const [cpuAnimationKey, setCpuAnimationKey] = useState(0);
   const [phase, setPhase] = useState("player");
 
   const selectedFighter = roster[selectedIndex];
@@ -158,13 +252,14 @@ function CharacterSelection() {
 
   // Move to the next unlocked fighter, skipping locked characters.
   const changeFighter = (direction) => {
-  if (phase !== "player") return;
+    if (phase !== "player") return;
 
-  const nextIndex =
-    (selectedIndex + direction + roster.length) % roster.length;
+    const nextIndex =
+      (selectedIndex + direction + roster.length) % roster.length;
 
-  setSelectedIndex(nextIndex);
-};
+    setSelectedIndex(nextIndex);
+    setPlayerAnimationKey((key) => key + 1);
+  };
 
   const confirmSelection = () => {
     if (phase !== "player") return;
@@ -241,6 +336,7 @@ function CharacterSelection() {
         eligibleOpponents[Math.floor(Math.random() * eligibleOpponents.length)];
 
       setCpuIndex(randomChoice.index);
+      setCpuAnimationKey((key) => key + 1);
       animationStep += 1;
 
       if (animationStep >= 6) {
@@ -271,96 +367,9 @@ function CharacterSelection() {
     });
   };
 
-  const FighterStats = ({ fighter }) => {
-    const stats = fighter.data;
+  
 
-    const statBars = [
-      {
-        name: "HEALTH",
-        value: stats.health,
-        maximum: 200,
-        color: "health",
-      },
-      {
-        name: "MANA",
-        value: stats.maximumMana,
-        maximum: 150,
-        color: "mana",
-      },
-      {
-        name: "DEFENSE",
-        value:
-          typeof stats.defense === "number"
-            ? stats.defense
-            : (stats.defense?.amount ?? 0),
-        maximum: 150,
-        color: "defense",
-      },
-      {
-        name: "AGILITY",
-        value: stats.agility,
-        maximum: 150,
-        color: "agility",
-      },
-    ];
 
-    return (
-      <div className={`roster-fighter-info ${fighter.color}`}>
-        <div className="roster-fighter-layout">
-          <div className="roster-fighter-portrait">
-            <img src={fighter.image} alt={stats.name} />
-          </div>
-
-          <div className="roster-fighter-details">
-            <p className="roster-fighter-description">{fighter.description}</p>
-
-            <h2>{stats.name}</h2>
-          </div>
-        </div>
-
-        <div className="roster-stat-list">
-          {statBars.map((stat) => {
-            const percentage =
-              stat.maximum > 0
-                ? Math.min(100, Math.max(0, (stat.value / stat.maximum) * 100))
-                : 0;
-
-            return (
-              <div className="roster-stat" key={stat.name}>
-                <div className="roster-stat-heading">
-                  <span>{stat.name}</span>
-                  <strong>
-                    {stat.value}/{stat.maximum}
-                  </strong>
-                </div>
-
-                <div
-                  className={`roster-stat-track ${stat.color}`}
-                  role="progressbar"
-                  aria-label={stat.name}
-                  aria-valuenow={stat.value}
-                  aria-valuemin={0}
-                  aria-valuemax={stat.maximum}
-                >
-                  <div
-                    className="roster-stat-fill"
-                    style={{ width: `${percentage}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="roster-moves">
-          <p>SPECIAL MOVES</p>
-          {stats.attacks.map((attack) => (
-            <span key={attack.name}>{attack.name}</span>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <main className="character-select-screen">
@@ -407,7 +416,10 @@ function CharacterSelection() {
             </div>
           </div>
 
-          <FighterStats fighter={previewFighter} />
+          <FighterStats
+            key={`player-${playerAnimationKey}`}
+            fighter={previewFighter}
+          />
         </section>
 
         <div className="versus-divider">VS</div>
@@ -428,7 +440,10 @@ function CharacterSelection() {
           </div>
 
           {cpuFighter ? (
-            <FighterStats fighter={cpuFighter} />
+            <FighterStats
+              key={`cpu-${cpuAnimationKey}-${cpuFighter.id}`}
+              fighter={cpuFighter}
+            />
           ) : (
             <div className="cpu-placeholder">
               <span>?</span>
@@ -474,7 +489,9 @@ function CharacterSelection() {
                   .join(" ")}
                 onClick={() => {
                   if (phase !== "player") return;
+
                   setSelectedIndex(index);
+                  setPlayerAnimationKey((key) => key + 1);
                 }}
                 disabled={phase !== "player"}
                 aria-pressed={isPlayerSelected}
