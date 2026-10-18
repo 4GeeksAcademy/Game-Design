@@ -8,11 +8,13 @@ import Opponent from '../Mechanics/Opponent.jsx';
 import VictoryScreen from '../Mechanics/VictoryScreen.jsx';
 import Homescreen from '../Mechanics/Main Page/Homescreen.jsx';
 import CharacterSelection from '../Mechanics/Main Page/CharacterSelection.jsx';
+import Shop from '../Mechanics/Main Page/Shop.jsx';
 
 export const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Homescreen />} />
+      <Route path="/shop" element={<Shop />} />
       <Route path="/character-select" element={<CharacterSelection />} />
       <Route path="/battle" element={<Battle />} />
       <Route path="/character" element={<Character />} />

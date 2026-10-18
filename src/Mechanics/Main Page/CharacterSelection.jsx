@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import mina from "../All_Character_Stats/Mina_AshidoStats.js";
 import minaArena from "../../assets/img/MinaAshidoArena.jpg";
 import rockLee from "../All_Character_Stats/Rock_LeeStats.js";
@@ -24,9 +25,10 @@ import Naruto from "../All_Character_Stats/NarutoStats.js";
 import NarutoArenaImage from "../../assets/img/Naruto.png";
 import Yoruichi from "../All_Character_Stats/YoruichiStats.js";
 import YoruichiArenaImage from "../../assets/img/Yoruichi.png";
+
+import { getUnlockedCharacters } from "../Currency.js";
+
 import "./CharacterSelection.css";
-
-
 
 const roster = [
   {
@@ -42,8 +44,8 @@ const roster = [
     data: Ichigo,
     color: "ichigo",
     description: "THE SUBSTITUTE SOUL REAPER",
-    },
-    {
+  },
+  {
     id: "naruto",
     image: NarutoArenaImage,
     data: Naruto,
@@ -107,13 +109,12 @@ const roster = [
     description: "UGRAVITY",
   },
   {
-    id: "Yoruichi",
+    id: "yoruichi",
     image: YoruichiArenaImage,
     data: Yoruichi,
     color: "yoruichi",
     description: "THE THUNDER GOD",
   },
-  
 ];
 
 function CharacterSelection() {
@@ -123,20 +124,80 @@ function CharacterSelection() {
   const teamSize = location.state?.teamSize ?? "1v1";
   const difficulty = location.state?.difficulty ?? "Normal";
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
+
+  const [selectedIndex, setSelectedIndex] = useState(() => {
+    const unlocked = getUnlockedCharacters();
+    const firstUnlocked = roster.findIndex((fighter) =>
+      unlocked.includes(fighter.id),
+    );
+
+    return firstUnlocked >= 0 ? firstUnlocked : 0;
+  });
+
   const [cpuIndex, setCpuIndex] = useState(null);
   const [phase, setPhase] = useState("player");
 
   const selectedFighter = roster[selectedIndex];
+  const previewFighter = selectedFighter;
   const cpuFighter = cpuIndex === null ? null : roster[cpuIndex];
 
+  useEffect(() => {
+    const updateUnlocks = () => {
+      setUnlockedIds(getUnlockedCharacters());
+    };
+
+    window.addEventListener("unlocksUpdated", updateUnlocks);
+
+    return () => {
+      window.removeEventListener("unlocksUpdated", updateUnlocks);
+    };
+  }, []);
+
+  const isUnlocked = (fighter) => unlockedIds.includes(fighter.id);
+
+  // Move to the next unlocked fighter, skipping locked characters.
   const changeFighter = (direction) => {
+  if (phase !== "player") return;
+
+  const nextIndex =
+    (selectedIndex + direction + roster.length) % roster.length;
+
+  setSelectedIndex(nextIndex);
+};
+
+  const confirmSelection = () => {
     if (phase !== "player") return;
 
-    setSelectedIndex(
-      (current) => (current + direction + roster.length) % roster.length,
-    );
+    if (!isUnlocked(selectedFighter)) {
+      navigate("/shop");
+      return;
+    }
+
+    setCpuIndex(null);
+    setPhase("cpu");
   };
+  // const confirmSelection = () => {
+  //   if (phase !== "player" || !isUnlocked(selectedFighter)) return;
+
+  //   const availableOpponents = roster
+  //     .map((fighter, index) => ({ fighter, index }))
+  //     .filter(
+  //       ({ fighter }) =>
+  //         isUnlocked(fighter) && fighter.id !== selectedFighter.id,
+  //     );
+
+  //   if (availableOpponents.length === 0) {
+  //     return;
+  //   }
+
+  //   const opponent =
+  //     availableOpponents[Math.floor(Math.random() * availableOpponents.length)];
+
+  //   setCpuIndex(opponent.index);
+  //   setPendingOpponent(opponent.index);
+  //   setPhase("cpu");
+  // };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -159,60 +220,46 @@ function CharacterSelection() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [phase, selectedIndex]);
+  }, [phase, selectedIndex, unlockedIds]);
 
-  const confirmSelection = () => {
-    if (phase !== "player") return;
+  useEffect(() => {
+    if (phase !== "cpu") return;
 
-    // Choose an opponent different from the player's fighter.
-    const availableOpponents = roster
+    const eligibleOpponents = roster
       .map((fighter, index) => ({ fighter, index }))
       .filter(({ fighter }) => fighter.id !== selectedFighter.id);
 
-    const opponent =
-      availableOpponents[Math.floor(Math.random() * availableOpponents.length)];
-
-    setCpuIndex((selectedIndex + 1) % roster.length);
-    setPhase("cpu");
-
-    // Save the final choice for the CPU selection animation.
-    setPendingOpponent(opponent.index);
-  };
-
-  const [pendingOpponent, setPendingOpponent] = useState(null);
-
-  useEffect(() => {
-    if (phase !== "cpu" || pendingOpponent === null) return;
+    if (eligibleOpponents.length === 0) {
+      setPhase("player");
+      return;
+    }
 
     let animationStep = 0;
 
-    // Alternate the CPU cursor before it locks onto its opponent.
     const animation = setInterval(() => {
+      const randomChoice =
+        eligibleOpponents[Math.floor(Math.random() * eligibleOpponents.length)];
+
+      setCpuIndex(randomChoice.index);
       animationStep += 1;
 
       if (animationStep >= 6) {
         clearInterval(animation);
-        setCpuIndex(pendingOpponent);
         setPhase("ready");
-        return;
       }
-
-      setCpuIndex((current) => {
-        let randomIndex;
-
-        do {
-          randomIndex = Math.floor(Math.random() * roster.length);
-        } while (roster.length > 1 && randomIndex === current);
-
-        return randomIndex;
-      });
     }, 350);
 
     return () => clearInterval(animation);
-  }, [phase, pendingOpponent]);
+  }, [phase, selectedIndex]);
 
   const startBattle = () => {
-    if (phase !== "ready" || cpuIndex === null) return;
+    if (
+      phase !== "ready" ||
+      cpuIndex === null ||
+      !isUnlocked(selectedFighter)
+    ) {
+      return;
+    }
 
     navigate("/battle", {
       state: {
@@ -242,7 +289,10 @@ function CharacterSelection() {
       },
       {
         name: "DEFENSE",
-        value: stats.defense.amount,
+        value:
+          typeof stats.defense === "number"
+            ? stats.defense
+            : (stats.defense?.amount ?? 0),
         maximum: 150,
         color: "defense",
       },
@@ -265,17 +315,15 @@ function CharacterSelection() {
             <p className="roster-fighter-description">{fighter.description}</p>
 
             <h2>{stats.name}</h2>
-
-            {/* Keep your existing roster-stat-list and roster-moves here */}
           </div>
         </div>
 
         <div className="roster-stat-list">
           {statBars.map((stat) => {
-            const percentage = Math.min(
-              100,
-              Math.max(0, (stat.value / stat.maximum) * 100),
-            );
+            const percentage =
+              stat.maximum > 0
+                ? Math.min(100, Math.max(0, (stat.value / stat.maximum) * 100))
+                : 0;
 
             return (
               <div className="roster-stat" key={stat.name}>
@@ -329,12 +377,22 @@ function CharacterSelection() {
           <span>{teamSize} MATCH</span>
           <span>AI: {difficulty.toUpperCase()}</span>
         </div>
+
+        <button
+          className="select-back-button"
+          onClick={() => navigate("/shop")}
+        >
+          ◈ CHARACTER SHOP
+        </button>
       </header>
 
       <section className="select-heading">
-        <p className="select-eyebrow">INSERT COIN · CHOOSE YOUR FIGHTER</p>
+        <p className="select-eyebrow">UNLOCK FIGHTERS · CHOOSE YOUR CHAMPION</p>
         <h1>SELECT YOUR FIGHTER</h1>
-        <p>Player 1, choose your fighter. The CPU will choose its opponent.</p>
+        <p>
+          Choose an unlocked fighter. Earn coins in battle to expand your
+          roster.
+        </p>
       </section>
 
       <section className="versus-selection">
@@ -349,11 +407,7 @@ function CharacterSelection() {
             </div>
           </div>
 
-          {phase === "player" ? (
-            <FighterStats fighter={selectedFighter} />
-          ) : (
-            <FighterStats fighter={selectedFighter} />
-          )}
+          <FighterStats fighter={previewFighter} />
         </section>
 
         <div className="versus-divider">VS</div>
@@ -388,31 +442,47 @@ function CharacterSelection() {
       <section className="roster-section">
         <div className="roster-title-row">
           <h2>FIGHTER ROSTER</h2>
-          <span>{roster.length} FIGHTERS AVAILABLE</span>
+          <span>
+            {
+              unlockedIds.filter((id) =>
+                roster.some((fighter) => fighter.id === id),
+              ).length
+            }{" "}
+            / {roster.length} UNLOCKED
+          </span>
         </div>
 
         <div className="character-roster-grid">
           {roster.map((fighter, index) => {
             const isPlayerSelected = index === selectedIndex;
             const isCpuSelected = index === cpuIndex;
+            const fighterUnlocked = isUnlocked(fighter);
 
             return (
               <button
                 key={fighter.id}
+                type="button"
                 className={[
                   "roster-tile",
                   fighter.color,
                   isPlayerSelected ? "p1-selected" : "",
                   isCpuSelected ? "cpu-selected" : "",
+                  !fighterUnlocked ? "fighter-unavailable" : "",
                   phase !== "player" ? "roster-locked" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => {
-                  if (phase === "player") setSelectedIndex(index);
+                  if (phase !== "player") return;
+                  setSelectedIndex(index);
                 }}
                 disabled={phase !== "player"}
                 aria-pressed={isPlayerSelected}
+                aria-label={
+                  fighterUnlocked
+                    ? `Select ${fighter.data.name}`
+                    : `${fighter.data.name} is locked. Open the shop to unlock.`
+                }
               >
                 {isPlayerSelected && (
                   <span className="roster-cursor p1-cursor">P1 ▼</span>
@@ -426,11 +496,21 @@ function CharacterSelection() {
 
                 <span className="roster-portrait">
                   <img src={fighter.image} alt={fighter.data.name} />
+
+                  {!fighterUnlocked && (
+                    <span className="fighter-lock-overlay">
+                      <span className="fighter-lock-icon">🔒</span>
+                      <strong>LOCKED</strong>
+                      <small>VISIT SHOP</small>
+                    </span>
+                  )}
                 </span>
 
-                <strong>{fighter.data.name}</strong>
-                <span className="roster-tile-description">
-                  {fighter.description}
+                <span className="roster-tile-info">
+                  <strong>{fighter.data.name}</strong>
+                  <span className="roster-tile-description">
+                    {fighterUnlocked ? fighter.description : "UNLOCK IN SHOP"}
+                  </span>
                 </span>
               </button>
             );
@@ -448,7 +528,7 @@ function CharacterSelection() {
 
           <p>
             {phase === "player"
-              ? "SELECT A TILE OR USE THE ARROWS"
+              ? "SELECT AN UNLOCKED TILE OR USE THE ARROWS"
               : phase === "cpu"
                 ? "CPU IS SELECTING..."
                 : "BOTH FIGHTERS ARE READY"}

@@ -1,14 +1,25 @@
+
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./BattleUI.css";
 
-function VictoryScreen({ damageDealt, attacksUsed }) {
+function VictoryScreen({ damageDealt = 0, attacksUsed = 0, onRematch }) {
+  const navigate = useNavigate();
+
+  const handleRematch = () => {
+    if (onRematch) {
+      onRematch();
+    } else {
+      navigate("/character-select");
+    }
+  };
+
   return (
     <div id="victoryScreen">
       <div id="victoryCard">
         <div id="victoryIcon">🏆</div>
 
         <p id="victoryEyebrow">BATTLE COMPLETE</p>
-
         <h1 id="victoryTitle">VICTORY!</h1>
 
         <p id="victoryMessage">
@@ -37,12 +48,28 @@ function VictoryScreen({ damageDealt, attacksUsed }) {
             <span className="victoryStatLabel">Opponent Health</span>
             <strong>0</strong>
           </div>
+
+          <div className="victoryStat">
+            <span className="victoryStatIcon">◈</span>
+            <span className="victoryStatLabel">Coins Earned</span>
+            <strong>+{Math.max(0, Math.floor(damageDealt))}</strong>
+          </div>
         </div>
 
         <div id="victoryFooter">
-          <span id="victoryFooterIcon">✦</span>
+          <span className="victoryFooterIcon">✦</span>
           <p>WELL FOUGHT, PLAYER!</p>
-          <span id="victoryFooterIcon">✦</span>
+          <span className="victoryFooterIcon">✦</span>
+        </div>
+
+        <div className="resultScreenButtons">
+          <button onClick={handleRematch}>
+            ↻ REMATCH
+          </button>
+
+          <button onClick={() => navigate("/")}>
+            ⌂ MAIN MENU
+          </button>
         </div>
       </div>
     </div>

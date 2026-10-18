@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCoins } from "../currency.js";
+import { getCoins } from "../Currency";
 import "./Homescreen.css";
 
 function Homescreen() {
@@ -66,6 +66,10 @@ function Homescreen() {
           onClick={() => openMenu("play")}
         >
           PLAY <span>▶</span>
+        </button>
+
+        <button className="arcade-button " onClick={() => navigate("/shop")}>
+          CHARACTER SHOP <span>◈</span>
         </button>
 
         <button className="arcade-button" onClick={() => openMenu("settings")}>

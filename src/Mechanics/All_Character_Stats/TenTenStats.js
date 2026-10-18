@@ -27,7 +27,7 @@ const TenTen = {
     {
       id: "tenten-kunai-throw",
       name: "Kunai Throw",
-      image: KunaiThrowImage,
+      // image: KunaiThrowImage,
       description: "Throws a kunai at the opponent with quick precision.",
       damage: 15,
       speed: 35,
@@ -38,7 +38,7 @@ const TenTen = {
     {
       id: "tenten-weapon-barrage",
       name: "Weapon Barrage",
-      image: WeaponBarrageImage,
+      // image: WeaponBarrageImage,
       description:
         "Launches a rapid barrage of shuriken and kunai at the opponent.",
       damage: 25,
@@ -50,7 +50,7 @@ const TenTen = {
     {
       id: "tenten-explosive-tags",
       name: "Explosive Tags",
-      image: ExplosiveTagsImage,
+      // image: ExplosiveTagsImage,
       description:
         "Throws explosive tags that damage the opponent and reduce their agility.",
       damage: 20,
@@ -65,7 +65,7 @@ const TenTen = {
     {
       id: "tenten-chain-sickle",
       name: "Chain Sickle",
-      image: ChainSickleImage,
+      // image: ChainSickleImage,
       description:
         "Attacks with a chained sickle, dealing damage and weakening the opponent's defense.",
       damage: 20,
@@ -80,7 +80,7 @@ const TenTen = {
     {
       id: "tenten-twin-rising-dragons",
       name: "Twin Rising Dragons",
-      image: TwinRisingDragonsImage,
+      // image: TwinRisingDragonsImage,
       description:
         "Uses her scrolls to unleash a large wave of weapons against the opponent.",
       damage: 35,
@@ -92,7 +92,7 @@ const TenTen = {
     {
       id: "tenten-sealing-scroll",
       name: "Sealing Scroll",
-      image: SealingScrollImage,
+      // image: SealingScrollImage,
       description:
         "Uses her scroll techniques to recover chakra and prepare for another attack.",
       damage: 0,
@@ -107,7 +107,7 @@ const TenTen = {
     {
       id: "tenten-dragon-weapons",
       name: "Dragon Weapons",
-      image: DragonWeaponsImage,
+      // image: DragonWeaponsImage,
       description:
         "Unleashes a powerful storm of weapons, dealing heavy damage and reducing the opponent's agility.",
       damage: 40,

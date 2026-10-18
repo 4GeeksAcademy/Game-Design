@@ -19,7 +19,7 @@ import Ichigo from "./All_Character_Stats/IchigoStats.js";
 import Naruto from "./All_Character_Stats/NarutoStats.js";
 import Yoruichi from "./All_Character_Stats/YoruichiStats.js";
 import { aiTurn } from "./AI.js";
-import { addCoins } from "./currency.js";
+import { addCoins } from "./Currency.js";
 import React, { useState, useEffect, useRef } from "react";
 
 function App() {
@@ -84,7 +84,7 @@ function App() {
     }
   }, [damageDealt]);
 
-  
+
   const [attacksUsed, setAttacksUsed] = useState(0);
   const [currentTurn, setCurrentTurn] = useState("player");
 

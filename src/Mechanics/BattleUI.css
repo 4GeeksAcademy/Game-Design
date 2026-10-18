@@ -2407,3 +2407,50 @@ body {
   border-radius: 8px;
   margin-bottom: 10px;
 }
+
+
+.resultScreenButtons {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.resultScreenButtons button {
+  min-width: 160px;
+  padding: 13px 20px;
+  border: 1px solid #13d5ff;
+  border-radius: 5px;
+  background: #102333;
+  color: #ffffff;
+  font-family: inherit;
+  font-weight: 800;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.resultScreenButtons button:hover {
+  background: #16415a;
+  box-shadow: 0 0 14px rgba(19, 213, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.resultScreenButtons button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .resultScreenButtons {
+    flex-direction: column;
+  }
+
+  .resultScreenButtons button {
+    width: 100%;
+  }
+}

@@ -1,14 +1,25 @@
+
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./BattleUI.css";
 
-function GameOverScreen({ damageDealt, attacksUsed }) {
+function GameOverScreen({ damageDealt = 0, attacksUsed = 0, onRematch }) {
+  const navigate = useNavigate();
+
+  const handleRematch = () => {
+    if (onRematch) {
+      onRematch();
+    } else {
+      navigate("/character-select");
+    }
+  };
+
   return (
     <div id="gameOverScreen">
       <div id="gameOverCard">
         <div id="gameOverIcon">💀</div>
 
         <p id="gameOverEyebrow">BATTLE COMPLETE</p>
-
         <h1 id="gameOverTitle">GAME OVER</h1>
 
         <p id="gameOverMessage">
@@ -34,6 +45,11 @@ function GameOverScreen({ damageDealt, attacksUsed }) {
             <span>❤️ Your Health</span>
             <strong>0</strong>
           </div>
+
+          <div className="gameOverStat">
+            <span>◈ Coins Earned</span>
+            <strong>+{Math.max(0, Math.floor(damageDealt))}</strong>
+          </div>
         </div>
 
         <div id="gameOverFooter">
@@ -41,10 +57,19 @@ function GameOverScreen({ damageDealt, attacksUsed }) {
           <p>EVERY FIGHT IS A LESSON</p>
           <span>✦</span>
         </div>
+
+        <div className="resultScreenButtons">
+          <button onClick={handleRematch}>
+            ↻ REMATCH
+          </button>
+
+          <button onClick={() => navigate("/")}>
+            ⌂ MAIN MENU
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
 export default GameOverScreen;
-
