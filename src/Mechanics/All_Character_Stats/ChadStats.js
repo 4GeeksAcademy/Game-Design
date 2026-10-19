@@ -13,7 +13,7 @@ const Chad = {
   name: "Yasutora Sado",
   image: ChadImage,
 
-  health: 130,
+  health: 120,
   mana: 85,
   maximumMana: 85,
   manaRegen: 20,
@@ -32,7 +32,7 @@ const Chad = {
     image: HeavyBlow,
     damage: 60,
     speed: 15,
-    cost: 30,
+    cost: 10,
     state: true,
     buff: {
       defense: 5,
@@ -45,7 +45,7 @@ const Chad = {
     image: GiantArmSmash,
     damage: 80,
     speed: 10,
-    cost: 50,
+    cost: 17,
     state: true,
     buff: {
       mana: 10,
@@ -58,7 +58,7 @@ const Chad = {
     image: ElDirecto,
     damage: 70,
     speed: 30,
-    cost: 40,
+    cost: 20,
     state: true,
     buff: {
       defense: 10,
@@ -72,7 +72,7 @@ const Chad = {
     image: LaMuerte,
     damage: 125,
     speed: 30,
-    cost: 85,
+    cost: 30,
     state: true,
     buff: {
       defense: 20,

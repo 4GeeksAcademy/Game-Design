@@ -1,4 +1,4 @@
-import { acidShot, acidBomb, acidRain, acidStorm } from "../Attack(list)";
+import { acidShot, acidBomb, acidRain, acidStorm } from "./Attack(list)";
 
 // const mina = {
 //     name: "Mina Ashido",
@@ -46,12 +46,11 @@ const mina = {
         mana: 20,
       },
       debuff: {
-        health: 2,
+        health: 5,
         mana: 5,
         agility: 2,
-
+      },
     },
-  },
 
     {
       name: "Acid Blast",
@@ -62,11 +61,10 @@ const mina = {
         defense: 3,
       },
       debuff: {
-        health: 3,
-        },
+        health: 7,
+      },
       state: true,
     },
-    
 
     {
       name: "Acid Bomb",
@@ -74,27 +72,26 @@ const mina = {
       speed: 10,
       cost: 40,
       buff: {
-        
         defense: 6,
       },
       debuff: {
-        health: 10,
-        defense: 5, agility: 6, cooldown: 2, recovery: 1,
+        health: 15,
+        defense: 5,
+        agility: 6,
+        cooldown: 2,
+        recovery: 1,
       },
       state: true,
     },
-
 
     {
       name: "Acid Corrosion",
       damage: 10,
       speed: 20,
       cost: 20,
-      debuff: { health: 3, defense: 10, agility: 10, cooldown: 1, recovery: 1, },
+      debuff: { health: 5, defense: 10, agility: 10, cooldown: 1, recovery: 1 },
       state: true,
     },
-
-   
   ],
 };
 

@@ -10,16 +10,16 @@ const Ochaco = {
   name: "Ochaco Uraraka",
   image: OchacoArenaImage,
 
-  health: 100,
-  mana: 75,
-  maximumMana: 75,
+  health: 90,
+  mana: 120,
+  maximumMana: 120,
   manaRegen: 25,
-  cooldown: 3,
-  maximumCooldown: 3,
-  recovery: 1,
-  agility: 35,
+  cooldown: 2,
+  maximumCooldown: 2,
+  recovery: 2,
+  agility: 20,
   defense: {
-    amount: 15,
+    amount: 17,
     active: true,
   },
 
@@ -29,11 +29,26 @@ const Ochaco = {
       image: ExplodingPineconeImage,
       damage: 15,
       speed: 45,
-      cost: 10,
+      cost: 7,
       state: true,
       debuff: {
-        agility: 10,
-        defense: 5,
+        agility: 20,
+        defense: 20,
+        cooldown: 1,
+      },
+    },
+
+    {
+      name: "Release!",
+      image: TabascoStarImage,
+      damage: 35,
+      speed: 45,
+      cost: 7,
+      state: true,
+      debuff: {
+        health: 5,
+        defense: 8,
+        recovery: 1,
       },
     },
 
@@ -44,8 +59,12 @@ const Ochaco = {
       speed: 55,
       cost: 12,
       state: true,
+      buff:{
+        mana: 20,
+      },
+
       debuff: {
-        defense: 5,
+        defense: 8,
       },
     },
 
@@ -54,7 +73,7 @@ const Ochaco = {
       image: FireBirdStarImage,
       damage: 55,
       speed: 40,
-      cost: 30,
+      cost: 15,
       state: true,
       debuff: {
         agility: 10,
@@ -70,23 +89,12 @@ const Ochaco = {
       cost: 18,
       state: true,
       debuff: {
-        agility: 15,
-        cooldown: 1,
+        agility: 30,
+        cooldown: 2,
       },
     },
 
-    {
-      name: "Release!",
-      image: TabascoStarImage,
-      damage: 35,
-      speed: 45,
-      cost: 22,
-      state: true,
-      debuff: {
-        health: 5,
-        defense: 8,
-      },
-    },
+    
   ],
 };
 

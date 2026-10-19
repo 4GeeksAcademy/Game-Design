@@ -24,6 +24,20 @@ const Luffy = {
   },
 
   attacks: [
+
+    {
+      name: "Second Gear",
+      image: null,
+      damage: 0,
+      speed: 0,
+      cost: 10,
+      state: true,
+      buff: {
+        agility: 10,
+        mana: 50,
+      }
+    },
+
     {
       name: "Gum-Gum Pistol",
       image: null,
@@ -51,7 +65,7 @@ const Luffy = {
     {
       name: "Gum-Gum Red Hawk",
       image: null,
-      damage: 95,
+      damage: 80,
       speed: 55,
       cost: 40,
       state: true,

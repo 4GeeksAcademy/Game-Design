@@ -10,25 +10,40 @@ const Ichigo = {
   name: "Ichigo Kurosaki",
   image: IchigoArenaImage,
 
-  health: 110,
-mana: 75,
-maximumMana: 75,
-manaRegen: 20,
+  health: 115,
+mana: 200,
+maximumMana: 200,
+manaRegen: 70,
 cooldown: 3,
 maximumCooldown: 3,
 recovery: 1,
-agility: 35,
+agility: 50,
 defense: {
-amount: 15,
+amount: 25,
 active: true,
 },
 
 attacks: [
+
+{
+  name: "Flash Step",
+  damage: 5,
+  speed: 50,
+  cost: 14,
+  state: true,
+  buff: {
+    agility: 15,
+  },
+  debuff: {
+    agility: 6,
+  },
+},
+
 {
 name: "Zangetsu Slash",
-damage: 20,
+damage: 55,
 speed: 40,
-cost: 12,
+cost: 21,
 state: true,
 buff: {
 agility: 3,
@@ -38,28 +53,15 @@ defense: 3,
 },
 },
 
-{
-  name: "Flash Step",
-  damage: 10,
-  speed: 50,
-  cost: 18,
-  state: true,
-  buff: {
-    agility: 8,
-  },
-  debuff: {
-    agility: 4,
-  },
-},
 
 {
   name: "Getsuga Tenshō",
-  damage: 35,
-  speed: 30,
-  cost: 30,
+  damage: 60,
+  speed: 40,
+  cost: 25,
   state: true,
   buff: {
-    defense: 3,
+    mana: 15,
   },
   debuff: {
     health: 5,
@@ -68,18 +70,30 @@ defense: 3,
 },
 
 {
-  name: "Bankai: Tensa Zangetsu",
+  name: "Gran Rey Cero",
   damage: 45,
-  speed: 35,
-  cost: 45,
+  speed: 45,
+  cost: 40,
+  state: true,
+  buff: {},
+  debuff: {
+    agility: 2,
+  },
+},
+
+{
+  name: "Bankai: Tensa Zangetsu",
+  damage: 10,
+  speed: 40,
+  cost: 70,
   state: true,
   buff: {
-    agility: 10,
+    mana: 180,
+    agility: 50,
     defense: 5,
-  },
-  debuff: {
-    health: 8,
-    defense: 5,
+    maximumCooldown: 2,
+    cooldown: 2,
+    recovery: 2
   },
 },
 

@@ -130,7 +130,7 @@ function FighterStats({ fighter }) {
     {
       name: "MANA",
       value: stats.maximumMana,
-      maximum: 150,
+      maximum: 200,
       color: "mana",
     },
     {
