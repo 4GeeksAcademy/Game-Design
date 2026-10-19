@@ -10,68 +10,33 @@ const Picolo = {
   name: "Piccolo",
   image: PicoloArenaImage,
 
-  health: 100,
-  mana: 65,
-  maximumMana: 65,
-  manaRegen: 15,
-  cooldown: 4,
-  maximumCooldown: 4,
+  health: 150,
+  mana: 90,
+  maximumMana: 90,
+  manaRegen: 30,
+  cooldown: 3,
+  maximumCooldown: 3,
   recovery: 1,
-  agility: 15,
+  agility: 25,
 
   defense: {
-    amount: 15,
+    amount: 28,
   },
 
   attacks: [
     {
-      id: "special-beam-cannon",
-      name: "Special Beam Cannon",
-      image: ExplodingPineconeImage,
-      damage: 45,
-      speed: 35,
-      cost: 30,
-      state: true,
-    },
-    {
-      id: "hellzone-grenade",
-      name: "Hellzone Grenade",
-      image: FireBirdStarImage,
-      damage: 35,
-      speed: 30,
-      cost: 25,
-      state: true,
-    },
-    {
-      id: "light-grenade",
-      name: "Light Grenade",
+      id: "regeneration",
+      name: "Namekian Regeneration",
       image: TabascoStarImage,
-      damage: 30,
-      speed: 25,
-      cost: 20,
+      damage: 0,
+      speed: 0,
+      cost: 35,
       state: true,
-    },
-    {
-      id: "explosive-wave",
-      name: "Explosive Wave",
-      image: GasStarImage,
-      damage: 20,
-      speed: 20,
-      cost: 15,
-      state: true,
-      debuff: {
-        agility: -10,
+      buff: {
+        health: 30,
       },
     },
-    {
-      id: "masenko",
-      name: "Masenko",
-      image: FireBirdStarImage,
-      damage: 25,
-      speed: 30,
-      cost: 15,
-      state: true,
-    },
+
     {
       id: "ki-control",
       name: "Ki Control",
@@ -83,19 +48,71 @@ const Picolo = {
       buff: {
         defense: 10,
         agility: 5,
+        mana: 30,
+      },
+    },
+
+    
+
+
+    {
+      id: "light-grenade",
+      name: "Light Grenade",
+      image: TabascoStarImage,
+      damage: 20,
+      speed: 38,
+      cost: 10,
+      state: true,
+      debuff: {
+        health: 4,
+      },
+    },
+    
+    {
+      id: "hellzone-grenade",
+      name: "Hellzone Grenade",
+      image: FireBirdStarImage,
+      damage: 40,
+      speed: 48,
+      cost: 13,
+      state: true,
+      debuff: {
+        health: 12,
+      },
+    },
+
+    {
+      id: "special-beam-cannon",
+      name: "Special Beam Cannon",
+      image: ExplodingPineconeImage,
+      damage: 45,
+      speed: 60,
+      cost: 15,
+      state: true,
+    },
+    
+    {
+      id: "explosive-wave",
+      name: "Explosive Wave",
+      image: GasStarImage,
+      damage: 40,
+      speed: 40,
+      cost: 20,
+      state: true,
+      debuff: {
+        agility: 10,
+        defense: 5,
+        maximumCooldown: 2,
       },
     },
     {
-      id: "regeneration",
-      name: "Namekian Regeneration",
-      image: TabascoStarImage,
-      damage: 0,
-      speed: 0,
-      cost: 20,
+      id: "masenko",
+      name: "Masenko",
+      image: FireBirdStarImage,
+      damage: 25,
+      speed: 70,
+      cost: 27,
       state: true,
-      buff: {
-        health: 20,
-      },
     },
   ],
 };

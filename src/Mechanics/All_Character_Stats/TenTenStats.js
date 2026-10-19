@@ -11,8 +11,8 @@ const TenTen = {
   image: TenTenArenaImage,
 
   health: 95,
-  mana: 85,
-  maximumMana: 85,
+  mana: 100,
+  maximumMana: 100,
   manaRegen: 25,
   cooldown: 3,
   maximumCooldown: 3,
@@ -24,14 +24,30 @@ const TenTen = {
   },
 
   attacks: [
+
+     {
+      id: "tenten-sealing-scroll",
+      name: "Sealing Scroll",
+      // image: SealingScrollImage,
+      description:
+        "Uses her scroll techniques to recover chakra and prepare for another attack.",
+      damage: 0,
+      speed: 0,
+      cost: 0,
+      state: true,
+      buff: {
+        mana: 20,
+      },
+    },
+
     {
       id: "tenten-kunai-throw",
       name: "Kunai Throw",
       // image: KunaiThrowImage,
       description: "Throws a kunai at the opponent with quick precision.",
       damage: 15,
-      speed: 35,
-      cost: 5,
+      speed: 40,
+      cost: 3,
       state: true,
     },
 
@@ -41,10 +57,13 @@ const TenTen = {
       // image: WeaponBarrageImage,
       description:
         "Launches a rapid barrage of shuriken and kunai at the opponent.",
-      damage: 25,
+      damage: 30,
       speed: 45,
-      cost: 15,
+      cost: 10,
       state: true,
+      debuff: {
+        cooldown: 1,
+      },
     },
 
     {
@@ -53,11 +72,12 @@ const TenTen = {
       // image: ExplosiveTagsImage,
       description:
         "Throws explosive tags that damage the opponent and reduce their agility.",
-      damage: 20,
-      speed: 30,
-      cost: 15,
+      damage: 25,
+      speed: 25,
+      cost: 12,
       state: true,
       debuff: {
+        health: 5,
         agility: 10,
       },
     },
@@ -73,7 +93,9 @@ const TenTen = {
       cost: 15,
       state: true,
       debuff: {
+        health: 3,
         defense: 5,
+        mana: 10,
       },
     },
 
@@ -83,26 +105,17 @@ const TenTen = {
       // image: TwinRisingDragonsImage,
       description:
         "Uses her scrolls to unleash a large wave of weapons against the opponent.",
-      damage: 35,
-      speed: 40,
+      damage: 55,
+      speed: 50,
       cost: 25,
       state: true,
-    },
-
-    {
-      id: "tenten-sealing-scroll",
-      name: "Sealing Scroll",
-      // image: SealingScrollImage,
-      description:
-        "Uses her scroll techniques to recover chakra and prepare for another attack.",
-      damage: 0,
-      speed: 0,
-      cost: 0,
-      state: true,
-      buff: {
-        mana: 15,
+      debuff: {
+        agility: 20,
+        cooldown: 1,
       },
     },
+
+   
 
     {
       id: "tenten-dragon-weapons",
@@ -110,12 +123,14 @@ const TenTen = {
       // image: DragonWeaponsImage,
       description:
         "Unleashes a powerful storm of weapons, dealing heavy damage and reducing the opponent's agility.",
-      damage: 40,
-      speed: 35,
-      cost: 30,
+      damage: 60,
+      speed: 70,
+      cost: 40,
       state: true,
       debuff: {
         agility: 15,
+        cooldown: 1,
+        maximumCooldown: 1,
       },
     },
   ],
