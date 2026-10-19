@@ -30,45 +30,56 @@ const Yoruichi = {
         {
             name: "Shunpo Strike",
             damage: 18,
-            cost: 10,
-            speed: 45,
+            cost: 5,
+            speed: 90,
             state: true,
 
             buff: {
-                agility: 10
+                agility: 10,
+                mana: 10,
             }
         },
 
         {
             name: "Hakuda Combo",
             damage: 28,
-            cost: 18,
-            speed: 35,
-            state: true
+            cost: 9,
+            speed: 70,
+            state: true,
+            buff: {
+                agility: 10,
+                mana: 15
+            },
         },
 
         {
             name: "Shunko: Lightning Release",
             damage: 12,
-            cost: 25,
-            speed: 40,
+            cost: 13,
+            speed: 80,
             state: true,
 
             buff: {
-                agility: 15,
-                defense: 5
-            }
+                agility: 10,
+                defense: 3,
+                mana: 5,
+            },
         },
 
         {
             name: "Raijin Senkei",
             damage: 42,
-            cost: 40,
-            speed: 25,
+            cost: 20,
+            speed: 50,
             state: true,
+            buff: {
+                agility: 10,
+                defense: 3,
+                mana: 10,
+            },
 
             debuff: {
-                agility: 10
+                agility: 20
             }
         }
     ]
