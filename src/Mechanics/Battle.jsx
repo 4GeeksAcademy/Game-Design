@@ -348,7 +348,7 @@ function App() {
           </div>
         </div>
       )}
-      {/* Show only one animated popup at a time. */}
+      {/* Show only one animated popup at a time.
       {combatMessages.length > 0 && (
         <div id="combatPopupContainer">
           {combatMessages.slice(0, 3).map((message, index) => (
@@ -363,7 +363,7 @@ function App() {
             </div>
           ))}
         </div>
-      )}
+      )} */}
 
       {knockout && !showResults ? null : character.health <= 0 ? (
         <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
@@ -541,6 +541,7 @@ function App() {
                   character={character}
                   setCharacter={setCharacter}
                   currentTurn={currentTurn}
+                  combatMessages={combatMessages}
                   setCurrentTurn={setCurrentTurn}
                 />
               </div>

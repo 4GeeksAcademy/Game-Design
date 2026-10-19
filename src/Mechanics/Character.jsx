@@ -2,12 +2,21 @@ import React from "react";
 import StatBar from "./StatBar.jsx";
 import "./BattleUI.css";
 
-function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
+function Character({
+  character,
+  setCharacter,
+  currentTurn,
+  setCurrentTurn,
+  combatMessages = [],
+}) {
   const healthPercentage =
     character.maximumHealth > 0
       ? Math.min(
           100,
-          Math.max(0, (character.health / character.maximumHealth) * 100),
+          Math.max(
+            0,
+            (character.health / character.maximumHealth) * 100,
+          ),
         )
       : 0;
 
@@ -15,7 +24,8 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
     <div id="characterSection">
       <div id="character" className="battle-status-panel">
         <div id="characterPortraitWrapper">
-          <img src={character.image} 
+          <img
+            src={character.image}
             id="characterImage"
             alt={character.name}
           />
@@ -25,23 +35,11 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
               <div className="verticalMeter healthMeter" title="Health">
                 <div
                   className="verticalMeterFill"
-                  style={{
-                    height: `${
-                      character.maximumHealth > 0
-                        ? Math.min(
-                            100,
-                            Math.max(
-                              0,
-                              (character.health / character.maximumHealth) *
-                                100,
-                            ),
-                          )
-                        : 0
-                    }%`,
-                  }}
+                  style={{ height: `${healthPercentage}%` }}
                 />
                 <span>H</span>
               </div>
+
               <strong className="verticalMeterValue">
                 {character.health}/{character.maximumHealth}
               </strong>
@@ -68,6 +66,7 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
                 />
                 <span>M</span>
               </div>
+
               <strong className="verticalMeterValue">
                 {character.mana}/{character.maximumMana}
               </strong>
@@ -82,7 +81,6 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
           <h2 id="characterName">{character.name}</h2>
 
           <div id="characterStats">
-           
             <StatBar
               label="Defense"
               icon="🛡️"
@@ -104,7 +102,8 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
             <div className="compactStat">
               <span>⏳ Cooldown</span>
               <strong>
-                {character.cooldown ?? 0}/{character.maximumCooldown ?? 3}
+                {character.cooldown ?? 0}/
+                {character.maximumCooldown ?? 3}
               </strong>
             </div>
 
@@ -114,6 +113,23 @@ function Character({ character, setCharacter, currentTurn, setCurrentTurn }) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Combat messages appear directly above Finish Turn. */}
+      <div
+        id="combatPopupContainer"
+        className="finish-turn-messages"
+        aria-live="polite"
+      >
+        {combatMessages.slice(0, 3).map((message, index) => (
+          <div
+            className={`combat-popup ${message.type}`}
+            key={message.id}
+            style={{ animationDelay: `${index * 0.15}s` }}
+          >
+            {message.text}
+          </div>
+        ))}
       </div>
 
       <div id="finishTurnArea">

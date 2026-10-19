@@ -996,9 +996,9 @@ body {
    ========================================================= */
 
 #combatPopupContainer {
-  position: fixed !important;
-  top: 25%;
-  right: 170px !important;
+  position: absolute !important;
+  top: 5%;
+  right: 30px !important;
   left: auto !important;
   z-index: 1000;
   display: flex;
@@ -3325,19 +3325,3 @@ body {
   box-shadow: 0 0 12px rgba(255, 49, 89, 0.7);
 }
 
-/* Combat messages above the Finish Turn button */
-.finish-turn-messages {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  margin: 12px 0;
-  z-index: 5;
-}
-
-.finish-turn-messages .combat-popup {
-  position: relative;
-  width: 100%;
-  box-sizing: border-box;
-}
