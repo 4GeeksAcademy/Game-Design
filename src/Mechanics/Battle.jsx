@@ -19,6 +19,7 @@ import Ichigo from "./All_Character_Stats/IchigoStats.js";
 import Naruto from "./All_Character_Stats/NarutoStats.js";
 import Yoruichi from "./All_Character_Stats/YoruichiStats.js";
 import { aiTurn } from "./AI.js";
+import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
 import React, { useState, useEffect, useRef } from "react";
 
@@ -72,6 +73,7 @@ function App() {
 
   const [damageDealt, setDamageDealt] = useState(0);
   const lastRewardedDamage = useRef(0);
+  const aiControllerRef = useRef(null);
 
   useEffect(() => {
     const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
@@ -168,14 +170,56 @@ function App() {
   ]);
 
   // Run the AI turn.
+
+  // Run the AI turn.
   useEffect(() => {
-    if (currentTurn === "ai") {
-      aiTurn(opponent, character, setAiAttack, () => {
-        setOpponent({ ...opponent });
-        setCharacter({ ...character });
-        setAiAttack(null);
+    if (currentTurn !== "ai") return;
+
+    const difficulty = location.state?.difficulty ?? "Easy";
+
+    if (difficulty === "Normal" || difficulty === "Hard") {
+      const controller = createNormalAIController({
+        ai: opponent,
+        player: character,
+
+        onShowAttack: (attack) => {
+          setAiAttack(attack);
+        },
+
+        onResolveAttack: (attack) => {
+          showCombatMessage(`${opponent.name} used ${attack.name}!`, "hit");
+
+          setOpponent({ ...opponent });
+          setCharacter({ ...character });
+        },
+
+        onFinish: () => {
+          opponent.turnFinished = true;
+
+          setAiAttack(null);
+          setOpponent({ ...opponent });
+          setCharacter({ ...character });
+        },
       });
+
+      aiControllerRef.current = controller;
+      controller.start();
+
+      return () => {
+        controller.stop();
+
+        if (aiControllerRef.current === controller) {
+          aiControllerRef.current = null;
+        }
+      };
     }
+
+    // Preserve Easy difficulty's existing behavior.
+    aiTurn(opponent, character, setAiAttack, () => {
+      setOpponent({ ...opponent });
+      setCharacter({ ...character });
+      setAiAttack(null);
+    });
   }, [currentTurn]);
 
   // Display the round announcement before allowing combat.
@@ -314,7 +358,12 @@ function App() {
 
                           setOpponent({ ...result.attacker });
                           setCharacter({ ...result.defender });
-                          setAiAttack(null);
+
+                          if (aiControllerRef.current) {
+                            aiControllerRef.current.respondToDefense();
+                          } else {
+                            setAiAttack(null);
+                          }
                         }
                       }}
                     >
@@ -344,7 +393,12 @@ function App() {
 
                           setOpponent({ ...result.attacker });
                           setCharacter({ ...result.defender });
-                          setAiAttack(null);
+
+                          if (aiControllerRef.current) {
+                            aiControllerRef.current.respondToDefense();
+                          } else {
+                            setAiAttack(null);
+                          }
                         }
                       }}
                     >

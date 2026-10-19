@@ -57,7 +57,7 @@ const mina = {
       name: "Acid Blast",
       damage: 25,
       speed: 30,
-      cost: 17,
+      cost: 15,
       buff: {
         defense: 3,
       },
@@ -72,7 +72,7 @@ const mina = {
       name: "Acid Bomb",
       damage: 40,
       speed: 10,
-      cost: 55,
+      cost: 40,
       buff: {
         
         defense: 6,
@@ -89,7 +89,7 @@ const mina = {
       name: "Acid Corrosion",
       damage: 10,
       speed: 20,
-      cost: 35,
+      cost: 20,
       debuff: { health: 3, defense: 10, agility: 10, cooldown: 1, recovery: 1, },
       state: true,
     },

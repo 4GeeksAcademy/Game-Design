@@ -55,7 +55,7 @@ const Usopp = {
     image: FireBirdStarImage,
     damage: 60,
     speed: 50,
-    cost: 30,
+    cost: 20,
     state: true,
     debuff: {
       defense: 10,
@@ -68,7 +68,7 @@ const Usopp = {
     image: GasStarImage,
     damage: 20,
     speed: 25,
-    cost: 18,
+    cost: 15,
     state: true,
     debuff: {
       health: 10,
@@ -82,7 +82,7 @@ const Usopp = {
     image: FakeHammerImage,
     damage: 1,
     speed: 30,
-    cost: 10,
+    cost: 1,
     state: true,
     debuff: {
       defense: 8,

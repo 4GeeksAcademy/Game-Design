@@ -139,13 +139,13 @@ function FighterStats({ fighter }) {
         typeof stats.defense === "number"
           ? stats.defense
           : (stats.defense?.amount ?? 0),
-      maximum: 150,
+      maximum: 100,
       color: "defense",
     },
     {
       name: "AGILITY",
       value: stats.agility,
-      maximum: 150,
+      maximum: 100,
       color: "agility",
     },
   ];
