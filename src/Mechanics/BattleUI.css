@@ -2954,3 +2954,390 @@ body {
 }
 
 
+/* =========================================
+   AI INCOMING ATTACK
+========================================= */
+
+#aiAttackSection {
+  position: relative;
+  width: min(420px, 92vw);
+  margin: 20px auto;
+  animation: incomingAttack 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+#aiAttackCard {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  color: #f5f7ff;
+  background: linear-gradient(145deg, #191b27, #0c0d13);
+  border: 1px solid #ff3159;
+  border-radius: 12px;
+  box-shadow:
+    0 0 12px rgb(255 49 89 / 18%),
+    inset 0 0 20px rgb(255 49 89 / 5%);
+}
+
+#aiAttackHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  color: #ff8197;
+  background: rgb(255 49 89 / 10%);
+  border-bottom: 1px solid rgb(255 49 89 / 30%);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.attack-warning-dot {
+  width: 8px;
+  height: 8px;
+  background: #ff3159;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff3159;
+  animation: warningPulse 0.8s ease-in-out infinite alternate;
+}
+
+#aiAttackInfo {
+  padding: 18px;
+}
+
+#aiAttackName {
+  margin: 0 0 18px;
+  color: #fff;
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  overflow-wrap: anywhere;
+}
+
+#aiAttackStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.attack-threat-badge,
+.attack-cost-badge {
+  display: flex;
+  min-width: 0;
+  min-height: 94px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 5px;
+  color: #fff;
+  background: #151720;
+  border: 2px solid #414453;
+  border-radius: 9px;
+  text-align: center;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.attack-threat-badge strong,
+.attack-cost-badge strong {
+  font-size: clamp(1.2rem, 3vw, 1.65rem);
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.threat-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+
+.threat-rating {
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* Damage threat colors */
+
+.threat-very-safe {
+  background: #123d2a;
+  border-color: #176b43;
+}
+
+.threat-safe {
+  background: #176b36;
+  border-color: #2acb67;
+}
+
+.threat-moderate {
+  color: #171304;
+  background: #e7c52f;
+  border-color: #ffe66d;
+}
+
+.threat-hazardous {
+  background: #8a3919;
+  border-color: #ff8138;
+  box-shadow: inset 0 0 12px rgb(255 129 56 / 12%);
+}
+
+.threat-dangerous {
+  background: #761b29;
+  border-color: #d82c45;
+}
+
+.threat-life-threatening {
+  background: #470b17;
+  border-color: #9c1732;
+  box-shadow: inset 0 0 14px rgb(255 0 55 / 12%);
+}
+
+.threat-death {
+  background: #050505;
+  border-color: #595959;
+  box-shadow: inset 0 0 12px rgb(255 255 255 / 3%);
+}
+
+/* Speed threat colors */
+
+.speed-easy {
+  border-color: #4e9a6c;
+}
+
+.speed-avoidable {
+  border-color: #38bd77;
+}
+
+.speed-challenging {
+  border-color: #e7c52f;
+}
+
+.speed-fast {
+  border-color: #ff8138;
+}
+
+.speed-very-fast {
+  border-color: #ed414e;
+}
+
+.speed-unavoidable {
+  border-color: #a91d39;
+  box-shadow: inset 0 0 12px rgb(255 0 55 / 10%);
+}
+
+.speed-guaranteed {
+  color: #fff;
+  background: #050505;
+  border-color: #ff3159;
+  box-shadow:
+    0 0 10px rgb(255 49 89 / 18%),
+    inset 0 0 12px rgb(255 49 89 / 8%);
+}
+
+/* Mana cost remains neutral */
+
+.attack-cost-badge {
+  border-color: #51536a;
+}
+
+.attack-cost-badge strong {
+  color: #bfc7ff;
+}
+
+/* =========================================
+   DEFEND / EVADE BUTTONS
+========================================= */
+
+#defensiveActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+#defendButton,
+#evadeButton {
+  display: flex;
+  flex: 1;
+  max-width: 200px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 13px 16px;
+  color: #fff;
+  background: #171923;
+  border: 1px solid #414453;
+  border-radius: 8px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+#defendButton:not(:disabled):hover {
+  background: #123d2a;
+  border-color: #2acb67;
+  box-shadow: 0 0 14px rgb(42 203 103 / 20%);
+  transform: translateY(-2px);
+}
+
+#evadeButton:hover {
+  background: #102e42;
+  border-color: #13d5ff;
+  box-shadow: 0 0 14px rgb(19 213 255 / 20%);
+  transform: translateY(-2px);
+}
+
+#defendButton:active,
+#evadeButton:active {
+  transform: scale(0.97);
+}
+
+#defendButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  filter: grayscale(0.7);
+}
+
+/* =========================================
+   ENTRANCE ANIMATIONS
+========================================= */
+
+@keyframes incomingAttack {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.96);
+    filter: brightness(1.7);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes warningPulse {
+  from {
+    opacity: 0.45;
+    transform: scale(0.8);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #aiAttackSection,
+  .attack-warning-dot {
+    animation: none;
+  }
+
+  #defendButton,
+  #evadeButton,
+  .attack-threat-badge,
+  .attack-cost-badge {
+    transition: none;
+  }
+}
+
+
+/* Defense countdown */
+#defenseTimer {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(19, 213, 255, 0.35);
+  border-radius: 8px;
+  background: rgba(5, 18, 32, 0.85);
+  transition: border-color 0.2s ease;
+}
+
+#defenseTimerText {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+#defenseTimerText span {
+  color: #a9c4d6;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+#defenseTimerText strong {
+  color: #13d5ff;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+#defenseTimerTrack {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+#defenseTimerFill {
+  height: 100%;
+  border-radius: inherit;
+  background: #13d5ff;
+  box-shadow: 0 0 10px rgba(19, 213, 255, 0.65);
+  transition: width 0.9s linear, background 0.2s ease;
+}
+
+#defenseTimer.timer-warning {
+  border-color: rgba(255, 184, 77, 0.7);
+}
+
+#defenseTimer.timer-warning #defenseTimerText strong {
+  color: #ffb84d;
+}
+
+#defenseTimer.timer-warning #defenseTimerFill {
+  background: #ffb84d;
+  box-shadow: 0 0 10px rgba(255, 184, 77, 0.5);
+}
+
+#defenseTimer.timer-critical {
+  border-color: rgba(255, 49, 89, 0.85);
+}
+
+#defenseTimer.timer-critical #defenseTimerText strong {
+  color: #ff3159;
+}
+
+#defenseTimer.timer-critical #defenseTimerFill {
+  background: #ff3159;
+  box-shadow: 0 0 12px rgba(255, 49, 89, 0.7);
+}
+
+/* Combat messages above the Finish Turn button */
+.finish-turn-messages {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin: 12px 0;
+  z-index: 5;
+}
+
+.finish-turn-messages .combat-popup {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}

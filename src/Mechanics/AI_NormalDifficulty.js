@@ -1,61 +1,45 @@
+
 import { attackCharacter } from "./Health.js";
 
 const MAX_QUEUE_SIZE = 10;
 const ATTACK_TIMEOUT = 10000;
 
-// Higher scores indicate attacks the AI should prefer.
 function scoreAttack(attack) {
   let score = 0;
 
   score += Math.max(0, attack.damage || 0) * 1.5;
   score += Math.max(0, attack.speed || 0) * 0.5;
 
-  // Reward useful effects.
   if (attack.buff) score += 12;
   if (attack.debuff) score += 14;
 
-  // Avoid spending lots of mana on weak moves.
   score -= Math.max(0, attack.cost || 0) * 0.6;
 
   return score;
 }
 
 function aiChooseNormalAttacks(ai) {
-  let available = ai.attacks.filter(
-    (attack) => attack.state === true && attack.cost <= ai.mana,
-  );
+  if (!ai || !Array.isArray(ai.attacks)) return [];
 
-  // Save mana rather than waste it on a very weak move.
-  if (available.length > 0 && scoreAttack(available[0]) < 8) {
-    return [];
-  }
-
-  // Prefer the moves with the highest strategic value.
-  available.sort((a, b) => scoreAttack(b) - scoreAttack(a));
-
-  const queue = [];
-  let plannedMana = ai.mana;
-
-  for (const attack of available) {
-    if (queue.length >= MAX_QUEUE_SIZE) break;
-
-    // Never plan an attack the AI cannot afford.
-    if (attack.cost > plannedMana) continue;
-
-    queue.push(attack);
-    plannedMana -= attack.cost;
-  }
-
-  return queue;
+  return ai.attacks
+    .filter((attack) => attack.state === true)
+    .sort((a, b) => scoreAttack(b) - scoreAttack(a))
+    .slice(0, MAX_QUEUE_SIZE);
 }
 
 function createNormalAIController({
+  getAI,
+  getPlayer,
   ai,
   player,
   onShowAttack,
   onResolveAttack,
   onFinish,
 }) {
+  // Get the latest fighter objects whenever needed.
+  const readAI = getAI ?? (() => ai);
+  const readPlayer = getPlayer ?? (() => player);
+
   let queue = [];
   let currentAttack = null;
   let timer = null;
@@ -69,6 +53,18 @@ function createNormalAIController({
     }
   }
 
+  function isBattleOver() {
+    const currentAI = readAI();
+    const currentPlayer = readPlayer();
+
+    return (
+      !currentAI ||
+      !currentPlayer ||
+      currentAI.health <= 0 ||
+      currentPlayer.health <= 0
+    );
+  }
+
   function finishTurn() {
     if (stopped) return;
 
@@ -78,7 +74,7 @@ function createNormalAIController({
     queue = [];
 
     onShowAttack(null);
-    onFinish();
+    onFinish(readAI(), readPlayer());
   }
 
   function advance() {
@@ -87,27 +83,26 @@ function createNormalAIController({
     clearAttackTimer();
     currentAttack = null;
 
-    // Don't continue a turn after a knockout.
-    if (player.health <= 0 || ai.health <= 0) {
+    if (isBattleOver()) {
       finishTurn();
       return;
     }
 
-    // Skip attacks that became unavailable while queued.
-    while (queue.length > 0) {
-      const nextAttack = queue.shift();
+    const currentAI = readAI();
 
-      if (nextAttack.state === true && nextAttack.cost <= ai.mana) {
-        currentAttack = nextAttack;
-        break;
-      }
-    }
+    // Choose the next queued move that is still usable.
+    const index = queue.findIndex(
+      (attack) =>
+        attack.state === true &&
+        (attack.cost ?? 0) <= currentAI.mana,
+    );
 
-    // No useful queued attack remains: end immediately.
-    if (!currentAttack) {
+    if (index === -1) {
       finishTurn();
       return;
     }
+
+    currentAttack = queue.splice(index, 1)[0];
 
     onShowAttack(currentAttack);
 
@@ -115,21 +110,34 @@ function createNormalAIController({
       if (stopped || !currentAttack) return;
 
       const attack = currentAttack;
-      currentAttack = null;
+      const attacker = readAI();
+      const defender = readPlayer();
+
       timer = null;
 
-      // The attack resolves automatically after 10 seconds.
-      if (player.health > 0 && ai.health > 0) {
-        attackCharacter(attack, ai, player);
-        onResolveAttack(attack);
-      }
-
-      if (player.health <= 0 || ai.health <= 0) {
+      if (
+        !attacker ||
+        !defender ||
+        attacker.health <= 0 ||
+        defender.health <= 0
+      ) {
         finishTurn();
         return;
       }
 
-      // Continue immediately instead of adding another delay.
+      const result = attackCharacter(attack, attacker, defender);
+
+      currentAttack = null;
+
+      if (result) {
+        onResolveAttack(attack, attacker, defender);
+      }
+
+      if (isBattleOver()) {
+        finishTurn();
+        return;
+      }
+
       advance();
     }, ATTACK_TIMEOUT);
   }
@@ -138,7 +146,9 @@ function createNormalAIController({
     if (started || stopped) return;
 
     started = true;
-    queue = aiChooseNormalAttacks(ai);
+
+    const currentAI = readAI();
+    queue = aiChooseNormalAttacks(currentAI);
 
     if (queue.length === 0) {
       finishTurn();
@@ -151,8 +161,7 @@ function createNormalAIController({
   function respondToDefense() {
     if (stopped || !currentAttack) return false;
 
-    // The defense handler resolves the attack before calling this.
-    // Clear its timeout and show the next attack immediately.
+    // The defense handler has already resolved the attack.
     advance();
     return true;
   }

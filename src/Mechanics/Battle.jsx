@@ -18,6 +18,7 @@ import Luffy from "./All_Character_Stats/LuffyStats.js";
 import Ichigo from "./All_Character_Stats/IchigoStats.js";
 import Naruto from "./All_Character_Stats/NarutoStats.js";
 import Yoruichi from "./All_Character_Stats/YoruichiStats.js";
+import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiTurn } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
@@ -87,6 +88,7 @@ function App() {
   }, [damageDealt]);
 
   const [attacksUsed, setAttacksUsed] = useState(0);
+  const [defenseTimeLeft, setDefenseTimeLeft] = useState(10);
   const [currentTurn, setCurrentTurn] = useState("intro");
 
   const [roundNumber, setRoundNumber] = useState(1);
@@ -100,6 +102,16 @@ function App() {
   const [combatLog, setCombatLog] = useState([]);
   const [aiAttack, setAiAttack] = useState(null);
 
+  const characterRef = useRef(character);
+  const opponentRef = useRef(opponent);
+  const knockoutRef = useRef(knockout);
+
+  useEffect(() => {
+    characterRef.current = character;
+    opponentRef.current = opponent;
+    knockoutRef.current = knockout;
+  }, [character, opponent, knockout]);
+
   // Display ONLY the first queued message.
   // The next message waits until this popup's display time finishes.
   // Remove the oldest popup after its display time.
@@ -109,7 +121,7 @@ function App() {
     if (firstMessageId === undefined) return;
 
     const timer = setTimeout(() => {
-      setCombatMessages((messages) => messages.slice(1));
+      setCombatMessages((messages) => messages.slice(3));
     }, 2800);
 
     return () => clearTimeout(timer);
@@ -169,7 +181,26 @@ function App() {
     knockout,
   ]);
 
-  // Run the AI turn.
+  useEffect(() => {
+    if (knockout || character.health <= 0 || opponent.health <= 0) {
+      aiControllerRef.current?.stop();
+      aiControllerRef.current = null;
+      setAiAttack(null);
+    }
+  }, [knockout, character.health, opponent.health]);
+
+  useEffect(() => {
+    if (
+      currentTurn !== "ai" ||
+      knockout ||
+      character.health <= 0 ||
+      opponent.health <= 0
+    ) {
+      return;
+    }
+
+    // Keep your existing AI-turn logic here.
+  }, [currentTurn, knockout, character.health, opponent.health]);
 
   // Run the AI turn.
   useEffect(() => {
@@ -179,26 +210,30 @@ function App() {
 
     if (difficulty === "Normal" || difficulty === "Hard") {
       const controller = createNormalAIController({
-        ai: opponent,
-        player: character,
+        getAI: () => opponentRef.current,
+        getPlayer: () => characterRef.current,
 
         onShowAttack: (attack) => {
           setAiAttack(attack);
         },
 
-        onResolveAttack: (attack) => {
-          showCombatMessage(`${opponent.name} used ${attack.name}!`, "hit");
+        onResolveAttack: (attack, currentAI, currentPlayer) => {
+          showCombatMessage(`${currentAI.name} used ${attack.name}!`, "hit");
 
-          setOpponent({ ...opponent });
-          setCharacter({ ...character });
+          setOpponent({ ...currentAI });
+          setCharacter({ ...currentPlayer });
         },
 
-        onFinish: () => {
-          opponent.turnFinished = true;
+        onFinish: (currentAI, currentPlayer) => {
+          if (!currentAI || !currentPlayer) return;
 
+          setOpponent({
+            ...currentAI,
+            turnFinished: true,
+          });
+
+          setCharacter({ ...currentPlayer });
           setAiAttack(null);
-          setOpponent({ ...opponent });
-          setCharacter({ ...character });
         },
       });
 
@@ -234,6 +269,33 @@ function App() {
 
     return () => clearTimeout(timer);
   }, [showRoundIntro]);
+
+  // Countdown for the player's defensive window.
+  useEffect(() => {
+    if (
+      !aiAttack ||
+      knockout ||
+      character.health <= 0 ||
+      opponent.health <= 0
+    ) {
+      setDefenseTimeLeft(10);
+      return;
+    }
+
+    let remaining = 10;
+    setDefenseTimeLeft(remaining);
+
+    const timer = setInterval(() => {
+      remaining -= 1;
+      setDefenseTimeLeft(Math.max(remaining, 0));
+
+      if (remaining <= 0) {
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [aiAttack, knockout, character.health, opponent.health]);
 
   // Add messages to the popup queue and permanent combat log.
   function showCombatMessage(text, type) {
@@ -323,17 +385,81 @@ function App() {
 
               {/* Opponent's attack and defensive choices. */}
               {aiAttack && (
-                <div id="aiAttackSection">
+                <div id="aiAttackSection" key={aiAttack.id ?? aiAttack.name}>
+                  {/*
+      The key helps React remount the card when the attack changes.
+      This retriggers its entrance animation for queued attacks.
+    */}
+
                   <div id="aiAttackCard">
-                    <div id="aiAttackHeader">OPPONENT ATTACK</div>
+                    <div id="aiAttackHeader">
+                      <span>⚠ INCOMING ATTACK</span>
+                      <span className="attack-warning-dot" />
+                    </div>
+
+                    <div
+                      id="defenseTimer"
+                      className={
+                        defenseTimeLeft <= 3
+                          ? "timer-critical"
+                          : defenseTimeLeft <= 5
+                            ? "timer-warning"
+                            : ""
+                      }
+                    >
+                      <div id="defenseTimerText">
+                        <span>DEFENSE WINDOW</span>
+                        <strong>{defenseTimeLeft}s</strong>
+                      </div>
+
+                      <div id="defenseTimerTrack">
+                        <div
+                          id="defenseTimerFill"
+                          style={{ width: `${defenseTimeLeft * 10}%` }}
+                        />
+                      </div>
+                    </div>
 
                     <div id="aiAttackInfo">
                       <h5 id="aiAttackName">{aiAttack.name}</h5>
 
                       <div id="aiAttackStats">
-                        <span>⚔ {aiAttack.damage}</span>
-                        <span>◆ {aiAttack.cost}</span>
-                        <span>⚡ {aiAttack.speed}</span>
+                        {/* Damage threat */}
+                        <div
+                          className={`attack-threat-badge ${
+                            getDamageThreat(aiAttack.damage).className
+                          }`}
+                        >
+                          <span className="threat-label">DAMAGE</span>
+
+                          <strong>{aiAttack.damage}</strong>
+
+                          <span className="threat-rating">
+                            {getDamageThreat(aiAttack.damage).label}
+                          </span>
+                        </div>
+
+                        {/* Speed threat */}
+                        <div
+                          className={`attack-threat-badge ${
+                            getSpeedThreat(aiAttack.speed).className
+                          }`}
+                        >
+                          <span className="threat-label">SPEED</span>
+
+                          <strong>{aiAttack.speed}</strong>
+
+                          <span className="threat-rating">
+                            {getSpeedThreat(aiAttack.speed).label}
+                          </span>
+                        </div>
+
+                        {/* Mana cost */}
+                        <div className="attack-cost-badge">
+                          <span className="threat-label">MANA COST</span>
+
+                          <strong>◆ {aiAttack.cost}</strong>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -341,7 +467,7 @@ function App() {
                   <div id="defensiveActions">
                     <button
                       id="defendButton"
-                      disabled={character.cooldown <= 0}
+                      disabled={character.cooldown <= 0 || defenseTimeLeft <= 0}
                       onClick={() => {
                         const result = attackCharacter(
                           aiAttack,
@@ -368,11 +494,12 @@ function App() {
                       }}
                     >
                       <span id="defendButtonIcon">🛡</span>
-                      <span>Defend</span>
+                      <span>DEFEND</span>
                     </button>
 
                     <button
                       id="evadeButton"
+                      disabled={defenseTimeLeft <= 0}
                       onClick={() => {
                         const result = evadeAttack(
                           aiAttack,
@@ -403,7 +530,7 @@ function App() {
                       }}
                     >
                       <span id="evadeButtonIcon">💨</span>
-                      <span>Evade</span>
+                      <span>EVADE</span>
                     </button>
                   </div>
                 </div>
