@@ -7,6 +7,151 @@ import { simulateBattle } from "./BattleSimulator.js";
 
 import "./BotSimulator.css";
 
+const MAX_ROUNDS = 100;
+
+function runStartingOrderSeries(
+  firstFighter,
+  secondFighter,
+  requestedCount,
+  firstDifficulty,
+  secondDifficulty,
+) {
+  let firstWins = 0;
+  let secondWins = 0;
+  let draws = 0;
+  let totalRounds = 0;
+
+  let firstWinnerHealthTotal = 0;
+  let secondWinnerHealthTotal = 0;
+
+  let firstWinnerRoundsTotal = 0;
+  let secondWinnerRoundsTotal = 0;
+
+  let lastResult = null;
+
+  for (let i = 0; i < requestedCount; i++) {
+    const result = simulateBattle(firstFighter.data, secondFighter.data, {
+      difficultyOne: firstDifficulty,
+      difficultyTwo: secondDifficulty,
+    });
+
+    totalRounds += result.rounds;
+
+    if (result.winner === firstFighter.data.name) {
+      firstWins++;
+      firstWinnerHealthTotal += result.fighters[0].health;
+      firstWinnerRoundsTotal += result.rounds;
+    } else if (result.winner === secondFighter.data.name) {
+      secondWins++;
+      secondWinnerHealthTotal += result.fighters[1].health;
+      secondWinnerRoundsTotal += result.rounds;
+    } else {
+      draws++;
+    }
+
+    lastResult = {
+      ...result,
+      selectedFighterOne: firstFighter,
+      selectedFighterTwo: secondFighter,
+    };
+  }
+
+  return {
+    firstFighter,
+    secondFighter,
+
+    firstWins,
+    secondWins,
+    draws,
+
+    completed: firstWins + secondWins + draws,
+
+    averageRounds:
+      requestedCount > 0 ? (totalRounds / requestedCount).toFixed(1) : "0.0",
+
+    firstAverageHealthAfterWins:
+      firstWins > 0 ? (firstWinnerHealthTotal / firstWins).toFixed(1) : "N/A",
+
+    secondAverageHealthAfterWins:
+      secondWins > 0
+        ? (secondWinnerHealthTotal / secondWins).toFixed(1)
+        : "N/A",
+
+    firstAverageRoundsToWin:
+      firstWins > 0 ? (firstWinnerRoundsTotal / firstWins).toFixed(1) : "N/A",
+
+    secondAverageRoundsToWin:
+      secondWins > 0
+        ? (secondWinnerRoundsTotal / secondWins).toFixed(1)
+        : "N/A",
+
+    lastResult,
+  };
+}
+
+function createFighterRecord(fighter) {
+  return {
+    id: fighter.id,
+    name: fighter.data.name,
+
+    wins: 0,
+    losses: 0,
+    draws: 0,
+    battles: 0,
+
+    totalRounds: 0,
+    totalRoundsToWin: 0,
+
+    totalHealthAfterWins: 0,
+
+    startsFirstBattles: 0,
+    startsFirstWins: 0,
+
+    startsSecondBattles: 0,
+    startsSecondWins: 0,
+  };
+}
+
+function recordFighterBattle(
+  fighterStats,
+  fighter,
+  ownHealth,
+  result,
+  position,
+) {
+  const stats = fighterStats[fighter.id];
+
+  const won = result.winner === fighter.data.name;
+  const drew = result.winner === null;
+
+  stats.battles++;
+  stats.totalRounds += result.rounds;
+
+  if (position === "first") {
+    stats.startsFirstBattles++;
+
+    if (won) {
+      stats.startsFirstWins++;
+    }
+  } else {
+    stats.startsSecondBattles++;
+
+    if (won) {
+      stats.startsSecondWins++;
+    }
+  }
+
+  if (won) {
+    stats.wins++;
+    stats.totalHealthAfterWins += ownHealth;
+    stats.totalRoundsToWin += result.rounds;
+  } else if (drew) {
+    stats.draws++;
+  } else {
+    stats.losses++;
+  }
+}
+
 function BotSimulator() {
   const navigate = useNavigate();
 
@@ -56,13 +201,6 @@ function BotSimulator() {
   }
 
   function runCustomSimulations(requestedCount) {
-    let botOneWins = 0;
-    let botTwoWins = 0;
-    let draws = 0;
-    let totalRounds = 0;
-    let lastResult = null;
-
-    // Select each fighter once for the entire batch.
     const fighterOne = chooseFighter(fighterOneId, null);
     const fighterTwo = chooseFighter(fighterTwoId, fighterOne?.id);
 
@@ -71,56 +209,65 @@ function BotSimulator() {
       return;
     }
 
-    // Run the same matchup repeatedly.
-    for (let i = 0; i < requestedCount; i++) {
-      const result = simulateBattle(fighterOne.data, fighterTwo.data, {
-        difficultyOne,
-        difficultyTwo,
-      });
+    // TEST A: Fighter One starts first.
+    const fighterOneStarts = runStartingOrderSeries(
+      fighterOne,
+      fighterTwo,
+      requestedCount,
+      difficultyOne,
+      difficultyTwo,
+    );
 
-      if (result.winner === fighterOne.data.name) {
-        botOneWins++;
-      } else if (result.winner === fighterTwo.data.name) {
-        botTwoWins++;
-      } else {
-        draws++;
-      }
+    // TEST B: Fighter Two starts first.
+    // The difficulty settings follow their respective fighters.
+    const fighterTwoStarts = runStartingOrderSeries(
+      fighterTwo,
+      fighterOne,
+      requestedCount,
+      difficultyTwo,
+      difficultyOne,
+    );
 
-      totalRounds += result.rounds;
+    // Combine the results while keeping both starting orders separate.
+    const botOneWins = fighterOneStarts.firstWins + fighterTwoStarts.secondWins;
 
-      lastResult = {
-        ...result,
-        selectedFighterOne: fighterOne,
-        selectedFighterTwo: fighterTwo,
-      };
-    }
+    const botTwoWins = fighterOneStarts.secondWins + fighterTwoStarts.firstWins;
 
-    const completed = botOneWins + botTwoWins + draws;
+    const draws = fighterOneStarts.draws + fighterTwoStarts.draws;
+
+    const completed = fighterOneStarts.completed + fighterTwoStarts.completed;
+
+    const totalRounds =
+      Number(fighterOneStarts.averageRounds) * requestedCount +
+      Number(fighterTwoStarts.averageRounds) * requestedCount;
 
     setResults({
       type: "custom",
+
+      selectedFighterOne: fighterOne,
+      selectedFighterTwo: fighterTwo,
+
       botOneWins,
       botTwoWins,
       draws,
       completed,
-      averageRounds: completed > 0 ? (totalRounds / completed).toFixed(1) : "0",
-      lastResult,
+
+      averageRounds:
+        completed > 0 ? (totalRounds / completed).toFixed(1) : "0.0",
+
+      startingOrderResults: [fighterOneStarts, fighterTwoStarts],
+
+      // Display the last battle from the second test.
+      lastResult: fighterTwoStarts.lastResult,
     });
   }
 
   function runAllMatchups(requestedCount) {
     const fighterStats = {};
 
+    // Create a statistics record for every unlocked fighter.
     for (const fighter of availableFighters) {
-      fighterStats[fighter.id] = {
-        id: fighter.id,
-        name: fighter.data.name,
-        wins: 0,
-        losses: 0,
-        draws: 0,
-        battles: 0,
-        totalRounds: 0,
-      };
+      fighterStats[fighter.id] = createFighterRecord(fighter);
     }
 
     let totalBattles = 0;
@@ -128,7 +275,7 @@ function BotSimulator() {
     let lastResult = null;
     let matchupCount = 0;
 
-    // Each pair is tested once: A vs B, but not B vs A again.
+    // Visit every unique pair of fighters.
     for (let i = 0; i < availableFighters.length; i++) {
       for (let j = i + 1; j < availableFighters.length; j++) {
         const fighterOne = availableFighters[i];
@@ -136,67 +283,182 @@ function BotSimulator() {
 
         matchupCount++;
 
-        for (let battle = 0; battle < requestedCount; battle++) {
-          const result = simulateBattle(fighterOne.data, fighterTwo.data, {
-            difficultyOne,
-            difficultyTwo,
-          });
+        // Test both possible starting orders.
+        const startingOrders = [
+          {
+            first: fighterOne,
+            second: fighterTwo,
+            firstDifficulty: difficultyOne,
+            secondDifficulty: difficultyTwo,
+          },
+          {
+            first: fighterTwo,
+            second: fighterOne,
+            firstDifficulty: difficultyTwo,
+            secondDifficulty: difficultyOne,
+          },
+        ];
 
-          const statsOne = fighterStats[fighterOne.id];
-          const statsTwo = fighterStats[fighterTwo.id];
+        for (const order of startingOrders) {
+          for (let battle = 0; battle < requestedCount; battle++) {
+            const result = simulateBattle(order.first.data, order.second.data, {
+              difficultyOne: order.firstDifficulty,
+              difficultyTwo: order.secondDifficulty,
+            });
 
-          statsOne.battles++;
-          statsTwo.battles++;
+            // Get each fighter's final health.
+            // The simulator returns fighters in argument order.
+            const firstHealth = result.fighters[0].health;
+            const secondHealth = result.fighters[1].health;
 
-          statsOne.totalRounds += result.rounds;
-          statsTwo.totalRounds += result.rounds;
+            // Update the first fighter's statistics.
+            recordFighterBattle(
+              fighterStats,
+              order.first,
+              firstHealth,
+              result,
+              "first",
+            );
 
-          totalBattles++;
-          totalRounds += result.rounds;
+            // Update the second fighter's statistics.
+            recordFighterBattle(
+              fighterStats,
+              order.second,
+              secondHealth,
+              result,
+              "second",
+            );
 
-          if (result.winner === fighterOne.data.name) {
-            statsOne.wins++;
-            statsTwo.losses++;
-          } else if (result.winner === fighterTwo.data.name) {
-            statsTwo.wins++;
-            statsOne.losses++;
-          } else {
-            statsOne.draws++;
-            statsTwo.draws++;
+            totalBattles++;
+            totalRounds += result.rounds;
+
+            lastResult = {
+              ...result,
+              selectedFighterOne: order.first,
+              selectedFighterTwo: order.second,
+            };
           }
-
-          lastResult = {
-            ...result,
-            selectedFighterOne: fighterOne,
-            selectedFighterTwo: fighterTwo,
-          };
         }
       }
     }
 
+    // Calculate the leaderboard statistics.
+    // Calculate the leaderboard statistics.
     const leaderboard = Object.values(fighterStats)
-      .map((fighter) => ({
-        ...fighter,
-        winRate:
-          fighter.battles > 0
-            ? ((fighter.wins / fighter.battles) * 100).toFixed(1)
-            : "0.0",
-        averageRounds:
-          fighter.battles > 0
-            ? (fighter.totalRounds / fighter.battles).toFixed(1)
-            : "0.0",
-      }))
-      .sort((a, b) => Number(b.winRate) - Number(a.winRate) || b.wins - a.wins);
+      .map((fighter) => {
+        // 1. Overall win rate.
+        const winRate =
+          fighter.battles > 0 ? (fighter.wins / fighter.battles) * 100 : 0;
 
+        // 2. Win rate when starting first.
+        const firstWinRate =
+          fighter.startsFirstBattles > 0
+            ? (fighter.startsFirstWins / fighter.startsFirstBattles) * 100
+            : 0;
+
+        // 3. Win rate when starting second.
+        const secondWinRate =
+          fighter.startsSecondBattles > 0
+            ? (fighter.startsSecondWins / fighter.startsSecondBattles) * 100
+            : 0;
+
+        // Average the two starting positions.
+        const startingOrderScore = (firstWinRate + secondWinRate) / 2;
+
+        // 4. Average rounds across all battles.
+        const averageRounds =
+          fighter.battles > 0 ? fighter.totalRounds / fighter.battles : 0;
+
+        // 5. Average rounds when the fighter wins.
+        const averageRoundsToWin =
+          fighter.wins > 0 ? fighter.totalRoundsToWin / fighter.wins : null;
+
+        // 6. Average health remaining after victories.
+        const averageHealthAfterWins =
+          fighter.wins > 0 ? fighter.totalHealthAfterWins / fighter.wins : null;
+
+        // Find the fighter's maximum starting health.
+        const fighterData = availableFighters.find(
+          (availableFighter) => availableFighter.id === fighter.id,
+        );
+
+        const maximumHealth =
+          fighterData?.data.maximumHealth ?? fighterData?.data.health ?? 100;
+
+        // Convert remaining health into a percentage.
+        const healthScore =
+          averageHealthAfterWins !== null && maximumHealth > 0
+            ? Math.min(
+                100,
+                Math.max(0, (averageHealthAfterWins / maximumHealth) * 100),
+              )
+            : 50;
+
+        // Reward faster wins.
+        // A win in 2 rounds scores higher than a win in 5 rounds.
+        const speedScore =
+          averageRoundsToWin !== null
+            ? Math.max(
+                0,
+                Math.min(
+                  100,
+                  ((MAX_ROUNDS - averageRoundsToWin) / MAX_ROUNDS) * 100,
+                ),
+              )
+            : 50;
+
+        // Combine all four factors into a score out of 100.
+        const overallScore =
+          winRate * 0.6 +
+          startingOrderScore * 0.2 +
+          healthScore * 0.1 +
+          speedScore * 0.1;
+
+        return {
+          ...fighter,
+
+          winRate: winRate.toFixed(1),
+          firstWinRate: firstWinRate.toFixed(1),
+          secondWinRate: secondWinRate.toFixed(1),
+
+          startingOrderScore: startingOrderScore.toFixed(1),
+          healthScore: healthScore.toFixed(1),
+          speedScore: speedScore.toFixed(1),
+
+          overallScore: overallScore.toFixed(1),
+
+          averageRounds: averageRounds.toFixed(1),
+
+          averageRoundsToWin:
+            averageRoundsToWin !== null ? averageRoundsToWin.toFixed(1) : "N/A",
+
+          averageHealthAfterWins:
+            averageHealthAfterWins !== null
+              ? averageHealthAfterWins.toFixed(1)
+              : "N/A",
+        };
+      })
+      // Strongest overall score appears first.
+      .sort(
+        (a, b) =>
+          Number(b.overallScore) - Number(a.overallScore) ||
+          Number(b.winRate) - Number(a.winRate) ||
+          b.wins - a.wins,
+      );
+
+    // Send the completed leaderboard to React so it appears on screen.
     setResults({
       type: "all",
       leaderboard,
       totalBattles,
       matchupCount,
       averageRounds:
-        totalBattles > 0 ? (totalRounds / totalBattles).toFixed(1) : "0.0",
+        totalBattles > 0
+          ? (totalRounds / totalBattles).toFixed(1)
+          : "0.0",
       lastResult,
     });
+
   }
 
   function runSimulations() {
@@ -260,11 +522,17 @@ function BotSimulator() {
 
               <div className="combat-log-health">
                 <span>
-                  {entry.attacker}: {entry.attackerHealth} HP
+                  <strong>{entry.attacker}</strong>
+                  <span className="health-number">
+                    {entry.attackerHealth} HP
+                  </span>
                 </span>
 
                 <span>
-                  {entry.defender}: {entry.defenderHealth} HP
+                  <strong>{entry.defender}</strong>
+                  <span className="health-number">
+                    {entry.defenderHealth} HP
+                  </span>
                 </span>
               </div>
             </div>
@@ -493,6 +761,64 @@ function BotSimulator() {
             </div>
           </div>
 
+          <div className="starting-order-comparison">
+            <h3>STARTING-ORDER COMPARISON</h3>
+
+            <p>
+              Each starting order was tested{" "}
+              <strong>{results.startingOrderResults[0].completed}</strong>{" "}
+              times.
+            </p>
+
+            <div className="starting-order-grid">
+              {results.startingOrderResults.map((test, index) => (
+                <div className="starting-order-card" key={index}>
+                  <h4>{test.firstFighter.data.name} STARTS FIRST</h4>
+
+                  <p>
+                    <strong>{test.firstFighter.data.name}</strong> wins:{" "}
+                    {test.firstWins}
+                  </p>
+
+                  <p>
+                    <strong>{test.secondFighter.data.name}</strong> wins:{" "}
+                    {test.secondWins}
+                  </p>
+
+                  <p>Draws: {test.draws}</p>
+
+                  <p>Average rounds: {test.averageRounds}</p>
+
+                  <hr />
+
+                  <p>
+                    <strong>{test.firstFighter.data.name}</strong>
+                  </p>
+
+                  <p>
+                    Average HP after wins: {test.firstAverageHealthAfterWins}
+                    {test.firstAverageHealthAfterWins !== "N/A" ? " HP" : ""}
+                  </p>
+
+                  <p>Average rounds to win: {test.firstAverageRoundsToWin}</p>
+
+                  <hr />
+
+                  <p>
+                    <strong>{test.secondFighter.data.name}</strong>
+                  </p>
+
+                  <p>
+                    Average HP after wins: {test.secondAverageHealthAfterWins}
+                    {test.secondAverageHealthAfterWins !== "N/A" ? " HP" : ""}
+                  </p>
+
+                  <p>Average rounds to win: {test.secondAverageRoundsToWin}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {renderLastBattle(results.lastResult)}
         </section>
       )}
@@ -515,25 +841,62 @@ function BotSimulator() {
             <table className="matchup-table">
               <thead>
                 <tr>
-                  <th>#</th>
+                  <th>RANK</th>
                   <th>FIGHTER</th>
+                  <th>OVERALL SCORE</th>
                   <th>WIN RATE</th>
                   <th>WINS</th>
                   <th>LOSSES</th>
                   <th>DRAWS</th>
-                  <th>AVG. ROUNDS</th>
+                  <th>STARTS FIRST</th>
+                  <th>STARTS SECOND</th>
+                  <th>AVG. HP AFTER WINS</th>
+                  <th>AVG. ROUNDS TO WIN</th>
                 </tr>
               </thead>
               <tbody>
                 {results.leaderboard.map((fighter, index) => (
-                  <tr key={fighter.id}>
-                    <td>{index + 1}</td>
-                    <td>{fighter.name}</td>
+                  <tr
+                    key={fighter.id}
+                    className={index === 0 ? "top-ranked-fighter" : ""}
+                  >
+                    <td>
+                      {index === 0
+                        ? "🥇"
+                        : index === 1
+                          ? "🥈"
+                          : index === 2
+                            ? "🥉"
+                            : index + 1}
+                    </td>
+
+                    <td>
+                      <strong>{fighter.name}</strong>
+                    </td>
+
+                    <td className="overall-score-cell">
+                      {fighter.overallScore}/100
+                    </td>
+
                     <td>{fighter.winRate}%</td>
+
                     <td>{fighter.wins}</td>
+
                     <td>{fighter.losses}</td>
+
                     <td>{fighter.draws}</td>
-                    <td>{fighter.averageRounds}</td>
+
+                    <td>{fighter.firstWinRate}%</td>
+
+                    <td>{fighter.secondWinRate}%</td>
+
+                    <td>
+                      {fighter.averageHealthAfterWins === "N/A"
+                        ? "N/A"
+                        : `${fighter.averageHealthAfterWins} HP`}
+                    </td>
+
+                    <td>{fighter.averageRoundsToWin}</td>
                   </tr>
                 ))}
               </tbody>

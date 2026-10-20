@@ -356,3 +356,122 @@
   }
 }
 
+
+.combat-log-entry {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.combat-log-health {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.combat-log-health span {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ABOVE CODE IS DEPRECATED */
+
+/* Starting-order comparison */
+
+.starting-order-comparison {
+  margin-top: 28px;
+}
+
+.starting-order-comparison > h3 {
+  margin-bottom: 10px;
+}
+
+.starting-order-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.starting-order-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(19, 213, 255, 0.35);
+  border-radius: 8px;
+  background: rgba(19, 213, 255, 0.05);
+}
+
+.starting-order-card h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.starting-order-card p {
+  margin: 8px 0;
+}
+
+.starting-order-card hr {
+  margin: 16px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 700px) {
+  .starting-order-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.combat-log-entry {
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+.combat-log-health {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.combat-log-health > span {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.health-number {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Overall fighter ranking */
+
+.matchup-table .overall-score-cell {
+  color: #13d5ff;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.matchup-table .top-ranked-fighter td {
+  background: rgba(19, 213, 255, 0.09);
+}
+
+.matchup-table .top-ranked-fighter td:first-child {
+  color: #ffd166;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.matchup-table .top-ranked-fighter td:nth-child(2) {
+  color: #ffffff;
+  font-weight: 900;
+}

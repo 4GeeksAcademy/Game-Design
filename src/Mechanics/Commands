@@ -1,0 +1,12 @@
+// Reset unlocked characters to the starter roster
+localStorage.removeItem("fightersArenaUnlockedCharacters");
+
+// Give yourself 10,000 coins
+localStorage.setItem("fightersArenaCoins", "10000");
+
+// Notify the game that the saved values changed
+window.dispatchEvent(new Event("unlocksUpdated"));
+window.dispatchEvent(new Event("coinsUpdated"));
+
+console.log("Progress reset! Coins:", localStorage.getItem("fightersArenaCoins"));
+console.log("Unlocked characters reset to the starter roster.");
