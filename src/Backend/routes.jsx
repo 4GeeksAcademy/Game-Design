@@ -9,10 +9,14 @@ import VictoryScreen from '../Mechanics/VictoryScreen.jsx';
 import Homescreen from '../Mechanics/Main Page/Homescreen.jsx';
 import CharacterSelection from '../Mechanics/Main Page/CharacterSelection.jsx';
 import Shop from '../Mechanics/Main Page/Shop.jsx';
+import BotSimulator from "../Mechanics/BotSimulator.jsx";
+import WatchMode from "../Mechanics/WatchMode";
 
 export const AppRoutes = () => {
   return (
     <Routes>
+      <Route path="/watch-mode" element={<WatchMode />} />
+      <Route path="/bot-simulator" element={<BotSimulator />} />
       <Route path="/" element={<Homescreen />} />
       <Route path="/shop" element={<Shop />} />
       <Route path="/character-select" element={<CharacterSelection />} />

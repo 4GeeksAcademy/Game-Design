@@ -10,11 +10,11 @@ const Yoruichi = {
   name: "Yoruichi Shihōin",
   image: YoruichiArenaImage,
 
-  health: 100,
-    maximumHealth: 100,
+  health: 70,
+    maximumHealth: 70,
 
-    mana: 75,
-    maximumMana: 75,
+    mana: 60,
+    maximumMana: 60,
     manaRegen: 20,
 
     cooldown: 3,
@@ -35,8 +35,9 @@ const Yoruichi = {
             state: true,
 
             buff: {
-                agility: 10,
+                agility: 7,
                 mana: 10,
+                manaRegen: 1,
             }
         },
 
@@ -47,8 +48,9 @@ const Yoruichi = {
             speed: 70,
             state: true,
             buff: {
-                agility: 10,
-                mana: 15
+                agility: 7,
+                mana: 4,
+                manaRegen: 1,
             },
         },
 
@@ -60,9 +62,10 @@ const Yoruichi = {
             state: true,
 
             buff: {
-                agility: 10,
+                agility: 7,
                 defense: 3,
-                mana: 5,
+                mana: 2,
+                manaRegen: 3,
             },
         },
 
@@ -73,13 +76,14 @@ const Yoruichi = {
             speed: 50,
             state: true,
             buff: {
-                agility: 10,
+                agility: 7,
                 defense: 3,
-                mana: 10,
+                mana: 5,
+                manaRegen: 3,
             },
 
             debuff: {
-                agility: 20
+                agility: 10
             }
         }
     ]

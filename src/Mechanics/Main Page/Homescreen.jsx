@@ -120,6 +120,13 @@ function Homescreen() {
           QUICK / CUSTOM BATTLE <span>▶</span>
         </button>
 
+        <button
+          className="arcade-button"
+          onClick={() => navigate("/bot-simulator")}
+        >
+          BOT VS BOT SIMULATOR <span>⚔</span>
+        </button>
+
         <button className="arcade-button" disabled>
           STORY MODE <span>LOCKED</span>
         </button>

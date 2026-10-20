@@ -36,7 +36,7 @@ const fighters = [
   { id: "luffy", data: Luffy, cost: 500 },
   { id: "ichigo", data: Ichigo, cost: 500 },
   { id: "naruto", data: Naruto, cost: 500 },
-  { id: "oruichi", data: Yoruichi, cost: 450 },
+  { id: "yoruichi", data: Yoruichi, cost: 450 },
 ];
 
 function Shop() {

@@ -97,7 +97,7 @@ function aiTurn(ai, player, showAttack, hideAttack) {
 
     aiFinishTurn(ai);
     hideAttack();
-  }, 4500);
+  }, 7000);
 }
 
 function aiFinishTurn(ai) {

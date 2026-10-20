@@ -30,7 +30,7 @@ import { getUnlockedCharacters } from "../Currency.js";
 
 import "./CharacterSelection.css";
 
-const roster = [
+export const roster = [
   {
     id: "luffy",
     image: LuffyArenaImage,

@@ -122,50 +122,91 @@ import React from "react";
 function applyEffects(effects, character, direction = 1) {
   const applied = {};
 
-  if (!effects || !character) {
-    return applied;
-  }
+  if (!effects || !character) return applied;
 
   const stats = [
-  "health",
-  "mana",
-  "defense",
-  "agility",
-  "cooldown",
-  "maximumCooldown",
-  "recovery",
-];
+    "maximumHealth",
+    "maximumMana",
+    "manaRegen",
+    "health",
+    "mana",
+    "defense",
+    "agility",
+    "cooldown",
+    "maximumCooldown",
+    "recovery",
+  ];
 
   stats.forEach((stat) => {
     const amount = effects[stat];
 
-    if (typeof amount !== "number" || amount === 0) {
-      return;
-    }
+    if (typeof amount !== "number" || amount === 0) return;
 
     const change = amount * direction;
 
-    if (stat === "health") {
+    // Increase or decrease the maximum health capacity.
+    if (stat === "maximumHealth") {
+      const previous = character.maximumHealth ?? character.health ?? 1;
+      const next = Math.max(1, previous + change);
+
+      character.maximumHealth = next;
+
+      // Current health cannot exceed the new maximum.
+      character.health = Math.min(character.health, next);
+
+      applied.maximumHealth = next - previous;
+    }
+
+    // Increase or decrease the maximum mana capacity.
+    else if (stat === "maximumMana") {
+      const previous = character.maximumMana ?? character.mana ?? 1;
+      const next = Math.max(1, previous + change);
+
+      character.maximumMana = next;
+
+      // Current mana cannot exceed the new maximum.
+      character.mana = Math.min(character.mana, next);
+
+      applied.maximumMana = next - previous;
+    }
+
+    // Mana regeneration can increase or decrease, but never go below zero.
+    else if (stat === "manaRegen") {
+      const previous = character.manaRegen ?? 0;
+      const next = Math.max(0, previous + change);
+
+      character.manaRegen = next;
+      applied.manaRegen = next - previous;
+    }
+
+    // Existing health behavior.
+    else if (stat === "health") {
       const previous = character.health;
       const maximum = character.maximumHealth ?? previous;
 
       character.health = Math.max(
         0,
-        Math.min(maximum, previous + change)
+        Math.min(maximum, previous + change),
       );
 
       applied.health = character.health - previous;
-    } else if (stat === "mana") {
+    }
+
+    // Existing mana behavior.
+    else if (stat === "mana") {
       const previous = character.mana;
       const maximum = character.maximumMana ?? previous;
 
       character.mana = Math.max(
         0,
-        Math.min(maximum, previous + change)
+        Math.min(maximum, previous + change),
       );
 
       applied.mana = character.mana - previous;
-    } else if (stat === "defense") {
+    }
+
+    // Existing defense behavior.
+    else if (stat === "defense") {
       const previous =
         typeof character.defense === "number"
           ? character.defense
@@ -183,10 +224,15 @@ function applyEffects(effects, character, direction = 1) {
       }
 
       applied.defense = next - previous;
-    } else {
+    }
+
+    // Existing behavior for agility, cooldown, and recovery.
+    else {
       const previous = character[stat] ?? 0;
-      character[stat] = Math.max(0, previous + change);
-      applied[stat] = character[stat] - previous;
+      const next = Math.max(0, previous + change);
+
+      character[stat] = next;
+      applied[stat] = next - previous;
     }
   });
 
