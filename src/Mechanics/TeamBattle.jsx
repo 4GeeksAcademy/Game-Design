@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection";
 import { attackCharacter } from "./Health.js";
@@ -148,6 +148,9 @@ export default function TeamBattle() {
     (fighter) => fighter.health > 0,
   );
 
+  const [phase, setPhase] = useState("selecting");
+  const [roundTargets, setRoundTargets] = useState({});
+
   const getTargetAssignedToOtherFighter = (fighterId) => {
     return Object.entries(targetAssignments).find(
       ([assignedFighterId, assignedTargetId]) =>
@@ -156,14 +159,109 @@ export default function TeamBattle() {
     );
   };
 
+  useEffect(() => {
+    if (phase !== "cpu-selecting") return;
+
+    const timer = setTimeout(() => {
+      const livingCPU = teams.opponent.filter((fighter) => fighter.health > 0);
+
+      const livingPlayers = teams.player.filter(
+        (fighter) => fighter.health > 0,
+      );
+
+      const availablePlayers = [...livingPlayers];
+      const cpuTargets = {};
+
+      // Each CPU fighter randomly chooses an available player.
+      for (const cpu of livingCPU) {
+        if (availablePlayers.length === 0) break;
+
+        const randomIndex = Math.floor(Math.random() * availablePlayers.length);
+
+        const chosenPlayer = availablePlayers.splice(randomIndex, 1)[0];
+
+        cpuTargets[cpu.id] = chosenPlayer.id;
+      }
+
+      setRoundTargets((previous) => ({
+        ...previous,
+        ...cpuTargets,
+      }));
+
+      setPhase("fighting");
+      setCombatMessage("Both teams have selected their targets. Fight!");
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [phase, teams.player, teams.opponent]);
+
+  const selectRoundTarget = (fighterId, opponentId) => {
+    const fighter = teams.player.find((fighter) => fighter.id === fighterId);
+
+    const opponent = teams.opponent.find(
+      (fighter) => fighter.id === opponentId,
+    );
+
+    if (!fighter || !opponent) return;
+    if (fighter.health <= 0 || opponent.health <= 0) return;
+
+    const anotherFighterHasTarget = Object.entries(roundTargets).some(
+      ([assignedFighterId, assignedOpponentId]) =>
+        assignedFighterId !== fighterId && assignedOpponentId === opponentId,
+    );
+
+    if (anotherFighterHasTarget) {
+      setCombatMessage(
+        `${opponent.name} is already assigned to your teammate this round.`,
+      );
+      return;
+    }
+
+    setRoundTargets((previous) => ({
+      ...previous,
+      [fighterId]: opponentId,
+    }));
+
+    setCombatMessage(`${fighter.name} will fight ${opponent.name} this round.`);
+  };
+
+  const confirmPlayerTargets = () => {
+    const livingPlayers = teams.player.filter((fighter) => fighter.health > 0);
+
+    const livingOpponents = teams.opponent.filter(
+      (fighter) => fighter.health > 0,
+    );
+
+    const requiredTargets = Math.min(
+      livingPlayers.length,
+      livingOpponents.length,
+    );
+
+    const selectedTargets = livingPlayers.filter(
+      (fighter) =>
+        roundTargets[fighter.id] &&
+        livingOpponents.some(
+          (opponent) => opponent.id === roundTargets[fighter.id],
+        ),
+    ).length;
+
+    if (selectedTargets < requiredTargets) {
+      setCombatMessage("Choose your available targets before continuing.");
+      return;
+    }
+
+    setPhase("cpu-selecting");
+    setCombatMessage("Your targets are locked! CPU is choosing...");
+  };
+
   const useAttack = (attackIndex) => {
     const attacker = teams.player.find(
       (fighter) => fighter.id === activePlayerId,
     );
 
     const defender = teams.opponent.find(
-      (fighter) => fighter.id === targetOpponentId,
-    );
+  (fighter) => fighter.id === roundTargets[activePlayerId]
+);
 
     if (!attacker || !defender) return;
 
@@ -250,15 +348,118 @@ export default function TeamBattle() {
     >
       <h1 style={{ textAlign: "center" }}>2v2 Team Battle — Test Screen</h1>
 
-      {/* CPU team appears at the top */}
-      <section>
-        <h2 style={{ color: "#ff3159" }}>CPU TEAM</h2>
+      {phase !== "fighting" && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.8)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: "#191919",
+              color: "white",
+              border: "2px solid #13d5ff",
+              borderRadius: "16px",
+              padding: "28px",
+              width: "min(90%, 500px)",
+              maxHeight: "85vh",
+              overflowY: "auto",
+              textAlign: "center",
+            }}
+          >
+            <h2>Choose Your Opponents</h2>
+            <p>Select one opponent for each living teammate.</p>
 
+            {teams.player
+              .filter((fighter) => fighter.health > 0)
+              .map((fighter) => (
+                <div
+                  key={fighter.id}
+                  style={{
+                    marginBottom: "20px",
+                    padding: "12px",
+                    border: "1px solid #444",
+                    borderRadius: "10px",
+                  }}
+                >
+                  <h3>{fighter.name}</h3>
+
+                  {teams.opponent
+                    .filter((opponent) => opponent.health > 0)
+                    .map((opponent) => {
+                      const claimedByTeammate = Object.entries(
+                        roundTargets,
+                      ).some(
+                        ([assignedFighterId, assignedOpponentId]) =>
+                          assignedFighterId !== fighter.id &&
+                          assignedOpponentId === opponent.id,
+                      );
+
+                      const selected = roundTargets[fighter.id] === opponent.id;
+
+                      return (
+                        <button
+                          key={opponent.id}
+                          type="button"
+                          disabled={claimedByTeammate}
+                          onClick={() =>
+                            selectRoundTarget(fighter.id, opponent.id)
+                          }
+                          style={{
+                            display: "block",
+                            width: "100%",
+                            marginTop: "8px",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: selected
+                              ? "2px solid #13d5ff"
+                              : "1px solid #555",
+                            background: selected ? "#163746" : "#252525",
+                            color: "white",
+                            cursor: claimedByTeammate
+                              ? "not-allowed"
+                              : "pointer",
+                            opacity: claimedByTeammate ? 0.45 : 1,
+                          }}
+                        >
+                          {opponent.name}
+                          {selected ? " ✓ Selected" : ""}
+                          {claimedByTeammate ? " — Teammate's target" : ""}
+                        </button>
+                      );
+                    })}
+                </div>
+              ))}
+
+            <button
+              type="button"
+              disabled={phase !== "selecting"}
+              onClick={confirmPlayerTargets}
+            >
+              {phase === "selecting"
+                ? "Confirm Targets"
+                : "CPU is selecting..."}
+            </button>
+
+            <p>{combatMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* CPU TEAM */}
+      <section>
+        <h2>CPU TEAM</h2>
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: "16px",
+            gap: "12px",
           }}
         >
           {teams.opponent.map((fighter) => (
@@ -266,40 +467,21 @@ export default function TeamBattle() {
               key={fighter.id}
               fighter={fighter}
               team="opponent"
-              isSelected={targetOpponentId === fighter.id}
-              onClick={() => {
-                if (fighter.health <= 0) return;
-
-                const assignedByOtherFighter = Object.entries(
-                  targetAssignments,
-                ).some(
-                  ([fighterId, targetId]) =>
-                    fighterId !== activePlayerId && targetId === fighter.id,
-                );
-
-                if (bothOpponentsAlive && assignedByOtherFighter) {
-                  setCombatMessage(
-                    "Your teammate has already chosen that opponent.",
-                  );
-                  return;
-                }
-
-                setTargetOpponentId(fighter.id);
-              }}
+              isSelected={roundTargets[fighter.id] != null}
+              onClick={() => {}}
             />
           ))}
         </div>
       </section>
 
-      {/* Player team appears at the bottom */}
-      <section style={{ marginTop: "32px" }}>
-        <h2 style={{ color: "#13d5ff" }}>PLAYER TEAM</h2>
-
+      {/* PLAYER TEAM */}
+      <section>
+        <h2>PLAYER TEAM</h2>
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: "16px",
+            gap: "12px",
           }}
         >
           {teams.player.map((fighter) => (
@@ -307,32 +489,13 @@ export default function TeamBattle() {
               key={fighter.id}
               fighter={fighter}
               team="player"
-              isSelected={activePlayerId === fighter.id}
+              isSelected={fighter.id === activePlayerId}
               onClick={() => {
                 if (fighter.health <= 0) return;
-
                 setActivePlayerId(fighter.id);
-
-                const assignedTarget = targetAssignments[fighter.id];
-
+                const assignedTarget = roundTargets[fighter.id];
                 if (assignedTarget) {
-                  const targetStillAlive = teams.opponent.some(
-                    (opponent) =>
-                      opponent.id === assignedTarget && opponent.health > 0,
-                  );
-
-                  if (targetStillAlive) {
-                    setTargetOpponentId(assignedTarget);
-                    return;
-                  }
-                }
-
-                const availableTarget = teams.opponent.find(
-                  (opponent) => opponent.health > 0,
-                );
-
-                if (availableTarget) {
-                  setTargetOpponentId(availableTarget.id);
+                  setTargetOpponentId(assignedTarget);
                 }
               }}
             />
@@ -340,10 +503,10 @@ export default function TeamBattle() {
         </div>
       </section>
 
-      <section style={{ marginTop: "32px" }}>
-        <h2 style={{ color: "#13d5ff" }}>
-          {teams.player.find((fighter) => fighter.id === activePlayerId)
-            ?.name ?? "Player"}
+      {/* ACTIVE PLAYER'S ATTACKS */}
+      <section>
+        <h2>
+          {teams.player.find((fighter) => fighter.id === activePlayerId)?.name}
           's Attacks
         </h2>
 
@@ -364,6 +527,7 @@ export default function TeamBattle() {
               key={`${activePlayerId}-${index}`}
               type="button"
               disabled={
+                phase !== "fighting" ||
                 attack.state !== true ||
                 (teams.player.find((fighter) => fighter.id === activePlayerId)
                   ?.mana ?? 0) < (attack.cost ?? 0)
