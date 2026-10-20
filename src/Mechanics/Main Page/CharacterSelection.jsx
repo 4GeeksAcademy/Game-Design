@@ -415,15 +415,16 @@ function CharacterSelection() {
       return;
     }
 
-    navigate("/battle", {
+    const playerTeamIds = selectedIndices.map((index) => roster[index].id);
+
+    const opponentTeamIds = cpuIndices.map((index) => roster[index].id);
+
+    navigate(teamSize === "2v2" ? "/team-battle" : "/battle", {
       state: {
-        playerId: roster[selectedIndices[0]].id,
-        opponentId: roster[cpuIndices[0]].id,
-
-        // New team arrays for the 2v2 battle implementation.
-        playerTeamIds: selectedIndices.map((index) => roster[index].id),
-        opponentTeamIds: cpuIndices.map((index) => roster[index].id),
-
+        playerId: playerTeamIds[0],
+        opponentId: opponentTeamIds[0],
+        playerTeamIds,
+        opponentTeamIds,
         teamSize,
         difficulty,
         gameMode: location.state?.gameMode ?? "quick",

@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 
 // Import components from Mechanics folder
 import Battle from '../Mechanics/Battle.jsx';
+import TeamBattle from '../Mechanics/TeamBattle.jsx';
 import Character from '../Mechanics/Character.jsx';
 import Opponent from '../Mechanics/Opponent.jsx';
 import VictoryScreen from '../Mechanics/VictoryScreen.jsx';
@@ -21,6 +22,7 @@ export const AppRoutes = () => {
       <Route path="/shop" element={<Shop />} />
       <Route path="/character-select" element={<CharacterSelection />} />
       <Route path="/battle" element={<Battle />} />
+      <Route path="/team-battle" element={<TeamBattle />} />
       <Route path="/character" element={<Character />} />
       <Route path="/opponent" element={<Opponent />} />
       <Route path="/victory" element={<VictoryScreen />} />
