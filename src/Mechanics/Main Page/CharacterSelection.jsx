@@ -158,9 +158,7 @@ function FighterStats({ fighter }) {
         </div>
 
         <div className="roster-fighter-details">
-          <p className="roster-fighter-description">
-            {fighter.description}
-          </p>
+          <p className="roster-fighter-description">{fighter.description}</p>
           <h2>{stats.name}</h2>
         </div>
       </div>
@@ -169,7 +167,7 @@ function FighterStats({ fighter }) {
         {statBars.map((stat) => {
           const percentage = Math.min(
             100,
-            Math.max(0, (stat.value / stat.maximum) * 100)
+            Math.max(0, (stat.value / stat.maximum) * 100),
           );
 
           return (
@@ -218,6 +216,11 @@ function CharacterSelection() {
 
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
 
+  const requiredFighters = teamSize === "2v2" ? 2 : 1;
+
+  const [selectedIndices, setSelectedIndices] = useState([]);
+
+  const [cpuIndices, setCpuIndices] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(() => {
     const unlocked = getUnlockedCharacters();
     const firstUnlocked = roster.findIndex((fighter) =>
@@ -227,14 +230,21 @@ function CharacterSelection() {
     return firstUnlocked >= 0 ? firstUnlocked : 0;
   });
 
-  const [cpuIndex, setCpuIndex] = useState(null);
   const [playerAnimationKey, setPlayerAnimationKey] = useState(0);
   const [cpuAnimationKey, setCpuAnimationKey] = useState(0);
   const [phase, setPhase] = useState("player");
 
-  const selectedFighter = roster[selectedIndex];
-  const previewFighter = selectedFighter;
-  const cpuFighter = cpuIndex === null ? null : roster[cpuIndex];
+  const selectedFighters = selectedIndices.map((index) => roster[index]);
+
+  // const selectedFighter = roster[selectedIndex];
+
+  const cpuFighters = cpuIndices.map((index) => roster[index]);
+
+  // const cpuIndex = cpuIndices[0] ?? null;
+  // const cpuFighter = cpuFighters[0] ?? null;
+
+  // Keep the existing single-fighter preview working.
+  // const previewFighter = selectedFighter;
 
   useEffect(() => {
     const updateUnlocks = () => {
@@ -250,53 +260,42 @@ function CharacterSelection() {
 
   const isUnlocked = (fighter) => unlockedIds.includes(fighter.id);
 
-  // Move to the next unlocked fighter, skipping locked characters.
   const changeFighter = (direction) => {
     if (phase !== "player") return;
 
-    const nextIndex =
-      (selectedIndex + direction + roster.length) % roster.length;
+    let nextIndex = selectedIndex;
 
-    setSelectedIndex(nextIndex);
-    setPlayerAnimationKey((key) => key + 1);
-  };
+    // Move through the roster until we find an unlocked character.
+    for (let step = 0; step < roster.length; step += 1) {
+      nextIndex = (nextIndex + direction + roster.length) % roster.length;
 
-  const confirmSelection = () => {
-    if (phase !== "player") return;
-
-    if (!isUnlocked(selectedFighter)) {
-      navigate("/shop");
-      return;
+      if (isUnlocked(roster[nextIndex])) {
+        break;
+      }
     }
 
-    setCpuIndex(null);
-    setPhase("cpu");
+    // Update the character highlighted by the arrows.
+    setSelectedIndex(nextIndex);
+    setPlayerAnimationKey((key) => key + 1);
+
+    // In 1v1, the highlighted character is automatically selected.
+    if (requiredFighters === 1) {
+      setSelectedIndices([nextIndex]);
+    }
   };
-  // const confirmSelection = () => {
-  //   if (phase !== "player" || !isUnlocked(selectedFighter)) return;
 
-  //   const availableOpponents = roster
-  //     .map((fighter, index) => ({ fighter, index }))
-  //     .filter(
-  //       ({ fighter }) =>
-  //         isUnlocked(fighter) && fighter.id !== selectedFighter.id,
-  //     );
-
-  //   if (availableOpponents.length === 0) {
-  //     return;
-  //   }
-
-  //   const opponent =
-  //     availableOpponents[Math.floor(Math.random() * availableOpponents.length)];
-
-  //   setCpuIndex(opponent.index);
-  //   setPendingOpponent(opponent.index);
-  //   setPhase("cpu");
-  // };
-
+  // Handle keyboard arrows and Enter.
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (phase !== "player") return;
+
+      // Don't interfere with typing in text fields.
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
 
       if (event.key === "ArrowLeft") {
         event.preventDefault();
@@ -306,7 +305,14 @@ function CharacterSelection() {
         changeFighter(1);
       } else if (event.key === "Enter") {
         event.preventDefault();
-        confirmSelection();
+
+        if (requiredFighters === 2) {
+          // In 2v2, Enter selects or deselects the highlighted fighter.
+          togglePlayerFighter(selectedIndex);
+        } else {
+          // In 1v1, Enter confirms the selected fighter.
+          confirmSelection();
+        }
       }
     };
 
@@ -315,61 +321,115 @@ function CharacterSelection() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [phase, selectedIndex, unlockedIds]);
+  }, [phase, selectedIndex, selectedIndices, unlockedIds, requiredFighters]);
+
+  const togglePlayerFighter = (index) => {
+    if (phase !== "player") return;
+
+    const fighter = roster[index];
+
+    if (!isUnlocked(fighter)) {
+      navigate("/shop");
+      return;
+    }
+
+    setSelectedIndex(index);
+
+    setSelectedIndices((current) => {
+      // Clicking a selected fighter removes them from the team.
+      if (current.includes(index)) {
+        return current.filter((selected) => selected !== index);
+      }
+
+      // Do not allow more fighters than the selected team size.
+      if (current.length >= requiredFighters) {
+        return current;
+      }
+
+      return [...current, index];
+    });
+
+    setPlayerAnimationKey((key) => key + 1);
+  };
+
+  const confirmSelection = () => {
+    if (phase !== "player") return;
+
+    if (selectedIndices.length !== requiredFighters) return;
+
+    if (!selectedIndices.every((index) => isUnlocked(roster[index]))) {
+      navigate("/shop");
+      return;
+    }
+
+    setCpuIndices([]);
+    setPhase("cpu");
+  };
 
   useEffect(() => {
     if (phase !== "cpu") return;
 
+    const playerIds = selectedIndices.map((index) => roster[index].id);
+
+    // CPU fighters cannot duplicate characters on the player's team.
+    // The CPU can choose from the entire roster, including locked fighters.
     const eligibleOpponents = roster
       .map((fighter, index) => ({ fighter, index }))
-      .filter(({ fighter }) => fighter.id !== selectedFighter.id);
+      .filter(({ fighter }) => !playerIds.includes(fighter.id));
 
-    if (eligibleOpponents.length === 0) {
+    if (eligibleOpponents.length < requiredFighters) {
+      setCpuIndices([]);
       setPhase("player");
       return;
     }
 
     let animationStep = 0;
+    let finalTeam = [];
 
     const animation = setInterval(() => {
-      const randomChoice =
-        eligibleOpponents[Math.floor(Math.random() * eligibleOpponents.length)];
+      const shuffled = [...eligibleOpponents].sort(() => Math.random() - 0.5);
 
-      setCpuIndex(randomChoice.index);
+      finalTeam = shuffled.slice(0, requiredFighters).map(({ index }) => index);
+
+      setCpuIndices(finalTeam);
       setCpuAnimationKey((key) => key + 1);
+
       animationStep += 1;
 
       if (animationStep >= 6) {
         clearInterval(animation);
+        setCpuIndices(finalTeam);
         setPhase("ready");
       }
     }, 350);
 
     return () => clearInterval(animation);
-  }, [phase, selectedIndex]);
+  }, [phase, selectedIndices, unlockedIds, requiredFighters]);
 
   const startBattle = () => {
     if (
       phase !== "ready" ||
-      cpuIndex === null ||
-      !isUnlocked(selectedFighter)
+      selectedIndices.length !== requiredFighters ||
+      cpuIndices.length !== requiredFighters
     ) {
       return;
     }
 
     navigate("/battle", {
       state: {
-        playerId: selectedFighter.id,
-        opponentId: roster[cpuIndex].id,
+        playerId: roster[selectedIndices[0]].id,
+        opponentId: roster[cpuIndices[0]].id,
+
+        // New team arrays for the 2v2 battle implementation.
+        playerTeamIds: selectedIndices.map((index) => roster[index].id),
+        opponentTeamIds: cpuIndices.map((index) => roster[index].id),
+
         teamSize,
         difficulty,
+        gameMode: location.state?.gameMode ?? "quick",
       },
     });
   };
-
-  
-
-
 
   return (
     <main className="character-select-screen">
@@ -397,10 +457,15 @@ function CharacterSelection() {
 
       <section className="select-heading">
         <p className="select-eyebrow">UNLOCK FIGHTERS · CHOOSE YOUR CHAMPION</p>
-        <h1>SELECT YOUR FIGHTER</h1>
+
+        <h1>
+          {requiredFighters === 2 ? "SELECT YOUR TEAM" : "SELECT YOUR FIGHTER"}
+        </h1>
+
         <p>
-          Choose an unlocked fighter. Earn coins in battle to expand your
-          roster.
+          {requiredFighters === 2
+            ? "Choose two unlocked fighters to form your team."
+            : "Choose an unlocked fighter. Earn coins in battle to expand your roster."}
         </p>
       </section>
 
@@ -416,10 +481,14 @@ function CharacterSelection() {
             </div>
           </div>
 
-          <FighterStats
-            key={`player-${playerAnimationKey}`}
-            fighter={previewFighter}
-          />
+          <div className={teamSize === "2v2" ? "roster-team-preview" : ""}>
+            {selectedFighters.map((fighter) => (
+              <FighterStats
+                key={`player-${fighter.id}-${playerAnimationKey}`}
+                fighter={fighter}
+              />
+            ))}
+          </div>
         </section>
 
         <div className="versus-divider">VS</div>
@@ -439,11 +508,15 @@ function CharacterSelection() {
             </div>
           </div>
 
-          {cpuFighter ? (
-            <FighterStats
-              key={`cpu-${cpuAnimationKey}-${cpuFighter.id}`}
-              fighter={cpuFighter}
-            />
+          {cpuFighters.length > 0 ? (
+            <div className={teamSize === "2v2" ? "roster-team-preview" : ""}>
+              {cpuFighters.map((fighter) => (
+                <FighterStats
+                  key={`cpu-${fighter.id}-${cpuAnimationKey}`}
+                  fighter={fighter}
+                />
+              ))}
+            </div>
           ) : (
             <div className="cpu-placeholder">
               <span>?</span>
@@ -469,8 +542,9 @@ function CharacterSelection() {
 
         <div className="character-roster-grid">
           {roster.map((fighter, index) => {
-            const isPlayerSelected = index === selectedIndex;
-            const isCpuSelected = index === cpuIndex;
+            const isPlayerSelected = selectedIndices.includes(index);
+            const isKeyboardHighlighted = selectedIndex === index;
+            const isCpuSelected = cpuIndices.includes(index);
             const fighterUnlocked = isUnlocked(fighter);
 
             return (
@@ -479,6 +553,9 @@ function CharacterSelection() {
                 type="button"
                 className={[
                   "roster-tile",
+                  isKeyboardHighlighted && phase === "player"
+                    ? "keyboard-highlighted"
+                    : "",
                   fighter.color,
                   isPlayerSelected ? "p1-selected" : "",
                   isCpuSelected ? "cpu-selected" : "",
@@ -487,12 +564,7 @@ function CharacterSelection() {
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                onClick={() => {
-                  if (phase !== "player") return;
-
-                  setSelectedIndex(index);
-                  setPlayerAnimationKey((key) => key + 1);
-                }}
+                onClick={() => togglePlayerFighter(index)}
                 disabled={phase !== "player"}
                 aria-pressed={isPlayerSelected}
                 aria-label={
@@ -501,13 +573,26 @@ function CharacterSelection() {
                     : `${fighter.data.name} is locked. Open the shop to unlock.`
                 }
               >
-                {isPlayerSelected && (
-                  <span className="roster-cursor p1-cursor">P1 ▼</span>
-                )}
-
-                {isCpuSelected && (
-                  <span className="roster-cursor cpu-cursor">
-                    {phase === "cpu" ? "CPU ?" : "CPU ▼"}
+                {(isPlayerSelected ||
+                  (isKeyboardHighlighted && phase === "player")) && (
+                  <span
+                    className={`roster-cursor ${
+                      isPlayerSelected
+                        ? selectedIndices[0] === index
+                          ? "p1-cursor"
+                          : "p2-cursor"
+                        : requiredFighters === 2 && selectedIndices.length === 1
+                          ? "p2-cursor"
+                          : "p1-cursor"
+                    }`}
+                  >
+                    {isPlayerSelected
+                      ? selectedIndices[0] === index
+                        ? "P1 ▼"
+                        : "P2 ▼"
+                      : requiredFighters === 2 && selectedIndices.length === 1
+                        ? "P2 ▼"
+                        : "P1 ▼"}
                   </span>
                 )}
 
@@ -545,7 +630,9 @@ function CharacterSelection() {
 
           <p>
             {phase === "player"
-              ? "SELECT AN UNLOCKED TILE OR USE THE ARROWS"
+              ? requiredFighters === 2
+                ? "SELECT TWO UNLOCKED FIGHTERS FROM THE ROSTER"
+                : "SELECT AN UNLOCKED FIGHTER OR USE THE ARROWS"
               : phase === "cpu"
                 ? "CPU IS SELECTING..."
                 : "BOTH FIGHTERS ARE READY"}
@@ -554,7 +641,9 @@ function CharacterSelection() {
           <button
             className="roster-nav-button"
             onClick={() => changeFighter(1)}
-            disabled={phase !== "player"}
+            disabled={
+              phase !== "player" || selectedIndices.length !== requiredFighters
+            }
           >
             NEXT ▶
           </button>
@@ -563,20 +652,35 @@ function CharacterSelection() {
 
       <footer className="select-footer">
         <p>
-          P1: <strong>{selectedFighter.data.name.toUpperCase()}</strong>
-          {"  VS  "}
-          CPU: <strong>{cpuFighter?.data.name.toUpperCase() ?? "???"}</strong>
+          P1:{" "}
+          <strong>
+            {selectedFighters
+              .map((fighter) => fighter.data.name.toUpperCase())
+              .join(" + ") || "NONE SELECTED"}
+          </strong>
+          {" VS "}
+          CPU:{" "}
+          <strong>
+            {cpuFighters
+              .map((fighter) => fighter.data.name.toUpperCase())
+              .join(" + ") || "???"}
+          </strong>
         </p>
 
         {phase === "player" ? (
           <button className="confirm-fighter-button" onClick={confirmSelection}>
-            CONFIRM FIGHTER <span>▶</span>
+            {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
+            <span>▶</span>
           </button>
         ) : (
           <button
             className="confirm-fighter-button"
             onClick={startBattle}
-            disabled={phase !== "ready"}
+            disabled={
+              phase !== "ready" ||
+              selectedIndices.length !== requiredFighters ||
+              cpuIndices.length !== requiredFighters
+            }
           >
             {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
           </button>

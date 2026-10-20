@@ -1450,3 +1450,155 @@
     transition: width 0.55s ease !important;
   }
 }
+
+
+/* Display multiple fighter previews in team-selection mode. */
+.roster-team-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.roster-team-preview > * {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .roster-team-preview {
+    grid-template-columns: 1fr;
+  }
+}
+
+.p2-cursor {
+  background: #13d5ff;
+  color: #07111f;
+  border: 1px solid #13d5ff;
+  box-shadow: 0 0 12px rgb(19 213 255 / 45%);
+}
+
+
+/* Highlight the fighter currently browsed with the keyboard */
+.roster-tile.keyboard-highlighted {
+  outline: 3px solid #13d5ff;
+  outline-offset: 3px;
+  box-shadow: 0 0 14px rgba(19, 213, 255, 0.55);
+  transform: translateY(-3px);
+  z-index: 1;
+}
+
+.roster-tile.keyboard-highlighted {
+  outline: 3px solid #13d5ff;
+  outline-offset: 3px;
+  box-shadow: 0 0 14px rgba(19, 213, 255, 0.55);
+  transform: translateY(-3px);
+  z-index: 1;
+}
+
+
+
+/* =========================================
+   2V2 PREVIEW CLEANUP
+   ========================================= */
+
+.roster-team-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px;
+}
+
+.roster-team-preview > .roster-fighter-info {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #34415a;
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, #182338, #0b1220);
+}
+
+/* Smaller portrait so the card has room for its stats. */
+.roster-team-preview .roster-fighter-layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.roster-team-preview .roster-fighter-portrait {
+  width: 100%;
+  height: 145px;
+  border: 1px solid #34415a;
+  border-radius: 6px;
+  background:
+    radial-gradient(ellipse, #26364e, #0b1220 75%);
+}
+
+.roster-team-preview .roster-fighter-details h2 {
+  margin: 4px 0 10px;
+  font-size: clamp(18px, 1.5vw, 25px);
+  overflow-wrap: anywhere;
+}
+
+.roster-team-preview .roster-fighter-description {
+  min-height: 24px;
+  margin-bottom: 5px;
+  font-size: 9px;
+  line-height: 1.4;
+  letter-spacing: 1px;
+}
+
+.roster-team-preview .roster-stat-list {
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.roster-team-preview .roster-stat-heading {
+  gap: 5px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+
+.roster-team-preview .roster-stat-heading strong {
+  font-size: 11px;
+}
+
+.roster-team-preview .roster-stat-track {
+  height: 10px;
+}
+
+.roster-team-preview .roster-moves {
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.roster-team-preview .roster-moves span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 6px;
+  font-size: 9px;
+}
+
+@media (max-width: 900px) {
+  .roster-team-preview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .roster-team-preview .roster-fighter-layout {
+    grid-template-columns: 100px minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .roster-team-preview .roster-fighter-portrait {
+    height: 145px;
+  }
+}
+
+@media (max-width: 520px) {
+  .roster-team-preview .roster-fighter-layout {
+    grid-template-columns: 85px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .roster-team-preview .roster-fighter-portrait {
+    height: 125px;
+  }
+}
