@@ -3,7 +3,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./BattleUI.css";
 
-function VictoryScreen({ damageDealt = 0, attacksUsed = 0, onRematch }) {
+function VictoryScreen({
+  damageDealt = 0,
+  attacksUsed = 0,
+  onRematch,
+  message = "Your opponent has been defeated.",
+}) {
   const navigate = useNavigate();
 
   const handleRematch = () => {
@@ -22,9 +27,7 @@ function VictoryScreen({ damageDealt = 0, attacksUsed = 0, onRematch }) {
         <p id="victoryEyebrow">BATTLE COMPLETE</p>
         <h1 id="victoryTitle">VICTORY!</h1>
 
-        <p id="victoryMessage">
-          Your opponent has been defeated.
-        </p>
+        <p id="victoryMessage">{message}</p>
 
         <div id="victoryDivider"></div>
 

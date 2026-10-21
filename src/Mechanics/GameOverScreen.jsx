@@ -3,7 +3,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./BattleUI.css";
 
-function GameOverScreen({ damageDealt = 0, attacksUsed = 0, onRematch }) {
+function GameOverScreen({
+  damageDealt = 0,
+  attacksUsed = 0,
+  onRematch,
+  message = "You have been defeated. Get back up and fight again!",
+}) {
   const navigate = useNavigate();
 
   const handleRematch = () => {
@@ -22,9 +27,7 @@ function GameOverScreen({ damageDealt = 0, attacksUsed = 0, onRematch }) {
         <p id="gameOverEyebrow">BATTLE COMPLETE</p>
         <h1 id="gameOverTitle">GAME OVER</h1>
 
-        <p id="gameOverMessage">
-          You have been defeated. Get back up and fight again!
-        </p>
+        <p id="gameOverMessage">{message}</p>
 
         <div id="gameOverDivider"></div>
 

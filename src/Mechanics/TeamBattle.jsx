@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection";
 import { attackCharacter } from "./Health.js";
+import VictoryScreen from "./VictoryScreen.jsx";
+import GameOverScreen from "./GameOverScreen.jsx";
 
 // Give each fighter independent stats and attack objects.
 function createBattleFighter(id) {
@@ -117,6 +119,8 @@ function FighterPreview({ fighter, isSelected, onClick, team }) {
 }
 
 export default function TeamBattle() {
+  const [damageDealt, setDamageDealt] = useState(0);
+  const [attacksUsed, setAttacksUsed] = useState(0);
   const [combatMessage, setCombatMessage] = useState(
     "Choose your fighter and target.",
   );
@@ -150,6 +154,9 @@ export default function TeamBattle() {
 
   const [phase, setPhase] = useState("selecting");
   const [roundTargets, setRoundTargets] = useState({});
+  const [roundNumber, setRoundNumber] = useState(1);
+
+  const cpuTurnRunning = useRef(false);
 
   const getTargetAssignedToOtherFighter = (fighterId) => {
     return Object.entries(targetAssignments).find(
@@ -194,6 +201,187 @@ export default function TeamBattle() {
 
     return () => clearTimeout(timer);
   }, [phase, teams.player, teams.opponent]);
+
+  useEffect(() => {
+    if (phase !== "cpu-fighting") return;
+
+    // Prevent the same CPU turn from starting twice.
+    if (cpuTurnRunning.current) return;
+
+    cpuTurnRunning.current = true;
+
+    let cancelled = false;
+
+    const runCPUTurn = async () => {
+      try {
+        // Make copies so we can simulate the CPU turn safely.
+        let updatedPlayers = teams.player.map((fighter) => ({
+          ...fighter,
+          defense:
+            typeof fighter.defense === "object" && fighter.defense !== null
+              ? { ...fighter.defense }
+              : fighter.defense,
+        }));
+
+        let updatedCPU = teams.opponent.map((fighter) => ({
+          ...fighter,
+          attacks: fighter.attacks.map((attack) => ({
+            ...attack,
+            buff: attack.buff ? { ...attack.buff } : attack.buff,
+            debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+          })),
+          defense:
+            typeof fighter.defense === "object" && fighter.defense !== null
+              ? { ...fighter.defense }
+              : fighter.defense,
+        }));
+
+        setCombatMessage("The CPU team is preparing its attacks!");
+
+        // Let the player see the message before combat starts.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        if (cancelled) return;
+
+        // Each living CPU fighter gets a chance to attack.
+        for (let cpuIndex = 0; cpuIndex < updatedCPU.length; cpuIndex++) {
+          const cpu = updatedCPU[cpuIndex];
+
+          if (cpu.health <= 0) continue;
+
+          const targetId = roundTargets[cpu.id];
+
+          const defenderIndex = updatedPlayers.findIndex(
+            (player) => player.id === targetId && player.health > 0,
+          );
+
+          // Skip this CPU if its assigned target has been defeated.
+          if (defenderIndex === -1) continue;
+
+          const defender = updatedPlayers[defenderIndex];
+
+          // Find all attacks this CPU can currently afford and use.
+          const availableAttacks = cpu.attacks
+            .map((attack, index) => ({ attack, index }))
+            .filter(
+              ({ attack }) =>
+                attack.state === true && cpu.mana >= (attack.cost ?? 0),
+            );
+
+          // Use one randomly selected available attack.
+          if (availableAttacks.length > 0) {
+            const randomChoice =
+              availableAttacks[
+                Math.floor(Math.random() * availableAttacks.length)
+              ];
+
+            const result = attackCharacter(randomChoice.attack, cpu, defender);
+
+            if (result) {
+              setCombatMessage(
+                `${cpu.name} used ${randomChoice.attack.name} on ${defender.name}!`,
+              );
+
+              // Update the displayed health, mana, and attack state.
+              setTeams({
+                player: updatedPlayers.map((fighter) => ({ ...fighter })),
+                opponent: updatedCPU.map((fighter) => ({ ...fighter })),
+              });
+
+              await new Promise((resolve) => setTimeout(resolve, 1200));
+
+              if (cancelled) return;
+            }
+          }
+        }
+
+        if (cancelled) return;
+
+        // Check whether either team has been defeated.
+        const livingPlayers = updatedPlayers.filter(
+          (fighter) => fighter.health > 0,
+        );
+
+        const livingCPU = updatedCPU.filter((fighter) => fighter.health > 0);
+
+        if (livingPlayers.length === 0) {
+          setCombatMessage("Defeat! Your entire team has been defeated.");
+          setPhase("defeat");
+          return;
+        }
+
+        if (livingCPU.length === 0) {
+          setCombatMessage("Victory! The entire CPU team has been defeated!");
+          setPhase("victory");
+          return;
+        }
+
+        // Prepare both teams for the next round.
+        const resetPlayers = updatedPlayers.map((fighter) => ({
+          ...fighter,
+
+          // Restore mana for the next round, without exceeding the maximum.
+          mana:
+            fighter.health > 0
+              ? Math.min(
+                  fighter.maximumMana ?? fighter.mana,
+                  fighter.mana + (fighter.manaRegen ?? 0),
+                )
+              : fighter.mana,
+
+          turnFinished: false,
+
+          // Make every attack available again.
+          attacks: fighter.attacks.map((attack) => ({
+            ...attack,
+            state: true,
+          })),
+        }));
+
+        const resetCPU = updatedCPU.map((fighter) => ({
+          ...fighter,
+
+          // Regenerate mana for the next round.
+          mana:
+            fighter.health > 0
+              ? Math.min(
+                  fighter.maximumMana ?? fighter.mana,
+                  fighter.mana + (fighter.manaRegen ?? 0),
+                )
+              : fighter.mana,
+
+          turnFinished: false,
+
+          attacks: fighter.attacks.map((attack) => ({
+            ...attack,
+            state: true,
+          })),
+        }));
+        setTeams({
+          player: resetPlayers,
+          opponent: resetCPU,
+        });
+
+        // Clear the old targets so everyone chooses again.
+        setRoundTargets({});
+        setTargetAssignments({});
+
+        setRoundNumber((previous) => previous + 1);
+
+        // Reopen target selection for the next round.
+        setCombatMessage("A new round begins! Choose your targets.");
+        setPhase("selecting");
+      } finally {
+        cpuTurnRunning.current = false;
+      }
+    };
+
+    runCPUTurn();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [phase]);
 
   const selectRoundTarget = (fighterId, opponentId) => {
     const fighter = teams.player.find((fighter) => fighter.id === fighterId);
@@ -254,42 +442,115 @@ export default function TeamBattle() {
     setCombatMessage("Your targets are locked! CPU is choosing...");
   };
 
+  const resolvePlayerTurnStatus = (players, opponents, targets) => {
+    const updatedPlayers = players.map((player) => {
+      // Defeated fighters are automatically finished.
+      if (player.health <= 0) {
+        return { ...player, turnFinished: true };
+      }
+
+      const targetId = targets[player.id];
+
+      const livingTarget = opponents.find(
+        (opponent) => opponent.id === targetId && opponent.health > 0,
+      );
+
+      // Skip this fighter if they have no living opponent to attack.
+      if (!livingTarget) {
+        return { ...player, turnFinished: true };
+      }
+
+      return player;
+    });
+
+    const allLivingPlayersFinished = updatedPlayers.every(
+      (player) => player.health <= 0 || player.turnFinished,
+    );
+
+    return { updatedPlayers, allLivingPlayersFinished };
+  };
+
+  const finishPlayerTurn = (fighterId) => {
+    const fighter = teams.player.find((player) => player.id === fighterId);
+
+    if (!fighter || fighter.health <= 0 || fighter.turnFinished) {
+      return;
+    }
+
+    const playersAfterFinishing = teams.player.map((player) =>
+      player.id === fighterId ? { ...player, turnFinished: true } : player,
+    );
+
+    const { updatedPlayers, allLivingPlayersFinished } =
+      resolvePlayerTurnStatus(
+        playersAfterFinishing,
+        teams.opponent,
+        roundTargets,
+      );
+
+    setTeams((previous) => ({
+      ...previous,
+      player: updatedPlayers,
+    }));
+
+    if (allLivingPlayersFinished) {
+      setCombatMessage(
+        "Your team has finished its turn! The CPU team is preparing to attack.",
+      );
+      setPhase("cpu-fighting");
+    } else {
+      setCombatMessage(
+        `${fighter.name} has finished their turn. Your teammate can keep fighting!`,
+      );
+    }
+  };
+
   const useAttack = (attackIndex) => {
-    const attacker = teams.player.find(
+    if (phase !== "fighting") return;
+
+    // Copy fighters and their attacks before combat changes their stats.
+    const updatedPlayers = teams.player.map((fighter) => ({
+      ...fighter,
+      defense:
+        typeof fighter.defense === "object" && fighter.defense !== null
+          ? { ...fighter.defense }
+          : fighter.defense,
+      attacks: fighter.attacks.map((attack) => ({
+        ...attack,
+        buff: attack.buff ? { ...attack.buff } : attack.buff,
+        debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+      })),
+    }));
+
+    const updatedOpponents = teams.opponent.map((fighter) => ({
+      ...fighter,
+      defense:
+        typeof fighter.defense === "object" && fighter.defense !== null
+          ? { ...fighter.defense }
+          : fighter.defense,
+      attacks: fighter.attacks.map((attack) => ({
+        ...attack,
+        buff: attack.buff ? { ...attack.buff } : attack.buff,
+        debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+      })),
+    }));
+
+    const attacker = updatedPlayers.find(
       (fighter) => fighter.id === activePlayerId,
     );
 
-    const defender = teams.opponent.find(
-  (fighter) => fighter.id === roundTargets[activePlayerId]
-);
+    const defender = updatedOpponents.find(
+      (fighter) => fighter.id === roundTargets[activePlayerId],
+    );
 
     if (!attacker || !defender) return;
 
-    if (attacker.health <= 0) {
-      setCombatMessage("A defeated fighter cannot attack.");
+    if (attacker.health <= 0 || attacker.turnFinished) {
       return;
     }
 
     if (defender.health <= 0) {
-      setCombatMessage("Choose an opponent who is still standing.");
-      return;
-    }
-
-    if (
-      bothOpponentsAlive &&
-      Object.entries(targetAssignments).some(
-        ([fighterId, assignedTargetId]) =>
-          fighterId !== attacker.id && assignedTargetId === defender.id,
-      )
-    ) {
-      setCombatMessage(
-        "Your teammate has already chosen that opponent. Select the other opponent.",
-      );
-      return;
-    }
-
-    if (attacker.health <= 0 || defender.health <= 0) {
-      setCombatMessage("A defeated fighter cannot participate.");
+      setCombatMessage("That opponent has already been defeated.");
       return;
     }
 
@@ -300,26 +561,100 @@ export default function TeamBattle() {
       return;
     }
 
+    const defenderHealthBefore = defender.health;
+
     const result = attackCharacter(attack, attacker, defender);
 
     if (!result) {
       setCombatMessage("Not enough mana to use that attack!");
       return;
     }
-    setTargetAssignments((previous) => ({
-      ...previous,
-      [attacker.id]: defender.id,
-    }));
 
-    setCombatMessage(
-      `${attacker.name} used ${attack.name} on ${defender.name}!`,
+    const actualDamage = Math.max(
+      0,
+      defenderHealthBefore - Math.max(0, defender.health),
     );
 
-    // Trigger a React update after the combat values change.
+    setDamageDealt((previous) => previous + actualDamage);
+    setAttacksUsed((previous) => previous + 1);
+
+    // If every CPU fighter is defeated, finish the battle immediately.
+    const livingOpponents = updatedOpponents.filter(
+      (fighter) => fighter.health > 0,
+    );
+
+    if (livingOpponents.length === 0) {
+      setTeams({
+        player: updatedPlayers,
+        opponent: updatedOpponents,
+      });
+      setCombatMessage("Victory! The entire CPU team has been defeated!");
+      setPhase("victory");
+      return;
+    }
+
+    // Automatically finish fighters who no longer have a living target.
+    const { updatedPlayers: playersAfterSkips, allLivingPlayersFinished } =
+      resolvePlayerTurnStatus(updatedPlayers, updatedOpponents, roundTargets);
+
     setTeams({
-      player: [...teams.player],
-      opponent: [...teams.opponent],
+      player: playersAfterSkips,
+      opponent: updatedOpponents,
     });
+
+    const automaticallySkipped = playersAfterSkips.some((player) => {
+      const previousPlayer = teams.player.find(
+        (previous) => previous.id === player.id,
+      );
+
+      const hasLivingTarget = updatedOpponents.some(
+        (opponent) =>
+          opponent.id === roundTargets[player.id] && opponent.health > 0,
+      );
+
+      return (
+        player.health > 0 &&
+        player.turnFinished &&
+        !previousPlayer?.turnFinished &&
+        !hasLivingTarget
+      );
+    });
+
+    setCombatMessage(
+      `${attacker.name} used ${attack.name} on ${defender.name}!${
+        automaticallySkipped
+          ? " Fighters without a living target have been automatically skipped."
+          : ""
+      }`,
+    );
+
+    // Start the CPU phase only after every living player is finished.
+    if (allLivingPlayersFinished) {
+      setCombatMessage(
+        `${attacker.name} used ${attack.name}! Your team has no remaining actions. The CPU team is preparing to attack.`,
+      );
+      setPhase("cpu-fighting");
+    }
+  };
+
+  const resetBattle = () => {
+    setTeams({
+      player: playerTeamIds.map(createBattleFighter),
+      opponent: opponentTeamIds.map(createBattleFighter),
+    });
+
+    setActivePlayerId(playerTeamIds[0] ?? null);
+    setTargetOpponentId(opponentTeamIds[0] ?? null);
+
+    setTargetAssignments({});
+    setRoundTargets({});
+    setRoundNumber(1);
+
+    setDamageDealt(0);
+    setAttacksUsed(0);
+
+    setCombatMessage("Choose your fighter and target.");
+    setPhase("selecting");
   };
 
   if (!hasValidTeams) {
@@ -337,6 +672,28 @@ export default function TeamBattle() {
     );
   }
 
+  if (phase === "victory") {
+    return (
+      <VictoryScreen
+        damageDealt={damageDealt}
+        attacksUsed={attacksUsed}
+        message="Your team has defeated the entire opposing team!"
+        onRematch={resetBattle}
+      />
+    );
+  }
+
+  if (phase === "defeat") {
+    return (
+      <GameOverScreen
+        damageDealt={damageDealt}
+        attacksUsed={attacksUsed}
+        message="Your entire team has been defeated. Fight again!"
+        onRematch={resetBattle}
+      />
+    );
+  }
+
   return (
     <main
       style={{
@@ -346,9 +703,11 @@ export default function TeamBattle() {
         padding: "24px",
       }}
     >
-      <h1 style={{ textAlign: "center" }}>2v2 Team Battle — Test Screen</h1>
+      <h1 style={{ textAlign: "center" }}>
+        2v2 Team Battle — Round {roundNumber}
+      </h1>
 
-      {phase !== "fighting" && (
+      {(phase === "selecting" || phase === "cpu-selecting") && (
         <div
           style={{
             position: "fixed",
@@ -528,6 +887,8 @@ export default function TeamBattle() {
               type="button"
               disabled={
                 phase !== "fighting" ||
+                teams.player.find((fighter) => fighter.id === activePlayerId)
+                  ?.turnFinished ||
                 attack.state !== true ||
                 (teams.player.find((fighter) => fighter.id === activePlayerId)
                   ?.mana ?? 0) < (attack.cost ?? 0)
@@ -540,6 +901,34 @@ export default function TeamBattle() {
             </button>
           ))}
         </div>
+
+        <button
+          type="button"
+          disabled={
+            phase !== "fighting" ||
+            teams.player.find((fighter) => fighter.id === activePlayerId)
+              ?.health <= 0 ||
+            teams.player.find((fighter) => fighter.id === activePlayerId)
+              ?.turnFinished
+          }
+          onClick={() => finishPlayerTurn(activePlayerId)}
+          style={{
+            marginTop: "20px",
+            padding: "14px 24px",
+            background: "#13d5ff",
+            color: "#101010",
+            border: "none",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            fontSize: "16px",
+            cursor: "pointer",
+          }}
+        >
+          {teams.player.find((fighter) => fighter.id === activePlayerId)
+            ?.turnFinished
+            ? "Turn Finished"
+            : "Finish Turn"}
+        </button>
       </section>
     </main>
   );
