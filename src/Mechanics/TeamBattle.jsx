@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection";
-import { attackCharacter } from "./Health.js";
+import { attackCharacter, evadeAttack } from "./Health.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
 
@@ -119,6 +119,10 @@ function FighterPreview({ fighter, isSelected, onClick, team }) {
 }
 
 export default function TeamBattle() {
+  const [pendingDefense, setPendingDefense] = useState(null);
+  const [cpuActionQueue, setCpuActionQueue] = useState(null);
+  const [cpuActionIndex, setCpuActionIndex] = useState(0);
+  const [defenseTimeLeft, setDefenseTimeLeft] = useState(10);
   const [damageDealt, setDamageDealt] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
   const [combatMessage, setCombatMessage] = useState(
@@ -154,9 +158,11 @@ export default function TeamBattle() {
 
   const [phase, setPhase] = useState("selecting");
   const [roundTargets, setRoundTargets] = useState({});
+  const [cpuTargets, setCpuTargets] = useState({});
   const [roundNumber, setRoundNumber] = useState(1);
 
   const cpuTurnRunning = useRef(false);
+  const defenseResolvedRef = useRef(false);
 
   const getTargetAssignedToOtherFighter = (fighterId) => {
     return Object.entries(targetAssignments).find(
@@ -167,221 +173,169 @@ export default function TeamBattle() {
   };
 
   useEffect(() => {
-    if (phase !== "cpu-selecting") return;
+    if (!pendingDefense || phase !== "cpu-fighting") {
+      setDefenseTimeLeft(10);
+      return;
+    }
 
-    const timer = setTimeout(() => {
-      const livingCPU = teams.opponent.filter((fighter) => fighter.health > 0);
+    let remaining = 10;
+    setDefenseTimeLeft(remaining);
 
+    const timer = setInterval(() => {
+      remaining -= 1;
+      setDefenseTimeLeft(Math.max(remaining, 0));
+
+      if (remaining <= 0) {
+        clearInterval(timer);
+        resolveCPUDefense("timeout");
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [pendingDefense, phase]);
+
+  useEffect(() => {
+    if (phase !== "cpu-fighting" || pendingDefense) return;
+
+    // STEP A: Build the CPU's action queue once per turn.
+    if (cpuActionQueue === null) {
+      const queue = [];
+
+      teams.opponent.forEach((cpu) => {
+        if (cpu.health <= 0) return;
+
+        const targetId = cpuTargets[cpu.id];
+        const target = teams.player.find(
+          (player) => player.id === targetId && player.health > 0,
+        );
+
+        if (!target) return;
+
+        const availableAttacks = cpu.attacks
+          .map((attack, attackIndex) => ({ attack, attackIndex }))
+          .filter(
+            ({ attack }) =>
+              attack.state === true && cpu.mana >= (attack.cost ?? 0),
+          );
+
+        if (availableAttacks.length === 0) return;
+
+        const choice =
+          availableAttacks[Math.floor(Math.random() * availableAttacks.length)];
+
+        queue.push({
+          cpuId: cpu.id,
+          targetId: target.id,
+          attackIndex: choice.attackIndex,
+        });
+      });
+
+      setCpuActionQueue(queue);
+      setCpuActionIndex(0);
+      setCombatMessage("The CPU team is preparing its attacks!");
+      return;
+    }
+
+    // STEP B: If every queued action is finished, end the CPU turn.
+    if (cpuActionIndex >= cpuActionQueue.length) {
       const livingPlayers = teams.player.filter(
         (fighter) => fighter.health > 0,
       );
 
-      const availablePlayers = [...livingPlayers];
-      const cpuTargets = {};
+      const livingCPU = teams.opponent.filter((fighter) => fighter.health > 0);
 
-      // Each CPU fighter randomly chooses an available player.
-      for (const cpu of livingCPU) {
-        if (availablePlayers.length === 0) break;
-
-        const randomIndex = Math.floor(Math.random() * availablePlayers.length);
-
-        const chosenPlayer = availablePlayers.splice(randomIndex, 1)[0];
-
-        cpuTargets[cpu.id] = chosenPlayer.id;
+      if (livingPlayers.length === 0) {
+        setCombatMessage("Defeat! Your entire team has been defeated.");
+        setPhase("defeat");
+        return;
       }
 
-      setRoundTargets((previous) => ({
-        ...previous,
-        ...cpuTargets,
-      }));
+      if (livingCPU.length === 0) {
+        setCombatMessage("Victory! The entire CPU team has been defeated!");
+        setPhase("victory");
+        return;
+      }
 
-      setPhase("fighting");
-      setCombatMessage("Both teams have selected their targets. Fight!");
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [phase, teams.player, teams.opponent]);
-
-  useEffect(() => {
-    if (phase !== "cpu-fighting") return;
-
-    // Prevent the same CPU turn from starting twice.
-    if (cpuTurnRunning.current) return;
-
-    cpuTurnRunning.current = true;
-
-    let cancelled = false;
-
-    const runCPUTurn = async () => {
-      try {
-        // Make copies so we can simulate the CPU turn safely.
-        let updatedPlayers = teams.player.map((fighter) => ({
+      // Regenerate mana and refresh attacks for the next round.
+      const resetFighters = (fighters) =>
+        fighters.map((fighter) => ({
           ...fighter,
-          defense:
-            typeof fighter.defense === "object" && fighter.defense !== null
-              ? { ...fighter.defense }
-              : fighter.defense,
-        }));
-
-        let updatedCPU = teams.opponent.map((fighter) => ({
-          ...fighter,
+          mana:
+            fighter.health > 0
+              ? Math.min(
+                  fighter.maximumMana ?? fighter.mana,
+                  fighter.mana + (fighter.manaRegen ?? 0),
+                )
+              : fighter.mana,
+          turnFinished: false,
           attacks: fighter.attacks.map((attack) => ({
             ...attack,
+            state: true,
             buff: attack.buff ? { ...attack.buff } : attack.buff,
             debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
           })),
-          defense:
-            typeof fighter.defense === "object" && fighter.defense !== null
-              ? { ...fighter.defense }
-              : fighter.defense,
         }));
 
-        setCombatMessage("The CPU team is preparing its attacks!");
+      setTeams({
+        player: resetFighters(teams.player),
+        opponent: resetFighters(teams.opponent),
+      });
 
-        // Let the player see the message before combat starts.
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      setRoundTargets({});
+      setCpuTargets({});
+      setTargetAssignments({});
+      setCpuActionQueue(null);
+      setCpuActionIndex(0);
+      setRoundNumber((previous) => previous + 1);
 
-        if (cancelled) return;
+      setCombatMessage("A new round begins! Choose your targets.");
+      setPhase("selecting");
+      return;
+    }
 
-        // Each living CPU fighter gets a chance to attack.
-        for (let cpuIndex = 0; cpuIndex < updatedCPU.length; cpuIndex++) {
-          const cpu = updatedCPU[cpuIndex];
+    // STEP C: Reveal the next CPU attack and wait for your response.
+    const action = cpuActionQueue[cpuActionIndex];
 
-          if (cpu.health <= 0) continue;
+    const cpu = teams.opponent.find((fighter) => fighter.id === action.cpuId);
 
-          const targetId = roundTargets[cpu.id];
+    const target = teams.player.find(
+      (fighter) => fighter.id === action.targetId,
+    );
 
-          const defenderIndex = updatedPlayers.findIndex(
-            (player) => player.id === targetId && player.health > 0,
-          );
+    // Skip actions if a fighter or their target has been defeated.
+    if (!cpu || cpu.health <= 0 || !target || target.health <= 0) {
+      setCpuActionIndex((previous) => previous + 1);
+      return;
+    }
 
-          // Skip this CPU if its assigned target has been defeated.
-          if (defenderIndex === -1) continue;
+    const attack = cpu.attacks[action.attackIndex];
 
-          const defender = updatedPlayers[defenderIndex];
+    if (!attack || attack.state !== true || cpu.mana < (attack.cost ?? 0)) {
+      setCpuActionIndex((previous) => previous + 1);
+      return;
+    }
 
-          // Find all attacks this CPU can currently afford and use.
-          const availableAttacks = cpu.attacks
-            .map((attack, index) => ({ attack, index }))
-            .filter(
-              ({ attack }) =>
-                attack.state === true && cpu.mana >= (attack.cost ?? 0),
-            );
+    defenseResolvedRef.current = false;
 
-          // Use one randomly selected available attack.
-          if (availableAttacks.length > 0) {
-            const randomChoice =
-              availableAttacks[
-                Math.floor(Math.random() * availableAttacks.length)
-              ];
+    setPendingDefense({
+      cpuId: cpu.id,
+      targetId: target.id,
+      attackIndex: action.attackIndex,
+    });
 
-            const result = attackCharacter(randomChoice.attack, cpu, defender);
-
-            if (result) {
-              setCombatMessage(
-                `${cpu.name} used ${randomChoice.attack.name} on ${defender.name}!`,
-              );
-
-              // Update the displayed health, mana, and attack state.
-              setTeams({
-                player: updatedPlayers.map((fighter) => ({ ...fighter })),
-                opponent: updatedCPU.map((fighter) => ({ ...fighter })),
-              });
-
-              await new Promise((resolve) => setTimeout(resolve, 1200));
-
-              if (cancelled) return;
-            }
-          }
-        }
-
-        if (cancelled) return;
-
-        // Check whether either team has been defeated.
-        const livingPlayers = updatedPlayers.filter(
-          (fighter) => fighter.health > 0,
-        );
-
-        const livingCPU = updatedCPU.filter((fighter) => fighter.health > 0);
-
-        if (livingPlayers.length === 0) {
-          setCombatMessage("Defeat! Your entire team has been defeated.");
-          setPhase("defeat");
-          return;
-        }
-
-        if (livingCPU.length === 0) {
-          setCombatMessage("Victory! The entire CPU team has been defeated!");
-          setPhase("victory");
-          return;
-        }
-
-        // Prepare both teams for the next round.
-        const resetPlayers = updatedPlayers.map((fighter) => ({
-          ...fighter,
-
-          // Restore mana for the next round, without exceeding the maximum.
-          mana:
-            fighter.health > 0
-              ? Math.min(
-                  fighter.maximumMana ?? fighter.mana,
-                  fighter.mana + (fighter.manaRegen ?? 0),
-                )
-              : fighter.mana,
-
-          turnFinished: false,
-
-          // Make every attack available again.
-          attacks: fighter.attacks.map((attack) => ({
-            ...attack,
-            state: true,
-          })),
-        }));
-
-        const resetCPU = updatedCPU.map((fighter) => ({
-          ...fighter,
-
-          // Regenerate mana for the next round.
-          mana:
-            fighter.health > 0
-              ? Math.min(
-                  fighter.maximumMana ?? fighter.mana,
-                  fighter.mana + (fighter.manaRegen ?? 0),
-                )
-              : fighter.mana,
-
-          turnFinished: false,
-
-          attacks: fighter.attacks.map((attack) => ({
-            ...attack,
-            state: true,
-          })),
-        }));
-        setTeams({
-          player: resetPlayers,
-          opponent: resetCPU,
-        });
-
-        // Clear the old targets so everyone chooses again.
-        setRoundTargets({});
-        setTargetAssignments({});
-
-        setRoundNumber((previous) => previous + 1);
-
-        // Reopen target selection for the next round.
-        setCombatMessage("A new round begins! Choose your targets.");
-        setPhase("selecting");
-      } finally {
-        cpuTurnRunning.current = false;
-      }
-    };
-
-    runCPUTurn();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [phase]);
+    setCombatMessage(
+      `${cpu.name} is preparing ${attack.name}! Choose Defend or Evade.`,
+    );
+  }, [
+    phase,
+    pendingDefense,
+    cpuActionQueue,
+    cpuActionIndex,
+    teams.player,
+    teams.opponent,
+    cpuTargets,
+    setTargetAssignments,
+  ]);
 
   const selectRoundTarget = (fighterId, opponentId) => {
     const fighter = teams.player.find((fighter) => fighter.id === fighterId);
@@ -413,34 +367,57 @@ export default function TeamBattle() {
     setCombatMessage(`${fighter.name} will fight ${opponent.name} this round.`);
   };
 
-  const confirmPlayerTargets = () => {
-    const livingPlayers = teams.player.filter((fighter) => fighter.health > 0);
+  
+const confirmPlayerTargets = () => {
+  const livingPlayers = teams.player.filter(
+    (fighter) => fighter.health > 0
+  );
 
-    const livingOpponents = teams.opponent.filter(
-      (fighter) => fighter.health > 0,
-    );
+  const livingOpponents = teams.opponent.filter(
+    (fighter) => fighter.health > 0
+  );
 
-    const requiredTargets = Math.min(
-      livingPlayers.length,
-      livingOpponents.length,
-    );
+  // Make sure each living player has a valid target.
+  const selectedTargets = livingPlayers.filter((player) =>
+    livingOpponents.some(
+      (opponent) => opponent.id === roundTargets[player.id]
+    )
+  ).length;
 
-    const selectedTargets = livingPlayers.filter(
-      (fighter) =>
-        roundTargets[fighter.id] &&
-        livingOpponents.some(
-          (opponent) => opponent.id === roundTargets[fighter.id],
-        ),
-    ).length;
+  const requiredTargets = Math.min(
+    livingPlayers.length,
+    livingOpponents.length
+  );
 
-    if (selectedTargets < requiredTargets) {
-      setCombatMessage("Choose your available targets before continuing.");
-      return;
-    }
+  if (selectedTargets < requiredTargets) {
+    setCombatMessage("Choose your available targets before continuing.");
+    return;
+  }
 
-    setPhase("cpu-selecting");
-    setCombatMessage("Your targets are locked! CPU is choosing...");
-  };
+  // Give each living CPU a different living player to target.
+const newCpuTargets = {};
+const availablePlayers = [...livingPlayers];
+
+livingOpponents.forEach((cpu) => {
+  if (availablePlayers.length === 0) return;
+
+  const randomIndex = Math.floor(
+    Math.random() * availablePlayers.length
+  );
+
+  const chosenPlayer = availablePlayers.splice(
+    randomIndex,
+    1
+  )[0];
+
+  newCpuTargets[cpu.id] = chosenPlayer.id;
+});
+
+  setCpuTargets(newCpuTargets);
+  setCombatMessage("Targets locked! The battle begins!");
+  setPhase("fighting");
+};
+
 
   const resolvePlayerTurnStatus = (players, opponents, targets) => {
     const updatedPlayers = players.map((player) => {
@@ -637,6 +614,118 @@ export default function TeamBattle() {
     }
   };
 
+  const resolveCPUDefense = (choice) => {
+    if (
+      !pendingDefense ||
+      phase !== "cpu-fighting" ||
+      defenseResolvedRef.current
+    ) {
+      return;
+    }
+
+    // Copy both teams so React receives updated fighter objects.
+    const updatedPlayers = teams.player.map((fighter) => ({
+      ...fighter,
+      defense:
+        typeof fighter.defense === "object" && fighter.defense !== null
+          ? { ...fighter.defense }
+          : fighter.defense,
+    }));
+
+    const updatedCPU = teams.opponent.map((fighter) => ({
+      ...fighter,
+      defense:
+        typeof fighter.defense === "object" && fighter.defense !== null
+          ? { ...fighter.defense }
+          : fighter.defense,
+      attacks: fighter.attacks.map((attack) => ({
+        ...attack,
+        buff: attack.buff ? { ...attack.buff } : attack.buff,
+        debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+      })),
+    }));
+
+    const attacker = updatedCPU.find(
+      (fighter) => fighter.id === pendingDefense.cpuId,
+    );
+
+    const defender = updatedPlayers.find(
+      (fighter) => fighter.id === pendingDefense.targetId,
+    );
+
+    if (!attacker || !defender) return;
+
+    if (attacker.health <= 0 || defender.health <= 0) {
+      setPendingDefense(null);
+      setCpuActionIndex((previous) => previous + 1);
+      return;
+    }
+
+    const attack = attacker.attacks[pendingDefense.attackIndex];
+
+    if (!attack || attack.state !== true) {
+      setPendingDefense(null);
+      setCpuActionIndex((previous) => previous + 1);
+      return;
+    }
+    defenseResolvedRef.current = true;
+
+    let result;
+
+    if (choice === "defend") {
+      const defenseAmount =
+        typeof defender.defense === "object"
+          ? (defender.defense?.amount ?? 0)
+          : (defender.defense ?? 0);
+
+      result = attackCharacter(attack, attacker, defender, defenseAmount);
+    } else if (choice === "evade") {
+      result = evadeAttack(attack, attacker, defender);
+    } else {
+      // The timer expired, so the attack lands without defensive protection.
+      result = attackCharacter(attack, attacker, defender);
+    }
+
+    if (!result) {
+      setCombatMessage("The defensive action could not be completed.");
+
+      setPendingDefense(null);
+      setCpuActionIndex((previous) => previous + 1);
+      return;
+    }
+
+    // Only an actual defensive choice uses cooldown and marks the fighter blocked.
+    if (choice === "defend" || choice === "evade") {
+      defender.cooldown = Math.max(0, (defender.cooldown ?? 0) - 1);
+      defender.blocked = true;
+    }
+
+    if (choice === "defend") {
+      setCombatMessage(
+        `${defender.name} defended ${attacker.name}'s ${attack.name}!`,
+      );
+    } else if (choice === "evade") {
+      setCombatMessage(
+        result.evaded
+          ? `${defender.name} evaded ${attacker.name}'s ${attack.name}!`
+          : `${defender.name} failed to evade ${attacker.name}'s ${attack.name}!`,
+      );
+    } else {
+      setCombatMessage(
+        `Time ran out! ${attacker.name}'s ${attack.name} hit ${defender.name}!`,
+      );
+    }
+
+    setTeams({
+      player: updatedPlayers,
+      opponent: updatedCPU,
+    });
+
+    // Clear the prompt and allow the next CPU action to proceed.
+    setPendingDefense(null);
+    setCpuActionIndex((previous) => previous + 1);
+  };
+
   const resetBattle = () => {
     setTeams({
       player: playerTeamIds.map(createBattleFighter),
@@ -648,7 +737,12 @@ export default function TeamBattle() {
 
     setTargetAssignments({});
     setRoundTargets({});
+    setCpuTargets({});
     setRoundNumber(1);
+    setPendingDefense(null);
+    setCpuActionQueue(null);
+    setCpuActionIndex(0);
+    
 
     setDamageDealt(0);
     setAttacksUsed(0);
@@ -656,6 +750,16 @@ export default function TeamBattle() {
     setCombatMessage("Choose your fighter and target.");
     setPhase("selecting");
   };
+
+  const pendingAttacker = pendingDefense
+    ? teams.opponent.find((fighter) => fighter.id === pendingDefense.cpuId)
+    : null;
+
+  const pendingTarget = pendingDefense
+    ? teams.player.find((fighter) => fighter.id === pendingDefense.targetId)
+    : null;
+
+  const pendingAttack = pendingAttacker?.attacks[pendingDefense?.attackIndex];
 
   if (!hasValidTeams) {
     return (
@@ -826,12 +930,137 @@ export default function TeamBattle() {
               key={fighter.id}
               fighter={fighter}
               team="opponent"
-              isSelected={roundTargets[fighter.id] != null}
+              isSelected={cpuTargets[fighter.id] != null}
               onClick={() => {}}
             />
           ))}
         </div>
       </section>
+
+      {/* INCOMING CPU ATTACK
+{pendingDefense && (() => {
+  const attacker = teams.opponent.find(
+    (fighter) => fighter.id === pendingDefense.cpuId
+  );
+
+  const target = teams.player.find(
+    (fighter) => fighter.id === pendingDefense.targetId
+  );
+
+  const attack = attacker?.attacks[pendingDefense.attackIndex];
+
+  if (!attacker || !target || !attack) return null;
+
+  return (
+    <section
+      key={`${attacker.id}-${target.id}-${attack.name}`}
+      style={{
+        margin: "24px 0",
+        padding: "24px",
+        border: "2px solid #ff3159",
+        borderRadius: "14px",
+        background: "linear-gradient(135deg, #241318, #171717)",
+        boxShadow: "0 0 22px #ff315933",
+        textAlign: "center",
+      }}
+    >
+      <p style={{ color: "#ff718b", fontWeight: "bold" }}>
+        ⚠ INCOMING ATTACK
+      </p>
+
+      <h2>{attacker.name} is attacking {target.name}!</h2>
+
+      <h3>{attack.name}</h3>
+
+      <p>Damage: {attack.damage ?? 0}</p>
+      <p>Speed: {attack.speed ?? 0}</p>
+      <p>Mana cost: {attack.cost ?? 0}</p>
+
+      <div style={{ margin: "20px auto", maxWidth: "420px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "8px",
+          }}
+        >
+          <strong>DEFENSE WINDOW</strong>
+          <strong style={{
+            color: defenseTimeLeft <= 3 ? "#ff3159" : "#13d5ff"
+          }}>
+            {defenseTimeLeft}s
+          </strong>
+        </div>
+
+        <div style={{
+          height: "8px",
+          background: "#333",
+          borderRadius: "10px",
+          overflow: "hidden",
+        }}>
+          <div style={{
+            width: `${defenseTimeLeft * 10}%`,
+            height: "100%",
+            background: defenseTimeLeft <= 3 ? "#ff3159" : "#13d5ff",
+            transition: "width 1s linear",
+          }} />
+        </div>
+      </div>
+
+      <p>
+        {target.name}: {target.health} HP · {target.mana} Mana
+      </p>
+
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        gap: "14px",
+        flexWrap: "wrap",
+        marginTop: "20px",
+      }}>
+        <button
+          type="button"
+          disabled={(target.cooldown ?? 0) <= 0}
+          onClick={() => resolveCPUDefense("defend")}
+          style={{
+            padding: "14px 28px",
+            background: "#13d5ff",
+            color: "#101010",
+            border: "none",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+        >
+          🛡 DEFEND
+        </button>
+
+        <button
+          type="button"
+          onClick={() => resolveCPUDefense("evade")}
+          style={{
+            padding: "14px 28px",
+            background: "#ff3159",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+        >
+          💨 EVADE
+        </button>
+      </div>
+
+      {(target.cooldown ?? 0) <= 0 && (
+        <p style={{ color: "#ffb1bd", marginTop: "12px" }}>
+          Defend is unavailable because this fighter has no cooldown remaining.
+          You can still try to evade!
+        </p>
+      )}
+    </section>
+  );
+})()} */}
 
       {/* PLAYER TEAM */}
       <section>
@@ -844,20 +1073,132 @@ export default function TeamBattle() {
           }}
         >
           {teams.player.map((fighter) => (
-            <FighterPreview
-              key={fighter.id}
-              fighter={fighter}
-              team="player"
-              isSelected={fighter.id === activePlayerId}
-              onClick={() => {
-                if (fighter.health <= 0) return;
-                setActivePlayerId(fighter.id);
-                const assignedTarget = roundTargets[fighter.id];
-                if (assignedTarget) {
-                  setTargetOpponentId(assignedTarget);
-                }
-              }}
-            />
+            <div key={fighter.id} style={{ position: "relative", minWidth: 0 }}>
+              <FighterPreview
+                fighter={fighter}
+                team="player"
+                isSelected={fighter.id === activePlayerId}
+                onClick={() => {
+                  if (fighter.health <= 0) return;
+                  setActivePlayerId(fighter.id);
+
+                  const assignedTarget = roundTargets[fighter.id];
+                  if (assignedTarget) {
+                    setTargetOpponentId(assignedTarget);
+                  }
+                }}
+              />
+
+              {pendingDefense &&
+                pendingDefense.targetId === fighter.id &&
+                pendingAttacker &&
+                pendingTarget &&
+                pendingAttack && (
+                  <section
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      aspectRatio: "1 / 1",
+                      boxSizing: "border-box",
+                      padding: "14px",
+                      overflowY: "auto",
+                      zIndex: 5,
+                      border: "2px solid #ff3159",
+                      borderRadius: "12px",
+                      background: "linear-gradient(145deg, #30151d, #111)",
+                      boxShadow: "0 0 20px #ff315955",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      textAlign: "center",
+                    }}
+                  >
+                    <strong style={{ color: "#ff718b" }}>
+                      ⚠ INCOMING ATTACK
+                    </strong>
+
+                    <h3 style={{ margin: "8px 0" }}>
+                      {pendingAttacker.name} → {pendingTarget.name}
+                    </h3>
+
+                    <p style={{ margin: "4px 0", fontWeight: "bold" }}>
+                      {pendingAttack.name}
+                    </p>
+
+                    <p style={{ margin: "4px 0", fontSize: "13px" }}>
+                      Damage: {pendingAttack.damage ?? 0} · Speed:{" "}
+                      {pendingAttack.speed ?? 0}
+                    </p>
+
+                    <strong
+                      style={{
+                        margin: "8px 0",
+                        color: defenseTimeLeft <= 3 ? "#ff3159" : "#13d5ff",
+                        fontSize: "22px",
+                      }}
+                    >
+                      {defenseTimeLeft}s
+                    </strong>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        width: "100%",
+                        marginTop: "6px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        disabled={
+                          defenseTimeLeft <= 0 ||
+                          (pendingTarget.cooldown ?? 0) <= 0
+                        }
+                        onClick={() => resolveCPUDefense("defend")}
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          padding: "10px 4px",
+                          background: "#13d5ff",
+                          color: "#101010",
+                          border: "none",
+                          borderRadius: "7px",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                        }}
+                      >
+                        DEFEND
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={defenseTimeLeft <= 0}
+                        onClick={() => resolveCPUDefense("evade")}
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          padding: "10px 4px",
+                          background: "#ff3159",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "7px",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                        }}
+                      >
+                        EVADE
+                      </button>
+                    </div>
+
+                    <p style={{ fontSize: "12px", marginBottom: 0 }}>
+                      {pendingTarget.health} HP remaining
+                    </p>
+                  </section>
+                )}
+            </div>
           ))}
         </div>
       </section>
