@@ -112,9 +112,8 @@ function App() {
     knockoutRef.current = knockout;
   }, [character, opponent, knockout]);
 
-  // Display ONLY the first queued message.
-  // The next message waits until this popup's display time finishes.
-  // Remove the oldest popup after its display time.
+  
+  // Display one queued message at a time.
   const firstMessageId = combatMessages[0]?.id;
 
   useEffect(() => {
@@ -126,6 +125,7 @@ function App() {
 
     return () => clearTimeout(timer);
   }, [firstMessageId]);
+
 
   // Advance to the next round after both fighters finish.
   useEffect(() => {
@@ -348,22 +348,17 @@ function App() {
           </div>
         </div>
       )}
-      {/* Show only one animated popup at a time.
+      {/* Show one animated combat popup at a time. */}
       {combatMessages.length > 0 && (
         <div id="combatPopupContainer">
-          {combatMessages.slice(0, 3).map((message, index) => (
-            <div
-              className={`combat-popup ${message.type}`}
-              key={message.id}
-              style={{
-                animationDelay: `${index * 0.15}s`,
-              }}
-            >
-              {message.text}
-            </div>
-          ))}
+          <div
+            className={`combat-popup ${combatMessages[0].type}`}
+            key={combatMessages[0].id}
+          >
+            {combatMessages[0].text}
+          </div>
         </div>
-      )} */}
+      )}
 
       {knockout && !showResults ? null : character.health <= 0 ? (
         <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />

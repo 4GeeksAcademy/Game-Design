@@ -996,11 +996,11 @@ body {
    ========================================================= */
 
 #combatPopupContainer {
-  position: absolute !important;
-  top: 5%;
+  position: fixed !important;
+  top: 15% !important;
   right: 30px !important;
   left: auto !important;
-  z-index: 1000;
+  z-index: 99999 !important;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1008,7 +1008,7 @@ body {
   width: max-content;
   max-width: calc(100vw - 40px);
   transform: none !important;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .combat-popup {
@@ -1156,10 +1156,17 @@ body {
 
 /* Keep the animation comfortable on smaller screens */
 @media (prefers-reduced-motion: reduce) {
+  #combatPopupContainer .combat-popup {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+}@media (prefers-reduced-motion: reduce) {
   
   #combatPopupContainer .combat-popup {
-    animation-duration: 0.01ms;
-    animation-delay: 0s;
+    animation-duration: 2.8ms;
+    animation-delay: 0.5s;
   }
 }
 
@@ -3325,3 +3332,13 @@ body {
   box-shadow: 0 0 12px rgba(255, 49, 89, 0.7);
 }
 
+
+/* Keep popups visible without animation only when reduced motion is enabled. */
+@media (prefers-reduced-motion: reduce) {
+  #combatPopupContainer .combat-popup {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+}
