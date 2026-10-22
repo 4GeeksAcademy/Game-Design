@@ -8,7 +8,7 @@
   width: 100%;
   height: 100vh;
   min-height: 600px;
-  overflow: hidden;
+  overflow: auto;
   padding: 14px 22px 18px;
   display: grid;
   grid-template-rows: 46px minmax(0, 1fr) 190px;
@@ -798,4 +798,358 @@ button.fighter-card { width: 100%; cursor: pointer; }
 
 .fighter-portrait {
   max-width: 130px;
+}
+
+.team-attack-grid {
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  display: grid;
+  grid-auto-columns: minmax(125px, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+  padding: 2px 2px 7px;
+}
+
+.team-attack-wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+.team-attack-card {
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #31516a;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #14283c, #0b1422);
+  cursor: pointer;
+}
+
+.team-attack-card:not(:disabled):hover {
+  border-color: var(--cyan);
+  background: #12354a;
+}
+
+.team-attack-card:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.team-attack-image,
+.team-attack-image-placeholder {
+  width: 100%;
+  height: 58px;
+  flex: 0 0 58px;
+  border-radius: 5px;
+  object-fit: contain;
+  background: #0004;
+}
+
+.team-attack-image-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.team-attack-name {
+  width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-attack-damage,
+.team-attack-cost {
+  color: #c2d2e4;
+  font-size: 9px;
+  text-align: center;
+}
+
+.team-attack-cost {
+  color: #58dcff;
+  font-weight: 700;
+}
+
+.team-attack-effects {
+  position: absolute;
+  z-index: 4;
+  bottom: calc(100% + 5px);
+  left: 0;
+  width: max-content;
+  max-width: 220px;
+  display: none;
+  padding: 8px;
+  border: 1px solid #ffffff30;
+  border-radius: 7px;
+  background: #0b1321;
+  box-shadow: 0 5px 18px #0009;
+  font-size: 9px;
+}
+
+.team-attack-wrapper:hover .team-attack-effects,
+.team-attack-wrapper:focus-within .team-attack-effects {
+  display: block;
+}
+
+.team-effect-heading,
+.team-effect {
+  display: inline-block;
+  margin: 2px;
+}
+
+.team-effect-heading {
+  font-weight: 900;
+}
+
+.buff-heading,
+.team-effect.buff {
+  color: #55e6a5;
+}
+
+.debuff-heading,
+.team-effect.debuff {
+  color: #ff7187;
+}
+
+@media (max-width: 620px) {
+  .team-attack-grid {
+    grid-auto-columns: minmax(115px, 40vw);
+  }
+}
+
+/* Give the attack panels and cards room to breathe */
+.battle-bottom {
+  align-items: stretch;
+  gap: 12px;
+}
+
+.player-attack-panel {
+  min-width: 0;
+  min-height: 230px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.attack-panel-header {
+  flex: 0 0 auto;
+}
+
+.team-attack-grid {
+  flex: 1 1 auto;
+  min-height: 150px;
+  grid-auto-columns: 132px;
+  gap: 10px;
+  padding: 2px 2px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.team-attack-wrapper {
+  min-width: 0;
+  min-height: 0;
+}
+
+.team-attack-card {
+  min-height: 140px;
+  padding: 8px;
+  gap: 7px;
+}
+
+.team-attack-image,
+.team-attack-image-placeholder {
+  height: 68px;
+  flex-basis: 68px;
+}
+
+.team-attack-name {
+  white-space: normal;
+  line-height: 1.2;
+}
+
+.finish-turn-button {
+  flex: 0 0 auto;
+  margin-top: auto;
+}
+
+@media (max-width: 850px) {
+  .battle-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .player-attack-panel {
+    min-height: 220px;
+  }
+}
+.battle-bottom {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+  min-height: 300px;
+}
+
+.player-attack-panel {
+  min-width: 0;
+  min-height: 300px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-attack-grid {
+  min-height: 180px;
+  grid-auto-columns: 112px;
+  gap: 8px;
+  padding: 2px 2px 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.team-attack-card {
+  min-height: 160px;
+  padding: 7px;
+  gap: 6px;
+}
+
+.team-attack-image,
+.team-attack-image-placeholder {
+  height: 64px;
+  flex-basis: 64px;
+}
+
+@media (max-width: 850px) {
+  .battle-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .player-attack-panel {
+    min-height: 260px;
+  }
+}
+
+.player-attack-panel {
+  height: auto;
+  min-height: 0;
+  align-self: start;
+  justify-content: flex-start;
+}
+
+.finish-turn-button {
+  flex: 0 0 auto;
+  margin-top: 8px; /* overrides margin-top: auto */
+}
+
+/* Shorten the battlefield so the attack panels fit higher on screen */
+.team-battle {
+  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.battlefield {
+  min-height: 0;
+  height: 52vh;
+  margin-bottom: 12px;
+}
+
+.battle-bottom {
+  margin-top: 0;
+  padding-bottom: 12px;
+}
+
+@media (max-height: 800px) {
+  .battlefield {
+    height: 52vh;
+  }
+}
+
+@media (max-width: 850px) {
+  .team-battle {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: visible;
+  }
+
+  .battlefield {
+    height: auto;
+    min-height: 420px;
+  }
+}
+
+/* Keep the battle and controls together in the viewport */
+.team-battle {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.battle-header {
+  flex: 0 0 auto;
+}
+
+.battlefield {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  margin-bottom: 0;
+}
+
+.battle-bottom {
+  flex: 0 0 290px;
+  min-height: 0;
+  margin-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+.combat-log,
+.player-attack-panel {
+  min-height: 0;
+  height: 100%;
+}
+
+.team-attack-grid {
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+@media (max-height: 800px) {
+  .battle-bottom {
+    flex-basis: 250px;
+  }
+}
+
+@media (max-width: 850px) {
+  .team-battle {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .battlefield {
+    flex: none;
+    min-height: 420px;
+  }
+
+  .battle-bottom {
+    flex: none;
+    overflow: visible;
+  }
 }

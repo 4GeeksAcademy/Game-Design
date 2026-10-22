@@ -5,6 +5,7 @@ import { roster } from "./Main Page/CharacterSelection";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
+import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import "./Teambattle.css";
 
 function createBattleFighter(id) {
@@ -48,14 +49,9 @@ function FighterPreview({
       ? (fighter.defense.amount ?? 0)
       : (fighter.defense ?? 0);
 
-  const statPercent = (value, maximum = 100) =>
-    maximum > 0
-      ? Math.max(0, Math.min(100, (Number(value) / maximum) * 100))
-      : 0;
-
       const percent = (value, maximum) =>
     maximum > 0
-      ? Math.max(0, Math.min(100, (value / maximum) * 100))
+      ? Math.max(0, Math.min(100, (Number(value) / maximum) * 100))
       : 0;
 
   return (
@@ -67,7 +63,7 @@ function FighterPreview({
         fighter.blocked ? "is-blocking" : ""
       }`}
       onClick={onClick}
-      disabled={fighter.health <= 0 || (team === "opponent" && !onClick)}
+      disabled={fighter.health <= 0 || (team === "opponent" && !canSelect)}
       aria-label={`${fighter.name}, ${fighter.health} health`}
     >
       <div className="fighter-card-heading">
@@ -96,7 +92,7 @@ function FighterPreview({
         />
       </div>
 
-       <div className="fighter-stat-bars">
+      <div className="fighter-stat-bars">
         <StatBar
           label="DEF"
           value={getDefense(fighter)}
@@ -163,65 +159,10 @@ function StatBar({ label, value, maximum, color }) {
       <div className="stat-bar-track">
         <div className="stat-bar-fill" style={{ width: `${percent}%` }} />
       </div>
-      <b>{amount}/{max}</b>
+      <b>
+        {amount}/{max}
+      </b>
     </div>
-  );
-}
-
-function PlayerAttackPanel({
-  fighter,
-  isActive,
-  phase,
-  onAttack,
-  onFinishTurn,
-}) {
-  if (!fighter) return null;
-
-  const canAct =
-    phase === "fighting" && fighter.health > 0 && !fighter.turnFinished;
-
-  return (
-    <section
-      className={`player-attack-panel ${isActive ? "is-active" : "is-inactive"}`}
-    >
-      <header className="attack-panel-header">
-        <h3>{fighter.name}</h3>
-        <span>ATTACKS</span>
-      </header>
-
-      <div className="attack-grid">
-        {fighter.attacks.map((attack, index) => {
-          const usable =
-            canAct &&
-            attack.state === true &&
-            fighter.mana >= (attack.cost ?? 0);
-
-          return (
-            <button
-              key={`${fighter.id}-${index}`}
-              type="button"
-              className="attack-button"
-              disabled={!usable}
-              onClick={() => onAttack(fighter.id, index)}
-            >
-              <strong>{attack.name}</strong>
-              <span>
-                DMG {attack.damage ?? 0} · MP {attack.cost ?? 0}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      <button
-        type="button"
-        className="finish-turn-button"
-        disabled={!canAct}
-        onClick={() => onFinishTurn(fighter.id)}
-      >
-        {fighter.turnFinished ? "TURN FINISHED" : "FINISH TURN"}
-      </button>
-    </section>
   );
 }
 
@@ -1011,7 +952,7 @@ export default function TeamBattle() {
         </div>
 
         {teams.player.map((fighter) => (
-          <PlayerAttackPanel
+          <TeamAttackOptions
             key={fighter.id}
             fighter={fighter}
             isActive={fighter.id === activePlayerId}
