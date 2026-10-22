@@ -4,6 +4,7 @@ import { roster } from "./Main Page/CharacterSelection";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
+import "./Teambattle.css";
 
 // Give each fighter independent stats and attack objects.
 function createBattleFighter(id) {
@@ -50,71 +51,189 @@ function createBattleFighter(id) {
 function FighterPreview({ fighter, isSelected, onClick, team }) {
   const isPlayer = team === "player";
 
+  const defense =
+    typeof fighter.defense === "object" && fighter.defense !== null
+      ? (fighter.defense.amount ?? 0)
+      : (fighter.defense ?? 0);
+
+  const agility = fighter.agility ?? 0;
+
+  const defensePercent = Math.min(100, Math.max(0, defense));
+  const agilityPercent = Math.min(100, Math.max(0, agility));
+
+  const healthPercent =
+    fighter.maximumHealth > 0
+      ? (Math.max(0, fighter.health) / fighter.maximumHealth) * 100
+      : 0;
+
+  const manaPercent =
+    fighter.maximumMana > 0
+      ? (Math.max(0, fighter.mana) / fighter.maximumMana) * 100
+      : 0;
+
   return (
     <button
       type="button"
+      className={[
+        "fighter-card",
+        `fighter-${team}`,
+        isSelected ? "is-selected" : "",
+        fighter.health <= 0 ? "is-defeated" : "",
+        fighter.blocked ? "is-blocking" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       onClick={onClick}
-      style={{
-        border: isSelected
-          ? `3px solid ${isPlayer ? "#13d5ff" : "#ff3159"}`
-          : "1px solid #444",
-        borderRadius: "10px",
-        padding: "16px",
-        background: isSelected ? "#252525" : "#191919",
-        color: "white",
-        minWidth: 0,
-        width: "100%",
-        textAlign: "left",
-        cursor: fighter.health <= 0 ? "not-allowed" : "pointer",
-        opacity: fighter.health <= 0 ? 0.45 : 1,
-        boxShadow: isSelected
-          ? `0 0 14px ${isPlayer ? "#13d5ff66" : "#ff315966"}`
-          : "none",
-      }}
+      disabled={fighter.health <= 0 || team === "opponent"}
+      aria-label={`${fighter.name}, ${fighter.health} health remaining`}
     >
-      <h3>
+      <h3 className="fighter-name">
         {fighter.name}
         {isSelected ? " ✓" : ""}
       </h3>
 
       {fighter.image && (
         <img
+          className="fighter-portrait"
           src={fighter.image}
           alt={fighter.name}
-          style={{
-            width: "100%",
-            maxWidth: "150px",
-            height: "150px",
-            objectFit: "contain",
-          }}
         />
       )}
 
-      <p>
-        Health: {fighter.health} / {fighter.maximumHealth}
-      </p>
+      <div className="fighter-resource">
+        <span className="resource-label">HP</span>
 
-      <p>
-        Mana: {fighter.mana} / {fighter.maximumMana}
-      </p>
+        <div className="resource-track">
+          <div
+            className="resource-fill health-fill"
+            style={{ width: `${healthPercent}%` }}
+          />
+        </div>
 
-      <p>
-        Defense:{" "}
-        {typeof fighter.defense === "object"
-          ? (fighter.defense?.amount ?? 0)
-          : (fighter.defense ?? 0)}
-      </p>
+        <span>
+          {Math.max(0, fighter.health)}/{fighter.maximumHealth}
+        </span>
+      </div>
 
-      <p>Agility: {fighter.agility ?? 0}</p>
+      <div className="fighter-resource">
+        <span className="resource-label">MP</span>
 
-      <h4>Attacks</h4>
+        <div className="resource-track">
+          <div
+            className="resource-fill mana-fill"
+            style={{ width: `${manaPercent}%` }}
+          />
+        </div>
 
-      {fighter.attacks.map((attack, index) => (
-        <p key={`${fighter.id}-${index}`}>
-          {attack.name} — Damage: {attack.damage ?? 0}, Mana: {attack.cost ?? 0}
-        </p>
-      ))}
+        <span>
+          {fighter.mana}/{fighter.maximumMana}
+        </span>
+      </div>
+
+      <div className="fighter-stat">
+        <span>DEF</span>
+
+        <div className="resource-track">
+          <div
+            className="resource-fill defense-fill"
+            style={{ width: `${defensePercent}%` }}
+          />
+        </div>
+
+        <span>{defense}</span>
+      </div>
+
+      <div className="fighter-stat">
+        <span>AGI</span>
+
+        <div className="resource-track">
+          <div
+            className="resource-fill agility-fill"
+            style={{ width: `${agilityPercent}%` }}
+          />
+        </div>
+
+        <span>{agility}</span>
+      </div>
+
+      <div className="fighter-detail">
+        <span>Cooldown</span>
+        <strong>{fighter.cooldown ?? 0}</strong>
+      </div>
+
+      <div className="fighter-detail">
+        <span>Recovery</span>
+        <strong>{fighter.recovery ?? 0}</strong>
+      </div>
+
+      <div className="fighter-detail">
+        <span>Mana Regen</span>
+        <strong>{fighter.manaRegen ?? 0}</strong>
+      </div>
     </button>
+  );
+}
+
+function PlayerAttackPanel({
+  fighter,
+  isActive,
+  phase,
+  onSelect,
+  onAttack,
+  onFinishTurn,
+}) {
+  if (!fighter) return null;
+
+  const canAct =
+    phase === "fighting" && fighter.health > 0 && !fighter.turnFinished;
+
+  return (
+    <section className={`player-attack-panel ${isActive ? "" : "is-inactive"}`}>
+      <h3 className="attack-panel-title">
+        {fighter.name}'s Attacks
+        {isActive ? " ★" : ""}
+      </h3>
+
+      <div className="attack-grid">
+        {fighter.attacks.map((attack, index) => {
+          const canUseAttack =
+            canAct &&
+            attack.state === true &&
+            fighter.mana >= (attack.cost ?? 0);
+
+          return (
+            <button
+              key={`${fighter.id}-${index}`}
+              type="button"
+              className="attack-button"
+              disabled={!canUseAttack}
+              onClick={() => {
+                onSelect(fighter.id);
+                onAttack(fighter.id, index);
+              }}
+            >
+              <strong>{attack.name}</strong>
+
+              <span>DMG: {attack.damage ?? 0}</span>
+
+              <span>MP: {attack.cost ?? 0}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        type="button"
+        className="finish-turn-button"
+        disabled={!canAct}
+        onClick={() => {
+          onSelect(fighter.id);
+          onFinishTurn(fighter.id);
+        }}
+      >
+        {fighter.turnFinished ? "TURN FINISHED" : "FINISH TURN"}
+      </button>
+    </section>
   );
 }
 
@@ -128,6 +247,8 @@ export default function TeamBattle() {
   const [combatMessage, setCombatMessage] = useState(
     "Choose your fighter and target.",
   );
+  const [combatPopups, setCombatPopups] = useState([]);
+  const popupIdRef = useRef(0);
   const location = useLocation();
   const [targetAssignments, setTargetAssignments] = useState({});
 
@@ -171,6 +292,34 @@ export default function TeamBattle() {
         assignedTargetId === targetOpponentId,
     );
   };
+  const showCombatMessage = (message) => {
+    setCombatMessage(message);
+
+    if (!message) return;
+
+    const popup = {
+      id: ++popupIdRef.current,
+      message,
+    };
+
+    setCombatPopups((current) => [...current, popup]);
+  };
+
+  
+useEffect(() => {
+  if (combatPopups.length === 0) return;
+
+  const oldestPopupId = combatPopups[0].id;
+
+  const timeout = setTimeout(() => {
+    setCombatPopups((current) =>
+      current.filter((popup) => popup.id !== oldestPopupId),
+    );
+  }, 1800);
+
+  return () => clearTimeout(timeout);
+}, [combatPopups[0]?.id]);
+
 
   useEffect(() => {
     if (!pendingDefense || phase !== "cpu-fighting") {
@@ -232,7 +381,7 @@ export default function TeamBattle() {
 
       setCpuActionQueue(queue);
       setCpuActionIndex(0);
-      setCombatMessage("The CPU team is preparing its attacks!");
+      showCombatMessage("The CPU team is preparing its attacks!");
       return;
     }
 
@@ -323,7 +472,7 @@ export default function TeamBattle() {
       attackIndex: action.attackIndex,
     });
 
-    setCombatMessage(
+    showCombatMessage(
       `${cpu.name} is preparing ${attack.name}! Choose Defend or Evade.`,
     );
   }, [
@@ -353,7 +502,7 @@ export default function TeamBattle() {
     );
 
     if (anotherFighterHasTarget) {
-      setCombatMessage(
+      showCombatMessage(
         `${opponent.name} is already assigned to your teammate this round.`,
       );
       return;
@@ -364,60 +513,65 @@ export default function TeamBattle() {
       [fighterId]: opponentId,
     }));
 
-    setCombatMessage(`${fighter.name} will fight ${opponent.name} this round.`);
+    showCombatMessage(
+      `${fighter.name} will fight ${opponent.name} this round.`,
+    );
   };
 
-  
-const confirmPlayerTargets = () => {
-  const livingPlayers = teams.player.filter(
-    (fighter) => fighter.health > 0
-  );
+  const confirmPlayerTargets = () => {
+    const livingPlayers = teams.player.filter((fighter) => fighter.health > 0);
 
-  const livingOpponents = teams.opponent.filter(
-    (fighter) => fighter.health > 0
-  );
+    const livingOpponents = teams.opponent.filter(
+      (fighter) => fighter.health > 0,
+    );
 
-  // Make sure each living player has a valid target.
-  const selectedTargets = livingPlayers.filter((player) =>
-    livingOpponents.some(
-      (opponent) => opponent.id === roundTargets[player.id]
-    )
-  ).length;
+    // Make sure each living player has a valid target.
+    const selectedTargets = livingPlayers.filter((player) =>
+      livingOpponents.some(
+        (opponent) => opponent.id === roundTargets[player.id],
+      ),
+    ).length;
 
-  const requiredTargets = Math.min(
-    livingPlayers.length,
-    livingOpponents.length
-  );
+    const requiredTargets = Math.min(
+      livingPlayers.length,
+      livingOpponents.length,
+    );
 
-  if (selectedTargets < requiredTargets) {
-    setCombatMessage("Choose your available targets before continuing.");
-    return;
-  }
+    if (selectedTargets < requiredTargets) {
+      setCombatMessage("Choose your available targets before continuing.");
+      return;
+    }
 
-  // Give each living CPU a different living player to target.
-const newCpuTargets = {};
-const availablePlayers = [...livingPlayers];
+    // Give each living CPU a different living player to target.
+    const newCpuTargets = {};
+    const availablePlayers = [...livingPlayers];
 
-livingOpponents.forEach((cpu) => {
-  if (availablePlayers.length === 0) return;
+    // Shuffle the CPU order so the same CPU doesn't always attack first.
+    const shuffledCPUs = [...livingOpponents];
 
-  const randomIndex = Math.floor(
-    Math.random() * availablePlayers.length
-  );
+    for (let i = shuffledCPUs.length - 1; i > 0; i--) {
+      const randomIndex = Math.floor(Math.random() * (i + 1));
 
-  const chosenPlayer = availablePlayers.splice(
-    randomIndex,
-    1
-  )[0];
+      [shuffledCPUs[i], shuffledCPUs[randomIndex]] = [
+        shuffledCPUs[randomIndex],
+        shuffledCPUs[i],
+      ];
+    }
 
-  newCpuTargets[cpu.id] = chosenPlayer.id;
-});
+    shuffledCPUs.forEach((cpu) => {
+      if (availablePlayers.length === 0) return;
 
-  setCpuTargets(newCpuTargets);
-  setCombatMessage("Targets locked! The battle begins!");
-  setPhase("fighting");
-};
+      const randomIndex = Math.floor(Math.random() * availablePlayers.length);
 
+      const chosenPlayer = availablePlayers.splice(randomIndex, 1)[0];
+
+      newCpuTargets[cpu.id] = chosenPlayer.id;
+    });
+
+    setCpuTargets(newCpuTargets);
+    showCombatMessage("Targets locked! The battle begins!");
+    setPhase("fighting");
+  };
 
   const resolvePlayerTurnStatus = (players, opponents, targets) => {
     const updatedPlayers = players.map((player) => {
@@ -471,18 +625,18 @@ livingOpponents.forEach((cpu) => {
     }));
 
     if (allLivingPlayersFinished) {
-      setCombatMessage(
+      showCombatMessage(
         "Your team has finished its turn! The CPU team is preparing to attack.",
       );
       setPhase("cpu-fighting");
     } else {
-      setCombatMessage(
+      showCombatMessage(
         `${fighter.name} has finished their turn. Your teammate can keep fighting!`,
       );
     }
   };
 
-  const useAttack = (attackIndex) => {
+  const useAttack = (fighterId, attackIndex) => {
     if (phase !== "fighting") return;
 
     // Copy fighters and their attacks before combat changes their stats.
@@ -512,12 +666,10 @@ livingOpponents.forEach((cpu) => {
       })),
     }));
 
-    const attacker = updatedPlayers.find(
-      (fighter) => fighter.id === activePlayerId,
-    );
+    const attacker = updatedPlayers.find((fighter) => fighter.id === fighterId);
 
     const defender = updatedOpponents.find(
-      (fighter) => fighter.id === roundTargets[activePlayerId],
+      (fighter) => fighter.id === roundTargets[fighterId],
     );
 
     if (!attacker || !defender) return;
@@ -597,7 +749,7 @@ livingOpponents.forEach((cpu) => {
       );
     });
 
-    setCombatMessage(
+    showCombatMessage(
       `${attacker.name} used ${attack.name} on ${defender.name}!${
         automaticallySkipped
           ? " Fighters without a living target have been automatically skipped."
@@ -607,7 +759,7 @@ livingOpponents.forEach((cpu) => {
 
     // Start the CPU phase only after every living player is finished.
     if (allLivingPlayersFinished) {
-      setCombatMessage(
+      showCombatMessage(
         `${attacker.name} used ${attack.name}! Your team has no remaining actions. The CPU team is preparing to attack.`,
       );
       setPhase("cpu-fighting");
@@ -687,7 +839,7 @@ livingOpponents.forEach((cpu) => {
     }
 
     if (!result) {
-      setCombatMessage("The defensive action could not be completed.");
+      showCombatMessage("The defensive action could not be completed.");
 
       setPendingDefense(null);
       setCpuActionIndex((previous) => previous + 1);
@@ -701,17 +853,17 @@ livingOpponents.forEach((cpu) => {
     }
 
     if (choice === "defend") {
-      setCombatMessage(
+      showCombatMessage(
         `${defender.name} defended ${attacker.name}'s ${attack.name}!`,
       );
     } else if (choice === "evade") {
-      setCombatMessage(
+      showCombatMessage(
         result.evaded
           ? `${defender.name} evaded ${attacker.name}'s ${attack.name}!`
           : `${defender.name} failed to evade ${attacker.name}'s ${attack.name}!`,
       );
     } else {
-      setCombatMessage(
+      showCombatMessage(
         `Time ran out! ${attacker.name}'s ${attack.name} hit ${defender.name}!`,
       );
     }
@@ -742,7 +894,6 @@ livingOpponents.forEach((cpu) => {
     setPendingDefense(null);
     setCpuActionQueue(null);
     setCpuActionIndex(0);
-    
 
     setDamageDealt(0);
     setAttacksUsed(0);
@@ -799,15 +950,8 @@ livingOpponents.forEach((cpu) => {
   }
 
   return (
-    <main
-      style={{
-        background: "#101010",
-        color: "white",
-        minHeight: "100vh",
-        padding: "24px",
-      }}
-    >
-      <h1 style={{ textAlign: "center" }}>
+    <main className="team-battle">
+      <h1 className="team-battle-title">
         2v2 Team Battle — Round {roundNumber}
       </h1>
 
@@ -916,361 +1060,175 @@ livingOpponents.forEach((cpu) => {
       )}
 
       {/* CPU TEAM */}
-      <section>
-        <h2>CPU TEAM</h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: "12px",
-          }}
-        >
-          {teams.opponent.map((fighter) => (
-            <FighterPreview
-              key={fighter.id}
-              fighter={fighter}
-              team="opponent"
-              isSelected={cpuTargets[fighter.id] != null}
-              onClick={() => {}}
-            />
-          ))}
-        </div>
-      </section>
+      {/* MAIN BATTLEFIELD */}
+      <section className="battlefield">
+        {/* CPU TEAM — LEFT SIDE */}
+        <div className="battle-team cpu-team">
+          <h2 className="battle-team-title">CPU TEAM</h2>
 
-      {/* INCOMING CPU ATTACK
-{pendingDefense && (() => {
-  const attacker = teams.opponent.find(
-    (fighter) => fighter.id === pendingDefense.cpuId
-  );
-
-  const target = teams.player.find(
-    (fighter) => fighter.id === pendingDefense.targetId
-  );
-
-  const attack = attacker?.attacks[pendingDefense.attackIndex];
-
-  if (!attacker || !target || !attack) return null;
-
-  return (
-    <section
-      key={`${attacker.id}-${target.id}-${attack.name}`}
-      style={{
-        margin: "24px 0",
-        padding: "24px",
-        border: "2px solid #ff3159",
-        borderRadius: "14px",
-        background: "linear-gradient(135deg, #241318, #171717)",
-        boxShadow: "0 0 22px #ff315933",
-        textAlign: "center",
-      }}
-    >
-      <p style={{ color: "#ff718b", fontWeight: "bold" }}>
-        ⚠ INCOMING ATTACK
-      </p>
-
-      <h2>{attacker.name} is attacking {target.name}!</h2>
-
-      <h3>{attack.name}</h3>
-
-      <p>Damage: {attack.damage ?? 0}</p>
-      <p>Speed: {attack.speed ?? 0}</p>
-      <p>Mana cost: {attack.cost ?? 0}</p>
-
-      <div style={{ margin: "20px auto", maxWidth: "420px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "8px",
-          }}
-        >
-          <strong>DEFENSE WINDOW</strong>
-          <strong style={{
-            color: defenseTimeLeft <= 3 ? "#ff3159" : "#13d5ff"
-          }}>
-            {defenseTimeLeft}s
-          </strong>
-        </div>
-
-        <div style={{
-          height: "8px",
-          background: "#333",
-          borderRadius: "10px",
-          overflow: "hidden",
-        }}>
-          <div style={{
-            width: `${defenseTimeLeft * 10}%`,
-            height: "100%",
-            background: defenseTimeLeft <= 3 ? "#ff3159" : "#13d5ff",
-            transition: "width 1s linear",
-          }} />
-        </div>
-      </div>
-
-      <p>
-        {target.name}: {target.health} HP · {target.mana} Mana
-      </p>
-
-      <div style={{
-        display: "flex",
-        justifyContent: "center",
-        gap: "14px",
-        flexWrap: "wrap",
-        marginTop: "20px",
-      }}>
-        <button
-          type="button"
-          disabled={(target.cooldown ?? 0) <= 0}
-          onClick={() => resolveCPUDefense("defend")}
-          style={{
-            padding: "14px 28px",
-            background: "#13d5ff",
-            color: "#101010",
-            border: "none",
-            borderRadius: "8px",
-            fontWeight: "bold",
-            cursor: "pointer",
-          }}
-        >
-          🛡 DEFEND
-        </button>
-
-        <button
-          type="button"
-          onClick={() => resolveCPUDefense("evade")}
-          style={{
-            padding: "14px 28px",
-            background: "#ff3159",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            fontWeight: "bold",
-            cursor: "pointer",
-          }}
-        >
-          💨 EVADE
-        </button>
-      </div>
-
-      {(target.cooldown ?? 0) <= 0 && (
-        <p style={{ color: "#ffb1bd", marginTop: "12px" }}>
-          Defend is unavailable because this fighter has no cooldown remaining.
-          You can still try to evade!
-        </p>
-      )}
-    </section>
-  );
-})()} */}
-
-      {/* PLAYER TEAM */}
-      <section>
-        <h2>PLAYER TEAM</h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: "12px",
-          }}
-        >
-          {teams.player.map((fighter) => (
-            <div key={fighter.id} style={{ position: "relative", minWidth: 0 }}>
+          <div className="fighter-grid">
+            {teams.opponent.map((fighter) => (
               <FighterPreview
+                key={fighter.id}
+                fighter={fighter}
+                team="opponent"
+                isSelected={cpuTargets[fighter.id] != null}
+                onClick={() => {}}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* CENTER — BATTLE MESSAGE */}
+        <div className="battle-center">
+          <h2>ROUND {roundNumber}</h2>
+          <p>{combatMessage}</p>
+        </div>
+
+        {/* PLAYER TEAM — RIGHT SIDE */}
+        <div className="battle-team player-team">
+          <h2 className="battle-team-title">PLAYER TEAM</h2>
+
+          <div className="fighter-grid">
+            {teams.player.map((fighter) => (
+              <FighterPreview
+                key={fighter.id}
                 fighter={fighter}
                 team="player"
                 isSelected={fighter.id === activePlayerId}
                 onClick={() => {
                   if (fighter.health <= 0) return;
+
                   setActivePlayerId(fighter.id);
 
                   const assignedTarget = roundTargets[fighter.id];
+
                   if (assignedTarget) {
                     setTargetOpponentId(assignedTarget);
                   }
                 }}
               />
+            ))}
+          </div>
+        </div>
 
-              {pendingDefense &&
-                pendingDefense.targetId === fighter.id &&
-                pendingAttacker &&
-                pendingTarget &&
-                pendingAttack && (
-                  <section
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      aspectRatio: "1 / 1",
-                      boxSizing: "border-box",
-                      padding: "14px",
-                      overflowY: "auto",
-                      zIndex: 5,
-                      border: "2px solid #ff3159",
-                      borderRadius: "12px",
-                      background: "linear-gradient(145deg, #30151d, #111)",
-                      boxShadow: "0 0 20px #ff315955",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      textAlign: "center",
-                    }}
-                  >
-                    <strong style={{ color: "#ff718b" }}>
-                      ⚠ INCOMING ATTACK
-                    </strong>
+        {/* INCOMING CPU ATTACK — OVER THE BATTLEFIELD */}
+        {pendingDefense &&
+          pendingAttacker &&
+          pendingTarget &&
+          pendingAttack && (
+            <section className="incoming-attack">
+              <h2 className="incoming-title">⚠ INCOMING ATTACK</h2>
 
-                    <h3 style={{ margin: "8px 0" }}>
-                      {pendingAttacker.name} → {pendingTarget.name}
-                    </h3>
+              <div className="incoming-fighters">
+                <div className="incoming-fighter">
+                  {pendingAttacker.image && (
+                    <img
+                      src={pendingAttacker.image}
+                      alt={pendingAttacker.name}
+                    />
+                  )}
 
-                    <p style={{ margin: "4px 0", fontWeight: "bold" }}>
-                      {pendingAttack.name}
-                    </p>
+                  <strong>{pendingAttacker.name}</strong>
+                  <span>ATTACKER</span>
+                </div>
 
-                    <p style={{ margin: "4px 0", fontSize: "13px" }}>
-                      Damage: {pendingAttack.damage ?? 0} · Speed:{" "}
-                      {pendingAttack.speed ?? 0}
-                    </p>
+                <span className="incoming-arrow">➜</span>
 
-                    <strong
-                      style={{
-                        margin: "8px 0",
-                        color: defenseTimeLeft <= 3 ? "#ff3159" : "#13d5ff",
-                        fontSize: "22px",
-                      }}
-                    >
-                      {defenseTimeLeft}s
-                    </strong>
+                <div className="incoming-fighter">
+                  {pendingTarget.image && (
+                    <img src={pendingTarget.image} alt={pendingTarget.name} />
+                  )}
 
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "8px",
-                        width: "100%",
-                        marginTop: "6px",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        disabled={
-                          defenseTimeLeft <= 0 ||
-                          (pendingTarget.cooldown ?? 0) <= 0
-                        }
-                        onClick={() => resolveCPUDefense("defend")}
-                        style={{
-                          flex: 1,
-                          minWidth: 0,
-                          padding: "10px 4px",
-                          background: "#13d5ff",
-                          color: "#101010",
-                          border: "none",
-                          borderRadius: "7px",
-                          fontWeight: "bold",
-                          cursor: "pointer",
-                        }}
-                      >
-                        DEFEND
-                      </button>
+                  <strong>{pendingTarget.name}</strong>
+                  <span>TARGET</span>
+                </div>
+              </div>
 
-                      <button
-                        type="button"
-                        disabled={defenseTimeLeft <= 0}
-                        onClick={() => resolveCPUDefense("evade")}
-                        style={{
-                          flex: 1,
-                          minWidth: 0,
-                          padding: "10px 4px",
-                          background: "#ff3159",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "7px",
-                          fontWeight: "bold",
-                          cursor: "pointer",
-                        }}
-                      >
-                        EVADE
-                      </button>
-                    </div>
+              <h3 className="incoming-attack-name">{pendingAttack.name}</h3>
 
-                    <p style={{ fontSize: "12px", marginBottom: 0 }}>
-                      {pendingTarget.health} HP remaining
-                    </p>
-                  </section>
-                )}
+              <p className="incoming-attack-details">
+                Damage: {pendingAttack.damage ?? 0}
+                {" · "}
+                Speed: {pendingAttack.speed ?? 0}
+                {" · "}
+                Mana: {pendingAttack.cost ?? 0}
+              </p>
+
+              <div
+                className={`defense-timer ${
+                  defenseTimeLeft <= 3 ? "is-urgent" : ""
+                }`}
+              >
+                DEFENSE WINDOW: {defenseTimeLeft}s
+              </div>
+
+              <div className="incoming-defense-buttons">
+                <button
+                  type="button"
+                  className="defend-button"
+                  disabled={
+                    defenseTimeLeft <= 0 || (pendingTarget.cooldown ?? 0) <= 0
+                  }
+                  onClick={() => resolveCPUDefense("defend")}
+                >
+                  🛡 DEFEND
+                </button>
+
+                <button
+                  type="button"
+                  className="evade-button"
+                  disabled={defenseTimeLeft <= 0}
+                  onClick={() => resolveCPUDefense("evade")}
+                >
+                  💨 EVADE
+                </button>
+              </div>
+
+              {(pendingTarget.cooldown ?? 0) <= 0 && (
+                <p className="incoming-attack-details">
+                  Defend is unavailable because this fighter has no cooldown
+                  remaining. You can still evade!
+                </p>
+              )}
+            </section>
+          )}
+
+        <div className="combat-popup-stack" aria-live="polite">
+          {combatPopups.slice(-4).map((popup, index) => (
+            <div
+              key={popup.id}
+              className="combat-popup"
+              style={{ "--popup-index": index }}
+            >
+              {popup.message}
             </div>
           ))}
         </div>
       </section>
 
-      {/* ACTIVE PLAYER'S ATTACKS */}
-      <section>
-        <h2>
-          {teams.player.find((fighter) => fighter.id === activePlayerId)?.name}
-          's Attacks
-        </h2>
+      {/* BOTTOM HUD — COMBAT LOG + BOTH PLAYERS' ATTACKS */}
+      <div className="battle-bottom">
+        <section className="combat-log">
+          <h2 className="combat-log-title">COMBAT LOG</h2>
 
-        <p>{combatMessage}</p>
+          <div className="combat-log-messages">
+            <p>{combatMessage}</p>
+          </div>
+        </section>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: "12px",
-          }}
-        >
-          {(
-            teams.player.find((fighter) => fighter.id === activePlayerId)
-              ?.attacks ?? []
-          ).map((attack, index) => (
-            <button
-              key={`${activePlayerId}-${index}`}
-              type="button"
-              disabled={
-                phase !== "fighting" ||
-                teams.player.find((fighter) => fighter.id === activePlayerId)
-                  ?.turnFinished ||
-                attack.state !== true ||
-                (teams.player.find((fighter) => fighter.id === activePlayerId)
-                  ?.mana ?? 0) < (attack.cost ?? 0)
-              }
-              onClick={() => useAttack(index)}
-            >
-              <strong>{attack.name}</strong>
-              <p>Damage: {attack.damage ?? 0}</p>
-              <p>Mana cost: {attack.cost ?? 0}</p>
-            </button>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          disabled={
-            phase !== "fighting" ||
-            teams.player.find((fighter) => fighter.id === activePlayerId)
-              ?.health <= 0 ||
-            teams.player.find((fighter) => fighter.id === activePlayerId)
-              ?.turnFinished
-          }
-          onClick={() => finishPlayerTurn(activePlayerId)}
-          style={{
-            marginTop: "20px",
-            padding: "14px 24px",
-            background: "#13d5ff",
-            color: "#101010",
-            border: "none",
-            borderRadius: "8px",
-            fontWeight: "bold",
-            fontSize: "16px",
-            cursor: "pointer",
-          }}
-        >
-          {teams.player.find((fighter) => fighter.id === activePlayerId)
-            ?.turnFinished
-            ? "Turn Finished"
-            : "Finish Turn"}
-        </button>
-      </section>
+        {teams.player.map((fighter) => (
+          <PlayerAttackPanel
+            key={fighter.id}
+            fighter={fighter}
+            isActive={fighter.id === activePlayerId}
+            phase={phase}
+            onSelect={setActivePlayerId}
+            onAttack={useAttack}
+            onFinishTurn={finishPlayerTurn}
+          />
+        ))}
+      </div>
     </main>
   );
 }
