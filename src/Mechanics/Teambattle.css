@@ -1153,3 +1153,102 @@ button.fighter-card { width: 100%; cursor: pointer; }
     overflow: visible;
   }
 }
+
+.team-battle {
+  position: relative;
+}
+
+.team-battle #combatPopupContainer {
+  position: fixed;
+  top: 5%;
+  right: 24px;
+  left: auto;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: auto;
+  max-width: calc(100vw - 40px);
+  pointer-events: none;
+}
+
+.team-battle .combat-popup {
+  animation: combatPopupAnimation 2.5s ease-in-out both;
+}
+
+@media (max-width: 600px) {
+  .team-battle #combatPopupContainer {
+    top: 12px;
+    right: 12px;
+    max-width: calc(100vw - 24px);
+  }
+}
+
+.fighter-effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.fighter-effect {
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.fighter-effect.buff {
+  color: #8fffc0;
+  background: #137a4933;
+  border: 1px solid #35d98788;
+}
+
+.fighter-effect.debuff {
+  color: #ff9aa8;
+  background: #a51e3d33;
+  border: 1px solid #ff526388;
+}
+
+.fighter-card {
+  position: relative;
+}
+
+.fighter-card-content {
+  /* Keep your existing card layout styles here. */
+}
+
+.fighter-effects {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-height: 56px;
+  overflow-y: auto;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.fighter-effect {
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.fighter-effect.buff {
+  color: #8fffc0;
+  background: #137a49;
+  border: 1px solid #35d987;
+}
+
+.fighter-effect.debuff {
+  color: #ff9aa8;
+  background: #a51e3d;
+  border: 1px solid #ff5263;
+}

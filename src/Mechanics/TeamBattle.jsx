@@ -37,6 +37,8 @@ function createBattleFighter(id) {
   };
 }
 
+
+
 function FighterPreview({
   fighter,
   team,
@@ -49,7 +51,7 @@ function FighterPreview({
       ? (fighter.defense.amount ?? 0)
       : (fighter.defense ?? 0);
 
-      const percent = (value, maximum) =>
+  const percent = (value, maximum) =>
     maximum > 0
       ? Math.max(0, Math.min(100, (Number(value) / maximum) * 100))
       : 0;
@@ -124,8 +126,25 @@ function FighterPreview({
           color="cooldown"
         />
       </div>
+
+      
+        
+      
     </button>
   );
+}
+
+
+
+function describeEffects(effects, targetName, kind) {
+  return Object.entries(effects ?? {})
+    .filter(([, amount]) => amount !== 0)
+    .map(([stat, amount]) => {
+      const verb = kind === "buff" ? "increased" : "reduced";
+      const signedAmount = `${amount > 0 ? "+" : ""}${amount}`;
+
+      return `${targetName}'s ${stat} ${verb} by ${signedAmount}`;
+    });
 }
 
 function ResourceBar({ label, value, maximum, percent, type }) {
@@ -196,6 +215,8 @@ export default function TeamBattle() {
   const [combatMessage, setCombatMessage] = useState(
     "Choose your fighters' targets.",
   );
+  const [combatPopups, setCombatPopups] = useState([]);
+  const popupTimerRef = useRef(null);
   const [combatLog, setCombatLog] = useState([
     "Choose your fighters' targets.",
   ]);
@@ -204,6 +225,16 @@ export default function TeamBattle() {
 
   const defenseResolvedRef = useRef(false);
   const cpuTurnRunningRef = useRef(false);
+  useEffect(() => {
+    if (!combatPopups.length) return;
+
+    popupTimerRef.current = setTimeout(() => {
+      // Keep your tested 1v1 queue behavior: remove the first three entries.
+      setCombatPopups((current) => current.slice(3));
+    }, 2800);
+
+    return () => clearTimeout(popupTimerRef.current);
+  }, [combatPopups]);
 
   const hasValidTeams =
     teams.player.length === 2 &&
@@ -211,9 +242,21 @@ export default function TeamBattle() {
     teams.player.every(Boolean) &&
     teams.opponent.every(Boolean);
 
-  const addLog = (message) => {
+  const addLog = (message, type = "hit") => {
+    const entry = {
+      id: Date.now() + Math.random(),
+      text: message,
+      type,
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }),
+    };
+
     setCombatMessage(message);
-    setCombatLog((current) => [...current.slice(-5), message]);
+    setCombatLog((current) => [...current.slice(-5), entry]);
+    setCombatPopups((current) => [...current, entry]);
   };
 
   const livingPlayers = teams.player.filter((fighter) => fighter.health > 0);
@@ -391,10 +434,30 @@ export default function TeamBattle() {
 
     const healthBefore = defender.health;
     const result = attackCharacter(attack, attacker, defender);
+    if (result && typeof result === "object") {
+      Object.assign(attacker, result.attacker ?? {});
+      Object.assign(defender, result.defender ?? {});
+    }
     if (!result) {
       addLog("Not enough mana to use that attack.");
       return;
     }
+
+    attacker.activeEffects = [
+      ...(attacker.activeEffects ?? []),
+      ...effectLabels(result.buffsApplied).map((effect) => ({
+        ...effect,
+        kind: "buff",
+      })),
+    ];
+
+    defender.activeEffects = [
+      ...(defender.activeEffects ?? []),
+      ...effectLabels(result.debuffsApplied).map((effect) => ({
+        ...effect,
+        kind: "debuff",
+      })),
+    ];
 
     setDamageDealt(
       (value) =>
@@ -424,6 +487,14 @@ export default function TeamBattle() {
     );
 
     addLog(`${attacker.name} used ${attack.name} on ${defender.name}.`);
+
+describeEffects(result.buffsApplied, attacker.name, "buff").forEach((message) =>
+  addLog(message, "buff"),
+);
+
+describeEffects(result.debuffsApplied, defender.name, "debuff").forEach(
+  (message) => addLog(message, "debuff"),
+);
 
     if (allFinished) {
       setPhase("cpu-fighting");
@@ -587,117 +658,124 @@ export default function TeamBattle() {
   }, [pendingDefense, phase]);
 
   const resolveCPUDefense = (choice) => {
-    if (
-      !pendingDefense ||
-      phase !== "cpu-fighting" ||
-      defenseResolvedRef.current
-    )
-      return;
+  if (
+    !pendingDefense ||
+    phase !== "cpu-fighting" ||
+    defenseResolvedRef.current
+  ) {
+    return;
+  }
 
-    const attacker = teams.opponent.find(
-      (fighter) => fighter.id === pendingDefense.cpuId,
-    );
-    const defender = teams.player.find(
-      (fighter) => fighter.id === pendingDefense.targetId,
-    );
+  const updatedPlayers = teams.player.map((fighter) => ({
+    ...fighter,
+    defense:
+      typeof fighter.defense === "object" && fighter.defense
+        ? { ...fighter.defense }
+        : fighter.defense,
+  }));
 
-    if (
-      !attacker ||
-      !defender ||
-      attacker.health <= 0 ||
-      defender.health <= 0
-    ) {
-      defenseResolvedRef.current = true;
-      setPendingDefense(null);
-      setCpuActionIndex((index) => index + 1);
-      return;
-    }
+  const updatedCPU = teams.opponent.map((fighter) => ({
+    ...fighter,
+    defense:
+      typeof fighter.defense === "object" && fighter.defense
+        ? { ...fighter.defense }
+        : fighter.defense,
+    attacks: fighter.attacks.map((attack) => ({
+      ...attack,
+      buff: attack.buff ? { ...attack.buff } : attack.buff,
+      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+    })),
+  }));
 
-    const updatedPlayers = teams.player.map((fighter) => ({
-      ...fighter,
-      defense:
-        typeof fighter.defense === "object" && fighter.defense
-          ? { ...fighter.defense }
-          : fighter.defense,
-    }));
-    const updatedCPU = teams.opponent.map((fighter) => ({
-      ...fighter,
-      defense:
-        typeof fighter.defense === "object" && fighter.defense
-          ? { ...fighter.defense }
-          : fighter.defense,
-      attacks: fighter.attacks.map((attack) => ({
-        ...attack,
-        buff: attack.buff ? { ...attack.buff } : attack.buff,
-        debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-      })),
-    }));
+  const currentAttacker = updatedCPU.find(
+    (fighter) => fighter.id === pendingDefense.cpuId,
+  );
+  const currentDefender = updatedPlayers.find(
+    (fighter) => fighter.id === pendingDefense.targetId,
+  );
 
-    const currentAttacker = updatedCPU.find(
-      (fighter) => fighter.id === pendingDefense.cpuId,
-    );
-    const currentDefender = updatedPlayers.find(
-      (fighter) => fighter.id === pendingDefense.targetId,
-    );
-    const attack = currentAttacker?.attacks[pendingDefense.attackIndex];
-
-    if (!attack || attack.state !== true) {
-      defenseResolvedRef.current = true;
-      setPendingDefense(null);
-      setCpuActionIndex((index) => index + 1);
-      return;
-    }
-
+  if (!currentAttacker || !currentDefender) {
     defenseResolvedRef.current = true;
-    let result;
-
-    if (choice === "defend") {
-      const defense =
-        typeof currentDefender.defense === "object"
-          ? (currentDefender.defense?.amount ?? 0)
-          : (currentDefender.defense ?? 0);
-      result = attackCharacter(
-        attack,
-        currentAttacker,
-        currentDefender,
-        defense,
-      );
-    } else if (choice === "evade") {
-      result = evadeAttack(attack, currentAttacker, currentDefender);
-    } else {
-      result = attackCharacter(attack, currentAttacker, currentDefender);
-    }
-
-    if (!result) {
-      addLog("The defensive action could not be completed.");
-    } else {
-      if (choice === "defend" || choice === "evade") {
-        currentDefender.cooldown = Math.max(
-          0,
-          (currentDefender.cooldown ?? 0) - 1,
-        );
-        currentDefender.blocked = true;
-      }
-
-      if (choice === "defend") {
-        addLog(
-          `${currentDefender.name} defended ${currentAttacker.name}'s ${attack.name}.`,
-        );
-      } else if (choice === "evade") {
-        addLog(
-          result.evaded
-            ? `${currentDefender.name} evaded ${attack.name}.`
-            : `${currentDefender.name} failed to evade ${attack.name}.`,
-        );
-      } else {
-        addLog(`Time ran out. ${attack.name} hit ${currentDefender.name}.`);
-      }
-    }
-
-    setTeams({ player: updatedPlayers, opponent: updatedCPU });
     setPendingDefense(null);
     setCpuActionIndex((index) => index + 1);
-  };
+    return;
+  }
+
+  const attack = currentAttacker.attacks[pendingDefense.attackIndex];
+
+  if (!attack || attack.state !== true) {
+    defenseResolvedRef.current = true;
+    setPendingDefense(null);
+    setCpuActionIndex((index) => index + 1);
+    return;
+  }
+
+  let result;
+
+  if (choice === "defend") {
+    const defense =
+      typeof currentDefender.defense === "object"
+        ? currentDefender.defense?.amount ?? 0
+        : currentDefender.defense ?? 0;
+
+    result = attackCharacter(
+      attack,
+      currentAttacker,
+      currentDefender,
+      defense,
+    );
+  } else if (choice === "evade") {
+    result = evadeAttack(attack, currentAttacker, currentDefender);
+  } else {
+    result = attackCharacter(attack, currentAttacker, currentDefender);
+  }
+
+  // Mark resolved only after handling the action. This also prevents
+  // the timeout and a button click from resolving the same attack twice.
+  defenseResolvedRef.current = true;
+
+  if (!result) {
+    addLog("The defensive action could not be completed.");
+  } else {
+    if (choice === "defend" || choice === "evade") {
+      currentDefender.cooldown = Math.max(
+        0,
+        (currentDefender.cooldown ?? 0) - 1,
+      );
+      currentDefender.blocked = true;
+    }
+
+    if (choice === "defend") {
+      addLog(
+        `${currentDefender.name} defended ${currentAttacker.name}'s ${attack.name}.`,
+      );
+    } else if (choice === "evade") {
+      addLog(
+        result.evaded
+          ? `${currentDefender.name} evaded ${attack.name}.`
+          : `${currentDefender.name} failed to evade ${attack.name}.`,
+      );
+    } else {
+      addLog(`Time ran out. ${attack.name} hit ${currentDefender.name}.`);
+    }
+
+    describeEffects(
+      result.buffsApplied,
+      currentAttacker.name,
+      "buff",
+    ).forEach((message) => addLog(message, "buff"));
+
+    describeEffects(
+      result.debuffsApplied,
+      currentDefender.name,
+      "debuff",
+    ).forEach((message) => addLog(message, "debuff"));
+  }
+
+  setTeams({ player: updatedPlayers, opponent: updatedCPU });
+  setPendingDefense(null);
+  setCpuActionIndex((index) => index + 1);
+};
 
   const resetBattle = () => {
     setTeams({
@@ -758,8 +836,23 @@ export default function TeamBattle() {
     );
   }
 
+  
+
   return (
     <main className="team-battle">
+      {combatPopups.length > 0 && (
+        <div id="combatPopupContainer" aria-live="polite">
+          {combatPopups.slice(0, 3).map((entry, index) => (
+            <div
+              key={entry.id}
+              className={`combat-popup ${entry.type}`}
+              style={{ animationDelay: `${index * 0.15}s` }}
+            >
+              {entry.text}
+            </div>
+          ))}
+        </div>
+      )}
       <header className="battle-header">
         <div className="header-team-label cpu-label">CPU TEAM</div>
         <h1>
@@ -945,8 +1038,11 @@ export default function TeamBattle() {
             <span className="log-dot" /> COMBAT LOG
           </header>
           <div className="combat-log-messages" aria-live="polite">
-            {combatLog.map((message, index) => (
-              <p key={`${index}-${message}`}>{message}</p>
+            {combatLog.map((entry) => (
+              <p key={entry.id} className={`combat-log-entry ${entry.type}`}>
+                <span className="combat-log-time">{entry.time}</span>
+                <span>{entry.text}</span>
+              </p>
             ))}
           </div>
         </div>
