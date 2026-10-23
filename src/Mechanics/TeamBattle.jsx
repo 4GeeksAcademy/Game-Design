@@ -846,7 +846,7 @@ useEffect(() => {
             attack.state === true && cpu.mana >= (attack.cost ?? 0),
         );
 
-      usableAttacks.slice(0, limit).forEach(({ attackIndex }) => {
+      usableAttacks.forEach(({ attackIndex }) => {
   queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
 });
     });
