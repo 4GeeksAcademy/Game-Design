@@ -2,12 +2,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection";
-import { attackCharacter } from "./Health.js";
+import { attackCharacter, evadeAttack } from "./Health.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import { aiDefendOrEvade } from "./AI.js";
-import "./Teambattle.css"
+import "./Teambattle.css";
 
 function createBattleFighter(id) {
   const selected = roster.find((fighter) => fighter.id === id);
@@ -307,7 +307,9 @@ export default function TeamBattle() {
       livingOpponents.some((opponent) => opponent.id === id),
     ).length;
 
-    if (assignedCount < Math.min(livingPlayers.length, livingOpponents.length)) {
+    if (
+      assignedCount < Math.min(livingPlayers.length, livingOpponents.length)
+    ) {
       addLog("Assign a target to each available opponent.");
       return;
     }
@@ -403,7 +405,12 @@ export default function TeamBattle() {
       (fighter) => fighter.id === roundTargets[fighterId],
     );
 
-    if (!attacker || !defender || attacker.health <= 0 || attacker.turnFinished) {
+    if (
+      !attacker ||
+      !defender ||
+      attacker.health <= 0 ||
+      attacker.turnFinished
+    ) {
       return;
     }
 
@@ -418,16 +425,16 @@ export default function TeamBattle() {
       return;
     }
 
-   const healthBefore = defender.health;
+    const healthBefore = defender.health;
 
-// The selected difficulty can control which CPU defense behavior is used.
-// AI.js contains the existing random defend/evade behavior.
-const difficulty = location.state?.difficulty ?? "Normal";
+    // The selected difficulty can control which CPU defense behavior is used.
+    // AI.js contains the existing random defend/evade behavior.
+    const difficulty = location.state?.difficulty ?? "Normal";
 
-const result =
-  difficulty === "Easy"
-    ? attackCharacter(attack, attacker, defender)
-    : aiDefendOrEvade(attack, attacker, defender);
+    const result =
+      difficulty === "Easy"
+        ? attackCharacter(attack, attacker, defender)
+        : aiDefendOrEvade(attack, attacker, defender);
     if (!result) {
       addLog("Not enough mana to use that attack.");
       return;
@@ -479,7 +486,9 @@ const result =
 
     if (allFinished) {
       setPhase("cpu-fighting");
-      addLog("Your team has no remaining actions. The CPU is preparing to attack.");
+      addLog(
+        "Your team has no remaining actions. The CPU is preparing to attack.",
+      );
     }
   };
 
@@ -505,8 +514,11 @@ const result =
         .filter(
           ({ attack }) =>
             attack.state === true && cpu.mana >= (attack.cost ?? 0),
-        )
-        .slice(0, limit);
+        );
+
+      usableAttacks.forEach(({ attackIndex }) => {
+        queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
+      });
 
       usableAttacks.forEach(({ attackIndex }) => {
         queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
@@ -695,8 +707,8 @@ const result =
     if (choice === "defend") {
       const defense =
         typeof currentDefender.defense === "object"
-          ? currentDefender.defense?.amount ?? 0
-          : currentDefender.defense ?? 0;
+          ? (currentDefender.defense?.amount ?? 0)
+          : (currentDefender.defense ?? 0);
 
       result = attackCharacter(
         attack,
@@ -783,8 +795,7 @@ const result =
     ? teams.player.find((fighter) => fighter.id === pendingDefense.targetId)
     : null;
 
-  const pendingAttack =
-    pendingAttacker?.attacks[pendingDefense?.attackIndex];
+  const pendingAttack = pendingAttacker?.attacks[pendingDefense?.attackIndex];
 
   if (!hasValidTeams) {
     return (
@@ -947,63 +958,68 @@ const result =
           </div>
         </div>
 
-        {pendingDefense && pendingAttacker && pendingTarget && pendingAttack && (
-          <section className="incoming-attack" aria-live="assertive">
-            <div className="incoming-topline">
-              <span>⚠ INCOMING ATTACK</span>
-              <span className={defenseTimeLeft <= 3 ? "timer-urgent" : ""}>
-                {defenseTimeLeft}s
-              </span>
-            </div>
-
-            <div className="incoming-matchup">
-              <div className="incoming-fighter">
-                {pendingAttacker.image && (
-                  <img src={pendingAttacker.image} alt="" />
-                )}
-                <strong>{pendingAttacker.name}</strong>
-                <small>ATTACKER</small>
+        {pendingDefense &&
+          pendingAttacker &&
+          pendingTarget &&
+          pendingAttack && (
+            <section className="incoming-attack" aria-live="assertive">
+              <div className="incoming-topline">
+                <span>⚠ INCOMING ATTACK</span>
+                <span className={defenseTimeLeft <= 3 ? "timer-urgent" : ""}>
+                  {defenseTimeLeft}s
+                </span>
               </div>
 
-              <span className="incoming-arrow">➜</span>
+              <div className="incoming-matchup">
+                <div className="incoming-fighter">
+                  {pendingAttacker.image && (
+                    <img src={pendingAttacker.image} alt="" />
+                  )}
+                  <strong>{pendingAttacker.name}</strong>
+                  <small>ATTACKER</small>
+                </div>
 
-              <div className="incoming-fighter">
-                {pendingTarget.image && <img src={pendingTarget.image} alt="" />}
-                <strong>{pendingTarget.name}</strong>
-                <small>TARGET</small>
+                <span className="incoming-arrow">➜</span>
+
+                <div className="incoming-fighter">
+                  {pendingTarget.image && (
+                    <img src={pendingTarget.image} alt="" />
+                  )}
+                  <strong>{pendingTarget.name}</strong>
+                  <small>TARGET</small>
+                </div>
               </div>
-            </div>
 
-            <h3>{pendingAttack.name}</h3>
-            <p>
-              DAMAGE {pendingAttack.damage ?? 0}
-              <span> · </span>
-              SPEED {pendingAttack.speed ?? 0}
-              <span> · </span>
-              MANA {pendingAttack.cost ?? 0}
-            </p>
+              <h3>{pendingAttack.name}</h3>
+              <p>
+                DAMAGE {pendingAttack.damage ?? 0}
+                <span> · </span>
+                SPEED {pendingAttack.speed ?? 0}
+                <span> · </span>
+                MANA {pendingAttack.cost ?? 0}
+              </p>
 
-            <div className="defense-actions">
-              <button
-                type="button"
-                className="defend-button"
-                disabled={defenseTimeLeft <= 0}
-                onClick={() => resolveCPUDefense("defend")}
-              >
-                🛡 DEFEND
-              </button>
+              <div className="defense-actions">
+                <button
+                  type="button"
+                  className="defend-button"
+                  disabled={defenseTimeLeft <= 0}
+                  onClick={() => resolveCPUDefense("defend")}
+                >
+                  🛡 DEFEND
+                </button>
 
-              <button
-                type="button"
-                className="evade-button"
-                disabled={defenseTimeLeft <= 0}
-                onClick={() => resolveCPUDefense("evade")}
-              >
-                💨 EVADE
-              </button>
-            </div>
-          </section>
-        )}
+                <button
+                  type="button"
+                  className="evade-button"
+                  disabled={defenseTimeLeft <= 0}
+                  onClick={() => resolveCPUDefense("evade")}
+                >
+                  💨 EVADE
+                </button>
+              </div>
+            </section>
+          )}
       </section>
 
       <section className="battle-bottom">

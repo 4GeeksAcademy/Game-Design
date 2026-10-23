@@ -5,6 +5,7 @@ import "./Homescreen.css";
 
 function Homescreen() {
   const navigate = useNavigate();
+  const [teamControl, setTeamControl] = useState("single-player");
   const [menuHistory, setMenuHistory] = useState(["home"]);
   const menu = menuHistory[menuHistory.length - 1];
   const [teamSize, setTeamSize] = useState("1v1");
