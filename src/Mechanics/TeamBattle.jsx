@@ -1456,11 +1456,11 @@ export default function TeamBattle() {
                   </div>
                 )}
                 <div
-  className="ally-popup-timer"
-  key={`${pendingAllyAttack.fighterId}-${pendingAllyAttack.attackIndex}`}
->
-  <span />
-</div>
+                  className="ally-popup-timer"
+                  key={`${pendingAllyAttack.fighterId}-${pendingAllyAttack.attackIndex}`}
+                >
+                  <span />
+                </div>
               </section>
             );
           })()}
