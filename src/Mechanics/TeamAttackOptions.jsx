@@ -42,16 +42,18 @@ export default function TeamAttackOptions({
   fighter,
   isActive,
   phase,
+  pendingAllyAttack = false,
   onAttack,
   onFinishTurn,
 }) {
   if (!fighter) return null;
 
   const canAct =
-    phase === "fighting" &&
-    isActive &&
-    fighter.health > 0 &&
-    !fighter.turnFinished;
+  phase === "fighting" &&
+  !pendingAllyAttack &&
+  isActive &&
+  fighter.health > 0 &&
+  !fighter.turnFinished;
 
   return (
     <section
