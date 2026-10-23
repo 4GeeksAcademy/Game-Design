@@ -43,18 +43,20 @@ export default function TeamAttackOptions({
   isActive,
   phase,
   pendingAllyAttack = false,
+  allowSimultaneousActions = false,
   onAttack,
   onFinishTurn,
 }) {
   if (!fighter) return null;
 
   const canAct =
-  phase === "fighting" &&
-  !pendingAllyAttack &&
-  isActive &&
-  fighter.health > 0 &&
-  !fighter.turnFinished;
+    phase === "fighting" &&
+    !pendingAllyAttack &&
+    (allowSimultaneousActions || isActive) &&
+    fighter.health > 0 &&
+    !fighter.turnFinished;
 
+    
   return (
     <section
       className={`player-attack-panel ${isActive ? "is-active" : "is-inactive"}`}
