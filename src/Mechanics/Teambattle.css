@@ -1216,7 +1216,11 @@ button.fighter-card { width: 100%; cursor: pointer; }
 }
 
 .fighter-card-content {
-  /* Keep your existing card layout styles here. */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .fighter-effects {
@@ -1251,4 +1255,150 @@ button.fighter-card { width: 100%; cursor: pointer; }
   color: #ff9aa8;
   background: #a51e3d;
   border: 1px solid #ff5263;
+}
+
+.ally-attack-popup {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  left: 50%;
+  width: min(390px, calc(100% - 32px));
+  padding: 20px;
+  overflow: hidden;
+  color: #fff;
+  text-align: center;
+  background: linear-gradient(145deg, #18243b, #101522 75%);
+  border: 1px solid rgba(91, 211, 255, 0.65);
+  border-radius: 18px;
+  box-shadow:
+    0 0 28px rgba(38, 185, 255, 0.28),
+    0 18px 55px rgba(0, 0, 0, 0.55);
+  transform: translate(-50%, -50%);
+  animation: ally-popup-in 220ms ease-out both;
+}
+
+.ally-popup-label {
+  margin-bottom: 16px;
+  color: #75e3ff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.ally-popup-matchup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ally-popup-fighter {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.ally-popup-fighter img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border: 2px solid rgba(117, 227, 255, 0.75);
+  border-radius: 50%;
+}
+
+.ally-popup-fighter strong {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ally-popup-fighter small {
+  color: #9ba9c2;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+
+.ally-popup-arrow {
+  color: #75e3ff;
+  font-size: 1.6rem;
+  animation: ally-arrow-pulse 700ms ease-in-out infinite alternate;
+}
+
+.ally-popup-attack-name {
+  margin-top: 16px;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-shadow: 0 0 12px rgba(117, 227, 255, 0.45);
+}
+
+.ally-popup-timer {
+  height: 3px;
+  margin-top: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+}
+
+.ally-popup-timer span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #75e3ff;
+  transform-origin: left;
+  animation: ally-popup-countdown 2s linear forwards;
+}
+
+@keyframes ally-popup-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes ally-popup-countdown {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes ally-arrow-pulse {
+  to {
+    transform: translateX(4px);
+    opacity: 0.65;
+  }
+}
+
+/* Override broad/global image rules inside battle popups */
+.ally-attack-popup .ally-popup-portrait,
+.incoming-attack .incoming-portrait {
+  display: block;
+  width: 76px;
+  height: 76px;
+  max-width: 76px;
+  max-height: 76px;
+  flex: 0 0 76px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 50%;
+  background: #101a2b;
+}
+
+/* Keep popup columns from stretching the portraits */
+.ally-popup-fighter,
+.incoming-fighter {
+  min-width: 0;
+}
+
+.ally-popup-fighter img,
+.incoming-fighter img {
+  box-sizing: border-box;
 }

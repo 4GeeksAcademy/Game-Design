@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getCoins } from "../Currency";
 import "./Homescreen.css";
 
+
 function Homescreen() {
   const navigate = useNavigate();
   const [teamControl, setTeamControl] = useState("single-player");
@@ -27,10 +28,12 @@ function Homescreen() {
 
   const startBattle = () => {
     navigate("/character-select", {
+
       state: {
         gameMode: "quick",
         teamSize,
         difficulty,
+        teamControl: teamSize === "2v2" ? teamControl : "single-player",
       },
     });
   };
@@ -48,6 +51,112 @@ function Homescreen() {
       window.removeEventListener("coinsUpdated", updateCoins);
     };
   }, []);
+
+  const renderTeamControl = () => {
+  const options = [
+    {
+      id: "single-player",
+      title: "PLAYER VS FULL CPU",
+      description:
+        "One player controls both fighters using the current turn-based mechanics.",
+      disabled: false,
+      playerCount: 1,
+      allyCpuCount: 0,
+      enemyCpuCount: 2,
+    },
+    {
+      id: "local-coop",
+      title: "PLAYER + PLAYER VS FULL CPU",
+      description: "Two local players control one fighter each.",
+      disabled: false,
+      playerCount: 2,
+      allyCpuCount: 0,
+      enemyCpuCount: 2,
+    },
+    {
+      id: "pvp",
+      title: "PLAYER VS PLAYER",
+      description: "Coming soon.",
+      disabled: true,
+      playerCount: 2,
+      allyCpuCount: 0,
+      enemyCpuCount: 2,
+    },
+    {
+      id: "cpu-assist",
+      title: "PLAYER + CPU VS CPU TEAM",
+      description: "A CPU teammate fights alongside you.",
+      disabled: false,
+      playerCount: 1,
+      allyCpuCount: 1,
+      enemyCpuCount: 2,
+    },
+  ];
+
+  return (
+    <>
+      <p className="home-eyebrow">2V2 TEAM SETUP</p>
+      <h2 className="menu-title">CHOOSE YOUR TEAM CONTROLS</h2>
+
+      <div className="team-control-grid">
+        {options.map((option) => (
+          <button
+            key={option.id}
+            type="button"
+            className={`team-control-card ${
+              teamControl === option.id ? "selected" : ""
+            }`}
+            disabled={option.disabled}
+            aria-pressed={teamControl === option.id}
+            onClick={() => setTeamControl(option.id)}
+          >
+            <span className="team-control-title">{option.title}</span>
+
+            <span className="team-control-matchup" aria-hidden="true">
+              <span className="matchup-side">
+                {Array.from({ length: option.playerCount }, (_, index) => (
+                  <span className="matchup-rectangle player" key={`p-${index}`}>
+                    <i className="fa-solid fa-circle-user" />
+                  </span>
+                ))}
+                {Array.from({ length: option.allyCpuCount }, (_, index) => (
+                  <span className="matchup-rectangle cpu" key={`ally-${index}`}>
+                    <i className="fa-solid fa-robot" />
+                  </span>
+                ))}
+              </span>
+
+              <b>VS</b>
+
+              <span className="matchup-side">
+                {Array.from({ length: option.enemyCpuCount }, (_, index) => (
+                  <span className="matchup-rectangle cpu" key={`cpu-${index}`}>
+                    <i className="fa-solid fa-robot" />
+                  </span>
+                ))}
+              </span>
+            </span>
+
+            <span className="team-control-description">
+              {option.description}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <button
+        className="arcade-button primary-button continue-button"
+        onClick={() => openMenu("difficulty")}
+      >
+        CONTINUE <span>▶</span>
+      </button>
+
+      <button className="back-button" onClick={goBack}>
+        ← BACK
+      </button>
+    </>
+  );
+};
 
   const renderHome = () => (
     <>
@@ -172,7 +281,9 @@ function Homescreen() {
 
       <button
         className="arcade-button primary-button continue-button"
-        onClick={() => openMenu("difficulty")}
+        onClick={() =>
+          openMenu(teamSize === "2v2" ? "teamControl" : "difficulty")
+        }
       >
         CONTINUE <span>▶</span>
       </button>
@@ -256,6 +367,8 @@ function Homescreen() {
           "HOW TO PLAY",
           "Learn the rules and master your combat abilities.",
         );
+      case "teamControl":
+        return renderTeamControl();
       default:
         return renderHome();
     }

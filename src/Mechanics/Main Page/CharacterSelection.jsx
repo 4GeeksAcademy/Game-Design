@@ -213,10 +213,18 @@ function CharacterSelection() {
 
   const teamSize = location.state?.teamSize ?? "1v1";
   const difficulty = location.state?.difficulty ?? "Normal";
+  const teamControl = location.state?.teamControl ?? "single-player";
 
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
 
+  // const requiredFighters =
+  // teamSize !== "2v2"
+  //   ? 1
+  //   : teamControl === "cpu-assist"
+  //     ? 1
+  //     : 2;
   const requiredFighters = teamSize === "2v2" ? 2 : 1;
+const cpuFighterCount = requiredFighters;
 
   const [selectedIndices, setSelectedIndices] = useState([]);
 
@@ -377,7 +385,9 @@ function CharacterSelection() {
       .map((fighter, index) => ({ fighter, index }))
       .filter(({ fighter }) => !playerIds.includes(fighter.id));
 
-    if (eligibleOpponents.length < requiredFighters) {
+   
+
+    if (eligibleOpponents.length < cpuFighterCount) {
       setCpuIndices([]);
       setPhase("player");
       return;
@@ -389,7 +399,7 @@ function CharacterSelection() {
     const animation = setInterval(() => {
       const shuffled = [...eligibleOpponents].sort(() => Math.random() - 0.5);
 
-      finalTeam = shuffled.slice(0, requiredFighters).map(({ index }) => index);
+      finalTeam = shuffled.slice(0, cpuFighterCount).map(({ index }) => index);
 
       setCpuIndices(finalTeam);
       setCpuAnimationKey((key) => key + 1);
@@ -404,32 +414,42 @@ function CharacterSelection() {
     }, 350);
 
     return () => clearInterval(animation);
-  }, [phase, selectedIndices, unlockedIds, requiredFighters]);
+  }, [phase, selectedIndices, unlockedIds, requiredFighters, teamControl]);
 
   const startBattle = () => {
     if (
       phase !== "ready" ||
       selectedIndices.length !== requiredFighters ||
-      cpuIndices.length !== requiredFighters
+      cpuIndices.length !== cpuFighterCount
     ) {
       return;
     }
 
-    const playerTeamIds = selectedIndices.map((index) => roster[index].id);
+   
+    const selectedCpuIds = cpuIndices.map((index) => roster[index].id);
 
-    const opponentTeamIds = cpuIndices.map((index) => roster[index].id);
+   const selectedPlayerIds = selectedIndices.map(
+  (index) => roster[index].id,
+);
 
-    navigate(teamSize === "2v2" ? "/team-battle" : "/battle", {
-      state: {
-        playerId: playerTeamIds[0],
-        opponentId: opponentTeamIds[0],
-        playerTeamIds,
-        opponentTeamIds,
-        teamSize,
-        difficulty,
-        gameMode: location.state?.gameMode ?? "quick",
-      },
-    });
+const opponentTeamIds = cpuIndices.map(
+  (index) => roster[index].id,
+);
+
+const playerTeamIds = selectedPlayerIds;
+
+    navigate("/team-battle", {
+  state: {
+    playerId: playerTeamIds[0],
+    opponentId: opponentTeamIds[0],
+    playerTeamIds,
+    opponentTeamIds,
+    teamSize,
+    difficulty,
+    teamControl,
+    gameMode: location.state?.gameMode ?? "quick",
+  },
+});
   };
 
   return (
@@ -498,13 +518,17 @@ function CharacterSelection() {
           <div className="roster-side-heading">
             <span className="cpu-label">CPU</span>
             <div>
-              <h2>CPU OPPONENT</h2>
+              <h2>
+                {teamControl === "cpu-assist" ? "CPU TEAM" : "CPU OPPONENT"}
+              </h2>
               <p>
                 {phase === "player"
                   ? "WAITING FOR PLAYER"
                   : phase === "cpu"
-                    ? "SEARCHING FOR OPPONENT..."
-                    : "OPPONENT LOCKED"}
+                    ? "SELECTING TEAM..."
+                    : teamControl === "cpu-assist"
+                      ? "ALLY + OPPONENTS LOCKED"
+                      : "OPPONENT LOCKED"}
               </p>
             </div>
           </div>
@@ -680,7 +704,7 @@ function CharacterSelection() {
             disabled={
               phase !== "ready" ||
               selectedIndices.length !== requiredFighters ||
-              cpuIndices.length !== requiredFighters
+              cpuIndices.length !== cpuFighterCount
             }
           >
             {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
