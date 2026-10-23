@@ -246,8 +246,9 @@ export default function TeamBattle() {
   //   };
   // });
 
+  const [allyAttackOutcome, setAllyAttackOutcome] = useState(null);
   const [pendingAllyAttack, setPendingAllyAttack] = useState(null);
-
+  const [defenseOutcome, setDefenseOutcome] = useState(null);
   const [phase, setPhase] = useState("selecting");
   const [roundNumber, setRoundNumber] = useState(1);
   const [roundTargets, setRoundTargets] = useState({});
@@ -320,67 +321,67 @@ export default function TeamBattle() {
   );
 
   const selectRoundTarget = (fighterId, opponentId) => {
-  const player = teams.player.find((fighter) => fighter.id === fighterId);
-  const opponent = teams.opponent.find(
-    (fighter) => fighter.id === opponentId,
-  );
-
-  if (!player || !opponent || player.health <= 0 || opponent.health <= 0) {
-    return;
-  }
-
-  const alreadyAssigned = Object.entries(roundTargets).some(
-    ([assignedPlayer, assignedOpponent]) =>
-      assignedPlayer !== fighterId && assignedOpponent === opponentId,
-  );
-
-  if (alreadyAssigned) {
-    addLog(`${opponent.name} is already assigned to your teammate.`);
-    return;
-  }
-
-  if (player.isCpuTeammate && teammateTargetTimerRef.current) {
-    clearTimeout(teammateTargetTimerRef.current);
-    teammateTargetTimerRef.current = null;
-  }
-
-  setRoundTargets((current) => ({ ...current, [fighterId]: opponentId }));
-  addLog(`${player.name} will fight ${opponent.name}.`);
-};
-
-useEffect(() => {
-  if (!isCpuAssist || phase !== "selecting") return;
-
-  const teammate = teams.player.find((fighter) => fighter.isCpuTeammate);
-  if (!teammate || roundTargets[teammate.id]) return;
-
-  teammateTargetTimerRef.current = setTimeout(() => {
-    const availableOpponent = teams.opponent.find(
-      (opponent) =>
-        opponent.health > 0 &&
-        !Object.entries(roundTargets).some(
-          ([fighterId, opponentId]) =>
-            fighterId !== teammate.id && opponentId === opponent.id,
-        ),
+    const player = teams.player.find((fighter) => fighter.id === fighterId);
+    const opponent = teams.opponent.find(
+      (fighter) => fighter.id === opponentId,
     );
 
-    if (availableOpponent) {
-      setRoundTargets((current) => {
-        // Keep a target the player selected before the timer fired.
-        if (current[teammate.id]) return current;
-
-        return { ...current, [teammate.id]: availableOpponent.id };
-      });
+    if (!player || !opponent || player.health <= 0 || opponent.health <= 0) {
+      return;
     }
 
-    teammateTargetTimerRef.current = null;
-  }, 3000);
+    const alreadyAssigned = Object.entries(roundTargets).some(
+      ([assignedPlayer, assignedOpponent]) =>
+        assignedPlayer !== fighterId && assignedOpponent === opponentId,
+    );
 
-  return () => {
-    clearTimeout(teammateTargetTimerRef.current);
-    teammateTargetTimerRef.current = null;
+    if (alreadyAssigned) {
+      addLog(`${opponent.name} is already assigned to your teammate.`);
+      return;
+    }
+
+    if (player.isCpuTeammate && teammateTargetTimerRef.current) {
+      clearTimeout(teammateTargetTimerRef.current);
+      teammateTargetTimerRef.current = null;
+    }
+
+    setRoundTargets((current) => ({ ...current, [fighterId]: opponentId }));
+    addLog(`${player.name} will fight ${opponent.name}.`);
   };
-}, [isCpuAssist, phase, teams.player, teams.opponent, roundTargets]);
+
+  useEffect(() => {
+    if (!isCpuAssist || phase !== "selecting") return;
+
+    const teammate = teams.player.find((fighter) => fighter.isCpuTeammate);
+    if (!teammate || roundTargets[teammate.id]) return;
+
+    teammateTargetTimerRef.current = setTimeout(() => {
+      const availableOpponent = teams.opponent.find(
+        (opponent) =>
+          opponent.health > 0 &&
+          !Object.entries(roundTargets).some(
+            ([fighterId, opponentId]) =>
+              fighterId !== teammate.id && opponentId === opponent.id,
+          ),
+      );
+
+      if (availableOpponent) {
+        setRoundTargets((current) => {
+          // Keep a target the player selected before the timer fired.
+          if (current[teammate.id]) return current;
+
+          return { ...current, [teammate.id]: availableOpponent.id };
+        });
+      }
+
+      teammateTargetTimerRef.current = null;
+    }, 3000);
+
+    return () => {
+      clearTimeout(teammateTargetTimerRef.current);
+      teammateTargetTimerRef.current = null;
+    };
+  }, [isCpuAssist, phase, teams.player, teams.opponent, roundTargets]);
 
   const confirmPlayerTargets = () => {
     if (livingOpponents.length === 0) {
@@ -483,36 +484,31 @@ useEffect(() => {
 
   const finishPlayerTurn = (fighterId) => {
     if (phase !== "fighting" || pendingDefense || pendingAllyAttack) return;
-  setTeams((current) => {
-    const player = current.player.find(
-      (fighter) => fighter.id === fighterId,
-    );
+    setTeams((current) => {
+      const player = current.player.find((fighter) => fighter.id === fighterId);
 
-    if (!player || player.health <= 0 || player.turnFinished) {
-      return current;
-    }
+      if (!player || player.health <= 0 || player.turnFinished) {
+        return current;
+      }
 
-    const updatedPlayers = current.player.map((fighter) =>
-      fighter.id === fighterId
-        ? { ...fighter, turnFinished: true }
-        : fighter,
-    );
+      const updatedPlayers = current.player.map((fighter) =>
+        fighter.id === fighterId ? { ...fighter, turnFinished: true } : fighter,
+      );
 
-    const allFinished = updatedPlayers.every(
-      (fighter) => fighter.health <= 0 || fighter.turnFinished,
-    );
+      const allFinished = updatedPlayers.every(
+        (fighter) => fighter.health <= 0 || fighter.turnFinished,
+      );
 
-    if (allFinished) {
-      setPhase("cpu-fighting");
-      addLog("Your team is finished. The CPU is preparing its attacks.");
-    } else {
-      addLog(`${player.name} finished their turn.`);
-    }
+      if (allFinished) {
+        setPhase("cpu-fighting");
+        addLog("Your team is finished. The CPU is preparing its attacks.");
+      } else {
+        addLog(`${player.name} finished their turn.`);
+      }
 
-    return { ...current, player: updatedPlayers };
-  });
-};
-
+      return { ...current, player: updatedPlayers };
+    });
+  };
 
   const useAttack = (fighterId, attackIndex, targetOverrideId = null) => {
     if (phase !== "fighting") return;
@@ -596,108 +592,113 @@ useEffect(() => {
     setAttacksUsed((value) => value + 1);
 
     const playersAfter = updatedPlayers.map((fighter) => {
-  if (fighter.health <= 0) {
-    return { ...fighter, turnFinished: true };
-  }
+      if (fighter.health <= 0) {
+        return { ...fighter, turnFinished: true };
+      }
 
-  const hasTarget = updatedOpponents.some(
-    (opponent) =>
-      opponent.id === roundTargets[fighter.id] && opponent.health > 0,
-  );
+      const hasTarget = updatedOpponents.some(
+        (opponent) =>
+          opponent.id === roundTargets[fighter.id] && opponent.health > 0,
+      );
 
-  if (!hasTarget) return { ...fighter, turnFinished: true };
+      if (!hasTarget) return { ...fighter, turnFinished: true };
 
-  // Preserve this fighter's own updated state. Only evaluate the teammate's
-  // remaining attacks when the teammate is the attacker.
-  if (fighter.id === attacker.id && fighter.isCpuTeammate) {
-    const attacksUsedThisTurn = attacker.attacks.filter(
-      (candidate) => candidate.state === false,
-    ).length;
+      // Preserve this fighter's own updated state. Only evaluate the teammate's
+      // remaining attacks when the teammate is the attacker.
+      if (fighter.id === attacker.id && fighter.isCpuTeammate) {
+        const attacksUsedThisTurn = attacker.attacks.filter(
+          (candidate) => candidate.state === false,
+        ).length;
 
-    const hasUsableAttack = attacker.attacks.some(
-      (candidate) =>
-        candidate.state === true &&
-        attacker.mana >= (candidate.cost ?? 0),
-    );
+        const hasUsableAttack = attacker.attacks.some(
+          (candidate) =>
+            candidate.state === true && attacker.mana >= (candidate.cost ?? 0),
+        );
 
-    return {
-      ...fighter,
-      attacks: attacker.attacks,
-      mana: attacker.mana,
-      health: attacker.health,
-      turnFinished:
-        !hasUsableAttack ||
-        (difficulty === "Easy" && attacksUsedThisTurn >= 1),
-    };
-  }
+        return {
+          ...fighter,
+          attacks: attacker.attacks,
+          mana: attacker.mana,
+          health: attacker.health,
+          turnFinished:
+            !hasUsableAttack ||
+            (difficulty === "Easy" && attacksUsedThisTurn >= 1),
+        };
+      }
 
-  // If this is the human attacker, save their own updated attacks/resources.
-  if (fighter.id === attacker.id) {
-    return {
-      ...fighter,
-      attacks: attacker.attacks,
-      mana: attacker.mana,
-      health: attacker.health,
-    };
-  }
+      // If this is the human attacker, save their own updated attacks/resources.
+      if (fighter.id === attacker.id) {
+        return {
+          ...fighter,
+          attacks: attacker.attacks,
+          mana: attacker.mana,
+          health: attacker.health,
+        };
+      }
 
-  return fighter;
-});
+      return fighter;
+    });
 
     setTeams({ player: playersAfter, opponent: updatedOpponents });
 
-   if (attacker.isCpuTeammate) {
-  const attacksUsedThisTurn = attacker.attacks.filter(
-    (candidate) => candidate.state === false,
-  ).length;
+    if (attacker.isCpuTeammate) {
+      const attacksUsedThisTurn = attacker.attacks.filter(
+        (candidate) => candidate.state === false,
+      ).length;
 
-  const assignedTargetId = roundTargets[attacker.id];
-  const assignedTargetAlive = updatedOpponents.some(
-    (opponent) =>
-      opponent.id === assignedTargetId && opponent.health > 0,
-  );
+      const assignedTargetId = roundTargets[attacker.id];
+      const assignedTargetAlive = updatedOpponents.some(
+        (opponent) => opponent.id === assignedTargetId && opponent.health > 0,
+      );
 
-  const nextAttackIndex = attacker.attacks.findIndex(
-    (candidate) =>
-      candidate.state === true &&
-      attacker.mana >= (candidate.cost ?? 0),
-  );
+      const nextAttackIndex = attacker.attacks.findIndex(
+        (candidate) =>
+          candidate.state === true && attacker.mana >= (candidate.cost ?? 0),
+      );
 
-  const canAttackAgain =
-    nextAttackIndex !== -1 &&
-    assignedTargetAlive &&
-    !(difficulty === "Easy" && attacksUsedThisTurn >= 1);
+      const canAttackAgain =
+        nextAttackIndex !== -1 &&
+        assignedTargetAlive &&
+        !(difficulty === "Easy" && attacksUsedThisTurn >= 1);
 
-  if (canAttackAgain) {
-    setPendingAllyAttack({
-      fighterId: attacker.id,
-      targetId: assignedTargetId,
-      attackIndex: nextAttackIndex,
-    });
-  } else {
-    setPendingAllyAttack(null);
+      if (canAttackAgain) {
+        setDefenseOutcome(null);
+        setAllyAttackOutcome(null);
+        setPendingAllyAttack({
+          fighterId: attacker.id,
+          targetId: assignedTargetId,
+          attackIndex: nextAttackIndex,
+        });
+      } else {
+        setPendingAllyAttack(null);
 
-    const finalPlayers = playersAfter.map((fighter) =>
-      fighter.id === attacker.id
-        ? { ...fighter, turnFinished: true }
-        : fighter,
-    );
+        const finalPlayers = playersAfter.map((fighter) =>
+          fighter.id === attacker.id
+            ? { ...fighter, turnFinished: true }
+            : fighter,
+        );
 
-    setTeams((current) => ({
-      ...current,
-      player: finalPlayers,
-    }));
+        setTeams((current) => ({
+          ...current,
+          player: finalPlayers,
+        }));
 
-    if (
-      finalPlayers.every(
-        (fighter) => fighter.health <= 0 || fighter.turnFinished,
-      )
-    ) {
-      setPhase("cpu-fighting");
+        if (
+          finalPlayers.every(
+            (fighter) => fighter.health <= 0 || fighter.turnFinished,
+          )
+        ) {
+          setPhase("cpu-fighting");
+        }
+      }
     }
-  }
-}
+    if (attacker.isCpuTeammate) {
+      const outcomeText = result.evaded
+        ? `${defender.name} evaded ${attack.name}.`
+        : `${attacker.name} used ${attack.name} on ${defender.name}.`;
 
+      setAllyAttackOutcome(outcomeText);
+    }
     addLog(`${attacker.name} used ${attack.name} on ${defender.name}.`);
 
     describeEffects(result.buffsApplied, attacker.name, "buff").forEach(
@@ -714,18 +715,18 @@ useEffect(() => {
       return;
     }
 
-  //   const allFinished = playersAfter.every(
-  //     (fighter) => fighter.health <= 0 || fighter.turnFinished,
-  //   );
+    //   const allFinished = playersAfter.every(
+    //     (fighter) => fighter.health <= 0 || fighter.turnFinished,
+    //   );
 
-  //   if (allFinished) {
-  //     setPhase("cpu-fighting");
-  //     addLog(
-  //       "Your team has no remaining actions. The CPU is preparing to attack.",
-  //     );
-  //   }
-  // };
-  }
+    //   if (allFinished) {
+    //     setPhase("cpu-fighting");
+    //     addLog(
+    //       "Your team has no remaining actions. The CPU is preparing to attack.",
+    //     );
+    //   }
+    // };
+  };
 
   const runCpuTeammateTurn = () => {
     if (!isCpuAssist || phase !== "fighting" || pendingAllyAttack) return;
@@ -764,6 +765,9 @@ useEffect(() => {
       return;
     }
 
+    setDefenseOutcome(null);
+
+    setAllyAttackOutcome(null);
     setPendingAllyAttack({
       fighterId: ally.id,
       targetId: target.id,
@@ -772,20 +776,20 @@ useEffect(() => {
   };
 
   useEffect(() => {
-  if (!pendingAllyAttack || phase !== "fighting") return;
+    if (!pendingAllyAttack || phase !== "fighting") return;
 
-  const attackToRun = pendingAllyAttack;
+    const attackToRun = pendingAllyAttack;
 
-  const timer = setTimeout(() => {
-    useAttack(
-      attackToRun.fighterId,
-      attackToRun.attackIndex,
-      attackToRun.targetId,
-    );
-  }, 2000);
+    const timer = setTimeout(() => {
+      useAttack(
+        attackToRun.fighterId,
+        attackToRun.attackIndex,
+        attackToRun.targetId,
+      );
+    }, 2000);
 
-  return () => clearTimeout(timer);
-}, [pendingAllyAttack, phase]);
+    return () => clearTimeout(timer);
+  }, [pendingAllyAttack, phase]);
 
   useEffect(() => {
     if (!isCpuAssist || phase !== "fighting" || pendingAllyAttack) return;
@@ -847,8 +851,8 @@ useEffect(() => {
         );
 
       usableAttacks.forEach(({ attackIndex }) => {
-  queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
-});
+        queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
+      });
     });
 
     if (queue.length === 0) {
@@ -894,7 +898,6 @@ useEffect(() => {
         addLog("Victory! The opposing team has been defeated.");
         return;
       }
-
 
       const resetFighters = (fighters) =>
         fighters.map((fighter) => ({
@@ -949,13 +952,13 @@ useEffect(() => {
     }
 
     defenseResolvedRef.current = false;
-setPendingDefense({
-  cpuId: cpu.id,
-  targetId: target.id,
-  attackIndex: action.attackIndex,
-});
-addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
-      
+    setDefenseOutcome(null);
+    setPendingDefense({
+      cpuId: cpu.id,
+      targetId: target.id,
+      attackIndex: action.attackIndex,
+    });
+    addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
   }, [
     phase,
     pendingDefense,
@@ -1000,6 +1003,17 @@ addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
       return;
     }
 
+    const defendingFighter = teams.player.find(
+      (fighter) => fighter.id === pendingDefense.targetId,
+    );
+
+    if (
+      (choice === "defend" || choice === "evade") &&
+      (!defendingFighter || (Number(defendingFighter.cooldown) || 0) <= 0)
+    ) {
+      return;
+    }
+
     const updatedPlayers = teams.player.map((fighter) => ({
       ...fighter,
       defense:
@@ -1039,8 +1053,11 @@ addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
 
     if (!attack || attack.state !== true) {
       defenseResolvedRef.current = true;
-      setPendingDefense(null);
-      setCpuActionIndex((index) => index + 1);
+      setTimeout(() => {
+        setDefenseOutcome(null);
+        setPendingDefense(null);
+        setCpuActionIndex((index) => index + 1);
+      }, 1000);
       return;
     }
 
@@ -1104,73 +1121,97 @@ addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
       ).forEach((message) => addLog(message, "debuff"));
     }
 
+    const outcomeText =
+      choice === "defend"
+        ? `${currentDefender.name} defended the attack.`
+        : choice === "evade"
+          ? result?.evaded
+            ? `${currentDefender.name} evaded the attack.`
+            : `${currentDefender.name} failed to evade and took damage.`
+          : `${currentDefender.name} took the full damage.`;
+
+    setDefenseOutcome(outcomeText);
+
     setTeams({ player: updatedPlayers, opponent: updatedCPU });
-    setPendingDefense(null);
-    setCpuActionIndex((index) => index + 1);
+
+    setTimeout(() => {
+      setDefenseOutcome(null);
+      setPendingDefense(null);
+      setCpuActionIndex((index) => index + 1);
+    }, 1000);
   };
 
   useEffect(() => {
-  if (!pendingDefense || phase !== "cpu-fighting") return;
+    if (!pendingDefense || phase !== "cpu-fighting") return;
 
-  const defender = teams.player.find(
-    (fighter) => fighter.id === pendingDefense.targetId,
-  );
-
-  // Human-controlled fighters keep using the defense buttons.
-  if (!defender?.isCpuTeammate) return;
-
-  const timer = setTimeout(() => {
-    const currentAttacker = teams.opponent.find(
-      (fighter) => fighter.id === pendingDefense.cpuId,
-    );
-    const currentDefender = teams.player.find(
+    const defender = teams.player.find(
       (fighter) => fighter.id === pendingDefense.targetId,
     );
-    const incomingAttack =
-      currentAttacker?.attacks[pendingDefense.attackIndex];
 
-    if (!currentAttacker || !currentDefender || !incomingAttack) {
-      resolveCPUDefense("timeout");
-      return;
-    }
+    // Human-controlled fighters keep using the defense buttons.
+    if (!defender?.isCpuTeammate) return;
 
-    // Use the same AI decision function used for normal-difficulty defense.
-    // If it returns a result, apply its updated fighter data below.
-    const result = aiDefendOrEvade(
-      incomingAttack,
-      currentAttacker,
-      currentDefender,
-    );
+    const timer = setTimeout(() => {
+      const currentAttacker = teams.opponent.find(
+        (fighter) => fighter.id === pendingDefense.cpuId,
+      );
+      const currentDefender = teams.player.find(
+        (fighter) => fighter.id === pendingDefense.targetId,
+      );
+      const incomingAttack =
+        currentAttacker?.attacks[pendingDefense.attackIndex];
 
-    if (result) {
-      defenseResolvedRef.current = true;
+      if (!currentAttacker || !currentDefender || !incomingAttack) {
+        resolveCPUDefense("timeout");
+        return;
+      }
 
-      const updatedPlayers = teams.player.map((fighter) =>
-        fighter.id === currentDefender.id
-          ? { ...fighter, ...(result.defender ?? {}) }
-          : fighter,
+      // Use the same AI decision function used for normal-difficulty defense.
+      // If it returns a result, apply its updated fighter data below.
+      const result = aiDefendOrEvade(
+        incomingAttack,
+        currentAttacker,
+        currentDefender,
       );
 
-      const updatedOpponents = teams.opponent.map((fighter) =>
-        fighter.id === currentAttacker.id
-          ? { ...fighter, ...(result.attacker ?? {}) }
-          : fighter,
-      );
+      if (result) {
+        defenseResolvedRef.current = true;
 
-      setTeams({ player: updatedPlayers, opponent: updatedOpponents });
-      setPendingDefense(null);
-      setCpuActionIndex((index) => index + 1);
+        const updatedPlayers = teams.player.map((fighter) =>
+          fighter.id === currentDefender.id
+            ? { ...fighter, ...(result.defender ?? {}) }
+            : fighter,
+        );
 
-      addLog(
-        `${currentDefender.name} automatically responded to ${incomingAttack.name}.`,
-      );
-    } else {
-      resolveCPUDefense("timeout");
-    }
-  }, 700);
+        const updatedOpponents = teams.opponent.map((fighter) =>
+          fighter.id === currentAttacker.id
+            ? { ...fighter, ...(result.attacker ?? {}) }
+            : fighter,
+        );
 
-  return () => clearTimeout(timer);
-}, [pendingDefense, phase, teams.player, teams.opponent]);
+        setTeams({ player: updatedPlayers, opponent: updatedOpponents });
+        const outcomeText = result.evaded
+          ? `${currentDefender.name} evaded the attack.`
+          : `${currentDefender.name} defended the attack.`;
+
+        setDefenseOutcome(outcomeText);
+
+        setTimeout(() => {
+          setDefenseOutcome(null);
+          setPendingDefense(null);
+          setCpuActionIndex((index) => index + 1);
+        }, 2000);
+
+        addLog(
+          `${currentDefender.name} automatically responded to ${incomingAttack.name}.`,
+        );
+      } else {
+        resolveCPUDefense("timeout");
+      }
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [pendingDefense, phase, teams.player, teams.opponent]);
 
   const resetBattle = () => {
     setTeams(createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist));
@@ -1409,9 +1450,17 @@ addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
                 </div>
 
                 <div className="ally-popup-attack-name">{attack.name}</div>
-                <div className="ally-popup-timer">
-                  <span />
-                </div>
+                {allyAttackOutcome && (
+                  <div className="ally-popup-outcome" role="status">
+                    {allyAttackOutcome}
+                  </div>
+                )}
+                <div
+  className="ally-popup-timer"
+  key={`${pendingAllyAttack.fighterId}-${pendingAllyAttack.attackIndex}`}
+>
+  <span />
+</div>
               </section>
             );
           })()}
@@ -1469,7 +1518,10 @@ addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
                 <button
                   type="button"
                   className="defend-button"
-                  disabled={defenseTimeLeft <= 0}
+                  disabled={
+                    defenseTimeLeft <= 0 ||
+                    (Number(pendingTarget?.cooldown) || 0) <= 0
+                  }
                   onClick={() => resolveCPUDefense("defend")}
                 >
                   🛡 DEFEND
@@ -1478,12 +1530,21 @@ addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
                 <button
                   type="button"
                   className="evade-button"
-                  disabled={defenseTimeLeft <= 0}
+                  disabled={
+                    defenseTimeLeft <= 0 ||
+                    (Number(pendingTarget?.cooldown) || 0) <= 0
+                  }
                   onClick={() => resolveCPUDefense("evade")}
                 >
                   💨 EVADE
                 </button>
               </div>
+
+              {defenseOutcome && (
+                <div className="incoming-outcome" role="status">
+                  {defenseOutcome}
+                </div>
+              )}
             </section>
           )}
       </section>
@@ -1508,14 +1569,14 @@ addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
           .filter((fighter) => !fighter.isCpuTeammate)
           .map((fighter) => (
             <TeamAttackOptions
-  key={fighter.id}
-  fighter={fighter}
-  isActive={fighter.id === activePlayerId}
-  phase={phase}
-  pendingAllyAttack={isCpuAssist && Boolean(pendingAllyAttack)}
-  onAttack={useAttack}
-  onFinishTurn={finishPlayerTurn}
-/>
+              key={fighter.id}
+              fighter={fighter}
+              isActive={fighter.id === activePlayerId}
+              phase={phase}
+              pendingAllyAttack={isCpuAssist && Boolean(pendingAllyAttack)}
+              onAttack={useAttack}
+              onFinishTurn={finishPlayerTurn}
+            />
           ))}
       </section>
     </main>
