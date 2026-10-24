@@ -1422,38 +1422,31 @@ button.fighter-card { width: 100%; cursor: pointer; }
 }
 
 /* Local co-op: show incoming attacks as independent stacked cards. */
-.local-coop-incoming {
-  left: 50%;
+battlefield > .local-coop-incoming {
   width: min(330px, 38%);
   max-height: 46%;
 }
 
+.battlefield > .local-coop-incoming.is-first {
+  top: 24px;
+  bottom: auto;
+  transform: translateX(-50%);
+}
 
-
-.local-coop-incoming.is-second {
+.battlefield > .local-coop-incoming.is-second {
   top: auto;
-  bottom: 8px;
+  bottom: 24px;
   transform: translateX(-50%);
 }
 
 @media (max-width: 620px) {
-  .local-coop-incoming {
+  .battlefield > .local-coop-incoming {
     width: min(330px, 88%);
     max-height: 46%;
   }
-
-  .local-coop-incoming.is-first {
-    top: 24px;
-    bottom: auto;
-    transform: translateX(-50%);
-  }
-
-  .local-coop-incoming.is-second {
-    top: auto;
-    bottom: 8px;
-    transform: translateX(-50%);
-  }
 }
+
+ 
 
 .player-attack-popup {
   position: absolute;
@@ -1499,3 +1492,42 @@ button.fighter-card { width: 100%; cursor: pointer; }
   bottom: 24px !important;
   transform: translateX(-50%) !important;
 }
+
+.take-damage-button {
+  flex: 1 1 100%;
+  min-height: 38px;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ff6b78;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7f2637, #4b1828);
+  color: #fff;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.take-damage-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #ff9aa3;
+  background: linear-gradient(135deg, #a83248, #681f35);
+  box-shadow: 0 0 14px rgb(255 70 100 / 30%);
+}
+
+.take-damage-button:focus-visible {
+  outline: 2px solid #ffd1d6;
+  outline-offset: 2px;
+}
+
+.take-damage-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+

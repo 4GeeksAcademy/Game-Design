@@ -214,6 +214,9 @@ export default function TeamBattle() {
     teamControl = "single-player",
     difficulty = "Normal",
   } = location.state ?? {};
+
+  const resolveLocalCoopDefenseRef = useRef(() => {});
+
   const [playerAttackPopup, setPlayerAttackPopup] = useState(null);
   const [localCoopDefenses, setLocalCoopDefenses] = useState([]);
   const [localCoopDefenseTimers, setLocalCoopDefenseTimers] = useState({});
@@ -280,15 +283,18 @@ export default function TeamBattle() {
   const [attacksUsed, setAttacksUsed] = useState(0);
 
   const defenseResolvedRef = useRef(false);
+  const resolveCPUDefenseRef = useRef(() => {});
 
   useEffect(() => {
     if (!combatPopups.length) return undefined;
 
-    popupTimerRef.current = setTimeout(() => {
-      setCombatPopups((current) => current.slice(3));
+    const displayedCount = Math.min(combatPopups.length, 3);
+
+    const timer = setTimeout(() => {
+      setCombatPopups((current) => current.slice(displayedCount));
     }, 2800);
 
-    return () => clearTimeout(popupTimerRef.current);
+    return () => clearTimeout(timer);
   }, [combatPopups]);
 
   const hasValidTeams =
@@ -463,26 +469,14 @@ export default function TeamBattle() {
 
     const newCpuTargets = {};
 
-    if (isLocalCoop) {
-      // Each CPU picks a living player independently; both may pick the same one.
-      for (const cpu of livingOpponents) {
-        const targets = teams.player.filter((player) => player.health > 0);
-        if (targets.length) {
-          newCpuTargets[cpu.id] =
-            targets[Math.floor(Math.random() * targets.length)].id;
-        }
-      }
-    } else {
-      // Preserve the existing distinct-target behavior for other modes.
-      const availablePlayers = [...livingPlayers];
+    const availablePlayers = [...livingPlayers].sort(() => Math.random() - 0.5);
 
-      [...livingOpponents]
-        .sort(() => Math.random() - 0.5)
-        .forEach((cpu) => {
-          if (!availablePlayers.length) return;
-          const index = Math.floor(Math.random() * availablePlayers.length);
-          newCpuTargets[cpu.id] = availablePlayers.splice(index, 1)[0].id;
-        });
+    for (const cpu of [...livingOpponents].sort(() => Math.random() - 0.5)) {
+      const target = availablePlayers.shift();
+
+      if (!target) break; // No unassigned living player; this CPU skips.
+
+      newCpuTargets[cpu.id] = target.id;
     }
 
     setTeams((current) => ({ ...current, player: playersWithTargets }));
@@ -767,6 +761,39 @@ export default function TeamBattle() {
     // };
   };
 
+  useEffect(() => {
+    if (phase !== "fighting" || pendingAllyAttack) return;
+
+    const playersAfter = teams.player.map((player) => {
+      const targetId = roundTargets[player.id];
+      const targetAlive = teams.opponent.some(
+        (opponent) => opponent.id === targetId && opponent.health > 0,
+      );
+
+      return !targetAlive && !player.turnFinished
+        ? { ...player, turnFinished: true }
+        : player;
+    });
+
+    const changed = playersAfter.some(
+      (player, index) =>
+        player.turnFinished !== teams.player[index].turnFinished,
+    );
+
+    if (!changed) return;
+
+    setTeams((current) => ({ ...current, player: playersAfter }));
+
+    if (
+      playersAfter.every((player) => player.health <= 0 || player.turnFinished)
+    ) {
+      setPhase("cpu-fighting");
+      addLog(
+        "Your team has no remaining targets. The CPU is preparing its attacks.",
+      );
+    }
+  }, [phase, pendingAllyAttack, teams.player, teams.opponent, roundTargets]);
+
   const runCpuTeammateTurn = () => {
     if (!isCpuAssist || phase !== "fighting" || pendingAllyAttack) return;
 
@@ -870,54 +897,55 @@ export default function TeamBattle() {
       phase !== "cpu-fighting" ||
       pendingDefense ||
       cpuActionQueue !== null ||
-      localCoopDefenses.length > 0
+      localCoopDefenses.length > 0 
     ) {
       return;
     }
-
     if (isLocalCoop) {
-  const batch = [];
+      const batch = [];
 
-  teams.opponent.forEach((cpu) => {
-    if (cpu.health <= 0) return;
+      teams.opponent.forEach((cpu) => {
+        if (cpu.health <= 0) return;
 
-    const targetId = cpuTargets[cpu.id];
-    const target = teams.player.find(
-      (player) => player.id === targetId && player.health > 0,
-    );
-    if (!target) return;
+        const targetId = cpuTargets[cpu.id];
+        const target = teams.player.find(
+          (player) => player.id === targetId && player.health > 0,
+        );
+        if (!target) return;
 
-    cpu.attacks.forEach((attack, attackIndex) => {
-      if (attack.state !== true || cpu.mana < (attack.cost ?? 0)) return;
+        const attackIndex = cpu.attacks.findIndex(
+          (attack) => attack.state === true && cpu.mana >= (attack.cost ?? 0),
+        );
 
-      batch.push({
-        id: `${cpu.id}-${target.id}-${attackIndex}-${roundNumber}`,
-        cpuId: cpu.id,
-        targetId: target.id,
-        attackIndex,
-        visible: false,
-        timeLeft: 10,
-        outcome: "",
+        if (attackIndex !== -1) {
+          batch.push({
+            id: `${roundNumber}-${cpu.id}-${attackIndex}`,
+            targetId: target.id,
+            cpuId: cpu.id,
+            attackIndex,
+            visible: false,
+            timeLeft: 10,
+            outcome: "",
+          });
+        }
       });
-    });
-  });
 
-  if (batch.length) {
-    localCoopResolvedRef.current = new Set();
-    setLocalCoopDefenses(batch);
-    setLocalCoopDefenseTimers({});
-    setCpuQueueReady(true);
-    addLog("The CPU team is preparing its attacks.");
-  } else {
-    setCpuActionQueue([]);
-    setCpuActionIndex(0);
-    setCpuQueueReady(true);
-  }
+      if (batch.length) {
+        localCoopResolvedRef.current = new Set();
+        setLocalCoopDefenses(batch);
+        setCpuQueueReady(true);
+        setCombatMessage("The CPU team is preparing its attacks.");
+      } else {
+        setLocalCoopDefenses([]);
+        setCpuActionQueue([]);
+        setCpuActionIndex(0);
+        setCpuQueueReady(true);
+      }
 
-  return;
-}
+      return;
+    }
 
-    const limit = Math.max(1, Number(cpuAttacksPerTurn) || 1);
+    const limit = Number.POSITIVE_INFINITY;
     const queue = [];
 
     teams.opponent.forEach((cpu) => {
@@ -934,7 +962,8 @@ export default function TeamBattle() {
         .filter(
           ({ attack }) =>
             attack.state === true && cpu.mana >= (attack.cost ?? 0),
-        );
+        )
+        .slice(0, limit);
 
       usableAttacks.forEach(({ attackIndex }) => {
         queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
@@ -1062,22 +1091,21 @@ export default function TeamBattle() {
       return undefined;
     }
 
-    let remaining = 10;
-    setDefenseTimeLeft(remaining);
+    setDefenseTimeLeft(10);
 
-    const timer = setInterval(() => {
-      remaining -= 1;
-      setDefenseTimeLeft(Math.max(0, remaining));
+    const timeout = setTimeout(() => {
+      setDefenseTimeLeft(0);
+      resolveCPUDefenseRef.current("timeout");
+    }, 10_000);
 
-      if (remaining <= 0) {
-        clearInterval(timer);
-        resolveCPUDefense("timeout");
-      }
-    }, 1000);
+    const interval = setInterval(() => {
+      setDefenseTimeLeft((time) => Math.max(0, time - 1));
+    }, 1_000);
 
-    return () => clearInterval(timer);
-    // resolveCPUDefense uses the current pending action and teams.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [pendingDefense, phase]);
 
   useEffect(() => {
@@ -1113,26 +1141,38 @@ export default function TeamBattle() {
     if (phase !== "cpu-fighting" || !isLocalCoop) return;
 
     const interval = setInterval(() => {
+      const expiredIds = [];
+
       setLocalCoopDefenses((current) =>
         current.map((defense) => {
-          if (!defense.visible || defense.outcome) return defense;
-
-          const nextTime = Math.max(0, defense.timeLeft - 1);
-          if (nextTime === 0 && !localCoopResolvedRef.current.has(defense.id)) {
-            localCoopTimeoutsRef.current.push(
-              setTimeout(
-                () => resolveLocalCoopDefense(defense.id, "timeout"),
-                0,
-              ),
-            );
+          if (!defense.visible || defense.outcome) {
+            return defense;
           }
-          return { ...defense, timeLeft: nextTime };
+
+          if (defense.timeLeft <= 1) {
+            if (!localCoopResolvedRef.current.has(defense.id)) {
+              expiredIds.push(defense.id);
+            }
+            return { ...defense, timeLeft: 0 };
+          }
+
+          const timeLeft = defense.timeLeft - 1;
+
+          if (timeLeft === 0 && !localCoopResolvedRef.current.has(defense.id)) {
+            expiredIds.push(defense.id);
+          }
+
+          return { ...defense, timeLeft };
         }),
       );
+
+      expiredIds.forEach((id) => {
+        setTimeout(() => resolveLocalCoopDefenseRef.current(id, "timeout"), 0);
+      });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [phase, isLocalCoop, localCoopDefenses]);
+  }, [phase, isLocalCoop]);
 
   const resolveLocalCoopDefense = (defenseId, choice) => {
     const incoming = localCoopDefenses.find((item) => item.id === defenseId);
@@ -1148,10 +1188,7 @@ export default function TeamBattle() {
 
     if (!attacker || !defender || !attack) return;
 
-    if (
-      (choice === "defend" || choice === "evade") &&
-      (Number(defender.cooldown) || 0) <= 0
-    ) {
+    if (choice === "defend" && (Number(defender.cooldown) || 0) <= 0) {
       return;
     }
 
@@ -1218,14 +1255,13 @@ export default function TeamBattle() {
     }
 
     const outcome =
-  choice === "defend"
-    ? `${currentDefender.name} defended ${currentAttacker.name}'s ${currentAttack.name}.`
-    : choice === "evade"
-      ? result?.evaded
-        ? `${currentDefender.name} evaded ${currentAttack.name}.`
-        : `${currentDefender.name} failed to evade ${currentAttack.name}.`
-      : `Time ran out. ${currentAttack.name} hit ${currentDefender.name}.`;
-
+      choice === "defend"
+        ? `${currentDefender.name} defended ${currentAttacker.name}'s ${currentAttack.name}.`
+        : choice === "evade"
+          ? result?.evaded
+            ? `${currentDefender.name} evaded ${currentAttack.name}.`
+            : `${currentDefender.name} failed to evade ${currentAttack.name}.`
+          : `Time ran out. ${currentAttack.name} hit ${currentDefender.name}.`;
 
     setTeams({ player: updatedPlayers, opponent: updatedCPU });
     setLocalCoopDefenses((current) =>
@@ -1240,51 +1276,63 @@ export default function TeamBattle() {
       setLocalCoopDefenses((current) => {
         const remaining = current.filter((item) => item.id !== defenseId);
 
-        if (remaining.length === 0) {
-          if (updatedPlayers.every((fighter) => fighter.health <= 0)) {
-            setPhase("defeat");
-          } else if (updatedCPU.every((fighter) => fighter.health <= 0)) {
-            setPhase("victory");
-          } else {
-            setCpuQueueReady(false);
-            setCpuTargets({});
-            setCpuActionQueue(null);
-            setCpuActionIndex(0);
+        if (remaining.length > 0) return remaining;
 
-            const resetFighters = (fighters) =>
-              fighters.map((fighter) => ({
-                ...fighter,
-                mana:
-                  fighter.health > 0
-                    ? Math.min(
-                        fighter.maximumMana ?? fighter.mana,
-                        fighter.mana + (fighter.manaRegen ?? 0),
-                      )
-                    : fighter.mana,
-                turnFinished: false,
-                blocked: false,
-                attacks: fighter.attacks.map((item) => ({
-                  ...item,
-                  state: true,
-                  buff: item.buff ? { ...item.buff } : item.buff,
-                  debuff: item.debuff ? { ...item.debuff } : item.debuff,
-                })),
-              }));
+        // Clear local-co-op batch state before advancing.
+        localCoopResolvedRef.current.clear();
+        localCoopTimeoutsRef.current.forEach(clearTimeout);
+        localCoopTimeoutsRef.current = [];
 
-            setTeams({
-              player: resetFighters(updatedPlayers),
-              opponent: resetFighters(updatedCPU),
-            });
-            setRoundTargets({});
-            setRoundNumber((round) => round + 1);
-            setPhase("selecting");
-            addLog("A new round begins. Choose your targets.");
-          }
+        if (updatedPlayers.every((fighter) => fighter.health <= 0)) {
+          setPhase("defeat");
+          return [];
         }
-        return remaining;
+
+        if (updatedCPU.every((fighter) => fighter.health <= 0)) {
+          setPhase("victory");
+          return [];
+        }
+
+        const resetFighters = (fighters) =>
+          fighters.map((fighter) => ({
+            ...fighter,
+            mana:
+              fighter.health > 0
+                ? Math.min(
+                    fighter.maximumMana ?? fighter.mana,
+                    fighter.mana + (fighter.manaRegen ?? 0),
+                  )
+                : fighter.mana,
+            turnFinished: false,
+            blocked: false,
+            attacks: fighter.attacks.map((item) => ({
+              ...item,
+              state: true,
+              buff: item.buff ? { ...item.buff } : item.buff,
+              debuff: item.debuff ? { ...item.debuff } : item.debuff,
+            })),
+          }));
+
+        setTeams({
+          player: resetFighters(updatedPlayers),
+          opponent: resetFighters(updatedCPU),
+        });
+
+        setRoundTargets({});
+        setCpuTargets({});
+        setCpuActionQueue(null);
+        setCpuActionIndex(0);
+        setCpuQueueReady(false);
+        setRoundNumber((round) => round + 1);
+        setPhase("selecting");
+        addLog("A new round begins. Choose your targets.");
+
+        return [];
       });
     }, 1000);
   };
+
+  resolveLocalCoopDefenseRef.current = resolveLocalCoopDefense;
 
   const resolveCPUDefense = (choice) => {
     if (
@@ -1300,7 +1348,7 @@ export default function TeamBattle() {
     );
 
     if (
-      (choice === "defend" || choice === "evade") &&
+      choice === "defend" &&
       (!defendingFighter || (Number(defendingFighter.cooldown) || 0) <= 0)
     ) {
       return;
@@ -1396,8 +1444,10 @@ export default function TeamBattle() {
             ? `${currentDefender.name} evaded ${attack.name}.`
             : `${currentDefender.name} failed to evade ${attack.name}.`,
         );
-      } else {
+      } else if (choice === "timeout") {
         addLog(`Time ran out. ${attack.name} hit ${currentDefender.name}.`);
+      } else {
+        addLog(`${currentDefender.name} chose to take the full damage.`);
       }
 
       describeEffects(
@@ -1504,6 +1554,8 @@ export default function TeamBattle() {
 
     return () => clearTimeout(timer);
   }, [pendingDefense, phase, teams.player, teams.opponent]);
+
+  resolveCPUDefenseRef.current = resolveCPUDefense;
 
   const resetBattle = () => {
     setTeams(createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist));
@@ -1760,58 +1812,34 @@ export default function TeamBattle() {
         {isLocalCoop &&
           localCoopDefenses
             .filter((defense) => defense.visible)
+            .slice(0, 2)
             .map((defense, index) => {
-              const attacker = teams.opponent.find(
-                (fighter) => fighter.id === defense.cpuId,
-              );
               const target = teams.player.find(
                 (fighter) => fighter.id === defense.targetId,
               );
+              const attacker = teams.opponent.find(
+                (fighter) => fighter.id === defense.cpuId,
+              );
               const attack = attacker?.attacks[defense.attackIndex];
 
-              if (!attacker || !target || !attack) return null;
+              if (!target || !attacker || !attack) return null;
 
               return (
                 <section
                   key={defense.id}
                   className={`incoming-attack local-coop-incoming ${
-                    index === 0 ? "is-first" : "is-second"
+                    index % 2 === 0 ? "is-first" : "is-second"
                   }`}
-                  aria-live="assertive"
                 >
                   <div className="incoming-topline">
                     <span>⚠ INCOMING ATTACK</span>
-                    <span
-                      className={defense.timeLeft <= 3 ? "timer-urgent" : ""}
-                    >
-                      {defense.timeLeft}s
-                    </span>
+                    <span>{defense.timeLeft}s</span>
                   </div>
 
                   <div className="incoming-matchup">
-                    <div className="incoming-fighter">
-                      {attacker.image && (
-                        <img
-                          className="incoming-portrait"
-                          src={attacker.image}
-                          alt=""
-                        />
-                      )}
-                      <strong>{attacker.name}</strong>
-                      <small>ATTACKER</small>
-                    </div>
-                    <span className="incoming-arrow">➜</span>
-                    <div className="incoming-fighter">
-                      {target.image && (
-                        <img
-                          className="incoming-portrait"
-                          src={target.image}
-                          alt=""
-                        />
-                      )}
-                      <strong>{target.name}</strong>
-                      <small>TARGET</small>
-                    </div>
+                    <strong>{attacker.name}</strong>
+                    <span>→</span>
+                    <strong>{target.name}</strong>
                   </div>
 
                   <h3>{attack.name}</h3>
@@ -1839,15 +1867,26 @@ export default function TeamBattle() {
                       type="button"
                       className="evade-button"
                       disabled={
-                        defense.timeLeft <= 0 ||
-                        (Number(target.cooldown) || 0) <= 0 ||
-                        Boolean(defense.outcome)
+                        defense.timeLeft <= 0 || Boolean(defense.outcome)
                       }
                       onClick={() =>
                         resolveLocalCoopDefense(defense.id, "evade")
                       }
                     >
                       💨 EVADE
+                    </button>
+
+                    <button
+                      type="button"
+                      className="take-damage-button"
+                      disabled={
+                        defense.timeLeft <= 0 || Boolean(defense.outcome)
+                      }
+                      onClick={() =>
+                        resolveLocalCoopDefense(defense.id, "take-damage")
+                      }
+                    >
+                      Take full damage
                     </button>
                   </div>
 
@@ -1866,11 +1905,11 @@ export default function TeamBattle() {
           pendingTarget &&
           pendingAttack && (
             <section
-  className={`incoming-attack ${
-    isLocalCoop ? "local-coop-incoming is-first" : ""
-  }`}
-  aria-live="assertive"
->
+              className={`incoming-attack ${
+                isLocalCoop ? "local-coop-incoming is-first" : ""
+              }`}
+              aria-live="assertive"
+            >
               <div className="incoming-topline">
                 <span>⚠ INCOMING ATTACK</span>
                 <span className={defenseTimeLeft <= 3 ? "timer-urgent" : ""}>
@@ -1931,13 +1970,19 @@ export default function TeamBattle() {
                 <button
                   type="button"
                   className="evade-button"
-                  disabled={
-                    defenseTimeLeft <= 0 ||
-                    (Number(pendingTarget?.cooldown) || 0) <= 0
-                  }
+                  disabled={defenseTimeLeft <= 0 || Boolean(defenseOutcome)}
                   onClick={() => resolveCPUDefense("evade")}
                 >
                   💨 EVADE
+                </button>
+
+                <button
+                  type="button"
+                  className="take-damage-button"
+                  disabled={defenseTimeLeft <= 0 || Boolean(defenseOutcome)}
+                  onClick={() => resolveCPUDefense("take-damage")}
+                >
+                  Take full damage
                 </button>
               </div>
 
