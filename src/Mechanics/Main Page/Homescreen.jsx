@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCoins } from "../Currency";
+import {
+  ATTACK_SLOT_COUNT,
+  DEFAULT_KEYBINDS,
+  actionLabel,
+  findKeybindConflict,
+  getKeybindLabel,
+  isReservedKey,
+  loadKeybinds,
+  normalizeKey,
+  saveKeybinds,
+} from "./keybinds.js";
 import "./Homescreen.css";
 
 
@@ -11,6 +22,66 @@ function Homescreen() {
   const menu = menuHistory[menuHistory.length - 1];
   const [teamSize, setTeamSize] = useState("1v1");
   const [difficulty, setDifficulty] = useState("Normal");
+
+  const [keybinds, setKeybinds] = useState(() => loadKeybinds());
+const [listeningFor, setListeningFor] = useState(null);
+const [keybindMessage, setKeybindMessage] = useState("");
+
+const resetKeybinds = () => {
+  const defaults = JSON.parse(JSON.stringify(DEFAULT_KEYBINDS));
+  setKeybinds(defaults);
+  saveKeybinds(defaults);
+  setListeningFor(null);
+  setKeybindMessage("Default keybinds restored.");
+};
+
+const handleKeybindCapture = (event) => {
+  if (!listeningFor) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (isReservedKey(event)) {
+    setKeybindMessage("That key is reserved. Choose another key.");
+    return;
+  }
+
+  const key = normalizeKey(event.key);
+  if (!key) return;
+
+  const conflict = findKeybindConflict(keybinds, key, listeningFor);
+
+  if (conflict) {
+    const playerName =
+      conflict.playerId === "player1" ? "Player 1" : "Player 2";
+
+    setKeybindMessage(
+      `${getKeybindLabel(key)} is already assigned to ${playerName} ${conflict.label}.`,
+    );
+    return;
+  }
+
+  const [playerId, action, slot] = listeningFor.split(".");
+  const updated = JSON.parse(JSON.stringify(keybinds));
+
+  if (action === "attack") {
+    updated[playerId].attacks[Number(slot)] = key;
+  } else {
+    updated[playerId][action] = key;
+  }
+
+  setKeybinds(updated);
+  saveKeybinds(updated);
+  setListeningFor(null);
+  setKeybindMessage("");
+};
+
+useEffect(() => {
+  if (!listeningFor) return undefined;
+
+  window.addEventListener("keydown", handleKeybindCapture);
+  return () => window.removeEventListener("keydown", handleKeybindCapture);
+}, [listeningFor, keybinds]);
 
   const openMenu = (nextMenu) => {
     setMenuHistory((history) => [...history, nextMenu]);
@@ -51,6 +122,104 @@ function Homescreen() {
       window.removeEventListener("coinsUpdated", updateCoins);
     };
   }, []);
+
+  const renderSettings = () => {
+  const players = [
+    ["player1", "PLAYER 1"],
+    ["player2", "PLAYER 2"],
+  ];
+
+  const renderBindingButton = (playerId, actionId, key) => {
+    const listening = listeningFor === actionId;
+
+    return (
+      <button
+        key={actionId}
+        type="button"
+        className="keybind-button"
+        onClick={() => {
+          setListeningFor(actionId);
+          setKeybindMessage("Press a key. Escape cancels.");
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            setListeningFor(null);
+            setKeybindMessage("");
+          }
+        }}
+      >
+        {listening ? "PRESS A KEY…" : getKeybindLabel(key)}
+      </button>
+    );
+  };
+
+  return (
+    <>
+      <p className="home-eyebrow">CUSTOMIZE CONTROLS</p>
+      <h2 className="menu-title">KEYBINDS</h2>
+      <p className="menu-description">
+        Select a binding, then press the key you want. Keys must be unique
+        across both players.
+      </p>
+
+      <div className="keybind-player-grid">
+        {players.map(([playerId, title]) => (
+          <section className="keybind-player" key={playerId}>
+            <h3>{title}</h3>
+
+            {Array.from({ length: ATTACK_SLOT_COUNT }, (_, index) => (
+              <div className="keybind-row" key={`${playerId}.attack.${index}`}>
+                <span>Attack {index + 1}</span>
+                {renderBindingButton(
+                  playerId,
+                  `${playerId}.attack.${index}`,
+                  keybinds[playerId].attacks[index],
+                )}
+              </div>
+            ))}
+
+            {[
+              ["finishTurn", "Finish turn"],
+              ["defend", "Defend"],
+              ["evade", "Evade"],
+              ["takeDamage", "Take full damage"],
+            ].map(([action, label]) => (
+              <div className="keybind-row" key={`${playerId}.${action}`}>
+                <span>{label}</span>
+                {renderBindingButton(
+                  playerId,
+                  `${playerId}.${action}`,
+                  keybinds[playerId][action],
+                )}
+              </div>
+            ))}
+          </section>
+        ))}
+      </div>
+
+      {keybindMessage && (
+        <p className="keybind-message" role="status">
+          {keybindMessage}
+        </p>
+      )}
+
+      <div className="settings-actions">
+        <button
+          type="button"
+          className="arcade-button"
+          onClick={resetKeybinds}
+        >
+          RESTORE DEFAULTS
+        </button>
+
+        <button type="button" className="back-button" onClick={goBack}>
+          ← BACK
+        </button>
+      </div>
+    </>
+  );
+};
 
   const renderTeamControl = () => {
   const options = [
@@ -358,10 +527,7 @@ function Homescreen() {
       case "difficulty":
         return renderDifficulty();
       case "settings":
-        return renderPlaceholder(
-          "SETTINGS",
-          "Game settings will be available here.",
-        );
+  return renderSettings();
       case "howToPlay":
         return renderPlaceholder(
           "HOW TO PLAY",

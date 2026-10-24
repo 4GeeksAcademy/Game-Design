@@ -19,9 +19,10 @@ import Ichigo from "./All_Character_Stats/IchigoStats.js";
 import Naruto from "./All_Character_Stats/NarutoStats.js";
 import Yoruichi from "./All_Character_Stats/YoruichiStats.js";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
-import { aiTurn } from "./AI.js";
+import { aiDefendOrEvade, aiTurn } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
+import useKeybinds from "./Main Page/useKeybinds.js";
 import React, { useState, useEffect, useRef } from "react";
 
 function App() {
@@ -317,6 +318,106 @@ function App() {
     setCombatLog((log) => [...log, message]);
   }
 
+
+
+
+  const useAttackSlot = (index) => {
+  const attack = character.attacks[index];
+
+  if (!attack || currentTurn !== "player" || !attack.state) return;
+
+  const result = aiDefendOrEvade(attack, character, opponent);
+
+  if (!result) {
+    showCombatMessage("Not enough mana!", "hit");
+    return;
+  }
+
+  setCharacter({ ...result.attacker });
+  setOpponent({ ...result.defender });
+
+  const damage = result.damageReceived ?? 0;
+  if (damage > 0) setDamageDealt((previous) => previous + damage);
+
+  setAttacksUsed((previous) => previous + 1);
+  showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
+
+  if (result.action === "defend") {
+    showCombatMessage(`${opponent.name} blocked ${attack.name}!`, "blocked");
+  } else if (result.action === "evade") {
+    showCombatMessage(`${opponent.name} evaded ${attack.name}!`, "evaded");
+  } else if (result.action === "attack" && result.evaded === false) {
+    showCombatMessage("💥 FAILED TO EVADE!", "hit");
+  } else if (damage > 0) {
+    showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
+  }
+
+  Object.entries(result.buffsApplied ?? {}).forEach(([stat, amount]) => {
+    if (typeof amount === "number" && amount !== 0) {
+      showCombatMessage(
+        `✨ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
+        "buff",
+      );
+    }
+  });
+
+  Object.entries(result.debuffsApplied ?? {}).forEach(([stat, amount]) => {
+    if (typeof amount === "number" && amount !== 0) {
+      showCombatMessage(
+        `💀 ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
+        "debuff",
+      );
+    }
+  });
+};
+
+const resolveIncomingAttack = (choice) => {
+  if (!aiAttack || defenseTimeLeft <= 0) return;
+
+  if (choice === "defend" && character.cooldown <= 0) return;
+
+  const result =
+    choice === "defend"
+      ? attackCharacter(
+          aiAttack,
+          opponent,
+          character,
+          character.defense.amount,
+        )
+      : choice === "evade"
+        ? evadeAttack(aiAttack, opponent, character)
+        : attackCharacter(aiAttack, opponent, character);
+
+  if (!result) return;
+
+  if (choice === "defend" || choice === "evade") {
+    character.cooldown -= 1;
+    character.blocked = true;
+  }
+
+  setOpponent({ ...result.attacker });
+  setCharacter({ ...result.defender });
+
+  if (choice === "defend") {
+    showCombatMessage("🛡️ BLOCKED!", "blocked");
+  } else if (choice === "evade") {
+    showCombatMessage(
+      result.evaded ? "💨 EVADED!" : "💥 FAILED TO EVADE!",
+      result.evaded ? "evaded" : "hit",
+    );
+  } else {
+    showCombatMessage("You took the full damage!", "hit");
+  }
+
+  if (aiControllerRef.current) {
+    aiControllerRef.current.respondToDefense();
+  } else {
+    setAiAttack(null);
+  }
+};
+
+
+
   return (
     <div className="container-fluid mt-3" id="gameContainer">
       {/* Full-screen round announcement */}
@@ -579,6 +680,7 @@ function App() {
               setAttacksUsed={setAttacksUsed}
               currentTurn={currentTurn}
               showCombatMessage={showCombatMessage}
+              onAttackSlot={useAttackSlot}
             />
           </div>
         </>

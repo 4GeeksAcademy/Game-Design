@@ -438,7 +438,7 @@ const opponentTeamIds = cpuIndices.map(
 
 const playerTeamIds = selectedPlayerIds;
 
-    navigate("/team-battle", {
+    navigate(teamSize === "1v1" ? "/battle" : "/team-battle", {
   state: {
     playerId: playerTeamIds[0],
     opponentId: opponentTeamIds[0],

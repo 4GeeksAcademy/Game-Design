@@ -1,5 +1,6 @@
-import React from "react";
+import React, {useEffect, useCallback } from "react";
 import { aiDefendOrEvade } from "./AI.js";
+import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import "./BattleUI.css";
 
 function AttackEffects({ attack }) {
@@ -14,6 +15,8 @@ function AttackEffects({ attack }) {
   if (buffs.length === 0 && debuffs.length === 0) {
     return null;
   }
+
+  
 
   return (
     <div className="attack-effects-popup">
@@ -36,9 +39,7 @@ function AttackEffects({ attack }) {
 
       {debuffs.length > 0 && (
         <div className="attack-effect-group">
-          <span className="attack-effect-heading debuff-heading">
-            DEBUFFS
-          </span>
+          <span className="attack-effect-heading debuff-heading">DEBUFFS</span>
 
           <div className="attack-effect-list">
             {debuffs.map(([stat, amount]) => (
@@ -54,6 +55,7 @@ function AttackEffects({ attack }) {
   );
 }
 
+
 function AttackOptions({
   character,
   opponent,
@@ -64,6 +66,89 @@ function AttackOptions({
   currentTurn,
   showCombatMessage,
 }) {
+  const handleAttack = useCallback(
+    (index) => {
+      const attack = character.attacks[index];
+
+      if (!attack || currentTurn !== "player" || !attack.state) return;
+
+      const result = aiDefendOrEvade(attack, character, opponent);
+
+      if (!result) {
+        showCombatMessage("Not enough mana!", "hit");
+        return;
+      }
+
+      setCharacter({ ...result.attacker });
+      setOpponent({ ...result.defender });
+
+      const damage = result.damageReceived ?? 0;
+      if (damage > 0) setDamageDealt((previous) => previous + damage);
+
+      setAttacksUsed((previous) => previous + 1);
+      showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
+
+      if (result.action === "defend") {
+        showCombatMessage(`${opponent.name} blocked ${attack.name}!`, "blocked");
+      } else if (result.action === "evade") {
+        showCombatMessage(`${opponent.name} evaded ${attack.name}!`, "evaded");
+      } else if (result.action === "attack" && result.evaded === false) {
+        showCombatMessage("💥 FAILED TO EVADE!", "hit");
+      } else if (damage > 0) {
+        showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
+      }
+
+      Object.entries(result.buffsApplied ?? {}).forEach(([stat, amount]) => {
+        if (typeof amount === "number" && amount !== 0) {
+          showCombatMessage(
+            `✨ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
+            "buff",
+          );
+        }
+      });
+
+      Object.entries(result.debuffsApplied ?? {}).forEach(([stat, amount]) => {
+        if (typeof amount === "number" && amount !== 0) {
+          showCombatMessage(
+            `💀 ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
+            "debuff",
+          );
+        }
+      });
+    },
+    [
+      character,
+      currentTurn,
+      opponent,
+      setCharacter,
+      setOpponent,
+      setDamageDealt,
+      setAttacksUsed,
+      showCombatMessage,
+    ],
+  );
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (currentTurn !== "player") return;
+
+      const key = normalizeKey(event.key);
+      const player1Binds = loadKeybinds().player1;
+
+      const index = player1Binds.attacks.findIndex(
+        (boundKey) => normalizeKey(boundKey) === key,
+      );
+
+      if (index === -1 || !character.attacks[index]?.state) return;
+
+      event.preventDefault();
+      handleAttack(index);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [character.attacks, currentTurn, handleAttack]);
+{
   return (
     <div
       id="attackSection"
@@ -87,81 +172,7 @@ function AttackOptions({
                   className="card text-start p-3 attack-card"
                   style={{ minWidth: "200px" }}
                   disabled={currentTurn !== "player" || !attack.state}
-                  onClick={() => {
-                    const result = aiDefendOrEvade(
-                      attack,
-                      character,
-                      opponent,
-                    );
-
-                    if (!result) {
-                      showCombatMessage("Not enough mana!", "hit");
-                      return;
-                    }
-
-                    setCharacter({ ...result.attacker });
-                    setOpponent({ ...result.defender });
-
-                    const damage = result.damageReceived ?? 0;
-
-                    if (damage > 0) {
-                      setDamageDealt((previous) => previous + damage);
-                    }
-
-                    setAttacksUsed((previous) => previous + 1);
-
-                    showCombatMessage(
-                      `${character.name} uses ${attack.name}!`,
-                      "attack",
-                    );
-
-                    if (result.action === "defend") {
-                      showCombatMessage(
-                        `${opponent.name} blocked ${attack.name}!`,
-                        "blocked",
-                      );
-                    } else if (result.action === "evade") {
-                      showCombatMessage(
-                        `${opponent.name} evaded ${attack.name}!`,
-                        "evaded",
-                      );
-                    } else if (
-                      result.action === "attack" &&
-                      result.evaded === false
-                    ) {
-                      showCombatMessage("💥 FAILED TO EVADE!", "hit");
-                    } else if (damage > 0) {
-                      showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
-                    }
-
-                    // Display buffs applied by the attack.
-                    Object.entries(result.buffsApplied ?? {}).forEach(
-                      ([stat, amount]) => {
-                        if (typeof amount === "number" && amount !== 0) {
-                          showCombatMessage(
-                            `✨ ${stat.toUpperCase()} ${
-                              amount > 0 ? "+" : ""
-                            }${amount}`,
-                            "buff",
-                          );
-                        }
-                      },
-                    );
-
-                    // Display debuffs applied by the attack.
-                    Object.entries(result.debuffsApplied ?? {}).forEach(
-                      ([stat, amount]) => {
-                        if (typeof amount === "number" && amount !== 0) {
-                          showCombatMessage(
-                            `💀 ${stat.toUpperCase()} ${
-                              amount > 0 ? "+" : ""
-                            }${amount}`,
-                            "debuff",
-                          );
-                        }
-                      },
-                    );
-                  }}
+                  onClick={() => handleAttack(index)}
                 >
                   <img
                     id={`attackImage${index}`}
@@ -197,6 +208,7 @@ function AttackOptions({
       </div>
     </div>
   );
+}
 }
 
 export default AttackOptions;

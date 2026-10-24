@@ -767,3 +767,60 @@
     transition: none;
   }
 }
+
+.keybind-player-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: min(100%, 900px);
+  max-height: 55vh;
+  overflow-y: auto;
+  margin: 1rem auto;
+}
+
+.keybind-player {
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.keybind-player h3 {
+  margin-bottom: 0.75rem;
+}
+
+.keybind-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.35rem 0;
+}
+
+.keybind-button {
+  min-width: 5rem;
+  padding: 0.4rem 0.75rem;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.keybind-message {
+  min-height: 1.5em;
+  text-align: center;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .keybind-player-grid {
+    grid-template-columns: 1fr;
+    max-height: 60vh;
+  }
+}
