@@ -996,11 +996,11 @@ body {
    ========================================================= */
 
 #combatPopupContainer {
-  position: absolute !important;
-  top: 5%;
+  position: fixed !important;
+  top: 15% !important;
   right: 30px !important;
   left: auto !important;
-  z-index: 1000;
+  z-index: 99999 !important;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1008,7 +1008,7 @@ body {
   width: max-content;
   max-width: calc(100vw - 40px);
   transform: none !important;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .combat-popup {
@@ -1156,10 +1156,17 @@ body {
 
 /* Keep the animation comfortable on smaller screens */
 @media (prefers-reduced-motion: reduce) {
+  #combatPopupContainer .combat-popup {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+}@media (prefers-reduced-motion: reduce) {
   
   #combatPopupContainer .combat-popup {
-    animation-duration: 0.01ms;
-    animation-delay: 0s;
+    animation-duration: 2.8ms;
+    animation-delay: 0.5s;
   }
 }
 
@@ -3325,3 +3332,54 @@ body {
   box-shadow: 0 0 12px rgba(255, 49, 89, 0.7);
 }
 
+
+/* Keep popups visible without animation only when reduced motion is enabled. */
+@media (prefers-reduced-motion: reduce) {
+  #combatPopupContainer .combat-popup {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+}
+
+
+#takeDamageButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-height: 54px;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid #ff6b6b;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #8f1d2c, #c0392b);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  box-shadow: 0 5px 16px rgb(192 57 43 / 30%);
+  transition:
+    transform 150ms ease,
+    filter 150ms ease,
+    box-shadow 150ms ease;
+}
+
+#takeDamageButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+  box-shadow: 0 8px 20px rgb(192 57 43 / 45%);
+}
+
+#takeDamageButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#takeDamageButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  filter: grayscale(0.5);
+}
+
+#takeDamageButtonIcon {
+  font-size: 1.25rem;
+}

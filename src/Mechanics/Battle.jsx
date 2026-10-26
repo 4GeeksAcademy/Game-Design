@@ -19,10 +19,11 @@ import Ichigo from "./All_Character_Stats/IchigoStats.js";
 import Naruto from "./All_Character_Stats/NarutoStats.js";
 import Yoruichi from "./All_Character_Stats/YoruichiStats.js";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
-import { aiTurn } from "./AI.js";
+import { aiDefendOrEvade, aiTurn } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
-import React, { useState, useEffect, useRef } from "react";
+import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 function App() {
   const location = useLocation();
@@ -112,9 +113,7 @@ function App() {
     knockoutRef.current = knockout;
   }, [character, opponent, knockout]);
 
-  // Display ONLY the first queued message.
-  // The next message waits until this popup's display time finishes.
-  // Remove the oldest popup after its display time.
+  // Display one queued message at a time.
   const firstMessageId = combatMessages[0]?.id;
 
   useEffect(() => {
@@ -317,6 +316,146 @@ function App() {
     setCombatLog((log) => [...log, message]);
   }
 
+  //   const useAttackSlot = (index) => {
+  //   const attack = character.attacks[index];
+
+  //   if (!attack || currentTurn !== "player" || !attack.state) return;
+
+  //   const result = aiDefendOrEvade(attack, character, opponent);
+
+  //   if (!result) {
+  //     showCombatMessage("Not enough mana!", "hit");
+  //     return;
+  //   }
+
+  //   setCharacter({ ...result.attacker });
+  //   setOpponent({ ...result.defender });
+
+  //   const damage = result.damageReceived ?? 0;
+  //   if (damage > 0) setDamageDealt((previous) => previous + damage);
+
+  //   setAttacksUsed((previous) => previous + 1);
+  //   showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
+
+  //   if (result.action === "defend") {
+  //     showCombatMessage(`${opponent.name} blocked ${attack.name}!`, "blocked");
+  //   } else if (result.action === "evade") {
+  //     showCombatMessage(`${opponent.name} evaded ${attack.name}!`, "evaded");
+  //   } else if (result.action === "attack" && result.evaded === false) {
+  //     showCombatMessage("💥 FAILED TO EVADE!", "hit");
+  //   } else if (damage > 0) {
+  //     showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
+  //   }
+
+  //   Object.entries(result.buffsApplied ?? {}).forEach(([stat, amount]) => {
+  //     if (typeof amount === "number" && amount !== 0) {
+  //       showCombatMessage(
+  //         `✨ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
+  //         "buff",
+  //       );
+  //     }
+  //   });
+
+  //   Object.entries(result.debuffsApplied ?? {}).forEach(([stat, amount]) => {
+  //     if (typeof amount === "number" && amount !== 0) {
+  //       showCombatMessage(
+  //         `💀 ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
+  //         "debuff",
+  //       );
+  //     }
+  //   });
+  // };
+
+  const resolveIncomingAttack = useCallback(
+    (choice) => {
+      if (!aiAttack || defenseTimeLeft <= 0) return;
+
+      if (choice === "defend" && character.cooldown <= 0) return;
+
+      const result =
+        choice === "defend"
+          ? attackCharacter(
+              aiAttack,
+              opponent,
+              character,
+              character.defense.amount,
+            )
+          : choice === "evade"
+            ? evadeAttack(aiAttack, opponent, character)
+            : attackCharacter(aiAttack, opponent, character);
+
+      if (!result) return;
+
+     if (choice === "defend" || choice === "evade") {
+      result.defender.cooldown -= 1;
+      result.defender.blocked = true;
+    }
+
+      setOpponent({ ...result.attacker });
+      setCharacter({ ...result.defender });
+
+      if (choice === "defend") {
+        showCombatMessage("🛡️ BLOCKED!", "blocked");
+      } else if (choice === "evade") {
+        showCombatMessage(
+          result.evaded ? "💨 EVADED!" : "💥 FAILED TO EVADE!",
+          result.evaded ? "evaded" : "hit",
+        );
+      } else {
+        showCombatMessage(
+          `${character.name} took ${result.damageReceived ?? aiAttack.damage} full damage!`,
+          "hit",
+        );
+      }
+
+      if (aiControllerRef.current) {
+        aiControllerRef.current.respondToDefense();
+      } else {
+        setAiAttack(null);
+      }
+    },
+    [aiAttack, defenseTimeLeft, character, opponent, showCombatMessage],
+  );
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (!aiAttack || defenseTimeLeft <= 0) return;
+
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+      ) {
+        return;
+      }
+
+      const key = normalizeKey(event.key);
+      const binds = loadKeybinds().player1;
+
+      let choice = null;
+
+      if (key === normalizeKey(binds.defend)) {
+        choice = "defend";
+      } else if (key === normalizeKey(binds.evade)) {
+        choice = "evade";
+      } else if (key === normalizeKey(binds.takeDamage)) {
+        choice = "take-damage";
+      }
+
+      if (!choice) return;
+
+      // Don't consume the defend key when defending is unavailable.
+      if (choice === "defend" && character.cooldown <= 0) return;
+
+      event.preventDefault();
+      resolveIncomingAttack(choice);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [aiAttack, defenseTimeLeft, character.cooldown, resolveIncomingAttack]);
+
   return (
     <div className="container-fluid mt-3" id="gameContainer">
       {/* Full-screen round announcement */}
@@ -348,22 +487,17 @@ function App() {
           </div>
         </div>
       )}
-      {/* Show only one animated popup at a time.
+      {/* Show one animated combat popup at a time. */}
       {combatMessages.length > 0 && (
         <div id="combatPopupContainer">
-          {combatMessages.slice(0, 3).map((message, index) => (
-            <div
-              className={`combat-popup ${message.type}`}
-              key={message.id}
-              style={{
-                animationDelay: `${index * 0.15}s`,
-              }}
-            >
-              {message.text}
-            </div>
-          ))}
+          <div
+            className={`combat-popup ${combatMessages[0].type}`}
+            key={combatMessages[0].id}
+          >
+            {combatMessages[0].text}
+          </div>
         </div>
-      )} */}
+      )}
 
       {knockout && !showResults ? null : character.health <= 0 ? (
         <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
@@ -468,30 +602,31 @@ function App() {
                     <button
                       id="defendButton"
                       disabled={character.cooldown <= 0 || defenseTimeLeft <= 0}
-                      onClick={() => {
-                        const result = attackCharacter(
-                          aiAttack,
-                          opponent,
-                          character,
-                          character.defense.amount,
-                        );
+                      // onClick={() => {
+                      //   const result = attackCharacter(
+                      //     aiAttack,
+                      //     opponent,
+                      //     character,
+                      //     character.defense.amount,
+                      //   );
 
-                        if (result) {
-                          character.cooldown -= 1;
-                          character.blocked = true;
+                      //   if (result) {
+                      //     character.cooldown -= 1;
+                      //     character.blocked = true;
 
-                          showCombatMessage("🛡️ BLOCKED!", "blocked");
+                      //     showCombatMessage("🛡️ BLOCKED!", "blocked");
 
-                          setOpponent({ ...result.attacker });
-                          setCharacter({ ...result.defender });
+                      //     setOpponent({ ...result.attacker });
+                      //     setCharacter({ ...result.defender });
 
-                          if (aiControllerRef.current) {
-                            aiControllerRef.current.respondToDefense();
-                          } else {
-                            setAiAttack(null);
-                          }
-                        }
-                      }}
+                      //     if (aiControllerRef.current) {
+                      //       aiControllerRef.current.respondToDefense();
+                      //     } else {
+                      //       setAiAttack(null);
+                      //     }
+                      //   }
+                      // }}
+                      onClick={() => resolveIncomingAttack("defend")}
                     >
                       <span id="defendButtonIcon">🛡</span>
                       <span>DEFEND</span>
@@ -500,37 +635,48 @@ function App() {
                     <button
                       id="evadeButton"
                       disabled={defenseTimeLeft <= 0}
-                      onClick={() => {
-                        const result = evadeAttack(
-                          aiAttack,
-                          opponent,
-                          character,
-                        );
+                      // onClick={() => {
+                      //   const result = evadeAttack(
+                      //     aiAttack,
+                      //     opponent,
+                      //     character,
+                      //   );
 
-                        if (result) {
-                          character.cooldown -= 1;
-                          character.blocked = true;
+                      //   if (result) {
+                      //     character.cooldown -= 1;
+                      //     character.blocked = true;
 
-                          showCombatMessage(
-                            result.evaded
-                              ? "💨 EVADED!"
-                              : "💥 FAILED TO EVADE!",
-                            result.evaded ? "evaded" : "hit",
-                          );
+                      //     showCombatMessage(
+                      //       result.evaded
+                      //         ? "💨 EVADED!"
+                      //         : "💥 FAILED TO EVADE!",
+                      //       result.evaded ? "evaded" : "hit",
+                      //     );
 
-                          setOpponent({ ...result.attacker });
-                          setCharacter({ ...result.defender });
+                      //     setOpponent({ ...result.attacker });
+                      //     setCharacter({ ...result.defender });
 
-                          if (aiControllerRef.current) {
-                            aiControllerRef.current.respondToDefense();
-                          } else {
-                            setAiAttack(null);
-                          }
-                        }
-                      }}
+                      //     if (aiControllerRef.current) {
+                      //       aiControllerRef.current.respondToDefense();
+                      //     } else {
+                      //       setAiAttack(null);
+                      //     }
+                      //   }
+                      // }}
+                      onClick={() => resolveIncomingAttack("evade")}
                     >
                       <span id="evadeButtonIcon">💨</span>
                       <span>EVADE</span>
+                    </button>
+
+                    <button
+                      id="takeDamageButton"
+                      type="button"
+                      disabled={!aiAttack || defenseTimeLeft <= 0}
+                      onClick={() => resolveIncomingAttack("take-damage")}
+                    >
+                      <span>💥</span>
+                      <span>TAKE FULL DAMAGE</span>
                     </button>
                   </div>
                 </div>

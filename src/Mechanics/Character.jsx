@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useCallback } from "react";
 import StatBar from "./StatBar.jsx";
 import "./BattleUI.css";
+import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 
 function Character({
   character,
@@ -19,6 +20,42 @@ function Character({
           ),
         )
       : 0;
+
+      const finishTurn = useCallback(() => {
+    if (currentTurn !== "player") return;
+
+    setCharacter({
+      ...character,
+      turnFinished: true,
+    });
+
+    setCurrentTurn("ai");
+  }, [character, currentTurn, setCharacter, setCurrentTurn]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const target = event.target;
+
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+      ) {
+        return;
+      }
+
+      const key = normalizeKey(event.key);
+      const finishKey = normalizeKey(loadKeybinds().player1.finishTurn);
+
+      if (key !== finishKey || currentTurn !== "player") return;
+
+      event.preventDefault();
+      finishTurn();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentTurn, finishTurn]);
 
   return (
     <div id="characterSection">
@@ -136,14 +173,7 @@ function Character({
         <button
           id="finishTurnButton"
           disabled={currentTurn !== "player"}
-          onClick={() => {
-            setCharacter({
-              ...character,
-              turnFinished: true,
-            });
-
-            setCurrentTurn("ai");
-          }}
+          onClick={finishTurn}
         >
           <span>Finish</span>
           <span>Turn</span>

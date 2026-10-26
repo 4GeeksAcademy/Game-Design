@@ -1,4 +1,3 @@
-
 /* ================================
    HOMESCREEN - ARCADE FIGHTING GAME
 ================================ */
@@ -40,15 +39,8 @@
   pointer-events: none;
   opacity: 0.3;
   background-image:
-    linear-gradient(
-      rgba(19, 213, 255, 0.07) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(19, 213, 255, 0.07) 1px,
-      transparent 1px
-    );
+    linear-gradient(rgba(19, 213, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(19, 213, 255, 0.07) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: linear-gradient(
     to bottom,
@@ -57,6 +49,7 @@
     black 80%,
     transparent
   );
+  animation: arcade-grid-drift 18s linear infinite;
 }
 
 /* HEADER */
@@ -89,12 +82,22 @@
   font-style: italic;
   transform: skew(-8deg);
   box-shadow: 4px 4px 0 #79172c;
+  animation: logo-impact 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .logo-name {
   font-size: clamp(13px, 2vw, 19px);
   font-weight: 900;
   letter-spacing: 2px;
+  animation: logo-name-enter 0.65s ease-out 0.12s both;
+}
+
+.home-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .header-tag {
@@ -104,6 +107,30 @@
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 2px;
+}
+
+.currency-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid rgba(54, 230, 160, 0.55);
+  background: rgba(54, 230, 160, 0.08);
+  color: #36e6a0;
+  font-size: 14px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 14px rgba(54, 230, 160, 0.08);
+  animation: currency-arrive 0.6s ease-out 0.25s both;
+}
+
+.currency-icon {
+  font-size: 19px;
+}
+
+.currency-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
 }
 
 /* MAIN CONTENT */
@@ -119,7 +146,7 @@
   margin: 0 auto;
   padding: 48px 0;
   text-align: center;
-  animation: arcade-enter 0.3s ease-out;
+  animation: home-screen-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .home-eyebrow {
@@ -128,6 +155,7 @@
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 5px;
+  animation: home-text-enter 0.45s ease-out 0.1s both;
 }
 
 .home-title {
@@ -141,6 +169,7 @@
   line-height: 0.87;
   letter-spacing: -4px;
   text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.45);
+  animation: home-title-impact 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
 }
 
 .title-accent {
@@ -156,6 +185,7 @@
   color: #bdc9df;
   font-size: 14px;
   letter-spacing: 1px;
+  animation: home-text-enter 0.5s ease-out 0.2s both;
 }
 
 .menu-title {
@@ -183,6 +213,26 @@
   gap: 13px;
   width: 100%;
   max-width: 390px;
+}
+
+.home-menu-buttons > .arcade-button {
+  animation: home-button-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.home-menu-buttons > .arcade-button:nth-child(1) {
+  animation-delay: 0.18s;
+}
+
+.home-menu-buttons > .arcade-button:nth-child(2) {
+  animation-delay: 0.27s;
+}
+
+.home-menu-buttons > .arcade-button:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+.home-menu-buttons > .arcade-button:nth-child(4) {
+  animation-delay: 0.45s;
 }
 
 .arcade-button {
@@ -221,14 +271,6 @@
   border-color: var(--arcade-cyan);
   background: #152640;
   box-shadow: 0 0 18px rgba(19, 213, 255, 0.17);
-}
-
-.arcade-button:focus-visible,
-.choice-button:focus-visible,
-.difficulty-button:focus-visible,
-.back-button:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 4px;
 }
 
 .primary-button {
@@ -317,6 +359,7 @@
   box-shadow:
     inset 0 0 22px rgba(255, 49, 89, 0.09),
     0 0 15px rgba(255, 49, 89, 0.2);
+  animation: selected-option-pulse 1.8s ease-in-out infinite;
 }
 
 .choice-button.selected strong {
@@ -365,10 +408,123 @@
   font-size: 18px;
 }
 
+/* TEAM CONTROL CARDS */
+
+.team-control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: min(100%, 560px);
+  margin: 24px auto 32px;
+}
+
+.team-control-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 160px;
+  padding: 16px;
+  color: #eef5ff;
+  text-align: left;
+  background: linear-gradient(145deg, #111d31, #0b1425);
+  border: 1px solid #34445d;
+  border-radius: 7px;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.team-control-card:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: #27dfe8;
+}
+
+.team-control-card.selected {
+  border: 2px solid #20e7ed;
+  box-shadow: 0 0 12px rgba(32, 231, 237, 0.35);
+}
+
+.team-control-card:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.team-control-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.team-control-title {
+  min-height: 2.5em;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+
+.team-control-matchup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 42px;
+}
+
+.matchup-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.matchup-rectangle {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 38px;
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+.matchup-rectangle i {
+  font-size: 1.1rem;
+}
+
+.matchup-rectangle.player {
+  border-color: #168fe0;
+  background: rgba(22, 143, 224, 0.18);
+  color: #54baff;
+}
+
+.matchup-rectangle.cpu {
+  border-color: #e83f59;
+  background: rgba(232, 63, 89, 0.18);
+  color: #ff657b;
+}
+
+.team-control-matchup > b {
+  color: #dce8f5;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+.team-control-description {
+  color: #aab8ca;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
 /* BACK BUTTON */
 
 .back-button {
-  margin-top: 27px;
+  position: static;
+  margin: 27px auto 0;
   padding: 10px 16px;
   border: none;
   background: transparent;
@@ -382,6 +538,7 @@
 
 .back-button:hover {
   color: white;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
 }
 
 /* FOOTER */
@@ -402,12 +559,60 @@
   letter-spacing: 1.5px;
 }
 
-/* TRANSITIONS */
+/* FOCUS */
 
-@keyframes arcade-enter {
+.arcade-button:focus-visible,
+.choice-button:focus-visible,
+.difficulty-button:focus-visible,
+.back-button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+}
+
+/* ANIMATIONS */
+
+@keyframes arcade-grid-drift {
+  from {
+    background-position: 0 0, 0 0;
+  }
+
+  to {
+    background-position: 48px 48px, 48px 48px;
+  }
+}
+
+@keyframes logo-impact {
+  0% {
+    opacity: 0;
+    transform: skew(-8deg) scale(0.65) rotate(-8deg);
+  }
+
+  70% {
+    transform: skew(-8deg) scale(1.12) rotate(2deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: skew(-8deg) scale(1) rotate(0);
+  }
+}
+
+@keyframes logo-name-enter {
   from {
     opacity: 0;
-    transform: translateY(9px);
+    transform: translateX(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes home-screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
   }
 
   to {
@@ -416,7 +621,82 @@
   }
 }
 
-/* MOBILE */
+@keyframes home-text-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes home-title-impact {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+
+  75% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.015);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes home-button-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes selected-option-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 22px rgba(255, 49, 89, 0.09),
+      0 0 10px rgba(255, 49, 89, 0.15);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 0 25px rgba(255, 49, 89, 0.16),
+      0 0 19px rgba(255, 49, 89, 0.3);
+  }
+}
+
+@keyframes currency-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 650px) {
+  .team-control-grid {
+    grid-template-columns: 1fr;
+    width: min(100%, 390px);
+  }
+}
 
 @media (max-width: 480px) {
   .home-screen {
@@ -444,61 +724,6 @@
     letter-spacing: -2px;
   }
 
-  .home-footer {
-    align-items: flex-start;
-    flex-direction: column;
-    font-size: 8px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-content {
-    animation: none;
-  }
-
-  .arcade-button,
-  .choice-button,
-  .difficulty-button,
-  .back-button {
-    transition: none;
-  }
-}
-
-
-/* HEADER CURRENCY DISPLAY */
-
-.home-header-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.currency-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border: 1px solid rgba(54, 230, 160, 0.55);
-  background: rgba(54, 230, 160, 0.08);
-  color: #36e6a0;
-  font-size: 14px;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-  box-shadow: 0 0 14px rgba(54, 230, 160, 0.08);
-}
-
-.currency-icon {
-  font-size: 19px;
-}
-
-.currency-label {
-  font-size: 9px;
-  letter-spacing: 1.5px;
-}
-
-@media (max-width: 480px) {
   .home-header-right {
     gap: 7px;
   }
@@ -512,255 +737,90 @@
   .currency-label {
     font-size: 8px;
   }
-}
 
-
-
-/* =========================================
-   ARCADE HOMEPAGE ANIMATIONS
-========================================= */
-
-/* Subtle movement in the arcade grid */
-.arcade-background {
-  animation: arcade-grid-drift 18s linear infinite;
-}
-
-/* Give the logo a little fighting-game energy */
-.logo-mark {
-  animation: logo-impact 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.logo-name {
-  animation: logo-name-enter 0.65s ease-out 0.12s both;
-}
-
-/* Make the main content arrive with more impact */
-.home-content {
-  animation: home-screen-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.home-eyebrow {
-  animation: home-text-enter 0.45s ease-out 0.1s both;
-}
-
-.home-title {
-  animation: home-title-impact 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
-}
-
-.home-subtitle {
-  animation: home-text-enter 0.5s ease-out 0.2s both;
-}
-
-/* Stagger the menu buttons like an arcade menu */
-.home-menu-buttons > .arcade-button {
-  animation: home-button-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-}
-
-.home-menu-buttons > .arcade-button:nth-child(1) {
-  animation-delay: 0.18s;
-}
-
-.home-menu-buttons > .arcade-button:nth-child(2) {
-  animation-delay: 0.27s;
-}
-
-.home-menu-buttons > .arcade-button:nth-child(3) {
-  animation-delay: 0.36s;
-}
-
-.home-menu-buttons > .arcade-button:nth-child(4) {
-  animation-delay: 0.45s;
-}
-
-/* Buttons feel physical when clicked */
-.arcade-button:not(:disabled):active,
-.choice-button:active,
-.difficulty-button:active,
-.back-button:active {
-  transform: scale(0.97);
-}
-
-/* Selected match options get a soft arcade pulse */
-.choice-button.selected {
-  animation: selected-option-pulse 1.8s ease-in-out infinite;
-}
-
-/* Stronger focus and hover response */
-.arcade-button:focus-visible,
-.choice-button:focus-visible,
-.difficulty-button:focus-visible {
-  box-shadow: 0 0 0 3px rgba(19, 213, 255, 0.25),
-    0 0 20px rgba(19, 213, 255, 0.25);
-}
-
-.back-button:hover {
-  text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
-}
-
-.currency-display {
-  animation: currency-arrive 0.6s ease-out 0.25s both;
-}
-
-/* Keyframes */
-@keyframes arcade-grid-drift {
-  from {
-    background-position: 0 0, 0 0;
-  }
-  to {
-    background-position: 48px 48px, 48px 48px;
+  .home-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    font-size: 8px;
   }
 }
 
-@keyframes logo-impact {
-  0% {
-    opacity: 0;
-    transform: skew(-8deg) scale(0.65) rotate(-8deg);
-  }
-  70% {
-    transform: skew(-8deg) scale(1.12) rotate(2deg);
-  }
-  100% {
-    opacity: 1;
-    transform: skew(-8deg) scale(1) rotate(0);
-  }
-}
-
-@keyframes logo-name-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes home-screen-enter {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes home-text-enter {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes home-title-impact {
-  0% {
-    opacity: 0;
-    transform: translateY(24px) scale(0.94);
-  }
-  75% {
-    opacity: 1;
-    transform: translateY(-3px) scale(1.015);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes home-button-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-22px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes selected-option-pulse {
-  0%, 100% {
-    box-shadow: inset 0 0 22px rgba(255, 49, 89, 0.09),
-      0 0 10px rgba(255, 49, 89, 0.15);
-  }
-  50% {
-    box-shadow: inset 0 0 25px rgba(255, 49, 89, 0.16),
-      0 0 19px rgba(255, 49, 89, 0.3);
-  }
-}
-
-@keyframes currency-arrive {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Keep the animations enabled even when the OS requests reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .home-content {
-    animation: home-screen-enter 0.55s ease-out both !important;
-  }
-
-  .home-eyebrow {
-    animation: home-text-enter 0.45s ease-out 0.1s both !important;
-  }
-
-  .home-title {
-    animation: home-title-impact 0.7s ease-out 0.08s both !important;
-  }
-
-  .home-subtitle {
-    animation: home-text-enter 0.5s ease-out 0.2s both !important;
-  }
-
-  .home-menu-buttons > .arcade-button {
-    animation: home-button-enter 0.45s ease-out backwards !important;
-  }
-
-  .home-menu-buttons > .arcade-button:nth-child(1) {
-    animation-delay: 0.18s !important;
-  }
-
-  .home-menu-buttons > .arcade-button:nth-child(2) {
-    animation-delay: 0.27s !important;
-  }
-
-  .home-menu-buttons > .arcade-button:nth-child(3) {
-    animation-delay: 0.36s !important;
-  }
-
-  .home-menu-buttons > .arcade-button:nth-child(4) {
-    animation-delay: 0.45s !important;
-  }
-
-  .logo-mark {
-    animation: logo-impact 0.65s ease-out both !important;
-  }
-
-  .logo-name {
-    animation: logo-name-enter 0.65s ease-out 0.12s both !important;
-  }
-
-  .currency-display {
-    animation: currency-arrive 0.6s ease-out 0.25s both !important;
-  }
-
-  .arcade-background {
-    animation: none !important;
-  }
-
+  .arcade-background,
+  .logo-mark,
+  .logo-name,
+  .home-content,
+  .home-eyebrow,
+  .home-title,
+  .home-subtitle,
+  .home-menu-buttons > .arcade-button,
+  .currency-display,
   .choice-button.selected {
-    animation: none !important;
+    animation: none;
+  }
+
+  .arcade-button,
+  .choice-button,
+  .difficulty-button,
+  .back-button,
+  .team-control-card {
+    transition: none;
+  }
+}
+
+.keybind-player-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: min(100%, 900px);
+  max-height: 55vh;
+  overflow-y: auto;
+  margin: 1rem auto;
+}
+
+.keybind-player {
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.keybind-player h3 {
+  margin-bottom: 0.75rem;
+}
+
+.keybind-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.35rem 0;
+}
+
+.keybind-button {
+  min-width: 5rem;
+  padding: 0.4rem 0.75rem;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.keybind-message {
+  min-height: 1.5em;
+  text-align: center;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .keybind-player-grid {
+    grid-template-columns: 1fr;
+    max-height: 60vh;
   }
 }
