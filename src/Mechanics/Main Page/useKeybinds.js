@@ -31,9 +31,12 @@ export default function useKeybinds(bindings, onAction, enabled = true) {
           (boundKey) => normalizeKey(boundKey) === key,
         );
 
-        if (attackIndex !== -1 && bindings.attacks?.[attackIndex]) {
+        if (
+  attackIndex !== -1 &&
+  (bindings.attacks === true || bindings.attacks?.[attackIndex])
+) {
           event.preventDefault();
-          actionRef.current("attack", attackIndex);
+          actionRef.current("attack", attackIndex, playerId);
           return;
         }
 
@@ -43,7 +46,7 @@ export default function useKeybinds(bindings, onAction, enabled = true) {
             bindings[action]
           ) {
             event.preventDefault();
-            actionRef.current(action);
+           actionRef.current(action, undefined, playerId);
             return;
           }
         }

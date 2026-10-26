@@ -3342,3 +3342,44 @@ body {
     visibility: visible !important;
   }
 }
+
+
+#takeDamageButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-height: 54px;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid #ff6b6b;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #8f1d2c, #c0392b);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  box-shadow: 0 5px 16px rgb(192 57 43 / 30%);
+  transition:
+    transform 150ms ease,
+    filter 150ms ease,
+    box-shadow 150ms ease;
+}
+
+#takeDamageButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+  box-shadow: 0 8px 20px rgb(192 57 43 / 45%);
+}
+
+#takeDamageButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#takeDamageButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  filter: grayscale(0.5);
+}
+
+#takeDamageButtonIcon {
+  font-size: 1.25rem;
+}
