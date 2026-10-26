@@ -463,7 +463,7 @@ button.fighter-card { width: 100%; cursor: pointer; }
   border: 1px solid #ff5470;
   border-radius: 11px;
   background: linear-gradient(145deg, #29101df5, #0b111ff7);
-  box-shadow: 0 0 0 100vmax #0005, 0 0 25px #ff31594a;
+  box-shadow:  0 0 25px #ff31594a;
   text-align: center;
   animation: card-enter 220ms ease-out both;
 }
@@ -1531,3 +1531,246 @@ battlefield > .local-coop-incoming {
   cursor: not-allowed;
 }
 
+.incoming-attack-image {
+  display: block;
+  width: 100%;
+  height: 90px;
+  margin: 8px auto 4px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #0004;
+}
+
+.incoming-threats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.incoming-threats span {
+  padding: 4px 7px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+
+/* Damage threat colors */
+.threat-very-safe { color: #65e6a3; }
+.threat-safe { color: #9be66b; }
+.threat-moderate { color: #f4d35e; }
+.threat-hazardous { color: #ffad5c; }
+.threat-dangerous { color: #ff765e; }
+.threat-life-threatening { color: #ff4f70; }
+.threat-death { color: #e9d5ff; }
+
+/* Speed threat colors */
+.speed-easy { color: #65e6a3; }
+.speed-avoidable { color: #9be66b; }
+.speed-challenging { color: #f4d35e; }
+.speed-fast { color: #ffad5c; }
+.speed-very-fast { color: #ff765e; }
+.speed-unavoidable { color: #ff4f70; }
+.speed-guaranteed { color: #e9d5ff; }
+
+.incoming-attack-image {
+  display: block;
+  width: 100%;
+  height: 90px;
+  margin: 8px auto 4px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #0004;
+}
+
+/* Incoming attack warning card */
+.incoming-attack {
+  width: min(360px, 42%);
+  padding: 14px;
+  border: 1px solid #ff526f;
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, rgb(53 15 31 / 97%), rgb(11 15 27 / 98%));
+  box-shadow:
+    0 0 22px rgb(255 49 89 / 24%),
+    inset 0 0 18px rgb(255 49 89 / 7%);
+}
+
+.incoming-topline {
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgb(255 82 111 / 25%);
+  color: #ff8295;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+}
+
+.incoming-topline span:first-child::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #ff526f;
+  box-shadow: 0 0 9px #ff526f;
+  vertical-align: 1px;
+}
+
+.incoming-topline span:last-child {
+  color: #65eaff;
+  font-size: 16px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.incoming-matchup {
+  margin-top: 10px;
+  color: #eaf3ff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.incoming-matchup .incoming-arrow {
+  color: #ff526f;
+  text-shadow: 0 0 10px rgb(255 82 111 / 70%);
+}
+
+.incoming-attack-image {
+  display: block;
+  width: min(100%, 230px);
+  height: 105px;
+  margin: 10px auto 6px;
+  object-fit: contain;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 9px;
+  background:
+    radial-gradient(ellipse, rgb(255 82 111 / 15%), transparent 70%),
+    #080d18;
+  filter: drop-shadow(0 0 8px rgb(255 82 111 / 25%));
+}
+
+.incoming-attack > h3 {
+  margin: 7px 0;
+  color: #fff;
+  font-size: 14px;
+  text-shadow: 0 0 12px rgb(255 255 255 / 18%);
+}
+
+.incoming-threats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 8px 0 10px;
+}
+
+.incoming-threats span {
+  padding: 5px 7px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  background: rgb(0 0 0 / 25%);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.35px;
+}
+
+.incoming-attack .defense-actions {
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.incoming-attack .defense-actions button {
+  min-height: 38px;
+  transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+}
+
+.incoming-attack .defense-actions button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 28%);
+}
+
+.incoming-attack .defense-actions button:disabled {
+  filter: grayscale(0.6);
+}
+
+.incoming-outcome {
+  padding-top: 9px;
+  color: #8fffc0;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.timer-urgent {
+  color: #ff3159 !important;
+  animation: threat-pulse 650ms ease-in-out infinite alternate;
+}
+
+@keyframes threat-pulse {
+  to {
+    opacity: 0.55;
+    text-shadow: 0 0 12px #ff3159;
+  }
+}
+
+/* Two local-co-op cards: keep them compact enough to avoid covering the field */
+.battlefield > .local-coop-incoming {
+  width: min(360px, 38%);
+  max-height: 48%;
+  overflow-y: auto;
+}
+
+@media (max-width: 620px) {
+  .incoming-attack,
+  .battlefield > .local-coop-incoming {
+    width: min(360px, 90%);
+  }
+
+  .incoming-attack-image {
+    height: 82px;
+  }
+}
+
+.team-battle .battlefield > .incoming-attack.local-coop-incoming {
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 20px !important;
+}
+
+@media (max-width: 620px) {
+  .team-battle .battlefield > .incoming-attack.local-coop-incoming {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 16px !important;
+  }
+}
+
+.battlefield > .local-coop-incoming.is-first {
+  top: 50% !important;
+  bottom: auto !important;
+  left: 27% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.battlefield > .local-coop-incoming.is-second {
+  top: 50% !important;
+  bottom: auto !important;
+  left: 73% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+@media (max-width: 620px) {
+  .battlefield > .local-coop-incoming.is-first {
+    left: 50% !important;
+    top: 27% !important;
+  }
+
+  .battlefield > .local-coop-incoming.is-second {
+    left: 50% !important;
+    top: 73% !important;
+  }
+}

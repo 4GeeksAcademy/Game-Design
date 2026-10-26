@@ -6,6 +6,7 @@ import { attackCharacter, evadeAttack } from "./Health.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
+import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade } from "./AI.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import useKeybinds from "./Main Page/useKeybinds.js";
@@ -222,8 +223,10 @@ export default function TeamBattle() {
   const [playerAttackPopup, setPlayerAttackPopup] = useState(null);
   const [localCoopDefenses, setLocalCoopDefenses] = useState([]);
   const [localCoopDefenseTimers, setLocalCoopDefenseTimers] = useState({});
+  const localCoopExpiredRef = useRef(new Set());
   const localCoopResolvedRef = useRef(new Set());
   const localCoopTimeoutsRef = useRef([]);
+  const localCoopAttackQueuesRef = useRef({});
   const [cpuQueueReady, setCpuQueueReady] = useState(false);
   const isLocalCoop = teamControl === "local-coop";
   const isCpuAssist = teamControl === "cpu-assist";
@@ -933,7 +936,7 @@ export default function TeamBattle() {
       return;
     }
     if (isLocalCoop) {
-      const batch = [];
+      const attacksByTarget = {};
 
       teams.opponent.forEach((cpu) => {
         if (cpu.health <= 0) return;
@@ -945,29 +948,44 @@ export default function TeamBattle() {
         if (!target) return;
 
         const usableAttacks = cpu.attacks
-  .map((attack, attackIndex) => ({ attack, attackIndex }))
-  .filter(
-    ({ attack }) =>
-      attack.state === true && cpu.mana >= (attack.cost ?? 0),
-  )
-  .slice(0, difficulty === "Easy" ? 1 : Number.POSITIVE_INFINITY);
+          .map((attack, attackIndex) => ({ attack, attackIndex }))
+          .filter(
+            ({ attack }) =>
+              attack.state === true && cpu.mana >= (attack.cost ?? 0),
+          )
+          .slice(0, difficulty === "Easy" ? 1 : Number.POSITIVE_INFINITY);
 
-usableAttacks.forEach(({ attackIndex }) => {
-  batch.push({
-    id: `${roundNumber}-${cpu.id}-${attackIndex}`,
-    targetId: target.id,
-    cpuId: cpu.id,
-    attackIndex,
-    visible: false,
-    timeLeft: 10,
-    outcome: "",
-  });
-});
+        attacksByTarget[target.id] ??= [];
+
+        usableAttacks.forEach(({ attackIndex }) => {
+          attacksByTarget[target.id].push({
+            id: `${roundNumber}-${cpu.id}-${attackIndex}`,
+            targetId: target.id,
+            cpuId: cpu.id,
+            attackIndex,
+            visible: false,
+            timeLeft: 10,
+            outcome: "",
+          });
+        });
       });
 
-      if (batch.length) {
+      const firstCards = [];
+      const remainingQueues = {};
+
+      Object.entries(attacksByTarget).forEach(([targetId, attacks]) => {
+        if (attacks.length) {
+          firstCards.push(attacks[0]);
+          remainingQueues[targetId] = attacks.slice(1);
+        }
+      });
+
+      localCoopAttackQueuesRef.current = remainingQueues;
+
+      if (firstCards.length) {
         localCoopResolvedRef.current = new Set();
-        setLocalCoopDefenses(batch);
+        localCoopExpiredRef.current.clear();
+        setLocalCoopDefenses(firstCards);
         setCpuQueueReady(true);
         setCombatMessage("The CPU team is preparing its attacks.");
       } else {
@@ -1121,27 +1139,28 @@ usableAttacks.forEach(({ attackIndex }) => {
   ]);
 
   useEffect(() => {
-    if (phase !== "cpu-fighting" || !pendingDefense) {
-      setDefenseTimeLeft(10);
-      return undefined;
-    }
+    if (phase !== "cpu-fighting" || !pendingDefense) return;
 
     setDefenseTimeLeft(10);
 
+    const interval = setInterval(() => {
+      setDefenseTimeLeft((time) => Math.max(0, time - 1));
+    }, 1000);
+
     const timeout = setTimeout(() => {
-      setDefenseTimeLeft(0);
       resolveCPUDefenseRef.current("timeout");
     }, 10_000);
 
-    const interval = setInterval(() => {
-      setDefenseTimeLeft((time) => Math.max(0, time - 1));
-    }, 1_000);
-
     return () => {
-      clearTimeout(timeout);
       clearInterval(interval);
+      clearTimeout(timeout);
     };
-  }, [pendingDefense, phase]);
+  }, [
+    pendingDefense?.cpuId,
+    pendingDefense?.targetId,
+    pendingDefense?.attackIndex,
+    phase,
+  ]);
 
   useEffect(() => {
     if (phase !== "cpu-fighting" || !isLocalCoop || !localCoopDefenses.length) {
@@ -1155,10 +1174,12 @@ usableAttacks.forEach(({ attackIndex }) => {
         setTimeout(() => {
           setLocalCoopDefenses((current) =>
             current.map((item) =>
-              item.id === defense.id ? { ...item, visible: true } : item,
+              item.id === defense.id
+                ? { ...item, visible: true, timeLeft: 10 }
+                : item,
             ),
           );
-        }, index * 1000),
+        }, 0),
       );
     });
 
@@ -1172,50 +1193,52 @@ usableAttacks.forEach(({ attackIndex }) => {
     };
   }, [phase, isLocalCoop, localCoopDefenses.length, roundNumber]);
 
-  useEffect(() => {
-    if (phase !== "cpu-fighting" || !isLocalCoop) return;
+  // Display countdown only.
+useEffect(() => {
+  if (phase !== "cpu-fighting" || !isLocalCoop) return;
 
-    const interval = setInterval(() => {
-      const expiredIds = [];
+  const interval = setInterval(() => {
+    setLocalCoopDefenses((current) =>
+      current.map((defense) =>
+        defense.visible && !defense.outcome
+          ? { ...defense, timeLeft: Math.max(0, defense.timeLeft - 1) }
+          : defense,
+      ),
+    );
+  }, 1000);
 
-      setLocalCoopDefenses((current) =>
-        current.map((defense) => {
-          if (!defense.visible || defense.outcome) {
-            return defense;
-          }
+  return () => clearInterval(interval);
+}, [phase, isLocalCoop]);
 
-          if (defense.timeLeft <= 1) {
-            if (!localCoopResolvedRef.current.has(defense.id)) {
-              expiredIds.push(defense.id);
-            }
-            return { ...defense, timeLeft: 0 };
-          }
+// Resolve each card once when its own deadline expires.
+useEffect(() => {
+  if (phase !== "cpu-fighting" || !isLocalCoop) return;
 
-          const timeLeft = defense.timeLeft - 1;
+  const timers = localCoopDefenses
+    .filter((defense) => defense.visible && !defense.outcome)
+    .map((defense) =>
+      setTimeout(() => {
+        resolveLocalCoopDefenseRef.current(defense.id, "timeout");
+      }, Math.max(0, defense.timeLeft) * 1000),
+    );
 
-          if (timeLeft === 0 && !localCoopResolvedRef.current.has(defense.id)) {
-            expiredIds.push(defense.id);
-          }
-
-          return { ...defense, timeLeft };
-        }),
-      );
-
-      expiredIds.forEach((id) => {
-        setTimeout(
-          () => resolveLocalCoopDefenseRef.current(id, "take-damage"),
-          0,
-        );
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [phase, isLocalCoop]);
+  return () => timers.forEach(clearTimeout);
+}, [phase, isLocalCoop, localCoopDefenses]);
 
   const resolveLocalCoopDefense = (defenseId, choice) => {
+    console.log("[LocalCoop resolve] Called:", { defenseId, choice });
     const incoming = localCoopDefenses.find((item) => item.id === defenseId);
-    if (!incoming || localCoopResolvedRef.current.has(defenseId)) return;
-
+    if (!incoming) {
+      console.warn("[LocalCoop resolve] Defense not found:", {
+        defenseId,
+        currentDefenseIds: localCoopDefenses.map((item) => item.id),
+      });
+      return;
+    }
+    if (localCoopResolvedRef.current.has(defenseId)) {
+      console.warn("[LocalCoop resolve] Already resolved:", defenseId);
+      return;
+    }
     const defender = teams.player.find(
       (fighter) => fighter.id === incoming.targetId,
     );
@@ -1260,48 +1283,62 @@ usableAttacks.forEach(({ attackIndex }) => {
     );
     const currentAttack = currentAttacker.attacks[incoming.attackIndex];
 
-    let result;
-    if (choice === "defend") {
-      const defense =
-        typeof currentDefender.defense === "object"
-          ? (currentDefender.defense?.amount ?? 0)
-          : (currentDefender.defense ?? 0);
+  const healthBefore = Number(currentDefender.health) || 0;
 
-      result = attackCharacter(
-        currentAttack,
-        currentAttacker,
-        currentDefender,
-        defense,
-      );
-    } else if (choice === "evade") {
-      result = evadeAttack(currentAttack, currentAttacker, currentDefender);
-    } else {
-      result = attackCharacter(currentAttack, currentAttacker, currentDefender);
-    }
+let result;
 
-    if (choice === "defend" || choice === "evade") {
-      currentDefender.cooldown = Math.max(
-        0,
-        (currentDefender.cooldown ?? 0) - 1,
-      );
-      currentDefender.blocked = true;
-    }
+if (choice === "defend") {
+  const defense =
+    typeof currentDefender.defense === "object"
+      ? (currentDefender.defense?.amount ?? 0)
+      : (currentDefender.defense ?? 0);
 
-    if (result) {
-      Object.assign(currentAttacker, result.attacker ?? {});
-      Object.assign(currentDefender, result.defender ?? {});
-    }
+  result = attackCharacter(
+    currentAttack,
+    currentAttacker,
+    currentDefender,
+    defense,
+  );
+} else if (choice === "evade") {
+  result = evadeAttack(currentAttack, currentAttacker, currentDefender);
+} else {
+  // Timeout and "take-damage": take the unblocked hit.
+  result = attackCharacter(
+    currentAttack,
+    currentAttacker,
+    currentDefender,
+    0,
+  );
+}
+
+if (result) {
+  Object.assign(currentAttacker, result.attacker ?? {});
+  Object.assign(currentDefender, result.defender ?? {});
+}
+
+const healthAfter = Number(currentDefender.health) || 0;
+
+console.log("[LocalCoop damage]", {
+  attacker: currentAttacker.name,
+  defender: currentDefender.name,
+  choice,
+  attack: currentAttack.name,
+  damage: healthBefore - Number(currentDefender.health),
+  healthBefore,
+  healthAfter: currentDefender.health,
+  result,
+});
 
     const outcome =
-  choice === "defend"
-    ? `${currentDefender.name} defended ${currentAttacker.name}'s ${currentAttack.name}.`
-    : choice === "evade"
-      ? result?.evaded
-        ? `${currentDefender.name} evaded ${currentAttack.name}.`
-        : `${currentDefender.name} failed to evade ${currentAttack.name}.`
-      : choice === "timeout"
-        ? `Time ran out. ${currentAttack.name} hit ${currentDefender.name}.`
-        : `${currentDefender.name} took the full damage from ${currentAttack.name}.`;
+      choice === "defend"
+        ? `${currentDefender.name} defended ${currentAttacker.name}'s ${currentAttack.name}.`
+        : choice === "evade"
+          ? result?.evaded
+            ? `${currentDefender.name} evaded ${currentAttack.name}.`
+            : `${currentDefender.name} failed to evade ${currentAttack.name}.`
+          : choice === "timeout"
+            ? `Time ran out. ${currentAttack.name} hit ${currentDefender.name}.`
+            : `${currentDefender.name} took the full damage from ${currentAttack.name}.`;
 
     setTeams({ player: updatedPlayers, opponent: updatedCPU });
     setLocalCoopDefenses((current) =>
@@ -1312,9 +1349,33 @@ usableAttacks.forEach(({ attackIndex }) => {
 
     addLog(outcome);
 
+    console.log("[LocalCoop resolve] Applying result:", {
+      defenseId,
+      choice,
+      outcome,
+    });
+
     setTimeout(() => {
+      console.log("[LocalCoop resolve] Removing prompt:", defenseId);
       setLocalCoopDefenses((current) => {
+        const resolvedDefense = current.find((item) => item.id === defenseId);
         const remaining = current.filter((item) => item.id !== defenseId);
+
+        if (resolvedDefense) {
+          const queue =
+            localCoopAttackQueuesRef.current[resolvedDefense.targetId] ?? [];
+
+          if (queue.length > 0) {
+            const [nextAttack, ...rest] = queue;
+            localCoopAttackQueuesRef.current[resolvedDefense.targetId] = rest;
+
+            // Show this player's next attack, while keeping the other player's card.
+            return [
+              ...remaining,
+              { ...nextAttack, visible: true, timeLeft: 10 },
+            ];
+          }
+        }
 
         if (remaining.length > 0) return remaining;
 
@@ -1398,11 +1459,11 @@ usableAttacks.forEach(({ attackIndex }) => {
         // Find a visible, unresolved prompt targeted at the player
         // whose defense keys match this key.
         const defense = localCoopDefenses.find((item) => {
-          if (!item.visible || item.outcome || item.timeLeft <= 0) return false;
+  if (!item.visible || item.outcome || item.timeLeft <= 0) return false;
 
-          const playerIndex = teams.player.findIndex(
-            (fighter) => fighter.id === item.targetId,
-          );
+  const playerIndex = teams.player.findIndex(
+    (fighter) => fighter.id === item.targetId,
+  );
           if (playerIndex < 0) return false;
 
           const playerId = playerIndex === 0 ? "player1" : "player2";
@@ -1556,6 +1617,7 @@ usableAttacks.forEach(({ attackIndex }) => {
       } else if (choice === "evade") {
         result = evadeAttack(attack, currentAttacker, currentDefender);
       } else {
+        // Includes "take-damage" and the 10-second timeout.
         result = attackCharacter(attack, currentAttacker, currentDefender);
       }
 
@@ -1956,8 +2018,11 @@ usableAttacks.forEach(({ attackIndex }) => {
           localCoopDefenses
             .filter((defense) => defense.visible)
             .slice(0, 2)
-            .map((defense, index) => {
+            .map((defense) => {
               const target = teams.player.find(
+                (fighter) => fighter.id === defense.targetId,
+              );
+              const playerIndex = teams.player.findIndex(
                 (fighter) => fighter.id === defense.targetId,
               );
               const attacker = teams.opponent.find(
@@ -1967,11 +2032,14 @@ usableAttacks.forEach(({ attackIndex }) => {
 
               if (!target || !attacker || !attack) return null;
 
+              const damageThreat = getDamageThreat(Number(attack.damage) || 0);
+              const speedThreat = getSpeedThreat(Number(attack.speed) || 0);
+
               return (
                 <section
                   key={defense.id}
                   className={`incoming-attack local-coop-incoming ${
-                    index % 2 === 0 ? "is-first" : "is-second"
+                    playerIndex === 0 ? "is-first" : "is-second"
                   }`}
                 >
                   <div className="incoming-topline">
@@ -1981,15 +2049,28 @@ usableAttacks.forEach(({ attackIndex }) => {
 
                   <div className="incoming-matchup">
                     <strong>{attacker.name}</strong>
-                    <span>→</span>
+                    <span className="incoming-arrow">➜</span>
                     <strong>{target.name}</strong>
                   </div>
 
+                  {attack.image && (
+                    <img
+                      className="incoming-attack-image"
+                      src={attack.image}
+                      alt={attack.name}
+                    />
+                  )}
+
                   <h3>{attack.name}</h3>
-                  <p>
-                    DAMAGE {attack.damage ?? 0} · SPEED {attack.speed ?? 0} ·
-                    MANA {attack.cost ?? 0}
-                  </p>
+
+                  <div className="incoming-threats">
+                    <span className={damageThreat.className}>
+                      DAMAGE: {damageThreat.label} ({attack.damage ?? 0})
+                    </span>
+                    <span className={speedThreat.className}>
+                      SPEED: {speedThreat.label} ({attack.speed ?? 0})
+                    </span>
+                  </div>
 
                   <div className="defense-actions">
                     <button
@@ -2061,41 +2142,43 @@ usableAttacks.forEach(({ attackIndex }) => {
               </div>
 
               <div className="incoming-matchup">
-                <div className="incoming-fighter">
-                  {pendingAttacker.image && (
-                    <img
-                      className="incoming-portrait"
-                      src={pendingAttacker.image}
-                      alt=""
-                    />
-                  )}
-                  <strong>{pendingAttacker.name}</strong>
-                  <small>ATTACKER</small>
-                </div>
-
+                <strong>{pendingAttacker.name}</strong>
                 <span className="incoming-arrow">➜</span>
-
-                <div className="incoming-fighter">
-                  {pendingTarget.image && (
-                    <img
-                      className="incoming-portrait"
-                      src={pendingTarget.image}
-                      alt=""
-                    />
-                  )}
-                  <strong>{pendingTarget.name}</strong>
-                  <small>TARGET</small>
-                </div>
+                <strong>{pendingTarget.name}</strong>
               </div>
 
+              {pendingAttack.image && (
+                <img
+                  className="incoming-attack-image"
+                  src={pendingAttack.image}
+                  alt={pendingAttack.name}
+                />
+              )}
+
               <h3>{pendingAttack.name}</h3>
-              <p>
-                DAMAGE {pendingAttack.damage ?? 0}
-                <span> · </span>
-                SPEED {pendingAttack.speed ?? 0}
-                <span> · </span>
-                MANA {pendingAttack.cost ?? 0}
-              </p>
+
+              <div className="incoming-threats">
+                {(() => {
+                  const damageThreat = getDamageThreat(
+                    Number(pendingAttack.damage) || 0,
+                  );
+                  const speedThreat = getSpeedThreat(
+                    Number(pendingAttack.speed) || 0,
+                  );
+
+                  return (
+                    <>
+                      <span className={damageThreat.className}>
+                        DAMAGE: {damageThreat.label} (
+                        {pendingAttack.damage ?? 0})
+                      </span>
+                      <span className={speedThreat.className}>
+                        SPEED: {speedThreat.label} ({pendingAttack.speed ?? 0})
+                      </span>
+                    </>
+                  );
+                })()}
+              </div>
 
               <div className="defense-actions">
                 <button
