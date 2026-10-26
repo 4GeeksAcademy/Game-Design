@@ -543,8 +543,6 @@ export default function TeamBattle() {
       })),
     }));
 
-    
-
     const updatedOpponents = teams.opponent.map((fighter) => ({
       ...fighter,
       defense:
@@ -765,37 +763,34 @@ export default function TeamBattle() {
   };
 
   useKeybinds(
-      {
-        attacks: phase === "fighting",
-        finishTurn: phase === "fighting",
-      },
-      (action, index, playerId) => {
-        console.log("Battle key:", { action, index, playerId });
-        const playerIndex = playerId === "player1" ? 0 : 1;
-        const fighter = teams.player[playerIndex];
+    {
+      attacks: phase === "fighting",
+      finishTurn: phase === "fighting",
+    },
+    (action, index, playerId) => {
+      console.log("Battle key:", { action, index, playerId });
+      const playerIndex = playerId === "player1" ? 0 : 1;
+      const fighter = teams.player[playerIndex];
 
-        if (!fighter || fighter.isCpuTeammate) return;
+      if (!fighter || fighter.isCpuTeammate) return;
 
-        if (action === "attack") {
-          if (
-            fighter.health <= 0 ||
-            fighter.turnFinished ||
-            pendingAllyAttack ||
-            phase !== "fighting"
-          ) {
-            return;
-          }
-
-          useAttack(fighter.id, index);
-        } else if (action === "finishTurn") {
-          finishPlayerTurn(fighter.id);
+      if (action === "attack") {
+        if (
+          fighter.health <= 0 ||
+          fighter.turnFinished ||
+          pendingAllyAttack ||
+          phase !== "fighting"
+        ) {
+          return;
         }
-        
-      },
-      phase === "fighting" &&
-  !pendingDefense &&
-  !pendingAllyAttack,
-    );
+
+        useAttack(fighter.id, index);
+      } else if (action === "finishTurn") {
+        finishPlayerTurn(fighter.id);
+      }
+    },
+    phase === "fighting" && !pendingDefense && !pendingAllyAttack,
+  );
 
   useEffect(() => {
     if (phase !== "fighting" || pendingAllyAttack) return;
@@ -949,21 +944,25 @@ export default function TeamBattle() {
         );
         if (!target) return;
 
-        const attackIndex = cpu.attacks.findIndex(
-          (attack) => attack.state === true && cpu.mana >= (attack.cost ?? 0),
-        );
+        const usableAttacks = cpu.attacks
+  .map((attack, attackIndex) => ({ attack, attackIndex }))
+  .filter(
+    ({ attack }) =>
+      attack.state === true && cpu.mana >= (attack.cost ?? 0),
+  )
+  .slice(0, difficulty === "Easy" ? 1 : Number.POSITIVE_INFINITY);
 
-        if (attackIndex !== -1) {
-          batch.push({
-            id: `${roundNumber}-${cpu.id}-${attackIndex}`,
-            targetId: target.id,
-            cpuId: cpu.id,
-            attackIndex,
-            visible: false,
-            timeLeft: 10,
-            outcome: "",
-          });
-        }
+usableAttacks.forEach(({ attackIndex }) => {
+  batch.push({
+    id: `${roundNumber}-${cpu.id}-${attackIndex}`,
+    targetId: target.id,
+    cpuId: cpu.id,
+    attackIndex,
+    visible: false,
+    timeLeft: 10,
+    outcome: "",
+  });
+});
       });
 
       if (batch.length) {
@@ -1203,7 +1202,10 @@ export default function TeamBattle() {
       );
 
       expiredIds.forEach((id) => {
-        setTimeout(() => resolveLocalCoopDefenseRef.current(id, "timeout"), 0);
+        setTimeout(
+          () => resolveLocalCoopDefenseRef.current(id, "take-damage"),
+          0,
+        );
       });
     }, 1000);
 
@@ -1291,13 +1293,15 @@ export default function TeamBattle() {
     }
 
     const outcome =
-      choice === "defend"
-        ? `${currentDefender.name} defended ${currentAttacker.name}'s ${currentAttack.name}.`
-        : choice === "evade"
-          ? result?.evaded
-            ? `${currentDefender.name} evaded ${currentAttack.name}.`
-            : `${currentDefender.name} failed to evade ${currentAttack.name}.`
-          : `Time ran out. ${currentAttack.name} hit ${currentDefender.name}.`;
+  choice === "defend"
+    ? `${currentDefender.name} defended ${currentAttacker.name}'s ${currentAttack.name}.`
+    : choice === "evade"
+      ? result?.evaded
+        ? `${currentDefender.name} evaded ${currentAttack.name}.`
+        : `${currentDefender.name} failed to evade ${currentAttack.name}.`
+      : choice === "timeout"
+        ? `Time ran out. ${currentAttack.name} hit ${currentDefender.name}.`
+        : `${currentDefender.name} took the full damage from ${currentAttack.name}.`;
 
     setTeams({ player: updatedPlayers, opponent: updatedCPU });
     setLocalCoopDefenses((current) =>
