@@ -2362,3 +2362,338 @@ battlefield > .local-coop-incoming {
     opacity: 0;
   }
 }
+
+
+.team-round-intro__name {
+  display: block;
+  margin-top: 8px;
+  color: #fff;
+  font-weight: 800;
+}
+
+.team-round-intro__status {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.team-round-intro__status.status-alive {
+  color: #8fffc0;
+  background: #176b4933;
+  border: 1px solid #43d995;
+}
+
+.team-round-intro__status.status-ko {
+  color: #ff7187;
+  background: #b5092b33;
+  border: 1px solid #ff3159;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 8px #ff315966;
+}
+
+.team-round-intro__fighter.is-defeated img {
+  filter: grayscale(1) brightness(0.65);
+  opacity: 0.75;
+}
+
+
+.team-round-intro__healthbar {
+  width: min(100%, 160px);
+  height: 9px;
+  margin: 8px auto 0;
+  overflow: hidden;
+  background: #10131c;
+  border: 1px solid #ffffff55;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 3px #0009;
+}
+
+.team-round-intro__healthbar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition:
+    width 350ms ease,
+    background-color 250ms ease,
+    box-shadow 250ms ease;
+}
+
+.team-round-intro__healthbar.health-healthy
+  .team-round-intro__healthbar-fill {
+  background: #35df83;
+  box-shadow: 0 0 8px #35df8380;
+}
+
+.team-round-intro__healthbar.health-warning
+  .team-round-intro__healthbar-fill {
+  background: #f4d438;
+  box-shadow: 0 0 8px #f4d43880;
+}
+
+.team-round-intro__healthbar.health-danger
+  .team-round-intro__healthbar-fill {
+  background: #ff343f;
+  box-shadow: 0 0 9px #ff343f99;
+}
+
+.team-round-intro__healthbar.health-critical
+  .team-round-intro__healthbar-fill {
+  background: #690018;
+  box-shadow: 0 0 7px #690018;
+}
+
+.team-round-intro__fighter.is-defeated
+  .team-round-intro__healthbar-fill {
+  background: #25252b;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-round-intro__healthbar-fill {
+    transition: none;
+  }
+}
+
+
+.team-finish-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10002;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+  color: #fff;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at center, #222b40 0%, #0a0d17 65%, #020309 100%);
+  animation: teamFinishEnter 450ms ease-out both;
+}
+
+.team-finish-overlay.finish-victory {
+  --finish-color: #13d5ff;
+  --finish-glow: #13d5ff88;
+}
+
+.team-finish-overlay.finish-defeat {
+  --finish-color: #ff3159;
+  --finish-glow: #ff315988;
+}
+
+.team-finish-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--finish-color);
+  animation: teamFinishFlash 650ms ease-out both;
+}
+
+.team-finish-eyebrow,
+.team-finish-title,
+.team-finish-message,
+.team-finish-versus,
+.team-finish-side,
+.team-finish-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.team-finish-eyebrow {
+  margin: 0 0 8px;
+  color: var(--finish-color);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.35em;
+}
+
+.team-finish-title {
+  margin: 0;
+  font-size: clamp(3.5rem, 10vw, 7rem);
+  font-weight: 1000;
+  font-style: italic;
+  line-height: 0.95;
+  text-shadow: 0 0 16px var(--finish-glow), 0 0 40px var(--finish-glow);
+  animation: teamFinishTitleImpact 700ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.team-finish-message {
+  margin: 12px 0 26px;
+  color: #e3eaf6;
+  font-size: clamp(0.65rem, 1.7vw, 0.95rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.team-finish-versus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(10px, 3vw, 32px);
+  width: min(100%, 1000px);
+}
+
+.team-finish-side {
+  min-width: 0;
+}
+
+.team-finish-side h2 {
+  margin: 0 0 14px;
+  color: var(--finish-color);
+  font-size: clamp(0.8rem, 2vw, 1.2rem);
+  font-weight: 950;
+  letter-spacing: 0.18em;
+}
+
+.team-finish-cards {
+  display: flex;
+  justify-content: center;
+  gap: clamp(8px, 1.5vw, 18px);
+}
+
+.team-finish-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  max-width: 190px;
+  padding: 8px;
+  background: #111827cc;
+  border: 1px solid #ffffff30;
+  border-radius: 10px;
+  animation: teamFinishCardWin 750ms cubic-bezier(.16, 1, .3, 1) both;
+  animation-delay: calc(350ms + var(--card-index, 0) * 130ms);
+}
+
+.winning-side .team-finish-card {
+  border-color: var(--finish-color);
+  box-shadow: 0 0 22px var(--finish-glow);
+}
+
+.defeated-side .team-finish-card {
+  filter: grayscale(1);
+  opacity: 0.7;
+  animation-name: teamFinishCardLose;
+}
+
+.team-finish-card img {
+  display: block;
+  width: 100%;
+  height: clamp(100px, 22vh, 210px);
+  object-fit: contain;
+}
+
+.team-finish-card strong {
+  margin-top: 8px;
+  font-size: clamp(0.65rem, 1.5vw, 0.95rem);
+  overflow-wrap: anywhere;
+}
+
+.team-finish-card span {
+  margin-top: 6px;
+  color: var(--finish-color);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.defeated-side .team-finish-card span {
+  color: #ff7187;
+}
+
+.team-finish-vs {
+  color: #fff;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  font-weight: 1000;
+  font-style: italic;
+  text-shadow: 0 0 16px var(--finish-glow);
+}
+
+.team-finish-footer {
+  margin: 26px 0 0;
+  color: #aab7ca;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  animation: teamFinishFooterPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes teamFinishEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes teamFinishFlash {
+  0% { opacity: 0.75; }
+  100% { opacity: 0; }
+}
+
+@keyframes teamFinishTitleImpact {
+  0% { opacity: 0; transform: scale(1.7) rotate(-5deg); }
+  65% { opacity: 1; transform: scale(0.94) rotate(1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes teamFinishCardWin {
+  from { opacity: 0; transform: translateY(65px) scale(0.75); }
+  70% { opacity: 1; transform: translateY(-8px) scale(1.04); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes teamFinishCardLose {
+  from { opacity: 0; transform: translateY(-45px) rotate(-5deg); }
+  to { opacity: 0.7; transform: translateY(12px) rotate(3deg); }
+}
+
+@keyframes teamFinishFooterPulse {
+  to { opacity: 0.55; }
+}
+
+@media (max-width: 620px) {
+  .team-finish-overlay {
+    padding: 12px;
+  }
+
+  .team-finish-versus {
+    gap: 7px;
+  }
+
+  .team-finish-card {
+    padding: 4px;
+  }
+
+  .team-finish-card img {
+    height: clamp(80px, 16vh, 140px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-finish-overlay,
+  .team-finish-flash,
+  .team-finish-title,
+  .team-finish-card,
+  .team-finish-footer {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
+}
+
+/* Fade out the Team K.O. screen before showing the result screen */
+.team-finish-overlay.is-fading-out {
+  animation: teamFinishFadeOut 0.6s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes teamFinishFadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}

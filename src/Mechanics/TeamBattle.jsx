@@ -66,6 +66,35 @@ function describeEffects(effects, targetName, kind) {
     });
 }
 
+function RoundIntroHealthBar({ fighter }) {
+  const maximumHealth = Number(fighter.maximumHealth) || 1;
+  const health = Math.max(0, Number(fighter.health) || 0);
+
+  const percent = Math.max(0, Math.min(100, (health / maximumHealth) * 100));
+
+  const healthLevel =
+    percent <= 10
+      ? "critical"
+      : percent <= 30
+        ? "danger"
+        : percent <= 50
+          ? "warning"
+          : "healthy";
+
+  return (
+    <div
+      className={`team-round-intro__healthbar health-${healthLevel}`}
+      role="img"
+      aria-label={`${health} of ${maximumHealth} health remaining`}
+    >
+      <div
+        className="team-round-intro__healthbar-fill"
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+  );
+}
+
 function FighterPreview({
   fighter,
   team,
@@ -271,7 +300,11 @@ export default function TeamBattle() {
   );
   const [knockout, setKnockout] = useState(null);
   const [isKnockoutFadingOut, setIsKnockoutFadingOut] = useState(false);
-const previousTeamsRef = useRef(teams);
+  const previousTeamsRef = useRef(teams);
+  const [teamFinishComplete, setTeamFinishComplete] = useState(false);
+  const [isTeamFinishFadingOut, setIsTeamFinishFadingOut] =
+  useState(false);
+
 
 
   const [allyAttackOutcome, setAllyAttackOutcome] = useState(null);
@@ -285,6 +318,12 @@ const previousTeamsRef = useRef(teams);
   const [activePlayerId, setActivePlayerId] = useState(
     playerTeamIds[0] ?? null,
   );
+
+    const isFinalTeamPhase = phase === "victory" || phase === "defeat";
+
+  const winningTeam = phase === "victory" ? teams.player : teams.opponent;
+
+  const defeatedTeam = phase === "defeat" ? teams.player : teams.opponent;
 
   const [pendingDefense, setPendingDefense] = useState(null);
   const [cpuActionQueue, setCpuActionQueue] = useState(null);
@@ -305,32 +344,54 @@ const previousTeamsRef = useRef(teams);
 
   const defenseResolvedRef = useRef(false);
 
-  
-useEffect(() => {
-  if (!knockout) {
+  useEffect(() => {
+    if (!knockout) {
+      setIsKnockoutFadingOut(false);
+      return undefined;
+    }
+
+    // Start the fade-out after the K.O. message has been visible.
     setIsKnockoutFadingOut(false);
+
+    const fadeTimer = setTimeout(() => {
+      setIsKnockoutFadingOut(true);
+    }, 2100);
+
+    // Remove the overlay after the fade-out finishes.
+    const removeTimer = setTimeout(() => {
+      setKnockout(null);
+      setIsKnockoutFadingOut(false);
+    }, 2600);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, [knockout]);
+
+  useEffect(() => {
+  if (!isFinalTeamPhase) {
+    setTeamFinishComplete(false);
+    setIsTeamFinishFadingOut(false);
     return undefined;
   }
 
-  // Start the fade-out after the K.O. message has been visible.
-  setIsKnockoutFadingOut(false);
+  setTeamFinishComplete(false);
+  setIsTeamFinishFadingOut(false);
 
   const fadeTimer = setTimeout(() => {
-    setIsKnockoutFadingOut(true);
-  }, 2100);
-
-  // Remove the overlay after the fade-out finishes.
-  const removeTimer = setTimeout(() => {
-    setKnockout(null);
-    setIsKnockoutFadingOut(false);
+    setIsTeamFinishFadingOut(true);
   }, 2600);
+
+  const completeTimer = setTimeout(() => {
+    setTeamFinishComplete(true);
+  }, 3200);
 
   return () => {
     clearTimeout(fadeTimer);
-    clearTimeout(removeTimer);
+    clearTimeout(completeTimer);
   };
-}, [knockout]);
-
+}, [isFinalTeamPhase, phase]);
 
   useEffect(() => {
     if (!combatPopups.length) return undefined;
@@ -380,36 +441,36 @@ useEffect(() => {
   );
 
   useEffect(() => {
-  const previousTeams = previousTeamsRef.current;
+    const previousTeams = previousTeamsRef.current;
 
-  const defeatedPlayer = teams.player.find((fighter) => {
-    const previous = previousTeams.player.find(
-      (oldFighter) => oldFighter.id === fighter.id,
-    );
+    const defeatedPlayer = teams.player.find((fighter) => {
+      const previous = previousTeams.player.find(
+        (oldFighter) => oldFighter.id === fighter.id,
+      );
 
-    return previous?.health > 0 && fighter.health <= 0;
-  });
-
-  const defeatedOpponent = teams.opponent.find((fighter) => {
-    const previous = previousTeams.opponent.find(
-      (oldFighter) => oldFighter.id === fighter.id,
-    );
-
-    return previous?.health > 0 && fighter.health <= 0;
-  });
-
-  // Save the current health for the next comparison.
-  previousTeamsRef.current = teams;
-
-  const defeatedFighter = defeatedOpponent ?? defeatedPlayer;
-
-  if (defeatedFighter) {
-    setKnockout({
-      ...defeatedFighter,
-      defeatedTeam: defeatedOpponent ? "opponent" : "player",
+      return previous?.health > 0 && fighter.health <= 0;
     });
-  }
-}, [teams]);
+
+    const defeatedOpponent = teams.opponent.find((fighter) => {
+      const previous = previousTeams.opponent.find(
+        (oldFighter) => oldFighter.id === fighter.id,
+      );
+
+      return previous?.health > 0 && fighter.health <= 0;
+    });
+
+    // Save the current health for the next comparison.
+    previousTeamsRef.current = teams;
+
+    const defeatedFighter = defeatedOpponent ?? defeatedPlayer;
+
+    if (defeatedFighter) {
+      setKnockout({
+        ...defeatedFighter,
+        defeatedTeam: defeatedOpponent ? "opponent" : "player",
+      });
+    }
+  }, [teams]);
 
   const selectRoundTarget = (fighterId, opponentId) => {
     const player = teams.player.find((fighter) => fighter.id === fighterId);
@@ -901,8 +962,6 @@ useEffect(() => {
     },
     phase === "fighting" && !pendingDefense && !pendingAllyAttack,
   );
-
-  
 
   useEffect(() => {
     if (phase !== "fighting" || pendingAllyAttack) return;
@@ -1947,7 +2006,7 @@ useEffect(() => {
     );
   }
 
- if (phase === "victory" && !knockout) {
+  if (phase === "victory" && !knockout && teamFinishComplete) {
     return (
       <VictoryScreen
         damageDealt={damageDealt}
@@ -1958,7 +2017,7 @@ useEffect(() => {
     );
   }
 
-  if (phase === "defeat" && !knockout) {
+  if (phase === "defeat" && !knockout && teamFinishComplete) {
     return (
       <GameOverScreen
         damageDealt={damageDealt}
@@ -1971,39 +2030,120 @@ useEffect(() => {
 
   return (
     <main className="team-battle">
-      {knockout && (
+
+{isFinalTeamPhase && (
   <div
-    className={`team-ko-overlay ko-${knockout.defeatedTeam} ${
-  isKnockoutFadingOut ? "is-fading-out" : ""
-}`}
-    role="alert"
-    aria-live="assertive"
+    className={`team-finish-overlay ${
+    phase === "victory" ? "finish-victory" : "finish-defeat"
+  } ${isTeamFinishFadingOut ? "is-fading-out" : ""}`}
+  role="alert"
+  aria-live="assertive"
   >
-    <div className="team-ko-flash" />
+    <div className="team-finish-flash" />
 
-    <div className="team-ko-content">
-      <p className="team-ko-eyebrow">FIGHTER DEFEATED</p>
+    <p className="team-finish-eyebrow">
+      FIGHTER'S ARENA
+    </p>
 
-      {knockout.image && (
-        <img
-          className="team-ko-portrait"
-          src={knockout.image}
-          alt={knockout.name}
-        />
-      )}
+    <h1 className="team-finish-title">
+      TEAM K.O.!
+    </h1>
 
-      <h1 className="team-ko-title">K.O.!</h1>
+    <p className="team-finish-message">
+      {phase === "victory"
+        ? "THE OPPOSING TEAM HAS BEEN DEFEATED"
+        : "YOUR ENTIRE TEAM HAS BEEN DEFEATED"}
+    </p>
 
-      <p className="team-ko-name">{knockout.name}</p>
+    <div className="team-finish-versus">
+      <div className="team-finish-side defeated-side">
+        <h2>DEFEATED</h2>
 
-      <p className="team-ko-subtitle">
-        {knockout.defeatedTeam === "opponent"
-          ? "OPPONENT DOWN"
-          : "PLAYER DOWN"}
-      </p>
+        <div className="team-finish-cards">
+          {defeatedTeam.map((fighter, index) => (
+            <div
+              className="team-finish-card"
+              key={fighter.id}
+              style={{ "--card-index": index }}
+            >
+              {fighter.image && (
+                <img src={fighter.image} alt="" />
+              )}
+
+              <strong>{fighter.name}</strong>
+              <span>K.O.</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="team-finish-vs">VS</div>
+
+      <div className="team-finish-side winning-side">
+        <h2>WINNERS</h2>
+
+        <div className="team-finish-cards">
+          {winningTeam.map((fighter, index) => (
+            <div
+              className="team-finish-card"
+              key={fighter.id}
+              style={{ "--card-index": index }}
+            >
+              {fighter.image && (
+                <img src={fighter.image} alt="" />
+              )}
+
+              <strong>{fighter.name}</strong>
+              <span>
+                {Math.max(0, fighter.health)} HP
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
+
+    <p className="team-finish-footer">
+      {teamFinishComplete
+        ? "RESULT CONFIRMED"
+        : "MATCH COMPLETE"}
+    </p>
   </div>
 )}
+
+      {knockout && (
+        <div
+          className={`team-ko-overlay ko-${knockout.defeatedTeam} ${
+            isKnockoutFadingOut ? "is-fading-out" : ""
+          }`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="team-ko-flash" />
+
+          <div className="team-ko-content">
+            <p className="team-ko-eyebrow">FIGHTER DEFEATED</p>
+
+            {knockout.image && (
+              <img
+                className="team-ko-portrait"
+                src={knockout.image}
+                alt={knockout.name}
+              />
+            )}
+
+            <h1 className="team-ko-title">K.O.!</h1>
+
+            <p className="team-ko-name">{knockout.name}</p>
+
+            <p className="team-ko-subtitle">
+              {knockout.defeatedTeam === "opponent"
+                ? "OPPONENT DOWN"
+                : "PLAYER DOWN"}
+            </p>
+          </div>
+        </div>
+      )}
       {(showRoundIntro || isIntroFadingOut) && (
         <div
           className={`team-round-intro ${
@@ -2021,12 +2161,36 @@ useEffect(() => {
               <div className="team-round-intro__label">CPU TEAM</div>
 
               <div className="team-round-intro__fighters">
-                {teams.opponent.map((fighter) => (
-                  <div className="team-round-intro__fighter" key={fighter.id}>
-                    {fighter.image && <img src={fighter.image} alt="" />}
-                    <span>{fighter.name}</span>
-                  </div>
-                ))}
+                {teams.opponent.map((fighter) => {
+                  const isKO = fighter.health <= 0;
+
+                  return (
+                    <div
+                      className={`team-round-intro__fighter ${
+                        isKO ? "is-defeated" : "is-alive"
+                      }`}
+                      key={fighter.id}
+                    >
+                      {fighter.image && <img src={fighter.image} alt="" />}
+
+                      <RoundIntroHealthBar fighter={fighter} />
+
+                      <span className="team-round-intro__name">
+                        {fighter.name}
+                      </span>
+
+                      <span
+                        className={`team-round-intro__status ${
+                          isKO ? "status-ko" : "status-alive"
+                        }`}
+                      >
+                        {isKO
+                          ? "K.O."
+                          : `HP ${Math.max(0, fighter.health)} / ${fighter.maximumHealth}`}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -2036,12 +2200,36 @@ useEffect(() => {
               <div className="team-round-intro__label">PLAYER TEAM</div>
 
               <div className="team-round-intro__fighters">
-                {teams.player.map((fighter) => (
-                  <div className="team-round-intro__fighter" key={fighter.id}>
-                    {fighter.image && <img src={fighter.image} alt="" />}
-                    <span>{fighter.name}</span>
-                  </div>
-                ))}
+                {teams.player.map((fighter) => {
+                  const isKO = fighter.health <= 0;
+
+                  return (
+                    <div
+                      className={`team-round-intro__fighter ${
+                        isKO ? "is-defeated" : "is-alive"
+                      }`}
+                      key={fighter.id}
+                    >
+                      {fighter.image && <img src={fighter.image} alt="" />}
+
+                      <RoundIntroHealthBar fighter={fighter} />
+
+                      <span className="team-round-intro__name">
+                        {fighter.name}
+                      </span>
+
+                      <span
+                        className={`team-round-intro__status ${
+                          isKO ? "status-ko" : "status-alive"
+                        }`}
+                      >
+                        {isKO
+                          ? "K.O."
+                          : `HP ${Math.max(0, fighter.health)} / ${fighter.maximumHealth}`}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
