@@ -94,9 +94,9 @@ const Kirishima = {
       buff: {
         defense: 7,
       },
-      debuff: {
-        defense: 12,
-      },
+      debuff: {defense: 12,},
+        
+      
     },
     {
       name: "Red Riot Unbreakable",
