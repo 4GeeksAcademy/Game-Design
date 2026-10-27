@@ -43,19 +43,29 @@ export default function TeamAttackOptions({
   fighter,
   isActive,
   phase,
-  pendingAllyAttack = false,
+  lockDuringAllyAttack = false,
   allowSimultaneousActions = false,
   onAttack,
   onFinishTurn,
 }) {
   if (!fighter) return null;
 
-  const canAct =
-    phase === "fighting" &&
-    !pendingAllyAttack &&
-    (allowSimultaneousActions || isActive) &&
-    fighter.health > 0 &&
-    !fighter.turnFinished;
+  // const canAct =
+  //   phase === "fighting" &&
+  // !lockDuringAllyAttack &&
+  // (allowSimultaneousActions || isActive) &&
+  // fighter.health > 0 &&
+  // !fighter.turnFinished;
+
+  const canFinishTurn =
+  phase === "fighting" &&
+  (allowSimultaneousActions || isActive) &&
+  fighter.health > 0 &&
+  !fighter.turnFinished;
+
+const canUseAttacks =
+  canFinishTurn &&
+  !lockDuringAllyAttack;
 
     
   return (
@@ -70,9 +80,9 @@ export default function TeamAttackOptions({
       <div className="team-attack-grid">
         {fighter.attacks.map((attack, index) => {
           const usable =
-            canAct &&
-            attack.state === true &&
-            fighter.mana >= (attack.cost ?? 0);
+  canUseAttacks &&
+  attack.state === true &&
+  fighter.mana >= (attack.cost ?? 0);
 
           return (
             <div className="team-attack-wrapper" key={`${fighter.id}-${index}`}>
@@ -113,7 +123,7 @@ export default function TeamAttackOptions({
       <button
         type="button"
         className="finish-turn-button"
-        disabled={!canAct}
+        disabled={!canFinishTurn}
         onClick={() => onFinishTurn(fighter.id)}
       >
         {fighter.turnFinished ? "TURN FINISHED" : "FINISH TURN"}
