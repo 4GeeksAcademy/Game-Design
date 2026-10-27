@@ -1,8 +1,111 @@
-
-import { attackCharacter } from "./Health.js";
+import { attackCharacter, evadeAttack } from "./Health.js";
 
 const MAX_QUEUE_SIZE = 10;
 const ATTACK_TIMEOUT = 10000;
+
+
+
+function normalDefendOrEvade(attack, attacker, defender) {
+  if (!attack || !attacker || !defender) return null;
+
+  const defense =
+    typeof defender.defense === "object"
+      ? defender.defense?.amount ?? 0
+      : defender.defense ?? 0;
+
+  const health = defender.health ?? 0;
+  const mana = defender.mana ?? 0;
+  const cooldown = defender.cooldown ?? 0;
+  const damage = Math.max(0, attack.damage ?? 0);
+
+  // Zero-damage moves should resolve without spending defense.
+  if (damage === 0 || cooldown <= 0) {
+    return attackCharacter(attack, attacker, defender);
+  }
+
+  const damageAfterBlock = Math.max(0, damage - defense);
+  const blockPreventsKnockout =
+    damage >= health && damageAfterBlock < health;
+
+  const evadeManaNeeded = Math.max(
+    0,
+    (attack.speed ?? 0) - (defender.agility ?? 0),
+  );
+
+  // Never attempt an evade that would fail due to insufficient mana.
+  const canEvade = mana >= evadeManaNeeded;
+  const evadePreventsKnockout = canEvade && damage < health;
+
+  const isFatal = damage >= health;
+
+  let choice = "take-damage";
+
+  if (isFatal) {
+    // Survival comes first. Avoid spending resources if the
+    // defensive move cannot prevent the knockout.
+    if (blockPreventsKnockout && !evadePreventsKnockout) {
+      choice = "defend";
+    } else if (evadePreventsKnockout && !blockPreventsKnockout) {
+      choice = "evade";
+    } else if (blockPreventsKnockout && evadePreventsKnockout) {
+      // Both work: prefer the option that preserves more mana.
+      choice =
+        evadeManaNeeded === 0 || evadeManaNeeded <= mana * 0.25
+          ? "evade"
+          : "defend";
+    }
+  } else {
+    // Don't spend a defensive charge on trivial damage.
+    const trivialDamage = Math.max(5, health * 0.1);
+
+    if (damage <= trivialDamage) {
+      choice = "take-damage";
+    } else if (canEvade) {
+      const manaIsAffordable =
+        evadeManaNeeded <= mana * 0.25;
+
+      // Evade when it prevents meaningful damage at a reasonable
+      // mana cost, especially when blocking would leave damage.
+      if (
+        damageAfterBlock > 0 &&
+        manaIsAffordable &&
+        damageAfterBlock >= damage * 0.25
+      ) {
+        choice = "evade";
+      } else if (damageAfterBlock < damage) {
+        choice = "defend";
+      }
+    } else if (damageAfterBlock < damage) {
+      choice = "defend";
+    }
+  }
+
+  let result;
+
+  if (choice === "defend") {
+    result = attackCharacter(
+      attack,
+      attacker,
+      defender,
+      defense,
+    );
+  } else if (choice === "evade") {
+    result = evadeAttack(attack, attacker, defender);
+  } else {
+    result = attackCharacter(attack, attacker, defender);
+  }
+
+  if (!result) return null;
+
+  if (choice === "defend" || choice === "evade") {
+    defender.cooldown = Math.max(0, cooldown - 1);
+  }
+
+  result.action =
+    choice === "take-damage" ? "take damage" : choice;
+
+  return result;
+}
 
 function scoreAttack(attack) {
   let score = 0;
@@ -221,4 +324,5 @@ export {
   aiChooseNormalAttacks,
   chooseNormalAttack,
   createNormalAIController,
+  normalDefendOrEvade,
 };
