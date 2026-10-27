@@ -18,13 +18,42 @@ function scoreAttack(attack) {
   return score;
 }
 
+
+function getNormalAttackPriority(attacks) {
+  const damagingAttacks = attacks
+    .filter((attack) => (attack.damage ?? 0) > 0)
+    .sort((a, b) => scoreAttack(b) - scoreAttack(a));
+
+  const utilityAttacks = attacks
+    .filter((attack) => (attack.damage ?? 0) <= 0)
+    .sort((a, b) => scoreAttack(b) - scoreAttack(a));
+
+  return [...damagingAttacks, ...utilityAttacks];
+}
+
 function aiChooseNormalAttacks(ai) {
   if (!ai || !Array.isArray(ai.attacks)) return [];
 
-  return ai.attacks
-    .filter((attack) => attack.state === true)
-    .sort((a, b) => scoreAttack(b) - scoreAttack(a))
-    .slice(0, MAX_QUEUE_SIZE);
+  const usableAttacks = ai.attacks.filter(
+    (attack) => attack.state === true
+  );
+
+  return getNormalAttackPriority(usableAttacks).slice(
+    0,
+    MAX_QUEUE_SIZE
+  );
+}
+
+function chooseNormalAttack(fighter) {
+  if (!fighter || !Array.isArray(fighter.attacks)) return null;
+
+  const usableAttacks = fighter.attacks.filter(
+    (attack) =>
+      attack.state === true &&
+      fighter.mana >= (attack.cost ?? 0)
+  );
+
+  return getNormalAttackPriority(usableAttacks)[0] ?? null;
 }
 
 function createNormalAIController({
@@ -188,6 +217,8 @@ export {
   MAX_QUEUE_SIZE,
   ATTACK_TIMEOUT,
   scoreAttack,
+  getNormalAttackPriority,
   aiChooseNormalAttacks,
+  chooseNormalAttack,
   createNormalAIController,
 };

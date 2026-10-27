@@ -453,12 +453,9 @@ function BotSimulator() {
       totalBattles,
       matchupCount,
       averageRounds:
-        totalBattles > 0
-          ? (totalRounds / totalBattles).toFixed(1)
-          : "0.0",
+        totalBattles > 0 ? (totalRounds / totalBattles).toFixed(1) : "0.0",
       lastResult,
     });
-
   }
 
   function runSimulations() {
@@ -526,12 +523,18 @@ function BotSimulator() {
                   <span className="health-number">
                     {entry.attackerHealth} HP
                   </span>
+                  <span className="mana-number">
+                    {entry.attackerMana ?? "—"} MP
+                  </span>
                 </span>
 
                 <span>
                   <strong>{entry.defender}</strong>
                   <span className="health-number">
                     {entry.defenderHealth} HP
+                  </span>
+                  <span className="mana-number">
+                    {entry.defenderMana ?? "—"} MP
                   </span>
                 </span>
               </div>

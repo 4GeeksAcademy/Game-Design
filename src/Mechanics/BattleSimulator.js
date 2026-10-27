@@ -1,10 +1,11 @@
 import { attackCharacter, evadeAttack } from "./Health.js";
+import { chooseNormalAttack, scoreAttack } from "./AI_NormalDifficulty.js";
 
 const MAX_ROUNDS = 100;
 const MAX_ATTACKS_PER_TURN = {
   Easy: 1,
-  Normal: 4,
-  Hard: 4,
+  Normal: 6,
+  Hard: 10,
 };
 
 // Make independent copies so the original roster never changes.
@@ -37,18 +38,6 @@ function getDefense(fighter) {
     : (fighter.defense?.amount ?? 0);
 }
 
-function scoreAttack(attack) {
-  let score = Math.max(0, attack.damage ?? 0) * 1.5;
-  score += Math.max(0, attack.speed ?? 0) * 0.5;
-
-  if (attack.buff) score += 12;
-  if (attack.debuff) score += 14;
-
-  score -= Math.max(0, attack.cost ?? 0) * 0.6;
-
-  return score;
-}
-
 function chooseAttack(fighter, difficulty) {
   const available = fighter.attacks.filter(
     (attack) => attack.state === true && fighter.mana >= (attack.cost ?? 0),
@@ -61,8 +50,12 @@ function chooseAttack(fighter, difficulty) {
     return available[Math.floor(Math.random() * available.length)];
   }
 
-  // Normal: prioritize attacks with a higher score.
-  // Hard will get its own strategy when we implement Hard AI.
+  // Normal: use the shared damage-first strategy.
+  if (difficulty === "Normal") {
+    return chooseNormalAttack(fighter);
+  }
+
+  // Hard: keep the existing scoring behavior for now.
   return [...available].sort((a, b) => scoreAttack(b) - scoreAttack(a))[0];
 }
 
@@ -157,6 +150,9 @@ function runBotTurn(attacker, defender, difficulty, stats, log, round) {
     if (!attack) break;
 
     const healthBefore = defender.health;
+    const attackerManaBefore = attacker.mana;
+    const defenderManaBefore = defender.mana;
+
     const result = resolveBotAttack(attack, attacker, defender);
 
     if (!result) {
@@ -184,6 +180,14 @@ function runBotTurn(attacker, defender, difficulty, stats, log, round) {
       damage: healthBefore - defender.health,
       attackerHealth: attacker.health,
       defenderHealth: defender.health,
+      attackerMana: attacker.mana,
+      defenderMana: defender.mana,
+      attackerMana: attacker.mana,
+      defenderMana: defender.mana,
+      attackerManaUsed: Math.max(0, attackerManaBefore - attacker.mana),
+      attackerMana: attacker.mana,
+      defenderManaUsed: Math.max(0, defenderManaBefore - defender.mana),
+      defenderMana: defender.mana,
     });
   }
 
@@ -258,16 +262,11 @@ function simulateBattle(
     roundsCompleted = round;
 
     // Alternate who acts first each round to reduce first-turn bias.
-    const order =
-      round % 2 === 1
-        ? [
-            [botOne, botTwo, difficultyOne],
-            [botTwo, botOne, difficultyTwo],
-          ]
-        : [
-            [botTwo, botOne, difficultyTwo],
-            [botOne, botTwo, difficultyOne],
-          ];
+    // Keep the original fighter order consistent every round.
+    const order = [
+      [botOne, botTwo, difficultyOne],
+      [botTwo, botOne, difficultyTwo],
+    ];
 
     for (const [attacker, defender, difficulty] of order) {
       if (attacker.health <= 0 || defender.health <= 0) break;
