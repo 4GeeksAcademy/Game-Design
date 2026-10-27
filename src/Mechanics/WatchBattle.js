@@ -7,11 +7,12 @@ import {
 } from "./BattleSimulator.js";
 
 const MAX_ROUNDS = 100;
+const OPENING_TURN_ATTACK_LIMIT = 3;
 
 const MAX_ATTACKS_PER_TURN = {
   Easy: 1,
-  Normal: 4,
-  Hard: 4,
+  Normal: 6,
+  Hard: 10,
 };
 
 // Create an independent battle without changing the original fighters.
@@ -262,8 +263,14 @@ function nextWatchDuelAction(battle) {
       return battle;
     }
 
-    const attackLimit =
-      MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+    const difficultyAttackLimit =
+  MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+
+const isOpeningTurn = battle.round === 1 && battle.turnPosition === 0;
+
+const attackLimit = isOpeningTurn
+  ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyAttackLimit)
+  : difficultyAttackLimit;
 
     const attack =
       battle.attacksThisTurn < attackLimit
@@ -402,8 +409,15 @@ function nextWatchTeamAction(battle) {
       continue;
     }
 
-    const attackLimit =
-      MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+    const difficultyAttackLimit =
+  MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+
+const isOpeningTeamTurn = battle.round === 1 && battle.teamTurn === 0;
+
+const attackLimit = isOpeningTeamTurn
+  ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyAttackLimit)
+  : difficultyAttackLimit;
+
 
     const attack =
       battle.attacksThisTurn < attackLimit

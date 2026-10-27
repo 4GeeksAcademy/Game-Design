@@ -2,6 +2,7 @@ import { attackCharacter, evadeAttack } from "./Health.js";
 import { chooseNormalAttack, scoreAttack } from "./AI_NormalDifficulty.js";
 
 const MAX_ROUNDS = 100;
+const OPENING_TURN_ATTACK_LIMIT = 3;
 const MAX_ATTACKS_PER_TURN = {
   Easy: 1,
   Normal: 6,
@@ -145,11 +146,23 @@ function resolveBotAttack(attack, attacker, defender) {
 }
 
 
-function runBotTurn(attacker, defender, difficulty, stats, log, round) {
+function runBotTurn(
+  attacker,
+  defender,
+  difficulty,
+  stats,
+  log,
+  round,
+  isOpeningTurn = false,
+) {
   let attacksThisTurn = 0;
 
-  const attackLimit =
+  const difficultyAttackLimit =
     MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+
+  const attackLimit = isOpeningTurn
+    ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyAttackLimit)
+    : difficultyAttackLimit;
 
   while (
     attacker.health > 0 &&
@@ -285,7 +298,15 @@ function simulateBattle(
 
       const attackerStats = attacker === botOne ? stats.botOne : stats.botTwo;
 
-      runBotTurn(attacker, defender, difficulty, stats, log, round);
+      runBotTurn(
+  attacker,
+  defender,
+  difficulty,
+  stats,
+  log,
+  round,
+  round === 1 && attacker === botOne,
+);
     }
 
     if (botOne.health <= 0 || botTwo.health <= 0) break;
@@ -462,8 +483,14 @@ function simulateTeamBattle(
 
       if (defender.health <= 0) continue;
 
-      const attackLimit =
-        MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+      const difficultyAttackLimit =
+  MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+
+const isOpeningTeamTurn = round === 1 && attackers === players;
+
+const attackLimit = isOpeningTeamTurn
+  ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyAttackLimit)
+  : difficultyAttackLimit;
 
       let attacksThisTurn = 0;
 

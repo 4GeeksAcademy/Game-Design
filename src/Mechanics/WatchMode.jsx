@@ -15,9 +15,9 @@ import "./WatchMode.css";
 const MAX_ROUNDS = 100;
 
 const SPEEDS = [
-  { label: "0.5×", delay: 1600 },
-  { label: "1×", delay: 900 },
-  { label: "2×", delay: 450 },
+  { label: "0.5×", delay: 2000 },
+  { label: "1×", delay: 1400 },
+  { label: "2×", delay: 150 },
 ];
 
 const PLAYER_COLOR = "#13D5FF";
