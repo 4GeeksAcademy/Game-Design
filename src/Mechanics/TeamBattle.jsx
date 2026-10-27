@@ -66,6 +66,35 @@ function describeEffects(effects, targetName, kind) {
     });
 }
 
+function RoundIntroHealthBar({ fighter }) {
+  const maximumHealth = Number(fighter.maximumHealth) || 1;
+  const health = Math.max(0, Number(fighter.health) || 0);
+
+  const percent = Math.max(0, Math.min(100, (health / maximumHealth) * 100));
+
+  const healthLevel =
+    percent <= 10
+      ? "critical"
+      : percent <= 30
+        ? "danger"
+        : percent <= 50
+          ? "warning"
+          : "healthy";
+
+  return (
+    <div
+      className={`team-round-intro__healthbar health-${healthLevel}`}
+      role="img"
+      aria-label={`${health} of ${maximumHealth} health remaining`}
+    >
+      <div
+        className="team-round-intro__healthbar-fill"
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+  );
+}
+
 function FighterPreview({
   fighter,
   team,
@@ -103,7 +132,11 @@ function FighterPreview({
       {fighter.image && (
         <img className="fighter-portrait" src={fighter.image} alt="" />
       )}
-
+      {fighter.health <= 0 && (
+        <span className="fighter-ko-badge" aria-label="Knocked out">
+          K.O.
+        </span>
+      )}
       <div className="fighter-bars">
         <ResourceBar
           label="HP"
@@ -248,7 +281,7 @@ export default function TeamBattle() {
   } = location.state ?? {};
 
   const resolveLocalCoopDefenseRef = useRef(() => {});
-
+  const [isIntroFadingOut, setIsIntroFadingOut] = useState(false);
   const [playerAttackPopup, setPlayerAttackPopup] = useState(null);
   const [localCoopDefenses, setLocalCoopDefenses] = useState([]);
   const [localCoopDefenseTimers, setLocalCoopDefenseTimers] = useState({});
@@ -265,39 +298,32 @@ export default function TeamBattle() {
   const [teams, setTeams] = useState(() =>
     createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist),
   );
+  const [knockout, setKnockout] = useState(null);
+  const [isKnockoutFadingOut, setIsKnockoutFadingOut] = useState(false);
+  const previousTeamsRef = useRef(teams);
+  const [teamFinishComplete, setTeamFinishComplete] = useState(false);
+  const [isTeamFinishFadingOut, setIsTeamFinishFadingOut] =
+  useState(false);
 
-  //   const [teams, setTeams] = useState(() => {
-  //   const playerFighters = playerTeamIds.map(createBattleFighter);
 
-  //   if (isCpuAssist && playerFighters.length === 1 && opponentTeamIds.length === 2) {
-  //     const availableTeammates = roster
-  //       .map((fighter) => fighter.id)
-  //       .filter((id) => !playerTeamIds.includes(id));
-
-  //     const teammateId =
-  //       availableTeammates[
-  //         Math.floor(Math.random() * availableTeammates.length)
-  //       ];
-
-  //     playerFighters.push(createTeammateFighter(teammateId));
-  //   }
-
-  //   return {
-  //     player: playerFighters,
-  //     opponent: opponentTeamIds.map(createBattleFighter),
-  //   };
-  // });
 
   const [allyAttackOutcome, setAllyAttackOutcome] = useState(null);
   const [pendingAllyAttack, setPendingAllyAttack] = useState(null);
   const [defenseOutcome, setDefenseOutcome] = useState(null);
   const [phase, setPhase] = useState("selecting");
   const [roundNumber, setRoundNumber] = useState(1);
+  const [showRoundIntro, setShowRoundIntro] = useState(true);
   const [roundTargets, setRoundTargets] = useState({});
   const [cpuTargets, setCpuTargets] = useState({});
   const [activePlayerId, setActivePlayerId] = useState(
     playerTeamIds[0] ?? null,
   );
+
+    const isFinalTeamPhase = phase === "victory" || phase === "defeat";
+
+  const winningTeam = phase === "victory" ? teams.player : teams.opponent;
+
+  const defeatedTeam = phase === "defeat" ? teams.player : teams.opponent;
 
   const [pendingDefense, setPendingDefense] = useState(null);
   const [cpuActionQueue, setCpuActionQueue] = useState(null);
@@ -317,6 +343,55 @@ export default function TeamBattle() {
   const [attacksUsed, setAttacksUsed] = useState(0);
 
   const defenseResolvedRef = useRef(false);
+
+  useEffect(() => {
+    if (!knockout) {
+      setIsKnockoutFadingOut(false);
+      return undefined;
+    }
+
+    // Start the fade-out after the K.O. message has been visible.
+    setIsKnockoutFadingOut(false);
+
+    const fadeTimer = setTimeout(() => {
+      setIsKnockoutFadingOut(true);
+    }, 2100);
+
+    // Remove the overlay after the fade-out finishes.
+    const removeTimer = setTimeout(() => {
+      setKnockout(null);
+      setIsKnockoutFadingOut(false);
+    }, 2600);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, [knockout]);
+
+  useEffect(() => {
+  if (!isFinalTeamPhase) {
+    setTeamFinishComplete(false);
+    setIsTeamFinishFadingOut(false);
+    return undefined;
+  }
+
+  setTeamFinishComplete(false);
+  setIsTeamFinishFadingOut(false);
+
+  const fadeTimer = setTimeout(() => {
+    setIsTeamFinishFadingOut(true);
+  }, 2600);
+
+  const completeTimer = setTimeout(() => {
+    setTeamFinishComplete(true);
+  }, 3200);
+
+  return () => {
+    clearTimeout(fadeTimer);
+    clearTimeout(completeTimer);
+  };
+}, [isFinalTeamPhase, phase]);
 
   useEffect(() => {
     if (!combatPopups.length) return undefined;
@@ -365,6 +440,38 @@ export default function TeamBattle() {
     (fighter) => fighter.health > 0,
   );
 
+  useEffect(() => {
+    const previousTeams = previousTeamsRef.current;
+
+    const defeatedPlayer = teams.player.find((fighter) => {
+      const previous = previousTeams.player.find(
+        (oldFighter) => oldFighter.id === fighter.id,
+      );
+
+      return previous?.health > 0 && fighter.health <= 0;
+    });
+
+    const defeatedOpponent = teams.opponent.find((fighter) => {
+      const previous = previousTeams.opponent.find(
+        (oldFighter) => oldFighter.id === fighter.id,
+      );
+
+      return previous?.health > 0 && fighter.health <= 0;
+    });
+
+    // Save the current health for the next comparison.
+    previousTeamsRef.current = teams;
+
+    const defeatedFighter = defeatedOpponent ?? defeatedPlayer;
+
+    if (defeatedFighter) {
+      setKnockout({
+        ...defeatedFighter,
+        defeatedTeam: defeatedOpponent ? "opponent" : "player",
+      });
+    }
+  }, [teams]);
+
   const selectRoundTarget = (fighterId, opponentId) => {
     const player = teams.player.find((fighter) => fighter.id === fighterId);
     const opponent = teams.opponent.find(
@@ -393,6 +500,26 @@ export default function TeamBattle() {
     setRoundTargets((current) => ({ ...current, [fighterId]: opponentId }));
     addLog(`${player.name} will fight ${opponent.name}.`);
   };
+
+  useEffect(() => {
+    if (!showRoundIntro) return;
+
+    setIsIntroFadingOut(false);
+
+    const fadeTimer = setTimeout(() => {
+      setIsIntroFadingOut(true);
+    }, 2400);
+
+    const removeTimer = setTimeout(() => {
+      setShowRoundIntro(false);
+      setIsIntroFadingOut(false);
+    }, 3000);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, [showRoundIntro, roundNumber]);
 
   useEffect(() => {
     if (!isCpuAssist || phase !== "selecting") return;
@@ -501,15 +628,10 @@ export default function TeamBattle() {
 
     setRoundTargets(targetsForRound);
 
-    const newCpuTargets = assignUniqueCpuTargets(
-  teams.opponent,
-  teams.player,
-);
-setCpuTargets(newCpuTargets);
+    const newCpuTargets = assignUniqueCpuTargets(teams.opponent, teams.player);
+    setCpuTargets(newCpuTargets);
 
-setCpuTargets(newCpuTargets);
-
-    
+    setCpuTargets(newCpuTargets);
 
     setTeams((current) => ({ ...current, player: playersWithTargets }));
     setCpuTargets(newCpuTargets);
@@ -994,65 +1116,63 @@ setCpuTargets(newCpuTargets);
       return;
     }
     if (isLocalCoop) {
-  const attacksByTarget = {};
+      const attacksByTarget = {};
 
-  teams.opponent.forEach((cpu) => {
-    if (cpu.health <= 0) return;
+      teams.opponent.forEach((cpu) => {
+        if (cpu.health <= 0) return;
 
-    const target = teams.player.find(
-  (player) =>
-    player.id === cpuTargets[cpu.id] &&
-    player.health > 0,
-);
+        const target = teams.player.find(
+          (player) => player.id === cpuTargets[cpu.id] && player.health > 0,
+        );
 
-    if (!target) return;
+        if (!target) return;
 
-    const attacks = cpu.attacks
-      .map((attack, attackIndex) => ({ attack, attackIndex }))
-      .filter(
-        ({ attack }) =>
-          attack.state === true && cpu.mana >= (attack.cost ?? 0),
-      )
-      .map(({ attackIndex }) => ({
-        id: `${cpu.id}-${attackIndex}-${target.id}`,
-        cpuId: cpu.id,
-        targetId: target.id,
-        attackIndex,
-      }));
+        const attacks = cpu.attacks
+          .map((attack, attackIndex) => ({ attack, attackIndex }))
+          .filter(
+            ({ attack }) =>
+              attack.state === true && cpu.mana >= (attack.cost ?? 0),
+          )
+          .map(({ attackIndex }) => ({
+            id: `${cpu.id}-${attackIndex}-${target.id}`,
+            cpuId: cpu.id,
+            targetId: target.id,
+            attackIndex,
+          }));
 
-    attacksByTarget[target.id] = [
-      ...(attacksByTarget[target.id] ?? []),
-      ...attacks,
-    ];
-  });
+        attacksByTarget[target.id] = [
+          ...(attacksByTarget[target.id] ?? []),
+          ...attacks,
+        ];
+      });
 
-  const firstCards = [];
-  const remainingQueues = {};
+      const firstCards = [];
+      const remainingQueues = {};
 
-  Object.entries(attacksByTarget).forEach(([targetId, attacks]) => {
-    if (attacks.length) {
-      firstCards.push(attacks[0]);
-      remainingQueues[targetId] = attacks.slice(1);
+      Object.entries(attacksByTarget).forEach(([targetId, attacks]) => {
+        if (attacks.length) {
+          firstCards.push(attacks[0]);
+          remainingQueues[targetId] = attacks.slice(1);
+        }
+      });
+
+      localCoopAttackQueuesRef.current = remainingQueues;
+
+      if (firstCards.length) {
+        localCoopResolvedRef.current = new Set();
+        localCoopExpiredRef.current.clear();
+        setLocalCoopDefenses(firstCards);
+        setCpuQueueReady(true);
+        setCombatMessage("The CPU team is preparing its attacks.");
+      } else {
+        setLocalCoopDefenses([]);
+        setCpuActionQueue([]);
+        setCpuActionIndex(0);
+        setCpuQueueReady(true);
+      }
+
+      return;
     }
-  });
-
-  localCoopAttackQueuesRef.current = remainingQueues;
-
-  if (firstCards.length) {
-    localCoopResolvedRef.current = new Set();
-    localCoopExpiredRef.current.clear();
-    setLocalCoopDefenses(firstCards);
-    setCpuQueueReady(true);
-    setCombatMessage("The CPU team is preparing its attacks.");
-  } else {
-    setLocalCoopDefenses([]);
-    setCpuActionQueue([]);
-    setCpuActionIndex(0);
-    setCpuQueueReady(true);
-  }
-
-  return;
-}
 
     const limit = Number.POSITIVE_INFINITY;
     const queue = [];
@@ -1062,13 +1182,11 @@ setCpuTargets(newCpuTargets);
 
       const targetId = cpuTargets[cpu.id];
 
-     const target = teams.player.find(
-  (player) =>
-    player.id === targetId &&
-    player.health > 0,
-);
+      const target = teams.player.find(
+        (player) => player.id === targetId && player.health > 0,
+      );
 
-if (!target) return;
+      if (!target) return;
 
       const usableAttacks = cpu.attacks
         .map((attack, attackIndex) => ({ attack, attackIndex }))
@@ -1158,6 +1276,7 @@ if (!target) return;
       setCpuActionQueue(null);
       setCpuActionIndex(0);
       setRoundNumber((round) => round + 1);
+      setShowRoundIntro(true);
       setPhase("selecting");
       addLog("A new round begins. Choose your targets.");
       return;
@@ -1490,6 +1609,7 @@ if (!target) return;
         setCpuActionIndex(0);
         setCpuQueueReady(false);
         setRoundNumber((round) => round + 1);
+        setShowRoundIntro(true);
         setPhase("selecting");
         addLog("A new round begins. Choose your targets.");
 
@@ -1862,13 +1982,31 @@ if (!target) return;
   if (!hasValidTeams) {
     return (
       <main className="team-battle error-screen">
-        <h2>Unable to load the 2v2 teams</h2>
-        <p>Return to character selection and choose two fighters per team.</p>
+        <section className="error-card" role="alert">
+          <div className="error-icon" aria-hidden="true">
+            !
+          </div>
+
+          <p className="error-eyebrow">BATTLE SETUP ERROR</p>
+          <h2>Unable to load your teams</h2>
+          <p className="error-message">
+            A 2v2 battle needs two valid fighters on each team. Return to
+            character selection and choose two fighters per side.
+          </p>
+
+          <button
+            className="error-back-button"
+            type="button"
+            onClick={() => window.history.back()}
+          >
+            Return to character selection
+          </button>
+        </section>
       </main>
     );
   }
 
-  if (phase === "victory") {
+  if (phase === "victory" && !knockout && teamFinishComplete) {
     return (
       <VictoryScreen
         damageDealt={damageDealt}
@@ -1879,7 +2017,7 @@ if (!target) return;
     );
   }
 
-  if (phase === "defeat") {
+  if (phase === "defeat" && !knockout && teamFinishComplete) {
     return (
       <GameOverScreen
         damageDealt={damageDealt}
@@ -1892,6 +2030,213 @@ if (!target) return;
 
   return (
     <main className="team-battle">
+
+{isFinalTeamPhase && (
+  <div
+    className={`team-finish-overlay ${
+    phase === "victory" ? "finish-victory" : "finish-defeat"
+  } ${isTeamFinishFadingOut ? "is-fading-out" : ""}`}
+  role="alert"
+  aria-live="assertive"
+  >
+    <div className="team-finish-flash" />
+
+    <p className="team-finish-eyebrow">
+      FIGHTER'S ARENA
+    </p>
+
+    <h1 className="team-finish-title">
+      TEAM K.O.!
+    </h1>
+
+    <p className="team-finish-message">
+      {phase === "victory"
+        ? "THE OPPOSING TEAM HAS BEEN DEFEATED"
+        : "YOUR ENTIRE TEAM HAS BEEN DEFEATED"}
+    </p>
+
+    <div className="team-finish-versus">
+      <div className="team-finish-side defeated-side">
+        <h2>DEFEATED</h2>
+
+        <div className="team-finish-cards">
+          {defeatedTeam.map((fighter, index) => (
+            <div
+              className="team-finish-card"
+              key={fighter.id}
+              style={{ "--card-index": index }}
+            >
+              {fighter.image && (
+                <img src={fighter.image} alt="" />
+              )}
+
+              <strong>{fighter.name}</strong>
+              <span>K.O.</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="team-finish-vs">VS</div>
+
+      <div className="team-finish-side winning-side">
+        <h2>WINNERS</h2>
+
+        <div className="team-finish-cards">
+          {winningTeam.map((fighter, index) => (
+            <div
+              className="team-finish-card"
+              key={fighter.id}
+              style={{ "--card-index": index }}
+            >
+              {fighter.image && (
+                <img src={fighter.image} alt="" />
+              )}
+
+              <strong>{fighter.name}</strong>
+              <span>
+                {Math.max(0, fighter.health)} HP
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <p className="team-finish-footer">
+      {teamFinishComplete
+        ? "RESULT CONFIRMED"
+        : "MATCH COMPLETE"}
+    </p>
+  </div>
+)}
+
+      {knockout && (
+        <div
+          className={`team-ko-overlay ko-${knockout.defeatedTeam} ${
+            isKnockoutFadingOut ? "is-fading-out" : ""
+          }`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="team-ko-flash" />
+
+          <div className="team-ko-content">
+            <p className="team-ko-eyebrow">FIGHTER DEFEATED</p>
+
+            {knockout.image && (
+              <img
+                className="team-ko-portrait"
+                src={knockout.image}
+                alt={knockout.name}
+              />
+            )}
+
+            <h1 className="team-ko-title">K.O.!</h1>
+
+            <p className="team-ko-name">{knockout.name}</p>
+
+            <p className="team-ko-subtitle">
+              {knockout.defeatedTeam === "opponent"
+                ? "OPPONENT DOWN"
+                : "PLAYER DOWN"}
+            </p>
+          </div>
+        </div>
+      )}
+      {(showRoundIntro || isIntroFadingOut) && (
+        <div
+          className={`team-round-intro ${
+            isIntroFadingOut ? "is-hiding" : "is-visible"
+          }`}
+          role="status"
+          aria-hidden={isIntroFadingOut}
+        >
+          <div className="team-round-intro__eyebrow">FIGHTER'S ARENA</div>
+
+          <h1 className="team-round-intro__round">ROUND {roundNumber}</h1>
+
+          <div className="team-round-intro__matchup">
+            <div className="team-round-intro__team team-round-intro__team--cpu">
+              <div className="team-round-intro__label">CPU TEAM</div>
+
+              <div className="team-round-intro__fighters">
+                {teams.opponent.map((fighter) => {
+                  const isKO = fighter.health <= 0;
+
+                  return (
+                    <div
+                      className={`team-round-intro__fighter ${
+                        isKO ? "is-defeated" : "is-alive"
+                      }`}
+                      key={fighter.id}
+                    >
+                      {fighter.image && <img src={fighter.image} alt="" />}
+
+                      <RoundIntroHealthBar fighter={fighter} />
+
+                      <span className="team-round-intro__name">
+                        {fighter.name}
+                      </span>
+
+                      <span
+                        className={`team-round-intro__status ${
+                          isKO ? "status-ko" : "status-alive"
+                        }`}
+                      >
+                        {isKO
+                          ? "K.O."
+                          : `HP ${Math.max(0, fighter.health)} / ${fighter.maximumHealth}`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="team-round-intro__vs">VS</div>
+
+            <div className="team-round-intro__team team-round-intro__team--player">
+              <div className="team-round-intro__label">PLAYER TEAM</div>
+
+              <div className="team-round-intro__fighters">
+                {teams.player.map((fighter) => {
+                  const isKO = fighter.health <= 0;
+
+                  return (
+                    <div
+                      className={`team-round-intro__fighter ${
+                        isKO ? "is-defeated" : "is-alive"
+                      }`}
+                      key={fighter.id}
+                    >
+                      {fighter.image && <img src={fighter.image} alt="" />}
+
+                      <RoundIntroHealthBar fighter={fighter} />
+
+                      <span className="team-round-intro__name">
+                        {fighter.name}
+                      </span>
+
+                      <span
+                        className={`team-round-intro__status ${
+                          isKO ? "status-ko" : "status-alive"
+                        }`}
+                      >
+                        {isKO
+                          ? "K.O."
+                          : `HP ${Math.max(0, fighter.health)} / ${fighter.maximumHealth}`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="team-round-intro__footer">GET READY</div>
+        </div>
+      )}
       {combatPopups.length > 0 && (
         <div id="combatPopupContainer" aria-live="polite">
           {combatPopups.slice(0, 3).map((entry, index) => (

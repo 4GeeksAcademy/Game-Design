@@ -25,6 +25,34 @@ import { addCoins } from "./Currency.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
+function RoundIntroHealthBar({ fighter }) {
+  const maximumHealth = Number(fighter.maximumHealth) || 1;
+  const health = Math.max(0, Number(fighter.health) || 0);
+  const percent = Math.max(0, Math.min(100, (health / maximumHealth) * 100));
+
+  const healthLevel =
+    percent <= 10
+      ? "critical"
+      : percent <= 30
+        ? "danger"
+        : percent <= 50
+          ? "warning"
+          : "healthy";
+
+  return (
+    <div
+      className={`battle-intro-healthbar health-${healthLevel}`}
+      role="img"
+      aria-label={`${health} of ${maximumHealth} health remaining`}
+    >
+      <div
+        className="battle-intro-healthbar-fill"
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+  );
+}
+
 function App() {
   const location = useLocation();
 
@@ -98,6 +126,11 @@ function App() {
   const [knockout, setKnockout] = useState(null);
   const [showResults, setShowResults] = useState(false);
 
+  const [isRoundIntroFadingOut, setIsRoundIntroFadingOut] = useState(false);
+
+  const [showFinishOverlay, setShowFinishOverlay] = useState(false);
+
+  const [isFinishFadingOut, setIsFinishFadingOut] = useState(false);
   // Temporary popup queue and permanent combat history.
   const [combatMessages, setCombatMessages] = useState([]);
   const [combatLog, setCombatLog] = useState([]);
@@ -146,39 +179,72 @@ function App() {
     }
   }, [character, opponent, knockout]);
 
-  // Pause combat and show the knockout announcement.
-  useEffect(() => {
-    if (knockout) {
-      const timer = setTimeout(() => {
-        setShowResults(true);
-      }, 2800);
+ // Show the individual K.O. cutscene, then the final results cards.
+useEffect(() => {
+  if (!knockout) return;
 
-      return () => clearTimeout(timer);
-    }
-  }, [knockout]);
+  setShowFinishOverlay(false);
+  setIsFinishFadingOut(false);
+  setShowResults(false);
 
-  // Detect a knockout only once.
-  useEffect(() => {
-    if (knockout) return;
+  // Let the individual K.O. cutscene play first.
+  const finishTimer = setTimeout(() => {
+    setShowFinishOverlay(true);
+  }, 2600);
 
-    if (character.health <= 0) {
-      setKnockout({
-        defeated: character.name,
-        winner: opponent.name,
-      });
-    } else if (opponent.health <= 0) {
-      setKnockout({
-        defeated: opponent.name,
-        winner: character.name,
-      });
-    }
-  }, [
-    character.health,
-    opponent.health,
-    character.name,
-    opponent.name,
-    knockout,
-  ]);
+  // Fade the final cards out before showing the original result screen.
+  const fadeTimer = setTimeout(() => {
+    setIsFinishFadingOut(true);
+  }, 5000);
+
+  const resultsTimer = setTimeout(() => {
+    setShowResults(true);
+  }, 5600);
+
+  return () => {
+    clearTimeout(finishTimer);
+    clearTimeout(fadeTimer);
+    clearTimeout(resultsTimer);
+  };
+}, [knockout]);
+
+
+ // Detect a knockout only once and save the fighters for the animations.
+useEffect(() => {
+  if (knockout) return;
+
+  if (character.health <= 0) {
+    setKnockout({
+      defeated: character.name,
+      winner: opponent.name,
+      defeatedImage: character.image,
+      winnerImage: opponent.image,
+      winnerHealth: Math.max(0, opponent.health),
+      winnerMaximumHealth: opponent.maximumHealth,
+      defeatedTeam: "player",
+    });
+  } else if (opponent.health <= 0) {
+    setKnockout({
+      defeated: opponent.name,
+      winner: character.name,
+      defeatedImage: opponent.image,
+      winnerImage: character.image,
+      winnerHealth: Math.max(0, character.health),
+      winnerMaximumHealth: character.maximumHealth,
+      defeatedTeam: "opponent",
+    });
+  }
+}, [
+  character.health,
+  opponent.health,
+  character.name,
+  opponent.name,
+  character.image,
+  opponent.image,
+  character.maximumHealth,
+  opponent.maximumHealth,
+  knockout,
+]);
 
   useEffect(() => {
     if (knockout || character.health <= 0 || opponent.health <= 0) {
@@ -257,17 +323,28 @@ function App() {
   }, [currentTurn]);
 
   // Display the round announcement before allowing combat.
-  useEffect(() => {
-    if (!showRoundIntro) return;
+useEffect(() => {
+  if (!showRoundIntro) return;
 
-    // Give the CSS fade-out time to finish before removing the overlay.
-    const timer = setTimeout(() => {
-      setShowRoundIntro(false);
-      setCurrentTurn("player");
-    }, 2400);
+  setIsRoundIntroFadingOut(false);
 
-    return () => clearTimeout(timer);
-  }, [showRoundIntro]);
+  // Begin fading after the intro has been visible.
+  const fadeTimer = setTimeout(() => {
+    setIsRoundIntroFadingOut(true);
+  }, 1800);
+
+  // Remove the overlay after its fade-out transition.
+  const finishTimer = setTimeout(() => {
+    setShowRoundIntro(false);
+    setIsRoundIntroFadingOut(false);
+    setCurrentTurn("player");
+  }, 2400);
+
+  return () => {
+    clearTimeout(fadeTimer);
+    clearTimeout(finishTimer);
+  };
+}, [showRoundIntro]);
 
   // Countdown for the player's defensive window.
   useEffect(() => {
@@ -316,55 +393,7 @@ function App() {
     setCombatLog((log) => [...log, message]);
   }
 
-  //   const useAttackSlot = (index) => {
-  //   const attack = character.attacks[index];
 
-  //   if (!attack || currentTurn !== "player" || !attack.state) return;
-
-  //   const result = aiDefendOrEvade(attack, character, opponent);
-
-  //   if (!result) {
-  //     showCombatMessage("Not enough mana!", "hit");
-  //     return;
-  //   }
-
-  //   setCharacter({ ...result.attacker });
-  //   setOpponent({ ...result.defender });
-
-  //   const damage = result.damageReceived ?? 0;
-  //   if (damage > 0) setDamageDealt((previous) => previous + damage);
-
-  //   setAttacksUsed((previous) => previous + 1);
-  //   showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
-
-  //   if (result.action === "defend") {
-  //     showCombatMessage(`${opponent.name} blocked ${attack.name}!`, "blocked");
-  //   } else if (result.action === "evade") {
-  //     showCombatMessage(`${opponent.name} evaded ${attack.name}!`, "evaded");
-  //   } else if (result.action === "attack" && result.evaded === false) {
-  //     showCombatMessage("💥 FAILED TO EVADE!", "hit");
-  //   } else if (damage > 0) {
-  //     showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
-  //   }
-
-  //   Object.entries(result.buffsApplied ?? {}).forEach(([stat, amount]) => {
-  //     if (typeof amount === "number" && amount !== 0) {
-  //       showCombatMessage(
-  //         `✨ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
-  //         "buff",
-  //       );
-  //     }
-  //   });
-
-  //   Object.entries(result.debuffsApplied ?? {}).forEach(([stat, amount]) => {
-  //     if (typeof amount === "number" && amount !== 0) {
-  //       showCombatMessage(
-  //         `💀 ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
-  //         "debuff",
-  //       );
-  //     }
-  //   });
-  // };
 
   const resolveIncomingAttack = useCallback(
     (choice) => {
@@ -386,10 +415,10 @@ function App() {
 
       if (!result) return;
 
-     if (choice === "defend" || choice === "evade") {
-      result.defender.cooldown -= 1;
-      result.defender.blocked = true;
-    }
+      if (choice === "defend" || choice === "evade") {
+        result.defender.cooldown -= 1;
+        result.defender.blocked = true;
+      }
 
       setOpponent({ ...result.attacker });
       setCharacter({ ...result.defender });
@@ -458,46 +487,153 @@ function App() {
 
   return (
     <div className="container-fluid mt-3" id="gameContainer">
-      {/* Full-screen round announcement */}
-      {showRoundIntro && !knockout && (
-        <div id="roundIntroOverlay">
-          <div id="roundIntroContent">
-            <span id="roundIntroEyebrow">FIGHT!</span>
+      {/* Full-screen round intro with both fighters and their health. */}
+{showRoundIntro && !knockout && (
+  <div
+    id="roundIntroOverlay"
+    className={isRoundIntroFadingOut ? "is-fading-out" : ""}
+    role="status"
+    aria-live="polite"
+  >
+    <div id="roundIntroContent" className="battle-intro-enhanced">
+      <span id="roundIntroEyebrow">FIGHTER'S ARENA</span>
 
-            <h1 key={roundNumber}>ROUND {roundNumber}</h1>
+      <h1 key={roundNumber}>ROUND {roundNumber}</h1>
 
-            <div id="roundIntroLine" />
+      <div className="battle-intro-matchup">
+        <div className="battle-intro-fighter battle-intro-opponent">
+          <span className="battle-intro-label">CPU OPPONENT</span>
 
-            <p>GET READY</p>
-          </div>
+          {opponent.image && (
+            <img src={opponent.image} alt={opponent.name} />
+          )}
+
+          <strong>{opponent.name}</strong>
+
+          <RoundIntroHealthBar fighter={opponent} />
+
+          <span className="battle-intro-hp">
+            HP {Math.max(0, opponent.health)} / {opponent.maximumHealth}
+          </span>
         </div>
+
+        <div className="battle-intro-vs">VS</div>
+
+        <div className="battle-intro-fighter battle-intro-player">
+          <span className="battle-intro-label">PLAYER</span>
+
+          {character.image && (
+            <img src={character.image} alt={character.name} />
+          )}
+
+          <strong>{character.name}</strong>
+
+          <RoundIntroHealthBar fighter={character} />
+
+          <span className="battle-intro-hp">
+            HP {Math.max(0, character.health)} / {character.maximumHealth}
+          </span>
+        </div>
+      </div>
+
+      <div id="roundIntroLine" />
+
+      <p>GET READY</p>
+    </div>
+  </div>
+)}
+
+{/* Individual K.O. cutscene. */}
+{knockout && !showFinishOverlay && !showResults && (
+  <div
+    className={`battle-ko-overlay ko-${knockout.defeatedTeam} ${
+      isFinishFadingOut ? "is-fading-out" : ""
+    }`}
+    role="alert"
+    aria-live="assertive"
+  >
+    <div className="battle-ko-flash" />
+
+    <div className="battle-ko-content">
+      <p className="battle-ko-eyebrow">FIGHTER DEFEATED</p>
+
+      {knockout.defeatedImage && (
+        <img
+          className="battle-ko-portrait"
+          src={knockout.defeatedImage}
+          alt={knockout.defeated}
+        />
       )}
 
-      {/* Full-screen knockout announcement */}
-      {knockout && !showResults && (
-        <div id="knockoutOverlay">
-          <div id="knockoutContent">
-            <span id="knockoutEyebrow">BATTLE OVER</span>
+      <h1 className="battle-ko-title">K.O.!</h1>
 
-            <h1>K.O.!</h1>
+      <p className="battle-ko-name">{knockout.defeated}</p>
 
-            <p id="knockoutDefeated">{knockout.defeated} DEFEATED</p>
+      <p className="battle-ko-subtitle">
+        {knockout.defeatedTeam === "opponent"
+          ? "OPPONENT DOWN"
+          : "PLAYER DOWN"}
+      </p>
+    </div>
+  </div>
+)}
 
-            <p id="knockoutWinner">{knockout.winner} WINS!</p>
-          </div>
+{/* Final winner-versus-defeated cards. */}
+{knockout && showFinishOverlay && !showResults && (
+  <div
+    className={`battle-finish-overlay ${
+      knockout.defeatedTeam === "player"
+        ? "finish-defeat"
+        : "finish-victory"
+    } ${isFinishFadingOut ? "is-fading-out" : ""}`}
+    role="alert"
+    aria-live="assertive"
+  >
+    <div className="battle-finish-flash" />
+
+    <p className="battle-finish-eyebrow">FIGHTER'S ARENA</p>
+
+    <h1 className="battle-finish-title">
+      {knockout.defeatedTeam === "player" ? "DEFEAT" : "VICTORY"}
+    </h1>
+
+    <p className="battle-finish-message">
+      {knockout.winner} WINS THE MATCH
+    </p>
+
+    <div className="battle-finish-versus">
+      <div className="battle-finish-side defeated-side">
+        <h2>DEFEATED</h2>
+
+        <div className="battle-finish-card">
+          {knockout.defeatedImage && (
+            <img src={knockout.defeatedImage} alt="" />
+          )}
+
+          <strong>{knockout.defeated}</strong>
+          <span>K.O.</span>
         </div>
-      )}
-      {/* Show one animated combat popup at a time. */}
-      {combatMessages.length > 0 && (
-        <div id="combatPopupContainer">
-          <div
-            className={`combat-popup ${combatMessages[0].type}`}
-            key={combatMessages[0].id}
-          >
-            {combatMessages[0].text}
-          </div>
+      </div>
+
+      <div className="battle-finish-vs">VS</div>
+
+      <div className="battle-finish-side winning-side">
+        <h2>WINNER</h2>
+
+        <div className="battle-finish-card">
+          {knockout.winnerImage && (
+            <img src={knockout.winnerImage} alt="" />
+          )}
+
+          <strong>{knockout.winner}</strong>
+          <span>{knockout.winnerHealth} HP</span>
         </div>
-      )}
+      </div>
+    </div>
+
+    <p className="battle-finish-footer">MATCH COMPLETE</p>
+  </div>
+)}
 
       {knockout && !showResults ? null : character.health <= 0 ? (
         <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />

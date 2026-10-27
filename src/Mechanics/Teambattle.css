@@ -1774,3 +1774,926 @@ battlefield > .local-coop-incoming {
     top: 73% !important;
   }
 }
+
+
+/* =========================================
+   TEAM BATTLE — ROUND INTRO
+========================================= */
+
+.team-round-intro {
+  
+  position: fixed;
+  inset: 0;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  overflow: hidden;
+  color: #fff;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(255, 49, 89, 0.22), transparent 45%),
+    radial-gradient(ellipse at 80% 50%, rgba(19, 213, 255, 0.20), transparent 45%),
+    rgba(3, 7, 17, 0.97);
+  animation: teamIntroFadeIn 0.45s ease-out both;
+}
+
+.team-round-intro__eyebrow {
+  color: #a9b7ca;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+}
+
+.team-round-intro__round {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 1000;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 24px rgba(255, 255, 255, 0.2);
+}
+
+.team-round-intro__matchup {
+  width: min(1100px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 3vw, 40px);
+}
+
+.team-round-intro__team {
+  min-width: 0;
+}
+
+.team-round-intro__label {
+  margin-bottom: 14px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.team-round-intro__team--cpu .team-round-intro__label {
+  color: #ff3159;
+}
+
+.team-round-intro__team--player .team-round-intro__label {
+  color: #13d5ff;
+}
+
+.team-round-intro__fighters {
+  display: flex;
+  justify-content: center;
+  gap: clamp(8px, 2vw, 22px);
+}
+
+.team-round-intro__fighter {
+  flex: 1;
+  min-width: 0;
+  max-width: 190px;
+  animation: teamFighterEntrance 0.65s ease-out both;
+}
+
+.team-round-intro__team--player .team-round-intro__fighter {
+  animation-name: teamFighterEntranceRight;
+}
+
+.team-round-intro__fighter img {
+  display: block;
+  width: 100%;
+  height: clamp(130px, 24vh, 250px);
+  object-fit: contain;
+  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.12));
+}
+
+.team-round-intro__team--cpu .team-round-intro__fighter img {
+  filter: drop-shadow(0 0 18px rgba(255, 49, 89, 0.35));
+}
+
+.team-round-intro__team--player .team-round-intro__fighter img {
+  filter: drop-shadow(0 0 18px rgba(19, 213, 255, 0.35));
+}
+
+.team-round-intro__fighter span {
+  display: block;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+  font-size: clamp(0.75rem, 1.4vw, 1rem);
+  font-weight: 800;
+}
+
+.team-round-intro__vs {
+  color: #fff;
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight: 1000;
+  font-style: italic;
+  text-shadow:
+    0 0 12px rgba(255, 255, 255, 0.35),
+    0 0 32px rgba(255, 49, 89, 0.2);
+  animation: teamVsPulse 1s ease-in-out infinite alternate;
+}
+
+.team-round-intro__footer {
+  color: #d5deeb;
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 0.35em;
+  animation: teamFooterPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes teamIntroFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes teamFighterEntrance {
+  from {
+    opacity: 0;
+    transform: translateX(-55px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes teamFighterEntranceRight {
+  from {
+    opacity: 0;
+    transform: translateX(55px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes teamVsPulse {
+  from {
+    transform: scale(0.96);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes teamFooterPulse {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .team-round-intro {
+    gap: 14px;
+    padding: 14px;
+
+  }
+
+  .team-round-intro__matchup {
+    gap: 8px;
+  }
+
+  .team-round-intro__fighter img {
+    height: clamp(100px, 19vh, 170px);
+  }
+
+  .team-round-intro__label {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+  }
+
+  .team-round-intro__footer {
+    font-size: 0.75rem;
+  }
+}
+
+
+
+.error-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(118, 46, 66, 0.28), transparent 55%),
+    #101116;
+  color: #f5f1f2;
+}
+
+.error-card {
+  width: min(100%, 480px);
+  padding: 40px 32px;
+  text-align: center;
+  border: 1px solid rgba(255, 115, 133, 0.35);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #242127, #17171d);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+}
+
+.error-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 20px;
+  border: 2px solid #ff7185;
+  border-radius: 50%;
+  color: #ff7185;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.error-eyebrow {
+  margin: 0 0 10px;
+  color: #ff9aa8;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.error-card h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+}
+
+.error-message {
+  max-width: 360px;
+  margin: 14px auto 26px;
+  color: #c8c2c7;
+  line-height: 1.6;
+}
+
+.error-back-button {
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 8px;
+  background: #ff7185;
+  color: #20151a;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.error-back-button:hover {
+  transform: translateY(-2px);
+  background: #ff91a0;
+}
+
+.error-back-button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+
+/* TEAM BATTLE — ROUND INTRO */
+
+
+.team-round-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  overflow: hidden;
+
+  color: #fff;
+  text-align: center;
+
+  background:
+    radial-gradient(
+      ellipse at 20% 50%,
+      rgba(255, 49, 89, 0.22),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 80% 50%,
+      rgba(19, 213, 255, 0.20),
+      transparent 45%
+    ),
+    rgba(3, 7, 17, 0.97);
+
+  /* Prevent the old entrance animation from overriding opacity. */
+  animation: none !important;
+
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.6s ease,
+    visibility 0s linear 0.6s;
+}
+
+.team-round-intro.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.45s ease-out,
+    visibility 0s linear 0s;
+}
+
+.team-round-intro.is-hiding {
+  opacity: 0;
+  visibility: visible;
+  pointer-events: none;
+  transition:
+    opacity 0.6s ease,
+    visibility 0s linear 0s;
+}
+
+/* Knocked-out fighter indicator */
+.fighter-ko-badge {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  z-index: 5;
+  transform: translate(-50%, -50%) rotate(-8deg);
+
+  padding: 6px 14px;
+  color: #fff;
+  background: #b5092b;
+  border: 2px solid #ff7187;
+  border-radius: 6px;
+
+  font-size: clamp(1.2rem, 2.5vw, 2rem);
+  font-weight: 1000;
+  font-style: italic;
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px 8px #000;
+  box-shadow: 0 0 18px #ff315966;
+
+  pointer-events: none;
+}
+
+.fighter-card.is-defeated .fighter-portrait {
+  filter: grayscale(1);
+}
+
+
+/* ================================
+   TEAM BATTLE — K.O. CUTSCENE
+================================ */
+
+.team-ko-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at center, #33101b 0%, #100810 48%, #03050b 100%);
+  animation: teamKoScreenEnter 0.35s ease-out both;
+}
+
+.team-ko-overlay.ko-opponent {
+  --ko-color: #ff3159;
+  --ko-glow: rgba(255, 49, 89, 0.7);
+}
+
+.team-ko-overlay.ko-player {
+  --ko-color: #13d5ff;
+  --ko-glow: rgba(19, 213, 255, 0.65);
+}
+
+.team-ko-flash {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: white;
+  pointer-events: none;
+  animation: teamKoFlash 0.65s ease-out both;
+}
+
+.team-ko-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(92vw, 700px);
+  text-align: center;
+  animation: teamKoImpact 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.team-ko-eyebrow {
+  margin: 0 0 8px;
+  color: var(--ko-color);
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  font-weight: 900;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  text-shadow: 0 0 18px var(--ko-glow);
+  animation: teamKoTextReveal 0.4s 0.15s both;
+}
+
+.team-ko-portrait {
+  display: block;
+  width: clamp(150px, 27vw, 260px);
+  height: clamp(190px, 34vw, 330px);
+  object-fit: contain;
+  object-position: center bottom;
+  filter:
+    grayscale(1)
+    drop-shadow(0 0 22px var(--ko-glow));
+  transform-origin: center bottom;
+  animation: teamKoFall 0.75s 0.1s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.team-ko-title {
+  position: relative;
+  z-index: 2;
+  margin: -18px 0 0;
+  color: #fff;
+  font-size: clamp(4.5rem, 15vw, 9rem);
+  font-weight: 1000;
+  font-style: italic;
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+  -webkit-text-stroke: 2px var(--ko-color);
+  text-shadow:
+    4px 4px 0 #5d071b,
+    0 0 14px var(--ko-glow),
+    0 0 38px var(--ko-glow);
+  animation: teamKoTitleImpact 0.55s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.team-ko-name {
+  margin: 18px 0 0;
+  color: #fff;
+  font-size: clamp(1.25rem, 4vw, 2.3rem);
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 3px 12px #000;
+  animation: teamKoTextReveal 0.4s 0.4s both;
+}
+
+.team-ko-subtitle {
+  margin: 8px 0 0;
+  color: var(--ko-color);
+  font-size: clamp(0.7rem, 2vw, 0.95rem);
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  animation: teamKoTextReveal 0.4s 0.55s both;
+}
+
+@keyframes teamKoScreenEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes teamKoFlash {
+  0% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes teamKoImpact {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) translateY(24px);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.04) translateY(-3px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes teamKoFall {
+  0% {
+    opacity: 0;
+    transform: translateY(-35px) rotate(5deg) scale(1.08);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(8px) rotate(-3deg) scale(0.96);
+  }
+  75% {
+    transform: translateY(-3px) rotate(1deg) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+
+@keyframes teamKoTitleImpact {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(-8deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(0.88) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes teamKoTextReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-ko-overlay,
+  .team-ko-flash,
+  .team-ko-content,
+  .team-ko-portrait,
+  .team-ko-title,
+  .team-ko-eyebrow,
+  .team-ko-name,
+  .team-ko-subtitle {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
+}
+
+
+/* Fade the K.O. cutscene out before React removes it */
+.team-ko-overlay.is-fading-out {
+  animation: teamKoScreenExit 0.5s ease-in forwards;
+}
+
+@keyframes teamKoScreenExit {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+
+.team-round-intro__name {
+  display: block;
+  margin-top: 8px;
+  color: #fff;
+  font-weight: 800;
+}
+
+.team-round-intro__status {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.team-round-intro__status.status-alive {
+  color: #8fffc0;
+  background: #176b4933;
+  border: 1px solid #43d995;
+}
+
+.team-round-intro__status.status-ko {
+  color: #ff7187;
+  background: #b5092b33;
+  border: 1px solid #ff3159;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 8px #ff315966;
+}
+
+.team-round-intro__fighter.is-defeated img {
+  filter: grayscale(1) brightness(0.65);
+  opacity: 0.75;
+}
+
+
+.team-round-intro__healthbar {
+  width: min(100%, 160px);
+  height: 9px;
+  margin: 8px auto 0;
+  overflow: hidden;
+  background: #10131c;
+  border: 1px solid #ffffff55;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 3px #0009;
+}
+
+.team-round-intro__healthbar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition:
+    width 350ms ease,
+    background-color 250ms ease,
+    box-shadow 250ms ease;
+}
+
+.team-round-intro__healthbar.health-healthy
+  .team-round-intro__healthbar-fill {
+  background: #35df83;
+  box-shadow: 0 0 8px #35df8380;
+}
+
+.team-round-intro__healthbar.health-warning
+  .team-round-intro__healthbar-fill {
+  background: #f4d438;
+  box-shadow: 0 0 8px #f4d43880;
+}
+
+.team-round-intro__healthbar.health-danger
+  .team-round-intro__healthbar-fill {
+  background: #ff343f;
+  box-shadow: 0 0 9px #ff343f99;
+}
+
+.team-round-intro__healthbar.health-critical
+  .team-round-intro__healthbar-fill {
+  background: #690018;
+  box-shadow: 0 0 7px #690018;
+}
+
+.team-round-intro__fighter.is-defeated
+  .team-round-intro__healthbar-fill {
+  background: #25252b;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-round-intro__healthbar-fill {
+    transition: none;
+  }
+}
+
+
+.team-finish-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10002;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+  color: #fff;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at center, #222b40 0%, #0a0d17 65%, #020309 100%);
+  animation: teamFinishEnter 450ms ease-out both;
+}
+
+.team-finish-overlay.finish-victory {
+  --finish-color: #13d5ff;
+  --finish-glow: #13d5ff88;
+}
+
+.team-finish-overlay.finish-defeat {
+  --finish-color: #ff3159;
+  --finish-glow: #ff315988;
+}
+
+.team-finish-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--finish-color);
+  animation: teamFinishFlash 650ms ease-out both;
+}
+
+.team-finish-eyebrow,
+.team-finish-title,
+.team-finish-message,
+.team-finish-versus,
+.team-finish-side,
+.team-finish-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.team-finish-eyebrow {
+  margin: 0 0 8px;
+  color: var(--finish-color);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.35em;
+}
+
+.team-finish-title {
+  margin: 0;
+  font-size: clamp(3.5rem, 10vw, 7rem);
+  font-weight: 1000;
+  font-style: italic;
+  line-height: 0.95;
+  text-shadow: 0 0 16px var(--finish-glow), 0 0 40px var(--finish-glow);
+  animation: teamFinishTitleImpact 700ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.team-finish-message {
+  margin: 12px 0 26px;
+  color: #e3eaf6;
+  font-size: clamp(0.65rem, 1.7vw, 0.95rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.team-finish-versus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(10px, 3vw, 32px);
+  width: min(100%, 1000px);
+}
+
+.team-finish-side {
+  min-width: 0;
+}
+
+.team-finish-side h2 {
+  margin: 0 0 14px;
+  color: var(--finish-color);
+  font-size: clamp(0.8rem, 2vw, 1.2rem);
+  font-weight: 950;
+  letter-spacing: 0.18em;
+}
+
+.team-finish-cards {
+  display: flex;
+  justify-content: center;
+  gap: clamp(8px, 1.5vw, 18px);
+}
+
+.team-finish-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  max-width: 190px;
+  padding: 8px;
+  background: #111827cc;
+  border: 1px solid #ffffff30;
+  border-radius: 10px;
+  animation: teamFinishCardWin 750ms cubic-bezier(.16, 1, .3, 1) both;
+  animation-delay: calc(350ms + var(--card-index, 0) * 130ms);
+}
+
+.winning-side .team-finish-card {
+  border-color: var(--finish-color);
+  box-shadow: 0 0 22px var(--finish-glow);
+}
+
+.defeated-side .team-finish-card {
+  filter: grayscale(1);
+  opacity: 0.7;
+  animation-name: teamFinishCardLose;
+}
+
+.team-finish-card img {
+  display: block;
+  width: 100%;
+  height: clamp(100px, 22vh, 210px);
+  object-fit: contain;
+}
+
+.team-finish-card strong {
+  margin-top: 8px;
+  font-size: clamp(0.65rem, 1.5vw, 0.95rem);
+  overflow-wrap: anywhere;
+}
+
+.team-finish-card span {
+  margin-top: 6px;
+  color: var(--finish-color);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.defeated-side .team-finish-card span {
+  color: #ff7187;
+}
+
+.team-finish-vs {
+  color: #fff;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  font-weight: 1000;
+  font-style: italic;
+  text-shadow: 0 0 16px var(--finish-glow);
+}
+
+.team-finish-footer {
+  margin: 26px 0 0;
+  color: #aab7ca;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  animation: teamFinishFooterPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes teamFinishEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes teamFinishFlash {
+  0% { opacity: 0.75; }
+  100% { opacity: 0; }
+}
+
+@keyframes teamFinishTitleImpact {
+  0% { opacity: 0; transform: scale(1.7) rotate(-5deg); }
+  65% { opacity: 1; transform: scale(0.94) rotate(1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes teamFinishCardWin {
+  from { opacity: 0; transform: translateY(65px) scale(0.75); }
+  70% { opacity: 1; transform: translateY(-8px) scale(1.04); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes teamFinishCardLose {
+  from { opacity: 0; transform: translateY(-45px) rotate(-5deg); }
+  to { opacity: 0.7; transform: translateY(12px) rotate(3deg); }
+}
+
+@keyframes teamFinishFooterPulse {
+  to { opacity: 0.55; }
+}
+
+@media (max-width: 620px) {
+  .team-finish-overlay {
+    padding: 12px;
+  }
+
+  .team-finish-versus {
+    gap: 7px;
+  }
+
+  .team-finish-card {
+    padding: 4px;
+  }
+
+  .team-finish-card img {
+    height: clamp(80px, 16vh, 140px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-finish-overlay,
+  .team-finish-flash,
+  .team-finish-title,
+  .team-finish-card,
+  .team-finish-footer {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
+}
+
+/* Fade out the Team K.O. screen before showing the result screen */
+.team-finish-overlay.is-fading-out {
+  animation: teamFinishFadeOut 0.6s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes teamFinishFadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
