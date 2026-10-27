@@ -59,10 +59,30 @@ function chooseAttack(fighter, difficulty) {
   return [...available].sort((a, b) => scoreAttack(b) - scoreAttack(a))[0];
 }
 
+
 function resolveBotAttack(attack, attacker, defender) {
   // Pure buff/debuff moves cannot be blocked or evaded.
   if ((attack.buff || attack.debuff) && !(attack.damage > 0)) {
     return attackCharacter(attack, attacker, defender);
+  }
+
+  const damage = Math.max(0, attack.damage ?? 0);
+  const defense = getDefense(defender);
+
+  // LOW-HEALTH RULE:
+  // At 5 HP or less, take a survivable hit to preserve
+  // the defensive cooldown and avoid spending evade mana.
+  // If the attack could knock the fighter out, use the
+  // normal defensive decision logic instead.
+  if (defender.health <= 5 && defender.health > damage) {
+    const result = attackCharacter(attack, attacker, defender);
+
+    if (result) {
+      result.action = "take damage";
+      result.damageReceived = defender.health;
+    }
+
+    return result;
   }
 
   // No defensive charges available: take the attack normally.
@@ -73,9 +93,6 @@ function resolveBotAttack(attack, attacker, defender) {
 
     return result;
   }
-
-  const damage = Math.max(0, attack.damage ?? 0);
-  const defense = getDefense(defender);
 
   // Calculate the cost and feasibility of evading this attack.
   const agilityNeeded = Math.max(
@@ -97,15 +114,10 @@ function resolveBotAttack(attack, attacker, defender) {
 
   const shouldEvade =
     canEvade &&
-    // A free evade is always worth considering.
     (agilityNeeded === 0 ||
-      // Evade rather than risk being knocked out.
       isLethalThreat ||
-      // Save mana when blocking already prevents all damage.
       (damage > defense &&
-        // Avoid taking a substantial hit if mana permits.
         (blockedDamage >= 10 ||
-          // Or evade when enough mana remains afterward.
           manaAfterEvade >= manaReserve)));
 
   if (shouldEvade) {
@@ -118,8 +130,7 @@ function resolveBotAttack(attack, attacker, defender) {
     return result;
   }
 
-  // Blocking is preferred when evasion is impossible or
-  // conserving mana is more valuable than avoiding the hit.
+  // Otherwise, block using the existing defense behavior.
   const healthBefore = defender.health;
 
   const result = attackCharacter(attack, attacker, defender, defense);
@@ -132,6 +143,7 @@ function resolveBotAttack(attack, attacker, defender) {
 
   return result;
 }
+
 
 function runBotTurn(attacker, defender, difficulty, stats, log, round) {
   let attacksThisTurn = 0;
@@ -318,9 +330,285 @@ function simulateBattle(
   };
 }
 
+
+
+
+
+
+
+
+
+
+/**
+ * Choose one unique opponent for each fighter who can act.
+ *
+ * If two teammates are alive but only one opponent remains,
+ * only one teammate receives a target. The other skips.
+ */
+function assignUniqueTargets(attackers, defenders) {
+  const livingAttackers = attackers.filter((fighter) => fighter.health > 0);
+  const livingDefenders = defenders.filter((fighter) => fighter.health > 0);
+
+  // Shuffle the available targets so the same teammate isn't
+  // always favored when there is only one opponent left.
+  const availableTargets = [...livingDefenders].sort(
+    () => Math.random() - 0.5,
+  );
+
+  const assignments = new Map();
+
+  for (const attacker of livingAttackers) {
+    const target = availableTargets.shift();
+
+    if (!target) break;
+
+    assignments.set(attacker.id, target);
+  }
+
+  return assignments;
+}
+
+/**
+ * Simulate a complete 2v2 battle.
+ *
+ * Each team's fighters act before the other team gets its turn.
+ * Targets are exclusive for the round, and a teammate without
+ * an assigned target skips their turn.
+ *
+ * The existing 1v1 simulateBattle() remains unchanged.
+ */
+function simulateTeamBattle(
+  teamOne,
+  teamTwo,
+  {
+    difficultyOne = "Normal",
+    difficultyTwo = "Normal",
+    maxRounds = MAX_ROUNDS,
+  } = {},
+) {
+  if (!Array.isArray(teamOne) || !Array.isArray(teamTwo)) {
+    throw new Error("Both teams must be arrays of fighters.");
+  }
+
+  if (teamOne.length !== 2 || teamTwo.length !== 2) {
+    throw new Error("Team battles require exactly two fighters per team.");
+  }
+
+  const cloneTeam = (team, prefix) =>
+    team.map((fighter, index) => {
+      const clone = cloneFighter(fighter);
+      clone.id = `${prefix}${index + 1}`;
+      clone.teamId = prefix;
+      return clone;
+    });
+
+  const players = cloneTeam(teamOne, "teamOne");
+  const opponents = cloneTeam(teamTwo, "teamTwo");
+  const allFighters = [...players, ...opponents];
+
+  const stats = {};
+
+  for (const fighter of allFighters) {
+    stats[fighter.id] = {
+      id: fighter.id,
+      name: fighter.name,
+      attacksUsed: 0,
+      damageDealt: 0,
+      blocks: 0,
+      successfulEvades: 0,
+      turnsTaken: 0,
+      skippedTurns: 0,
+    };
+  }
+
+  const log = [];
+  let roundsCompleted = 0;
+
+  function living(team) {
+    return team.filter((fighter) => fighter.health > 0);
+  }
+
+  function teamIsDefeated(team) {
+    return living(team).length === 0;
+  }
+
+  function runTeamTurn(attackers, defenders, difficulty, round) {
+    const targets = assignUniqueTargets(attackers, defenders);
+
+    for (const attacker of attackers) {
+      if (attacker.health <= 0) continue;
+
+      const defender = targets.get(attacker.id);
+
+      if (!defender) {
+        stats[attacker.id].skippedTurns++;
+
+        log.push({
+          round,
+          attacker: attacker.name,
+          defender: null,
+          attack: null,
+          action: "skipped",
+          damage: 0,
+          attackerHealth: attacker.health,
+          defenderHealth: null,
+          attackerMana: attacker.mana,
+          defenderMana: null,
+          reason: "No unique target was available.",
+        });
+
+        continue;
+      }
+
+      if (defender.health <= 0) continue;
+
+      const attackLimit =
+        MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+
+      let attacksThisTurn = 0;
+
+      stats[attacker.id].turnsTaken++;
+
+      while (
+        attacker.health > 0 &&
+        defender.health > 0 &&
+        attacksThisTurn < attackLimit
+      ) {
+        const attack = chooseAttack(attacker, difficulty);
+
+        if (!attack) break;
+
+        const attackerManaBefore = attacker.mana;
+        const defenderManaBefore = defender.mana;
+        const healthBefore = defender.health;
+
+        const result = resolveBotAttack(attack, attacker, defender);
+
+        if (!result) {
+          // Avoid repeatedly trying a failed move.
+          attack.state = false;
+          continue;
+        }
+
+        attacksThisTurn++;
+        stats[attacker.id].attacksUsed++;
+        stats[attacker.id].damageDealt +=
+          healthBefore - defender.health;
+
+        if (result.action === "defend") {
+          stats[defender.id].blocks++;
+        } else if (result.action === "evade") {
+          stats[defender.id].successfulEvades++;
+        }
+
+        log.push({
+          round,
+          attacker: attacker.name,
+          defender: defender.name,
+          attack: attack.name,
+          action: result.action,
+          damage: Math.max(0, healthBefore - defender.health),
+          attackerHealth: attacker.health,
+          defenderHealth: defender.health,
+          attackerMana: attacker.mana,
+          defenderMana: defender.mana,
+          attackerManaUsed: Math.max(
+            0,
+            attackerManaBefore - attacker.mana,
+          ),
+          defenderManaUsed: Math.max(
+            0,
+            defenderManaBefore - defender.mana,
+          ),
+        });
+
+        // Don't allow the other teammate to take over this target
+        // if it gets knocked out during the round.
+        if (defender.health <= 0) break;
+      }
+    }
+  }
+
+  for (let round = 1; round <= maxRounds; round++) {
+    if (teamIsDefeated(players) || teamIsDefeated(opponents)) break;
+
+    roundsCompleted = round;
+
+    // The player's team acts first, followed by the opposing team.
+    runTeamTurn(players, opponents, difficultyOne, round);
+
+    if (teamIsDefeated(opponents)) break;
+
+    runTeamTurn(opponents, players, difficultyTwo, round);
+
+    if (teamIsDefeated(players) || teamIsDefeated(opponents)) break;
+
+    advanceRound(allFighters);
+  }
+
+  const playerSurvivors = living(players);
+  const opponentSurvivors = living(opponents);
+
+  let winner = null;
+
+  if (playerSurvivors.length > 0 && opponentSurvivors.length === 0) {
+    winner = "Team 1";
+  } else if (opponentSurvivors.length > 0 && playerSurvivors.length === 0) {
+    winner = "Team 2";
+  } else {
+    const playerHealth = playerSurvivors.reduce(
+      (total, fighter) => total + fighter.health,
+      0,
+    );
+
+    const opponentHealth = opponentSurvivors.reduce(
+      (total, fighter) => total + fighter.health,
+      0,
+    );
+
+    if (playerHealth > opponentHealth) winner = "Team 1";
+    if (opponentHealth > playerHealth) winner = "Team 2";
+  }
+
+  return {
+    winner,
+    isDraw: winner === null,
+    rounds: roundsCompleted,
+    endReason:
+      teamIsDefeated(players) || teamIsDefeated(opponents)
+        ? "knockout"
+        : "round-limit",
+    teams: [
+      players.map((fighter) => ({
+        id: fighter.id,
+        name: fighter.name,
+        health: fighter.health,
+        mana: fighter.mana,
+      })),
+      opponents.map((fighter) => ({
+        id: fighter.id,
+        name: fighter.name,
+        health: fighter.health,
+        mana: fighter.mana,
+      })),
+    ],
+    fighters: allFighters.map((fighter) => ({
+      id: fighter.id,
+      name: fighter.name,
+      health: fighter.health,
+      mana: fighter.mana,
+      teamId: fighter.teamId,
+    })),
+    stats,
+    log,
+  };
+}
+
+
 export {
   cloneFighter,
   simulateBattle,
+  simulateTeamBattle,
   chooseAttack,
   resolveBotAttack,
   advanceRound,
