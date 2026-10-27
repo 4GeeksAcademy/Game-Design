@@ -10,6 +10,7 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade } from "./AI.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import useKeybinds from "./Main Page/useKeybinds.js";
+import { chooseNormalAttack } from "./AI_NormalDifficulty.js";
 import "./Teambattle.css";
 
 function createBattleFighter(id) {
@@ -295,6 +296,7 @@ export default function TeamBattle() {
     const displayedCount = Math.min(combatPopups.length, 3);
 
     const timer = setTimeout(() => {
+      setPendingAllyAttack(null);
       setCombatPopups((current) => current.slice(displayedCount));
     }, 2800);
 
@@ -581,19 +583,31 @@ export default function TeamBattle() {
     }
 
     const attack = attacker.attacks[attackIndex];
+
     if (!attack || attack.state !== true) {
       addLog("That attack has already been used.");
       return;
     }
 
+    const attacksUsedThisTurn = attacker.attacks.filter(
+      (move) => move.state === false,
+    ).length;
+
+    if (roundNumber === 1 && attacksUsedThisTurn >= 3) {
+      addLog(`${attacker.name} has reached the 3-attack opening limit.`);
+      return;
+    }
+
     const healthBefore = defender.health;
 
-    setPlayerAttackPopup({
-      attackerId: attacker.id,
-      targetId: defender.id,
-      attackName: attack.name,
-      outcome: "",
-    });
+    if (!attacker.isCpuTeammate) {
+      setPlayerAttackPopup({
+        attackerId: attacker.id,
+        targetId: defender.id,
+        attackName: attack.name,
+        outcome: "",
+      });
+    }
 
     // The selected difficulty can control which CPU defense behavior is used.
     // AI.js contains the existing random defend/evade behavior.
@@ -611,11 +625,15 @@ export default function TeamBattle() {
       ? `${defender.name} evaded ${attack.name}.`
       : `${attacker.name} hit ${defender.name}.`;
 
-    setPlayerAttackPopup((current) =>
-      current ? { ...current, outcome } : current,
-    );
+    if (!attacker.isCpuTeammate) {
+  setPlayerAttackPopup((current) =>
+    current ? { ...current, outcome } : current,
+  );
+}
 
-    setTimeout(() => setPlayerAttackPopup(null), 2000);
+  if (!attacker.isCpuTeammate) {
+  setTimeout(() => setPlayerAttackPopup(null), 2000);
+}
 
     if (typeof result === "object") {
       Object.assign(attacker, result.attacker ?? {});
@@ -701,11 +719,7 @@ export default function TeamBattle() {
       if (canAttackAgain) {
         setDefenseOutcome(null);
         setAllyAttackOutcome(null);
-        setPendingAllyAttack({
-          fighterId: attacker.id,
-          targetId: assignedTargetId,
-          attackIndex: nextAttackIndex,
-        });
+        setPendingAllyAttack(null);
       } else {
         setPendingAllyAttack(null);
 
@@ -850,15 +864,27 @@ export default function TeamBattle() {
     const attacksUsedThisTurn = ally.attacks.filter(
       (attack) => attack.state === false,
     ).length;
+    if (roundNumber === 1 && attacksUsedThisTurn >= 3) {
+      finishPlayerTurn(ally.id);
+      return;
+    }
 
     if (difficulty === "Easy" && attacksUsedThisTurn >= 1) {
       finishPlayerTurn(ally.id);
       return;
     }
 
-    const attackIndex = ally.attacks.findIndex(
-      (attack) => attack.state === true && ally.mana >= (attack.cost ?? 0),
-    );
+    const selectedAttack =
+      difficulty === "Easy"
+        ? ally.attacks.find(
+            (attack) =>
+              attack.state === true && ally.mana >= (attack.cost ?? 0),
+          )
+        : chooseNormalAttack(ally);
+
+    const attackIndex = selectedAttack
+      ? ally.attacks.indexOf(selectedAttack)
+      : -1;
 
     if (attackIndex === -1) {
       finishPlayerTurn(ally.id);
@@ -1194,36 +1220,39 @@ export default function TeamBattle() {
   }, [phase, isLocalCoop, localCoopDefenses.length, roundNumber]);
 
   // Display countdown only.
-useEffect(() => {
-  if (phase !== "cpu-fighting" || !isLocalCoop) return;
+  useEffect(() => {
+    if (phase !== "cpu-fighting" || !isLocalCoop) return;
 
-  const interval = setInterval(() => {
-    setLocalCoopDefenses((current) =>
-      current.map((defense) =>
-        defense.visible && !defense.outcome
-          ? { ...defense, timeLeft: Math.max(0, defense.timeLeft - 1) }
-          : defense,
-      ),
-    );
-  }, 1000);
+    const interval = setInterval(() => {
+      setLocalCoopDefenses((current) =>
+        current.map((defense) =>
+          defense.visible && !defense.outcome
+            ? { ...defense, timeLeft: Math.max(0, defense.timeLeft - 1) }
+            : defense,
+        ),
+      );
+    }, 1000);
 
-  return () => clearInterval(interval);
-}, [phase, isLocalCoop]);
+    return () => clearInterval(interval);
+  }, [phase, isLocalCoop]);
 
-// Resolve each card once when its own deadline expires.
-useEffect(() => {
-  if (phase !== "cpu-fighting" || !isLocalCoop) return;
+  // Resolve each card once when its own deadline expires.
+  useEffect(() => {
+    if (phase !== "cpu-fighting" || !isLocalCoop) return;
 
-  const timers = localCoopDefenses
-    .filter((defense) => defense.visible && !defense.outcome)
-    .map((defense) =>
-      setTimeout(() => {
-        resolveLocalCoopDefenseRef.current(defense.id, "timeout");
-      }, Math.max(0, defense.timeLeft) * 1000),
-    );
+    const timers = localCoopDefenses
+      .filter((defense) => defense.visible && !defense.outcome)
+      .map((defense) =>
+        setTimeout(
+          () => {
+            resolveLocalCoopDefenseRef.current(defense.id, "timeout");
+          },
+          Math.max(0, defense.timeLeft) * 1000,
+        ),
+      );
 
-  return () => timers.forEach(clearTimeout);
-}, [phase, isLocalCoop, localCoopDefenses]);
+    return () => timers.forEach(clearTimeout);
+  }, [phase, isLocalCoop, localCoopDefenses]);
 
   const resolveLocalCoopDefense = (defenseId, choice) => {
     console.log("[LocalCoop resolve] Called:", { defenseId, choice });
@@ -1283,51 +1312,51 @@ useEffect(() => {
     );
     const currentAttack = currentAttacker.attacks[incoming.attackIndex];
 
-  const healthBefore = Number(currentDefender.health) || 0;
+    const healthBefore = Number(currentDefender.health) || 0;
 
-let result;
+    let result;
 
-if (choice === "defend") {
-  const defense =
-    typeof currentDefender.defense === "object"
-      ? (currentDefender.defense?.amount ?? 0)
-      : (currentDefender.defense ?? 0);
+    if (choice === "defend") {
+      const defense =
+        typeof currentDefender.defense === "object"
+          ? (currentDefender.defense?.amount ?? 0)
+          : (currentDefender.defense ?? 0);
 
-  result = attackCharacter(
-    currentAttack,
-    currentAttacker,
-    currentDefender,
-    defense,
-  );
-} else if (choice === "evade") {
-  result = evadeAttack(currentAttack, currentAttacker, currentDefender);
-} else {
-  // Timeout and "take-damage": take the unblocked hit.
-  result = attackCharacter(
-    currentAttack,
-    currentAttacker,
-    currentDefender,
-    0,
-  );
-}
+      result = attackCharacter(
+        currentAttack,
+        currentAttacker,
+        currentDefender,
+        defense,
+      );
+    } else if (choice === "evade") {
+      result = evadeAttack(currentAttack, currentAttacker, currentDefender);
+    } else {
+      // Timeout and "take-damage": take the unblocked hit.
+      result = attackCharacter(
+        currentAttack,
+        currentAttacker,
+        currentDefender,
+        0,
+      );
+    }
 
-if (result) {
-  Object.assign(currentAttacker, result.attacker ?? {});
-  Object.assign(currentDefender, result.defender ?? {});
-}
+    if (result) {
+      Object.assign(currentAttacker, result.attacker ?? {});
+      Object.assign(currentDefender, result.defender ?? {});
+    }
 
-const healthAfter = Number(currentDefender.health) || 0;
+    const healthAfter = Number(currentDefender.health) || 0;
 
-console.log("[LocalCoop damage]", {
-  attacker: currentAttacker.name,
-  defender: currentDefender.name,
-  choice,
-  attack: currentAttack.name,
-  damage: healthBefore - Number(currentDefender.health),
-  healthBefore,
-  healthAfter: currentDefender.health,
-  result,
-});
+    console.log("[LocalCoop damage]", {
+      attacker: currentAttacker.name,
+      defender: currentDefender.name,
+      choice,
+      attack: currentAttack.name,
+      damage: healthBefore - Number(currentDefender.health),
+      healthBefore,
+      healthAfter: currentDefender.health,
+      result,
+    });
 
     const outcome =
       choice === "defend"
@@ -1459,11 +1488,11 @@ console.log("[LocalCoop damage]", {
         // Find a visible, unresolved prompt targeted at the player
         // whose defense keys match this key.
         const defense = localCoopDefenses.find((item) => {
-  if (!item.visible || item.outcome || item.timeLeft <= 0) return false;
+          if (!item.visible || item.outcome || item.timeLeft <= 0) return false;
 
-  const playerIndex = teams.player.findIndex(
-    (fighter) => fighter.id === item.targetId,
-  );
+          const playerIndex = teams.player.findIndex(
+            (fighter) => fighter.id === item.targetId,
+          );
           if (playerIndex < 0) return false;
 
           const playerId = playerIndex === 0 ? "player1" : "player2";
@@ -2300,7 +2329,7 @@ console.log("[LocalCoop damage]", {
               fighter={fighter}
               isActive={fighter.id === activePlayerId}
               phase={phase}
-              pendingAllyAttack={isCpuAssist && Boolean(pendingAllyAttack)}
+              lockDuringAllyAttack={isCpuAssist && Boolean(pendingAllyAttack)}
               allowSimultaneousActions={isLocalCoop}
               onAttack={useAttack}
               onFinishTurn={finishPlayerTurn}

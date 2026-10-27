@@ -730,6 +730,7 @@ function App() {
               setAttacksUsed={setAttacksUsed}
               currentTurn={currentTurn}
               showCombatMessage={showCombatMessage}
+              openingTurnActive={roundNumber === 1}
             />
           </div>
         </>

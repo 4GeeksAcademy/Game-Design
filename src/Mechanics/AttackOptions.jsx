@@ -1,4 +1,4 @@
-import React, {useEffect, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import { aiDefendOrEvade } from "./AI.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import "./BattleUI.css";
@@ -15,8 +15,6 @@ function AttackEffects({ attack }) {
   if (buffs.length === 0 && debuffs.length === 0) {
     return null;
   }
-
-  
 
   return (
     <div className="attack-effects-popup">
@@ -55,7 +53,6 @@ function AttackEffects({ attack }) {
   );
 }
 
-
 function AttackOptions({
   character,
   opponent,
@@ -65,12 +62,23 @@ function AttackOptions({
   setAttacksUsed,
   currentTurn,
   showCombatMessage,
+  openingTurnActive = false,
 }) {
+  const openingTurnAttackLimitReached =
+    openingTurnActive &&
+    character.attacks.filter((attack) => attack.state === false).length >= 3;
   const handleAttack = useCallback(
     (index) => {
       const attack = character.attacks[index];
 
-      if (!attack || currentTurn !== "player" || !attack.state) return;
+      if (
+        !attack ||
+        currentTurn !== "player" ||
+        !attack.state ||
+        openingTurnAttackLimitReached
+      ) {
+        return;
+      }
 
       const result = aiDefendOrEvade(attack, character, opponent);
 
@@ -89,7 +97,10 @@ function AttackOptions({
       showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
 
       if (result.action === "defend") {
-        showCombatMessage(`${opponent.name} blocked ${attack.name}!`, "blocked");
+        showCombatMessage(
+          `${opponent.name} blocked ${attack.name}!`,
+          "blocked",
+        );
       } else if (result.action === "evade") {
         showCombatMessage(`${opponent.name} evaded ${attack.name}!`, "evaded");
       } else if (result.action === "attack" && result.evaded === false) {
@@ -139,7 +150,13 @@ function AttackOptions({
         (boundKey) => normalizeKey(boundKey) === key,
       );
 
-      if (index === -1 || !character.attacks[index]?.state) return;
+      if (
+        index === -1 ||
+        !character.attacks[index]?.state ||
+        openingTurnAttackLimitReached
+      ) {
+        return;
+      }
 
       event.preventDefault();
       handleAttack(index);
@@ -148,67 +165,71 @@ function AttackOptions({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [character.attacks, currentTurn, handleAttack]);
-{
-  return (
-    <div
-      id="attackSection"
-      className="d-flex justify-content-center w-100 my-3"
-    >
-      <div id="attack" className="card w-100">
-        <div id="attackHeader" className="card-header text-center fw-bold">
-          Attack Options
-        </div>
+  {
+    return (
+      <div
+        id="attackSection"
+        className="d-flex justify-content-center w-100 my-3"
+      >
+        <div id="attack" className="card w-100">
+          <div id="attackHeader" className="card-header text-center fw-bold">
+            Attack Options
+          </div>
 
-        <div id="attackBody" className="card-body">
-          <div
-            id="attackList"
-            className="d-flex flex-row flex-nowrap gap-3 overflow-x-auto pb-2"
-          >
-            {character.attacks.map((attack, index) => (
-              <div className="attack-card-wrapper" key={attack.name}>
-                <button
-                  id={`attackCard${index}`}
-                  type="button"
-                  className="card text-start p-3 attack-card"
-                  style={{ minWidth: "200px" }}
-                  disabled={currentTurn !== "player" || !attack.state}
-                  onClick={() => handleAttack(index)}
-                >
-                  <img
-                    id={`attackImage${index}`}
-                    src={attack.image}
-                    className="card-img-top attack-image"
-                    alt={attack.name}
-                    loading="lazy"
-                  />
-
-                  <h5 id={`attackName${index}`} className="text-center">
-                    {attack.name}
-                  </h5>
-
-                  <div id={`attackStats${index}`} className="attack-stats">
-                    <span className="attack-damage">
-                      DAMAGE: {attack.damage ?? 0}
-                    </span>
-                  </div>
-
-                  <span
-                    id={`attackButton${index}`}
-                    className="btn btn-success attack-cost-button"
+          <div id="attackBody" className="card-body">
+            <div
+              id="attackList"
+              className="d-flex flex-row flex-nowrap gap-3 overflow-x-auto pb-2"
+            >
+              {character.attacks.map((attack, index) => (
+                <div className="attack-card-wrapper" key={attack.name}>
+                  <button
+                    id={`attackCard${index}`}
+                    type="button"
+                    className="card text-start p-3 attack-card"
+                    style={{ minWidth: "200px" }}
+                    disabled={
+                      currentTurn !== "player" ||
+                      !attack.state ||
+                      openingTurnAttackLimitReached
+                    }
+                    onClick={() => handleAttack(index)}
                   >
-                    COST: {attack.cost ?? 0} MANA
-                  </span>
-                </button>
+                    <img
+                      id={`attackImage${index}`}
+                      src={attack.image}
+                      className="card-img-top attack-image"
+                      alt={attack.name}
+                      loading="lazy"
+                    />
 
-                <AttackEffects attack={attack} />
-              </div>
-            ))}
+                    <h5 id={`attackName${index}`} className="text-center">
+                      {attack.name}
+                    </h5>
+
+                    <div id={`attackStats${index}`} className="attack-stats">
+                      <span className="attack-damage">
+                        DAMAGE: {attack.damage ?? 0}
+                      </span>
+                    </div>
+
+                    <span
+                      id={`attackButton${index}`}
+                      className="btn btn-success attack-cost-button"
+                    >
+                      COST: {attack.cost ?? 0} MANA
+                    </span>
+                  </button>
+
+                  <AttackEffects attack={attack} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 }
 
 export default AttackOptions;
