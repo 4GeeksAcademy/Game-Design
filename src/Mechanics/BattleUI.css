@@ -2818,6 +2818,607 @@ body {
   }
 }
 
+
+
+/* =========================================
+   1V1 BATTLE — ENHANCED ROUND INTRO
+========================================= */
+
+#roundIntroOverlay {
+  z-index: 10000;
+  background:
+    radial-gradient(
+      ellipse at 20% 50%,
+      rgba(255, 49, 89, 0.22),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 80% 50%,
+      rgba(19, 213, 255, 0.2),
+      transparent 45%
+    ),
+    rgba(3, 7, 17, 0.97);
+
+  /* React controls the fade so the overlay is removed at the right time. */
+  animation: none;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.6s ease, visibility 0s linear 0s;
+}
+
+#roundIntroOverlay.is-fading-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.6s ease,
+    visibility 0s linear 0.6s;
+}
+
+#roundIntroContent.battle-intro-enhanced {
+  width: min(1100px, 100%);
+  padding: 20px;
+}
+
+.battle-intro-matchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 3vw, 40px);
+  margin: 20px auto;
+}
+
+.battle-intro-fighter {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  animation: battleIntroFighterIn 0.65s ease-out both;
+}
+
+.battle-intro-opponent {
+  --fighter-glow: rgba(255, 49, 89, 0.55);
+  --fighter-color: #ff3159;
+}
+
+.battle-intro-player {
+  --fighter-glow: rgba(19, 213, 255, 0.55);
+  --fighter-color: #13d5ff;
+  animation-name: battleIntroFighterInRight;
+}
+
+.battle-intro-label {
+  margin-bottom: 8px;
+  color: var(--fighter-color);
+  font-size: clamp(0.65rem, 1.5vw, 0.9rem);
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.battle-intro-fighter img {
+  display: block;
+  width: min(100%, 240px);
+  height: clamp(120px, 25vh, 250px);
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 0 18px var(--fighter-glow));
+}
+
+.battle-intro-fighter strong {
+  max-width: 100%;
+  margin-top: 8px;
+  color: #fff;
+  font-size: clamp(0.9rem, 2vw, 1.35rem);
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.battle-intro-hp {
+  margin-top: 7px;
+  color: #d5deeb;
+  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-intro-vs {
+  color: #fff;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  font-weight: 1000;
+  font-style: italic;
+  text-shadow:
+    0 0 12px rgba(255, 255, 255, 0.35),
+    0 0 30px rgba(255, 49, 89, 0.2);
+  animation: battleIntroVsPulse 1s ease-in-out infinite alternate;
+}
+
+.battle-intro-healthbar {
+  width: min(100%, 190px);
+  height: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+  background: #10131c;
+  border: 1px solid #ffffff55;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 3px #0009;
+}
+
+.battle-intro-healthbar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 350ms ease;
+}
+
+.battle-intro-healthbar.health-healthy .battle-intro-healthbar-fill {
+  background: #35df83;
+  box-shadow: 0 0 8px #35df8380;
+}
+
+.battle-intro-healthbar.health-warning .battle-intro-healthbar-fill {
+  background: #f4d438;
+  box-shadow: 0 0 8px #f4d43880;
+}
+
+.battle-intro-healthbar.health-danger .battle-intro-healthbar-fill {
+  background: #ff343f;
+  box-shadow: 0 0 9px #ff343f99;
+}
+
+.battle-intro-healthbar.health-critical .battle-intro-healthbar-fill {
+  background: #690018;
+  box-shadow: 0 0 7px #690018;
+}
+
+@keyframes battleIntroFighterIn {
+  from {
+    opacity: 0;
+    transform: translateX(-55px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes battleIntroFighterInRight {
+  from {
+    opacity: 0;
+    transform: translateX(55px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes battleIntroVsPulse {
+  from { transform: scale(0.96); }
+  to { transform: scale(1.08); }
+}
+
+
+/* =========================================
+   1V1 BATTLE — INDIVIDUAL K.O. CUTSCENE
+========================================= */
+
+.battle-ko-overlay {
+  --ko-color: #13d5ff;
+  --ko-glow: rgba(19, 213, 255, 0.65);
+
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 16px;
+  isolation: isolate;
+  color: #fff;
+  background:
+    radial-gradient(ellipse at center, #33101b 0%, #100810 48%, #03050b 100%);
+  animation: battleKoScreenEnter 0.35s ease-out both;
+}
+
+.battle-ko-overlay.ko-opponent {
+  --ko-color: #ff3159;
+  --ko-glow: rgba(255, 49, 89, 0.7);
+}
+
+.battle-ko-overlay.ko-player {
+  --ko-color: #13d5ff;
+  --ko-glow: rgba(19, 213, 255, 0.65);
+}
+
+.battle-ko-flash {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: white;
+  pointer-events: none;
+  animation: battleKoFlash 0.65s ease-out both;
+}
+
+.battle-ko-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(92vw, 700px);
+  text-align: center;
+  animation: battleKoImpact 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.battle-ko-eyebrow {
+  margin: 0 0 8px;
+  color: var(--ko-color);
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  font-weight: 900;
+  letter-spacing: 0.3em;
+}
+
+.battle-ko-portrait {
+  display: block;
+  width: clamp(130px, 25vw, 250px);
+  height: clamp(150px, 30vh, 290px);
+  object-fit: contain;
+  object-position: center bottom;
+  filter: grayscale(1) drop-shadow(0 0 22px var(--ko-glow));
+  transform-origin: center bottom;
+  animation: battleKoFall 0.75s 0.1s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.battle-ko-title {
+  position: relative;
+  z-index: 2;
+  margin: -15px 0 0;
+  color: #fff;
+  font-size: clamp(4.5rem, 15vw, 9rem);
+  font-weight: 1000;
+  font-style: italic;
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+  -webkit-text-stroke: 2px var(--ko-color);
+  text-shadow:
+    4px 4px 0 #5d071b,
+    0 0 14px var(--ko-glow),
+    0 0 38px var(--ko-glow);
+  animation: battleKoTitleImpact 0.55s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.battle-ko-name {
+  margin: 16px 0 0;
+  color: #fff;
+  font-size: clamp(1.2rem, 4vw, 2.3rem);
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.battle-ko-subtitle {
+  margin: 8px 0 0;
+  color: var(--ko-color);
+  font-size: clamp(0.7rem, 2vw, 0.95rem);
+  font-weight: 900;
+  letter-spacing: 0.25em;
+}
+
+@keyframes battleKoScreenEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes battleKoFlash {
+  0% { opacity: 0.95; }
+  100% { opacity: 0; }
+}
+
+@keyframes battleKoImpact {
+  0% {
+    opacity: 0;
+    transform: scale(0.72) translateY(24px);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.04) translateY(-3px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes battleKoFall {
+  0% {
+    opacity: 0;
+    transform: translateY(-35px) rotate(5deg) scale(1.08);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(8px) rotate(-3deg) scale(0.96);
+  }
+  75% {
+    transform: translateY(-3px) rotate(1deg) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+
+@keyframes battleKoTitleImpact {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(-8deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(0.88) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+
+/* =========================================
+   1V1 BATTLE — FINAL WINNER CARDS
+========================================= */
+
+.battle-finish-overlay {
+  --finish-color: #13d5ff;
+  --finish-glow: #13d5ff88;
+
+  position: fixed;
+  inset: 0;
+  z-index: 10002;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+  color: #fff;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at center, #222b40 0%, #0a0d17 65%, #020309 100%);
+  animation: battleFinishEnter 450ms ease-out both;
+}
+
+.battle-finish-overlay.finish-defeat {
+  --finish-color: #ff3159;
+  --finish-glow: #ff315988;
+}
+
+.battle-finish-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--finish-color);
+  animation: battleFinishFlash 650ms ease-out both;
+}
+
+.battle-finish-eyebrow,
+.battle-finish-title,
+.battle-finish-message,
+.battle-finish-versus,
+.battle-finish-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.battle-finish-eyebrow {
+  margin: 0 0 8px;
+  color: var(--finish-color);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+}
+
+.battle-finish-title {
+  margin: 0;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  font-weight: 1000;
+  font-style: italic;
+  line-height: 0.95;
+  text-shadow: 0 0 16px var(--finish-glow), 0 0 40px var(--finish-glow);
+  animation: battleFinishTitleImpact 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.battle-finish-message {
+  margin: 12px 0 24px;
+  color: #e3eaf6;
+  font-size: clamp(0.65rem, 1.7vw, 0.95rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.battle-finish-versus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(10px, 3vw, 32px);
+  width: min(100%, 850px);
+}
+
+.battle-finish-side {
+  min-width: 0;
+}
+
+.battle-finish-side h2 {
+  margin: 0 0 12px;
+  color: var(--finish-color);
+  font-size: clamp(0.8rem, 2vw, 1.1rem);
+  font-weight: 950;
+  letter-spacing: 0.15em;
+}
+
+.battle-finish-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  max-width: 260px;
+  margin: 0 auto;
+  padding: 10px;
+  background: #111827cc;
+  border: 1px solid var(--finish-color);
+  border-radius: 10px;
+  box-shadow: 0 0 22px var(--finish-glow);
+  animation: battleFinishCardWin 750ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 350ms;
+}
+
+.defeated-side .battle-finish-card {
+  border-color: #ffffff30;
+  box-shadow: none;
+  filter: grayscale(1);
+  opacity: 0.7;
+  animation-name: battleFinishCardLose;
+}
+
+.battle-finish-card img {
+  display: block;
+  width: 100%;
+  height: clamp(100px, 22vh, 210px);
+  object-fit: contain;
+}
+
+.battle-finish-card strong {
+  margin-top: 8px;
+  font-size: clamp(0.65rem, 1.5vw, 0.95rem);
+  overflow-wrap: anywhere;
+}
+
+.battle-finish-card span {
+  margin-top: 6px;
+  color: var(--finish-color);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.defeated-side .battle-finish-card span {
+  color: #ff7187;
+}
+
+.battle-finish-vs {
+  color: #fff;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  font-weight: 1000;
+  font-style: italic;
+  text-shadow: 0 0 16px var(--finish-glow);
+}
+
+.battle-finish-footer {
+  margin: 22px 0 0;
+  color: #aab7ca;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  animation: battleFinishFooterPulse 1s ease-in-out infinite alternate;
+}
+
+.battle-finish-overlay.is-fading-out {
+  animation: battleFinishFadeOut 0.6s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes battleFinishEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes battleFinishFlash {
+  0% { opacity: 0.75; }
+  100% { opacity: 0; }
+}
+
+@keyframes battleFinishTitleImpact {
+  0% { opacity: 0; transform: scale(1.7) rotate(-5deg); }
+  65% { opacity: 1; transform: scale(0.94) rotate(1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes battleFinishCardWin {
+  from { opacity: 0; transform: translateY(65px) scale(0.75); }
+  70% { opacity: 1; transform: translateY(-8px) scale(1.04); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes battleFinishCardLose {
+  from { opacity: 0; transform: translateY(-45px) rotate(-5deg); }
+  to { opacity: 0.7; transform: translateY(12px) rotate(3deg); }
+}
+
+@keyframes battleFinishFooterPulse {
+  to { opacity: 0.55; }
+}
+
+@keyframes battleFinishFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (max-width: 620px) {
+  #roundIntroContent.battle-intro-enhanced {
+    padding: 12px;
+  }
+
+  .battle-intro-matchup {
+    gap: 7px;
+  }
+
+  .battle-intro-fighter img {
+    height: clamp(100px, 19vh, 170px);
+  }
+
+  .battle-intro-label {
+    letter-spacing: 0.07em;
+  }
+
+  .battle-finish-overlay {
+    padding: 12px;
+  }
+
+  .battle-finish-versus {
+    gap: 7px;
+  }
+
+  .battle-finish-card {
+    padding: 5px;
+  }
+
+  .battle-finish-card img {
+    height: clamp(80px, 16vh, 140px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #roundIntroOverlay,
+  #roundIntroContent,
+  .battle-intro-fighter,
+  .battle-intro-vs,
+  .battle-ko-overlay,
+  .battle-ko-flash,
+  .battle-ko-content,
+  .battle-ko-portrait,
+  .battle-ko-title,
+  .battle-finish-overlay,
+  .battle-finish-flash,
+  .battle-finish-title,
+  .battle-finish-card,
+  .battle-finish-footer {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .battle-intro-healthbar-fill {
+    transition: none;
+  }
+}
+
+
 /* =========================================
    OPPONENT ATTACK — BODY LUNGE + IMPACT
 ========================================= */
