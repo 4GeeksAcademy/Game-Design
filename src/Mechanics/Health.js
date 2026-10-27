@@ -315,46 +315,37 @@ function evadeAttack(ATK, attacker, defender) {
     return null;
   }
 
-  if (attacker.mana < (ATK.cost ?? 0)) {
+  const attackCost = Number(ATK.cost) || 0;
+  const attackerMana = Number(attacker.mana) || 0;
+
+  if (attackerMana < attackCost) {
     console.log("Not enough attacker mana!");
     return null;
   }
 
-  attacker.mana -= ATK.cost ?? 0;
+  // The attacker pays the attack's mana cost.
+  attacker.mana = attackerMana - attackCost;
 
-  const agilityNeeded = Math.max(
+  // Agility covers the attack speed first; defender mana covers any shortfall.
+  const agilityShortfall = Math.max(
     0,
-    ATK.speed - defender.agility
+    (Number(ATK.speed) || 0) - (Number(defender.agility) || 0),
   );
+  const defenderMana = Number(defender.mana) || 0;
+  const manaSpent = Math.min(defenderMana, agilityShortfall);
 
-  let evaded = false;
-  let manaSpent = 0;
+  defender.mana = defenderMana - manaSpent;
+  const evaded = manaSpent >= agilityShortfall;
 
-  if (agilityNeeded === 0) {
-    evaded = true;
-  } else if (defender.mana >= agilityNeeded) {
-    defender.mana -= agilityNeeded;
-    manaSpent = agilityNeeded;
-    evaded = true;
-  } else {
-    manaSpent = defender.mana;
-    defender.mana = 0;
-  }
-
-  // Effects resolve even when the attack's damage is evaded.
   const buffsApplied = applyEffects(ATK.buff, attacker);
-
-  // Debuffs only apply if the opponent fails to evade.
-  let debuffsApplied = {};
-
-  if (!evaded) {
-    debuffsApplied = applyEffects(ATK.debuff, defender, -1);
-  }
+  const debuffsApplied = evaded
+    ? {}
+    : applyEffects(ATK.debuff, defender, -1);
 
   let damageReceived = 0;
 
   if (!evaded && ATK.damage > 0 && defender.health > 0) {
-    damageReceived = Math.max(0, ATK.damage);
+    damageReceived = Math.max(0, Number(ATK.damage) || 0);
     defender.health = Math.max(0, defender.health - damageReceived);
   }
 

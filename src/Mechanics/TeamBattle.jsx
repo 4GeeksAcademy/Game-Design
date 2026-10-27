@@ -212,6 +212,31 @@ function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist) {
   };
 }
 
+function assignUniqueCpuTargets(opponents, players) {
+  const availablePlayers = players
+    .filter((player) => player.health > 0)
+    .map((player) => player.id);
+
+  // Shuffle living players so the CPU target assignment is random.
+  for (let i = availablePlayers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [availablePlayers[i], availablePlayers[j]] = [
+      availablePlayers[j],
+      availablePlayers[i],
+    ];
+  }
+
+  const targets = {};
+  const livingOpponents = opponents.filter((cpu) => cpu.health > 0);
+
+  livingOpponents.forEach((cpu, index) => {
+    const targetId = availablePlayers[index];
+    if (targetId) targets[cpu.id] = targetId;
+  });
+
+  return targets;
+}
+
 export default function TeamBattle() {
   const location = useLocation();
   const {
@@ -476,17 +501,15 @@ export default function TeamBattle() {
 
     setRoundTargets(targetsForRound);
 
-    const newCpuTargets = {};
+    const newCpuTargets = assignUniqueCpuTargets(
+  teams.opponent,
+  teams.player,
+);
+setCpuTargets(newCpuTargets);
 
-    const availablePlayers = [...livingPlayers].sort(() => Math.random() - 0.5);
+setCpuTargets(newCpuTargets);
 
-    for (const cpu of [...livingOpponents].sort(() => Math.random() - 0.5)) {
-      const target = availablePlayers.shift();
-
-      if (!target) break; // No unassigned living player; this CPU skips.
-
-      newCpuTargets[cpu.id] = target.id;
-    }
+    
 
     setTeams((current) => ({ ...current, player: playersWithTargets }));
     setCpuTargets(newCpuTargets);
@@ -696,6 +719,14 @@ export default function TeamBattle() {
     });
 
     setTeams({ player: playersAfter, opponent: updatedOpponents });
+    if (
+      playersAfter.every(
+        (fighter) => fighter.health <= 0 || fighter.turnFinished,
+      )
+    ) {
+      setPhase("cpu-fighting");
+      addLog("Your team is finished. The CPU is preparing its attacks.");
+    }
 
     if (attacker.isCpuTeammate) {
       const attacksUsedThisTurn = attacker.attacks.filter(
@@ -819,7 +850,7 @@ export default function TeamBattle() {
         (opponent) => opponent.id === targetId && opponent.health > 0,
       );
 
-      return !targetAlive && !player.turnFinished
+      return (player.health <= 0 || !targetAlive) && !player.turnFinished
         ? { ...player, turnFinished: true }
         : player;
     });
@@ -963,85 +994,65 @@ export default function TeamBattle() {
       return;
     }
     if (isLocalCoop) {
-      const attacksByTarget = {};
+  const attacksByTarget = {};
 
-      const assignedTargetsThisTurn = new Set();
+  teams.opponent.forEach((cpu) => {
+    if (cpu.health <= 0) return;
 
-teams.opponent.forEach((cpu) => {
-  if (cpu.health <= 0) return;
+    const target = teams.player.find(
+  (player) =>
+    player.id === cpuTargets[cpu.id] &&
+    player.health > 0,
+);
 
-  const originalTargetId = cpuTargets[cpu.id];
+    if (!target) return;
 
-  let target = teams.player.find(
-    (player) =>
-      player.id === originalTargetId && player.health > 0,
-  );
+    const attacks = cpu.attacks
+      .map((attack, attackIndex) => ({ attack, attackIndex }))
+      .filter(
+        ({ attack }) =>
+          attack.state === true && cpu.mana >= (attack.cost ?? 0),
+      )
+      .map(({ attackIndex }) => ({
+        id: `${cpu.id}-${attackIndex}-${target.id}`,
+        cpuId: cpu.id,
+        targetId: target.id,
+        attackIndex,
+      }));
 
-  // If the assigned target was defeated, find a living player
-  // who has not already been assigned to another CPU this turn.
-  if (!target) {
-    const availablePlayers = teams.player.filter(
-      (player) =>
-        player.health > 0 &&
-        !assignedTargetsThisTurn.has(player.id),
-    );
+    attacksByTarget[target.id] = [
+      ...(attacksByTarget[target.id] ?? []),
+      ...attacks,
+    ];
+  });
 
-    if (availablePlayers.length === 0) return;
+  const firstCards = [];
+  const remainingQueues = {};
 
-    target =
-      availablePlayers[
-        Math.floor(Math.random() * availablePlayers.length)
-      ];
+  Object.entries(attacksByTarget).forEach(([targetId, attacks]) => {
+    if (attacks.length) {
+      firstCards.push(attacks[0]);
+      remainingQueues[targetId] = attacks.slice(1);
+    }
+  });
+
+  localCoopAttackQueuesRef.current = remainingQueues;
+
+  if (firstCards.length) {
+    localCoopResolvedRef.current = new Set();
+    localCoopExpiredRef.current.clear();
+    setLocalCoopDefenses(firstCards);
+    setCpuQueueReady(true);
+    setCombatMessage("The CPU team is preparing its attacks.");
+  } else {
+    setLocalCoopDefenses([]);
+    setCpuActionQueue([]);
+    setCpuActionIndex(0);
+    setCpuQueueReady(true);
   }
 
-  // Never allow two CPUs to attack the same player this turn.
-  if (assignedTargetsThisTurn.has(target.id)) return;
-
-  assignedTargetsThisTurn.add(target.id);
-
-  const usableAttacks = cpu.attacks
-    .map((attack, attackIndex) => ({ attack, attackIndex }))
-    .filter(
-      ({ attack }) =>
-        attack.state === true && cpu.mana >= (attack.cost ?? 0),
-    );
-
-  usableAttacks.forEach(({ attackIndex }) => {
-    queue.push({
-      cpuId: cpu.id,
-      targetId: target.id,
-      attackIndex,
-    });
-  });
-});
-
-      const firstCards = [];
-      const remainingQueues = {};
-
-      Object.entries(attacksByTarget).forEach(([targetId, attacks]) => {
-        if (attacks.length) {
-          firstCards.push(attacks[0]);
-          remainingQueues[targetId] = attacks.slice(1);
-        }
-      });
-
-      localCoopAttackQueuesRef.current = remainingQueues;
-
-      if (firstCards.length) {
-        localCoopResolvedRef.current = new Set();
-        localCoopExpiredRef.current.clear();
-        setLocalCoopDefenses(firstCards);
-        setCpuQueueReady(true);
-        setCombatMessage("The CPU team is preparing its attacks.");
-      } else {
-        setLocalCoopDefenses([]);
-        setCpuActionQueue([]);
-        setCpuActionIndex(0);
-        setCpuQueueReady(true);
-      }
-
-      return;
-    }
+  return;
+}
 
     const limit = Number.POSITIVE_INFINITY;
     const queue = [];
@@ -1049,23 +1060,15 @@ teams.opponent.forEach((cpu) => {
     teams.opponent.forEach((cpu) => {
       if (cpu.health <= 0) return;
 
-     const targetId = cpuTargets[cpu.id];
+      const targetId = cpuTargets[cpu.id];
 
-let target = teams.player.find(
-  (player) => player.id === targetId && player.health > 0,
+     const target = teams.player.find(
+  (player) =>
+    player.id === targetId &&
+    player.health > 0,
 );
 
-// If the assigned target was defeated, choose a random survivor.
-if (!target) {
-  const availablePlayers = teams.player.filter(
-    (player) => player.health > 0,
-  );
-
-  if (availablePlayers.length === 0) return;
-
-  target =
-    availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
-}
+if (!target) return;
 
       const usableAttacks = cpu.attacks
         .map((attack, attackIndex) => ({ attack, attackIndex }))
@@ -1190,6 +1193,7 @@ if (!target) {
     pendingDefense,
     cpuActionQueue,
     cpuActionIndex,
+    cpuQueueReady,
     teams.opponent,
     teams.player,
     livingPlayers.length,
@@ -1777,15 +1781,15 @@ if (!target) {
       // Use the same AI decision function used for normal-difficulty defense.
       // If it returns a result, apply its updated fighter data below.
       const defenseController =
-  difficulty === "Normal"
-    ? normalDefendOrEvade // It would select normal difficulty,
-    : aiDefendOrEvade;   // or else it selects easy mode
+        difficulty === "Normal"
+          ? normalDefendOrEvade // It would select normal difficulty,
+          : aiDefendOrEvade; // or else it selects easy mode
 
-const result = defenseController(
-  incomingAttack,
-  currentAttacker,
-  currentDefender,
-);
+      const result = defenseController(
+        incomingAttack,
+        currentAttacker,
+        currentDefender,
+      );
 
       if (result) {
         defenseResolvedRef.current = true;
