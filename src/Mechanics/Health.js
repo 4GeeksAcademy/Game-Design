@@ -310,13 +310,18 @@ function currentHealth(ATK, character, defense = 0) {
   }
 }
 
+
 function evadeAttack(ATK, attacker, defender) {
   if (!ATK || !attacker || !defender || ATK.state !== true) {
     return null;
   }
 
   const attackCost = Number(ATK.cost) || 0;
+  const attackSpeed = Number(ATK.speed) || 0;
   const attackerMana = Number(attacker.mana) || 0;
+  const defenderMana = Number(defender.mana) || 0;
+  const defenderAgility = Number(defender.agility) || 0;
+  const defenderCooldown = Number(defender.cooldown) || 0;
 
   if (attackerMana < attackCost) {
     console.log("Not enough attacker mana!");
@@ -326,17 +331,27 @@ function evadeAttack(ATK, attacker, defender) {
   // The attacker pays the attack's mana cost.
   attacker.mana = attackerMana - attackCost;
 
-  // Agility covers the attack speed first; defender mana covers any shortfall.
-  const agilityShortfall = Math.max(
-    0,
-    (Number(ATK.speed) || 0) - (Number(defender.agility) || 0),
-  );
-  const defenderMana = Number(defender.mana) || 0;
-  const manaSpent = Math.min(defenderMana, agilityShortfall);
+  // Check whether the defender has a cooldown available.
+  const hasCooldown = defenderCooldown > 0;
+
+  // Spend one cooldown when available.
+  if (hasCooldown) {
+    defender.cooldown = defenderCooldown - 1;
+  }
+
+  // Agility only helps when the defender has cooldown available.
+  const usableAgility = hasCooldown ? defenderAgility : 0;
+
+  // Mana must cover whatever attack speed agility cannot cover.
+  const manaNeeded = Math.max(0, attackSpeed - usableAgility);
+  const manaSpent = Math.min(defenderMana, manaNeeded);
 
   defender.mana = defenderMana - manaSpent;
-  const evaded = manaSpent >= agilityShortfall;
 
+  // Evasion succeeds if agility plus spent mana covers attack speed.
+  const evaded = usableAgility + manaSpent >= attackSpeed;
+
+  // Preserve the existing buff/debuff behavior.
   const buffsApplied = applyEffects(ATK.buff, attacker);
   const debuffsApplied = evaded
     ? {}
@@ -349,6 +364,7 @@ function evadeAttack(ATK, attacker, defender) {
     defender.health = Math.max(0, defender.health - damageReceived);
   }
 
+  // Prevent this attack from being resolved twice.
   ATK.state = false;
 
   return {
@@ -362,6 +378,7 @@ function evadeAttack(ATK, attacker, defender) {
     action: evaded ? "evade" : "attack",
   };
 }
+
 
 export { attackCharacter, currentHealth, evadeAttack, applyEffects };
 
