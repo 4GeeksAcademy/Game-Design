@@ -274,7 +274,7 @@ function assignUniqueCpuTargets(opponents, players) {
 export default function TeamBattle() {
   const location = useLocation();
   const levelConfig = location.state ?? {};
-const isStoryMode = levelConfig.gameMode === "story";
+  const isStoryMode = levelConfig.gameMode === "story";
   const {
     playerTeamIds = [],
     opponentTeamIds = [],
@@ -282,6 +282,8 @@ const isStoryMode = levelConfig.gameMode === "story";
     teamControl = "single-player",
     difficulty = "Normal",
   } = location.state ?? {};
+  const isStory1v2 =
+    isStoryMode && playerTeamIds.length === 1 && opponentTeamIds.length === 2;
 
   const resolveLocalCoopDefenseRef = useRef(() => {});
   const [isIntroFadingOut, setIsIntroFadingOut] = useState(false);
@@ -305,10 +307,7 @@ const isStoryMode = levelConfig.gameMode === "story";
   const [isKnockoutFadingOut, setIsKnockoutFadingOut] = useState(false);
   const previousTeamsRef = useRef(teams);
   const [teamFinishComplete, setTeamFinishComplete] = useState(false);
-  const [isTeamFinishFadingOut, setIsTeamFinishFadingOut] =
-  useState(false);
-
-
+  const [isTeamFinishFadingOut, setIsTeamFinishFadingOut] = useState(false);
 
   const [allyAttackOutcome, setAllyAttackOutcome] = useState(null);
   const [pendingAllyAttack, setPendingAllyAttack] = useState(null);
@@ -322,7 +321,7 @@ const isStoryMode = levelConfig.gameMode === "story";
     playerTeamIds[0] ?? null,
   );
 
-    const isFinalTeamPhase = phase === "victory" || phase === "defeat";
+  const isFinalTeamPhase = phase === "victory" || phase === "defeat";
 
   const winningTeam = phase === "victory" ? teams.player : teams.opponent;
 
@@ -373,28 +372,28 @@ const isStoryMode = levelConfig.gameMode === "story";
   }, [knockout]);
 
   useEffect(() => {
-  if (!isFinalTeamPhase) {
+    if (!isFinalTeamPhase) {
+      setTeamFinishComplete(false);
+      setIsTeamFinishFadingOut(false);
+      return undefined;
+    }
+
     setTeamFinishComplete(false);
     setIsTeamFinishFadingOut(false);
-    return undefined;
-  }
 
-  setTeamFinishComplete(false);
-  setIsTeamFinishFadingOut(false);
+    const fadeTimer = setTimeout(() => {
+      setIsTeamFinishFadingOut(true);
+    }, 2600);
 
-  const fadeTimer = setTimeout(() => {
-    setIsTeamFinishFadingOut(true);
-  }, 2600);
+    const completeTimer = setTimeout(() => {
+      setTeamFinishComplete(true);
+    }, 3200);
 
-  const completeTimer = setTimeout(() => {
-    setTeamFinishComplete(true);
-  }, 3200);
-
-  return () => {
-    clearTimeout(fadeTimer);
-    clearTimeout(completeTimer);
-  };
-}, [isFinalTeamPhase, phase]);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(completeTimer);
+    };
+  }, [isFinalTeamPhase, phase]);
 
   useEffect(() => {
     if (!combatPopups.length) return undefined;
@@ -409,7 +408,7 @@ const isStoryMode = levelConfig.gameMode === "story";
     return () => clearTimeout(timer);
   }, [combatPopups]);
 
-  const hasValidTeams =
+  const hasValidStandardTeams =
     teams.player.length === 2 &&
     teams.opponent.length === 2 &&
     teams.player.every(Boolean) &&
@@ -420,6 +419,19 @@ const isStoryMode = levelConfig.gameMode === "story";
       (fighter, index) => fighter.id === opponentTeamIds[index],
     ) &&
     (!isCpuAssist || teams.player[1].isCpuTeammate);
+
+  const hasValidStory1v2 =
+    isStory1v2 &&
+    teams.player.length === 1 &&
+    teams.opponent.length === 2 &&
+    teams.player.every(Boolean) &&
+    teams.opponent.every(Boolean) &&
+    teams.player[0].id === playerTeamIds[0] &&
+    teams.opponent.every(
+      (fighter, index) => fighter.id === opponentTeamIds[index],
+    );
+
+  const hasValidTeams = hasValidStandardTeams || hasValidStory1v2;
 
   const addLog = (message, type = "hit") => {
     const entry = {
@@ -1250,24 +1262,36 @@ const isStoryMode = levelConfig.gameMode === "story";
       }
 
       const resetFighters = (fighters) =>
-        fighters.map((fighter) => ({
-          ...fighter,
-          mana:
-            fighter.health > 0
-              ? Math.min(
-                  fighter.maximumMana ?? fighter.mana,
-                  fighter.mana + (fighter.manaRegen ?? 0),
-                )
-              : fighter.mana,
-          turnFinished: false,
-          blocked: false,
-          attacks: fighter.attacks.map((attack) => ({
-            ...attack,
-            state: true,
-            buff: attack.buff ? { ...attack.buff } : attack.buff,
-            debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-          })),
-        }));
+  fighters.map((fighter) => ({
+    ...fighter,
+
+    mana:
+      fighter.health > 0
+        ? Math.min(
+            fighter.maximumMana ?? fighter.mana,
+            fighter.mana + (fighter.manaRegen ?? 0),
+          )
+        : fighter.mana,
+
+    // Restore cooldown based on this fighter's recovery stat.
+    cooldown:
+      fighter.health > 0
+        ? Math.min(
+            fighter.maximumCooldown ?? fighter.cooldown ?? 0,
+            (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
+          )
+        : fighter.cooldown,
+
+    turnFinished: false,
+    blocked: false,
+
+    attacks: fighter.attacks.map((attack) => ({
+      ...attack,
+      state: true,
+      buff: attack.buff ? { ...attack.buff } : attack.buff,
+      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+    })),
+  }));
 
       setTeams({
         player: resetFighters(teams.player),
@@ -1582,24 +1606,36 @@ const isStoryMode = levelConfig.gameMode === "story";
         }
 
         const resetFighters = (fighters) =>
-          fighters.map((fighter) => ({
-            ...fighter,
-            mana:
-              fighter.health > 0
-                ? Math.min(
-                    fighter.maximumMana ?? fighter.mana,
-                    fighter.mana + (fighter.manaRegen ?? 0),
-                  )
-                : fighter.mana,
-            turnFinished: false,
-            blocked: false,
-            attacks: fighter.attacks.map((item) => ({
-              ...item,
-              state: true,
-              buff: item.buff ? { ...item.buff } : item.buff,
-              debuff: item.debuff ? { ...item.debuff } : item.debuff,
-            })),
-          }));
+  fighters.map((fighter) => ({
+    ...fighter,
+
+    mana:
+      fighter.health > 0
+        ? Math.min(
+            fighter.maximumMana ?? fighter.mana,
+            fighter.mana + (fighter.manaRegen ?? 0),
+          )
+        : fighter.mana,
+
+    // Restore cooldown based on this fighter's recovery stat.
+    cooldown:
+      fighter.health > 0
+        ? Math.min(
+            fighter.maximumCooldown ?? fighter.cooldown ?? 0,
+            (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
+          )
+        : fighter.cooldown,
+
+    turnFinished: false,
+    blocked: false,
+
+    attacks: fighter.attacks.map((attack) => ({
+      ...attack,
+      state: true,
+      buff: attack.buff ? { ...attack.buff } : attack.buff,
+      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+    })),
+  }));
 
         setTeams({
           player: resetFighters(updatedPlayers),
@@ -1814,13 +1850,15 @@ const isStoryMode = levelConfig.gameMode === "story";
       if (!result) {
         addLog("The defensive action could not be completed.");
       } else {
-        if (choice === "defend" || choice === "evade") {
-          currentDefender.cooldown = Math.max(
-            0,
-            (currentDefender.cooldown ?? 0) - 1,
-          );
-          currentDefender.blocked = true;
-        }
+        if (choice === "defend") {
+  currentDefender.cooldown = Math.max(
+    0,
+    (currentDefender.cooldown ?? 0) - 1,
+  );
+  currentDefender.blocked = true;
+} else if (choice === "evade") {
+  currentDefender.blocked = true;
+}
 
         if (choice === "defend") {
           addLog(
@@ -1992,9 +2030,11 @@ const isStoryMode = levelConfig.gameMode === "story";
 
           <p className="error-eyebrow">BATTLE SETUP ERROR</p>
           <h2>Unable to load your teams</h2>
+
           <p className="error-message">
-            A 2v2 battle needs two valid fighters on each team. Return to
-            character selection and choose two fighters per side.
+            {isStory1v2
+              ? "A Story Mode 1v2 battle needs one valid player fighter and two valid opponents. Return to character selection and check your fighters."
+              : "A 2v2 battle needs two valid fighters on each team. Return to character selection and choose two fighters per side."}
           </p>
 
           <button
@@ -2010,44 +2050,44 @@ const isStoryMode = levelConfig.gameMode === "story";
   }
 
   if (
-  (phase === "victory" || phase === "defeat") &&
-  !knockout &&
-  teamFinishComplete
-) {
-  const won = phase === "victory";
+    (phase === "victory" || phase === "defeat") &&
+    !knockout &&
+    teamFinishComplete
+  ) {
+    const won = phase === "victory";
 
-  if (isStoryMode) {
-    return (
-      <StoryResultsScreen
-        won={won}
-        playerName={teams.player.map((fighter) => fighter.name).join(" & ")}
-        opponentName={teams.opponent
-          .map((fighter) => fighter.name)
-          .join(" & ")}
+    if (isStoryMode) {
+      return (
+        <StoryResultsScreen
+          won={won}
+          playerName={teams.player.map((fighter) => fighter.name).join(" & ")}
+          opponentName={teams.opponent
+            .map((fighter) => fighter.name)
+            .join(" & ")}
+          damageDealt={damageDealt}
+          attacksUsed={attacksUsed}
+          levelConfig={levelConfig}
+          battlePath="/team-battle"
+        />
+      );
+    }
+
+    return won ? (
+      <VictoryScreen
         damageDealt={damageDealt}
         attacksUsed={attacksUsed}
-        levelConfig={levelConfig}
-        battlePath="/team-battle"
+        message="Your team has defeated the opposing team!"
+        onRematch={resetBattle}
+      />
+    ) : (
+      <GameOverScreen
+        damageDealt={damageDealt}
+        attacksUsed={attacksUsed}
+        message="Your entire team has been defeated."
+        onRematch={resetBattle}
       />
     );
   }
-
-  return won ? (
-    <VictoryScreen
-      damageDealt={damageDealt}
-      attacksUsed={attacksUsed}
-      message="Your team has defeated the opposing team!"
-      onRematch={resetBattle}
-    />
-  ) : (
-    <GameOverScreen
-      damageDealt={damageDealt}
-      attacksUsed={attacksUsed}
-      message="Your entire team has been defeated."
-      onRematch={resetBattle}
-    />
-  );
-}
 
   if (phase === "defeat" && !knockout && teamFinishComplete) {
     return (
@@ -2062,86 +2102,73 @@ const isStoryMode = levelConfig.gameMode === "story";
 
   return (
     <main className="team-battle">
+      {isFinalTeamPhase && (
+        <div
+          className={`team-finish-overlay ${
+            phase === "victory" ? "finish-victory" : "finish-defeat"
+          } ${isTeamFinishFadingOut ? "is-fading-out" : ""}`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="team-finish-flash" />
 
-{isFinalTeamPhase && (
-  <div
-    className={`team-finish-overlay ${
-    phase === "victory" ? "finish-victory" : "finish-defeat"
-  } ${isTeamFinishFadingOut ? "is-fading-out" : ""}`}
-  role="alert"
-  aria-live="assertive"
-  >
-    <div className="team-finish-flash" />
+          <p className="team-finish-eyebrow">FIGHTER'S ARENA</p>
 
-    <p className="team-finish-eyebrow">
-      FIGHTER'S ARENA
-    </p>
+          <h1 className="team-finish-title">TEAM K.O.!</h1>
 
-    <h1 className="team-finish-title">
-      TEAM K.O.!
-    </h1>
+          <p className="team-finish-message">
+            {phase === "victory"
+              ? "THE OPPOSING TEAM HAS BEEN DEFEATED"
+              : "YOUR ENTIRE TEAM HAS BEEN DEFEATED"}
+          </p>
 
-    <p className="team-finish-message">
-      {phase === "victory"
-        ? "THE OPPOSING TEAM HAS BEEN DEFEATED"
-        : "YOUR ENTIRE TEAM HAS BEEN DEFEATED"}
-    </p>
+          <div className="team-finish-versus">
+            <div className="team-finish-side defeated-side">
+              <h2>DEFEATED</h2>
 
-    <div className="team-finish-versus">
-      <div className="team-finish-side defeated-side">
-        <h2>DEFEATED</h2>
+              <div className="team-finish-cards">
+                {defeatedTeam.map((fighter, index) => (
+                  <div
+                    className="team-finish-card"
+                    key={fighter.id}
+                    style={{ "--card-index": index }}
+                  >
+                    {fighter.image && <img src={fighter.image} alt="" />}
 
-        <div className="team-finish-cards">
-          {defeatedTeam.map((fighter, index) => (
-            <div
-              className="team-finish-card"
-              key={fighter.id}
-              style={{ "--card-index": index }}
-            >
-              {fighter.image && (
-                <img src={fighter.image} alt="" />
-              )}
-
-              <strong>{fighter.name}</strong>
-              <span>K.O.</span>
+                    <strong>{fighter.name}</strong>
+                    <span>K.O.</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="team-finish-vs">VS</div>
+            <div className="team-finish-vs">VS</div>
 
-      <div className="team-finish-side winning-side">
-        <h2>WINNERS</h2>
+            <div className="team-finish-side winning-side">
+              <h2>WINNERS</h2>
 
-        <div className="team-finish-cards">
-          {winningTeam.map((fighter, index) => (
-            <div
-              className="team-finish-card"
-              key={fighter.id}
-              style={{ "--card-index": index }}
-            >
-              {fighter.image && (
-                <img src={fighter.image} alt="" />
-              )}
+              <div className="team-finish-cards">
+                {winningTeam.map((fighter, index) => (
+                  <div
+                    className="team-finish-card"
+                    key={fighter.id}
+                    style={{ "--card-index": index }}
+                  >
+                    {fighter.image && <img src={fighter.image} alt="" />}
 
-              <strong>{fighter.name}</strong>
-              <span>
-                {Math.max(0, fighter.health)} HP
-              </span>
+                    <strong>{fighter.name}</strong>
+                    <span>{Math.max(0, fighter.health)} HP</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
+          </div>
 
-    <p className="team-finish-footer">
-      {teamFinishComplete
-        ? "RESULT CONFIRMED"
-        : "MATCH COMPLETE"}
-    </p>
-  </div>
-)}
+          <p className="team-finish-footer">
+            {teamFinishComplete ? "RESULT CONFIRMED" : "MATCH COMPLETE"}
+          </p>
+        </div>
+      )}
 
       {knockout && (
         <div

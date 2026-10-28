@@ -1,10 +1,23 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./StoryMode.css";
 
 function StoryMode() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [screen, setScreen] = useState("chapters");
+
+  const [level1Complete, setLevel1Complete] = useState(
+    () => localStorage.getItem("storyLevel1Complete") === "true",
+  );
+
+  useEffect(() => {
+    if (location.state?.level1Completed === true) {
+      localStorage.setItem("storyLevel1Complete", "true");
+      setLevel1Complete(true);
+    }
+  }, [location.state]);
 
   const renderChapters = () => (
     <>
@@ -73,7 +86,9 @@ function StoryMode() {
         </svg>
 
         <button
-          className="story-level-node level-one"
+          className={`story-level-node level-one ${
+            level1Complete ? "completed" : ""
+          }`}
           onClick={() =>
             navigate("/story-cutscene", {
               state: {
@@ -88,19 +103,29 @@ function StoryMode() {
               },
             })
           }
-          aria-label="Play Level 1"
+          aria-label={
+            level1Complete ? "Replay completed Level 1" : "Play Level 1"
+          }
         >
           <strong>01</strong>
-          <small>START</small>
+          <small>{level1Complete ? "COMPLETED" : "START"}</small>
         </button>
 
-        <div
-          className="story-level-node level-two locked"
-          aria-label="Level 2 locked"
+        <button
+          className={`story-level-node level-two ${
+            level1Complete ? "available" : "locked"
+          }`}
+          disabled={!level1Complete}
+          aria-label={level1Complete ? "Level 2 unlocked" : "Level 2 locked"}
+          title={
+            level1Complete
+              ? "Level 2 unlocked — story coming soon"
+              : "Win both Level 1 battles to unlock"
+          }
         >
           <strong>02</strong>
-          <small>LOCKED</small>
-        </div>
+          <small>{level1Complete ? "UNLOCKED" : "LOCKED"}</small>
+        </button>
 
         <div
           className="story-level-node level-three locked"
