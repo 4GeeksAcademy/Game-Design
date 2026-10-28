@@ -11,82 +11,109 @@ const Yoruichi = {
   image: YoruichiArenaImage,
 
   health: 70,
-    maximumHealth: 70,
+  maximumHealth: 70,
 
-    mana: 60,
-    maximumMana: 60,
-    manaRegen: 20,
+  mana: 60,
+  maximumMana: 60,
+  manaRegen: 20,
 
-    cooldown: 3,
-    maximumCooldown: 3,
-    recovery: 1,
+  cooldown: 5,
+  maximumCooldown: 5,
+  recovery: 1,
 
-    agility: 40,
-    defense: {
-        amount: 15
+  agility: 40,
+  defense: {
+    amount: 15,
+  },
+
+  attacks: [
+    {
+      name: "Shunpo Strike",
+      damage: 18,
+      cost: 5,
+      speed: 90,
+      state: true,
+
+      buff: {
+        agility: 7,
+        mana: 10,
+        manaRegen: 2,
+      },
     },
 
-    attacks: [
-        {
-            name: "Shunpo Strike",
-            damage: 18,
-            cost: 5,
-            speed: 90,
-            state: true,
+    {
+      name: "Hakuda Combo",
+      damage: 28,
+      cost: 9,
+      speed: 70,
+      state: true,
+      buff: {
+        agility: 7,
+        mana: 4,
+        manaRegen: 1,
+        cooldown: 1,
+      },
+    },
 
-            buff: {
-                agility: 7,
-                mana: 10,
-                manaRegen: 1,
-            }
-        },
+    {
+      name: "Shunko: Lightning Release",
+      damage: 12,
+      cost: 13,
+      speed: 80,
+      state: true,
 
-        {
-            name: "Hakuda Combo",
-            damage: 28,
-            cost: 9,
-            speed: 70,
-            state: true,
-            buff: {
-                agility: 7,
-                mana: 4,
-                manaRegen: 1,
-            },
-        },
+      buff: {
+        agility: 7,
+        defense: 3,
+        mana: 2,
+        manaRegen: 3,
+      },
+    },
 
-        {
-            name: "Shunko: Lightning Release",
-            damage: 12,
-            cost: 13,
-            speed: 80,
-            state: true,
+    {
+      name: "Raijin Senkei",
+      damage: 42,
+      cost: 20,
+      speed: 50,
+      state: true,
+      buff: {
+        agility: 7,
+        defense: 3,
+        mana: 5,
+        manaRegen: 3,
+        cooldown: 1,
+      },
 
-            buff: {
-                agility: 7,
-                defense: 3,
-                mana: 2,
-                manaRegen: 3,
-            },
-        },
+      debuff: {
+        agility: 10,
+      },
+    },
 
-        {
-            name: "Raijin Senkei",
-            damage: 42,
-            cost: 20,
-            speed: 50,
-            state: true,
-            buff: {
-                agility: 7,
-                defense: 3,
-                mana: 5,
-                manaRegen: 3,
-            },
+    {
+      name: "Utsusemi: Afterimage Strike",
+      damage: 24,
+      cost: 24,
+      speed: 50,
+      state: true,
 
-            debuff: {
-                agility: 10
-            }
-        }
-    ]
+      buff: {
+        agility: 5,
+        cooldown: 1,
+      },
+    },
+    {
+      name: "Shunko: Raiju Senkei",
+      damage: 35,
+      cost: 30,
+      speed: 38,
+      state: true,
+
+      buff: {
+        recovery: 1,
+        cooldown: 1,
+      },
+    },
+  ],
 };
 
 export default Yoruichi;
