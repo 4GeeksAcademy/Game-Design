@@ -573,6 +573,7 @@ body {
   align-items: stretch;
   gap: 14px !important;
   overflow-x: auto;
+  min-width: 0;
   padding: 4px 3px 12px;
   scrollbar-color: #367cff #101a30;
   scrollbar-width: thin;
@@ -3984,3 +3985,162 @@ body {
 #takeDamageButtonIcon {
   font-size: 1.25rem;
 }
+
+/* Move attack options directly below the opponent HUD */
+#attackSection {
+  margin-top: 12px !important;
+  margin-bottom: 22px !important;
+}
+
+/* Keep the attack panel compact and cards in a horizontal row */
+#attackList {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+/* Give attacks more room on smaller screens */
+@media (max-width: 1100px) {
+  #attackSection {
+    margin-top: 12px !important;
+  }
+}
+
+/* Compact battle layout: fighters side by side, attacks directly below */
+@media (min-width: 1101px) {
+  #battleLayout #battleArena {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "opponent opponent"
+      "player   player"
+      "attacks  attacks";
+    align-items: start;
+    gap: 12px 16px;
+  }
+
+  #battleLayout #opponentSection {
+    grid-area: opponent;
+    margin: 0 !important;
+  }
+
+  #battleLayout #characterSection {
+    grid-area: player;
+    margin: 0 !important;
+  }
+
+  #battleLayout #attackSection {
+    grid-area: attacks;
+    margin: 0 !important;
+  }
+
+  /* Reduce the tall portrait/meter area */
+  #battleLayout #opponent.battle-status-panel {
+    grid-template-rows: 150px auto;
+    padding-top: 28px;
+  }
+
+  #battleLayout #opponentPortraitWrapper,
+  #battleLayout #opponent #opponentImage,
+  #battleLayout #opponentSideMeters .verticalMeter {
+    height: 150px !important;
+  }
+
+  #battleLayout #character.battle-status-panel {
+    grid-template-rows: auto auto auto;
+    padding-top: 14px;
+  }
+
+  #battleLayout #characterPortraitWrapper,
+  #battleLayout #character #characterImage,
+  #battleLayout #characterSideMeters .verticalMeter {
+    height: 150px !important;
+  }
+
+  #battleLayout #character #characterImage {
+    width: 95px;
+    flex-basis: 95px;
+  }
+}
+
+/* Keep the finish button from adding extra vertical space */
+#characterSection {
+  align-items: center;
+}
+
+@media (max-width: 1100px) {
+  #battleLayout #opponentSection,
+  #battleLayout #characterSection {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  #battleLayout #attackSection {
+    margin-top: 4px !important;
+  }
+}
+
+/* Shorter attack cards */
+#attackBody {
+  padding: 10px 16px;
+}
+
+#attackList {
+  align-items: stretch;
+  gap: 10px !important;
+  padding: 4px 3px 8px;
+}
+
+.attack-card-wrapper {
+  flex-basis: 170px;
+  min-width: 223px;
+}
+
+.attack-card-wrapper .attack-card {
+  padding: 8px;
+}
+
+/* Reduce the large image area */
+.attack-card .attack-image,
+.attack-card [id^="attackImage"] {
+  height: 100px !important;
+  margin-bottom: 6px;
+}
+
+/* Tighten spacing inside each card */
+.attack-card h5,
+.attack-card [id^="attackName"] {
+  min-height: 0;
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+}
+
+.attack-card .attack-stats,
+.attack-card [id^="attackStats"] {
+  margin: 4px 0 6px;
+  padding: 5px 0;
+}
+
+/* Fix oversized cost button height */
+.attack-card .attack-cost-button {
+  line-height: 5.2 !important;
+  margin-top: 4px !important;
+  padding: 6px 8px !important;
+}
+
+/* Add breathing room between opponent and player panels */
+@media (min-width: 1101px) {
+  #battleLayout #battleArena {
+    row-gap: 24px;
+  }
+}
+
+@media (max-width: 1100px) {
+  #battleLayout #opponentSection {
+    margin-bottom: 24px !important;
+  }
+
+  #battleLayout #characterSection {
+    margin-top: 24px !important;
+  }
+}
+
