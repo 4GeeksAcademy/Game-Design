@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { roster } from "../CharacterSelection.jsx";
 import "./StoryCutscene.css";
 
-function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig }) {
+function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, onComplete, }) {
   const navigate = useNavigate();
 
   // Default configuration keeps the cutscene safe if opened directly.
@@ -46,6 +46,21 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig })
   const isTextComplete = visibleCharacters >= fullText.length;
   const isLastLine = dialogueIndex === dialogueLines.length - 1;
 
+  const finishCutscene = () => {
+  if (onComplete) {
+    onComplete();
+    return;
+  }
+
+  // Preserve the old behavior when no callback is supplied.
+  navigate("/character-select", {
+    state: {
+      ...levelConfig,
+      gameMode: "story",
+    },
+  });
+};
+
   // Reveal the current line gradually.
   useEffect(() => {
     setVisibleCharacters(0);
@@ -74,15 +89,9 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig })
     }
 
     if (isLastLine) {
-      navigate("/character-select", {
-        state: {
-          ...levelConfig,
-          gameMode: "story",
-        },
-      });
-
-      return;
-    }
+  finishCutscene();
+  return;
+}
 
     setTransitioning(true);
 
@@ -103,13 +112,8 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig })
       }
 
       if (event.key === "Escape") {
-        navigate("/character-select", {
-          state: {
-            ...levelConfig,
-            gameMode: "story",
-          },
-        });
-      }
+  finishCutscene();
+}
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -143,14 +147,8 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig })
         <button
           type="button"
           className="vn-skip"
-          onClick={() =>
-            navigate("/character-select", {
-              state: {
-                ...levelConfig,
-                gameMode: "story",
-              },
-            })
-          }
+          onClick={finishCutscene}
+          
         >
           SKIP ▶
         </button>

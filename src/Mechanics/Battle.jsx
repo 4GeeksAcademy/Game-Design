@@ -22,7 +22,7 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
-
+import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
@@ -333,33 +333,7 @@ useEffect(() => {
     });
   }, [currentTurn]);
 
-  useEffect(() => {
-  if (!isStoryMode || !knockout || !showResults) return;
-
-  navigate("/story-cutscene", {
-    state: {
-      ...levelConfig,
-      gameMode: "story",
-      storyPhase: "results",
-      won: knockout.defeatedTeam === "opponent",
-      playerName: character.name,
-      opponentName: opponent.name,
-      damageDealt,
-      attacksUsed,
-    },
-    replace: true,
-  });
-}, [
-  isStoryMode,
-  knockout,
-  showResults,
-  navigate,
-  levelConfig,
-  character.name,
-  opponent.name,
-  damageDealt,
-  attacksUsed,
-]);
+ 
 
 
   // Display the round announcement before allowing combat.
@@ -675,20 +649,33 @@ useEffect(() => {
   </div>
 )}
 
-    {knockout && (!showResults || isStoryMode) ? null : character.health <= 0 ? (
+    {isStoryMode && knockout && showResults ? (
+  <StoryResultsScreen
+    won={knockout.defeatedTeam === "opponent"}
+    playerName={character.name}
+    opponentName={opponent.name}
+    damageDealt={damageDealt}
+    attacksUsed={attacksUsed}
+    levelConfig={levelConfig}
+  />
+) : knockout && !showResults ? (
+  null
+) : !isStoryMode && character.health <= 0 ? (
   <GameOverScreen
     damageDealt={damageDealt}
     attacksUsed={attacksUsed}
   />
-) : opponent.health <= 0 ? (
+) : !isStoryMode && opponent.health <= 0 ? (
   <div id="victorySection">
     <VictoryScreen
       damageDealt={damageDealt}
       attacksUsed={attacksUsed}
     />
   </div>
+) : knockout ? (
+  null
 ) : (
-        <>
+  <>
           {/* Fighters and combat log share one layout. */}
           <div id="battleLayout">
             <div id="battleArena">

@@ -219,7 +219,12 @@ function CharacterSelection() {
   const difficulty = levelConfig.difficulty ?? "Normal";
   const teamControl = levelConfig.teamControl ?? "single-player";
 
-  const storyOpponentId = isStoryMode ? levelConfig.opponentId : null;
+  const storyOpponentIds = isStoryMode
+    ? (levelConfig.opponentTeamIds ??
+      (levelConfig.opponentId ? [levelConfig.opponentId] : []))
+    : [];
+
+  const storyOpponentId = storyOpponentIds[0] ?? null;
 
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
 
@@ -229,8 +234,13 @@ function CharacterSelection() {
   //   : teamControl === "cpu-assist"
   //     ? 1
   //     : 2;
-  const requiredFighters = teamSize === "2v2" ? 2 : 1;
-  const cpuFighterCount = requiredFighters;
+  // Story encounters can override the standard team-size rules.
+  const isStoryOneVsTwo = isStoryMode && levelConfig.storyMatchType === "1v2";
+
+  const requiredFighters = isStoryOneVsTwo ? 1 : teamSize === "2v2" ? 2 : 1;
+
+  // A 1v2 story encounter has one player fighter and two opponents.
+  const cpuFighterCount = isStoryOneVsTwo ? 2 : requiredFighters;
 
   const [selectedIndices, setSelectedIndices] = useState([]);
 
@@ -239,11 +249,15 @@ function CharacterSelection() {
       return [];
     }
 
-    const opponentIndex = roster.findIndex(
-      (fighter) => fighter.id === levelConfig.opponentId,
-    );
+    const opponentIds =
+      levelConfig.gameMode === "story"
+        ? (levelConfig.opponentTeamIds ??
+          (levelConfig.opponentId ? [levelConfig.opponentId] : []))
+        : [];
 
-    return opponentIndex >= 0 ? [opponentIndex] : [];
+    return opponentIds
+      .map((id) => roster.findIndex((fighter) => fighter.id === id))
+      .filter((index) => index >= 0);
   });
   const [selectedIndex, setSelectedIndex] = useState(() => {
     const unlocked = getUnlockedCharacters();
@@ -303,7 +317,7 @@ function CharacterSelection() {
 
       if (
         isUnlocked(candidate) &&
-        (!isStoryMode || candidate.id !== storyOpponentId)
+        (!isStoryMode || !storyOpponentIds.includes(candidate.id))
       ) {
         break;
       }
@@ -364,8 +378,8 @@ function CharacterSelection() {
     const fighter = roster[index];
 
     // Story opponents are assigned by the level, not selected by the player.
-    if (isStoryMode && fighter.id === storyOpponentId) {
-      return;
+    if (isStoryMode && storyOpponentIds.includes(fighter.id)) {
+      return null;
     }
 
     if (!isUnlocked(fighter)) {
@@ -465,24 +479,27 @@ function CharacterSelection() {
 
     const opponentTeamIds = cpuIndices.map((index) => roster[index].id);
 
-    navigate(teamSize === "1v1" ? "/battle" : "/team-battle", {
-      state: {
-        // Preserve every setting defined by the story level.
-        ...levelConfig,
+    navigate(
+      isStoryOneVsTwo || teamSize === "2v2" ? "/team-battle" : "/battle",
+      {
+        state: {
+          // Preserve every setting defined by the story level.
+          ...levelConfig,
 
-        // Pass the selected fighters to the battle.
-        playerId: playerTeamIds[0],
-        opponentId: opponentTeamIds[0],
-        playerTeamIds,
-        opponentTeamIds,
+          // Pass the selected fighters to the battle.
+          playerId: playerTeamIds[0],
+          opponentId: opponentTeamIds[0],
+          playerTeamIds,
+          opponentTeamIds,
 
-        // Keep the established match settings.
-        teamSize,
-        difficulty,
-        teamControl,
-        gameMode: isStoryMode ? "story" : (levelConfig.gameMode ?? "quick"),
+          // Keep the established match settings.
+          teamSize,
+          difficulty,
+          teamControl,
+          gameMode: isStoryMode ? "story" : (levelConfig.gameMode ?? "quick"),
+        },
       },
-    });
+    );
   };
 
   return (

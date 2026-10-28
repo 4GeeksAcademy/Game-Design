@@ -14,6 +14,7 @@ import {
   chooseNormalAttack,
   normalDefendOrEvade,
 } from "./AI_NormalDifficulty.js";
+import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import "./Teambattle.css";
 
 function createBattleFighter(id) {
@@ -272,6 +273,8 @@ function assignUniqueCpuTargets(opponents, players) {
 
 export default function TeamBattle() {
   const location = useLocation();
+  const levelConfig = location.state ?? {};
+const isStoryMode = levelConfig.gameMode === "story";
   const {
     playerTeamIds = [],
     opponentTeamIds = [],
@@ -2006,16 +2009,45 @@ export default function TeamBattle() {
     );
   }
 
-  if (phase === "victory" && !knockout && teamFinishComplete) {
+  if (
+  (phase === "victory" || phase === "defeat") &&
+  !knockout &&
+  teamFinishComplete
+) {
+  const won = phase === "victory";
+
+  if (isStoryMode) {
     return (
-      <VictoryScreen
+      <StoryResultsScreen
+        won={won}
+        playerName={teams.player.map((fighter) => fighter.name).join(" & ")}
+        opponentName={teams.opponent
+          .map((fighter) => fighter.name)
+          .join(" & ")}
         damageDealt={damageDealt}
         attacksUsed={attacksUsed}
-        message="Your team has defeated the opposing team!"
-        onRematch={resetBattle}
+        levelConfig={levelConfig}
+        battlePath="/team-battle"
       />
     );
   }
+
+  return won ? (
+    <VictoryScreen
+      damageDealt={damageDealt}
+      attacksUsed={attacksUsed}
+      message="Your team has defeated the opposing team!"
+      onRematch={resetBattle}
+    />
+  ) : (
+    <GameOverScreen
+      damageDealt={damageDealt}
+      attacksUsed={attacksUsed}
+      message="Your entire team has been defeated."
+      onRematch={resetBattle}
+    />
+  );
+}
 
   if (phase === "defeat" && !knockout && teamFinishComplete) {
     return (

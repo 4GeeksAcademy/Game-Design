@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -14,23 +15,36 @@ function StoryResultsScreen({
   const chapter = levelConfig?.storyChapter ?? 1;
   const level = levelConfig?.storyLevel ?? 1;
 
-  const returnToStory = () => {
-    navigate("/story-mode", {
-      state: {
-        gameMode: "story",
-        storyChapter: chapter,
-        storyLevel: level,
-      },
-    });
-  };
-
-  const retryLevel = () => {
+  // Continue to the post-battle cutscene, not the opening scene.
+  const continueStory = () => {
     navigate("/story-cutscene", {
       state: {
         ...levelConfig,
         gameMode: "story",
+        storyPhase: "continue",
+        previousBattleWon: won,
+        previousPlayerName: playerName,
+        previousOpponentName: opponentName,
+        previousDamageDealt: damageDealt,
+        previousAttacksUsed: attacksUsed,
       },
     });
+  };
+
+  // Restart the same fight without replaying the opening cutscene.
+  const rematch = () => {
+  navigate("/battle", {
+    state: {
+      ...levelConfig,
+      gameMode: "story",
+      storyPhase: "battle",
+    },
+  });
+};
+
+  // Exit story mode and return to the main menu.
+  const returnHome = () => {
+    navigate("/", { replace: true });
   };
 
   return (
@@ -40,7 +54,11 @@ function StoryResultsScreen({
           CHAPTER {chapter} · LEVEL {level}
         </p>
 
-        <h1 className={won ? "story-results-victory" : "story-results-defeat"}>
+        <h1
+          className={
+            won ? "story-results-victory" : "story-results-defeat"
+          }
+        >
           {won ? "VICTORY!" : "DEFEAT"}
         </h1>
 
@@ -69,12 +87,16 @@ function StoryResultsScreen({
         )}
 
         <div className="story-results-actions">
-          <button type="button" onClick={returnToStory}>
-            RETURN TO STORY MAP
+          <button type="button" onClick={continueStory}>
+            CONTINUE STORY
           </button>
 
-          <button type="button" onClick={retryLevel}>
-            RETRY LEVEL
+          <button type="button" onClick={rematch}>
+            REMATCH
+          </button>
+
+          <button type="button" onClick={returnHome}>
+            RETURN HOME
           </button>
         </div>
       </div>
