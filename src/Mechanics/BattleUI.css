@@ -4144,3 +4144,118 @@ body {
   }
 }
 
+
+#storyResultsScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at center, #202536 0%, #090b12 75%);
+  color: #fff;
+  text-align: center;
+}
+
+.story-results-content {
+  width: min(100%, 620px);
+  padding: 32px;
+  border: 1px solid #13d5ff;
+  background: rgba(9, 13, 24, 0.96);
+  box-shadow: 0 0 30px rgba(19, 213, 255, 0.2);
+}
+
+.story-results-eyebrow {
+  color: #13d5ff;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+#storyResultsScreen h1 {
+  margin: 20px 0;
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.story-results-victory {
+  color: #13d5ff;
+  text-shadow: 0 0 22px rgba(19, 213, 255, 0.45);
+}
+
+.story-results-defeat {
+  color: #ff3159;
+  text-shadow: 0 0 22px rgba(255, 49, 89, 0.4);
+}
+
+.story-results-message {
+  font-size: 1.1rem;
+}
+
+.story-results-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 32px 0;
+}
+
+.story-results-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.story-results-stats span {
+  color: #aab4c8;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+}
+
+.story-results-stats strong {
+  font-size: 2rem;
+}
+
+.story-results-completion {
+  color: #13d5ff;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.story-results-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.story-results-actions button {
+  padding: 12px 18px;
+  border: 1px solid #13d5ff;
+  background: transparent;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.story-results-actions button:hover {
+  background: #13d5ff;
+  color: #090b12;
+}
+
+@media (max-width: 480px) {
+  .story-results-content {
+    padding: 24px 16px;
+  }
+
+  .story-results-stats {
+    gap: 24px;
+  }
+
+  .story-results-actions button {
+    width: 100%;
+  }
+}

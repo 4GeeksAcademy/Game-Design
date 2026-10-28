@@ -14,7 +14,6 @@ import {
 } from "./keybinds.js";
 import "./Homescreen.css";
 
-
 function Homescreen() {
   const navigate = useNavigate();
   const [teamControl, setTeamControl] = useState("single-player");
@@ -24,64 +23,64 @@ function Homescreen() {
   const [difficulty, setDifficulty] = useState("Normal");
 
   const [keybinds, setKeybinds] = useState(() => loadKeybinds());
-const [listeningFor, setListeningFor] = useState(null);
-const [keybindMessage, setKeybindMessage] = useState("");
+  const [listeningFor, setListeningFor] = useState(null);
+  const [keybindMessage, setKeybindMessage] = useState("");
 
-const resetKeybinds = () => {
-  const defaults = JSON.parse(JSON.stringify(DEFAULT_KEYBINDS));
-  setKeybinds(defaults);
-  saveKeybinds(defaults);
-  setListeningFor(null);
-  setKeybindMessage("Default keybinds restored.");
-};
+  const resetKeybinds = () => {
+    const defaults = JSON.parse(JSON.stringify(DEFAULT_KEYBINDS));
+    setKeybinds(defaults);
+    saveKeybinds(defaults);
+    setListeningFor(null);
+    setKeybindMessage("Default keybinds restored.");
+  };
 
-const handleKeybindCapture = (event) => {
-  if (!listeningFor) return;
+  const handleKeybindCapture = (event) => {
+    if (!listeningFor) return;
 
-  event.preventDefault();
-  event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
 
-  if (isReservedKey(event)) {
-    setKeybindMessage("That key is reserved. Choose another key.");
-    return;
-  }
+    if (isReservedKey(event)) {
+      setKeybindMessage("That key is reserved. Choose another key.");
+      return;
+    }
 
-  const key = normalizeKey(event.key);
-  if (!key) return;
+    const key = normalizeKey(event.key);
+    if (!key) return;
 
-  const conflict = findKeybindConflict(keybinds, key, listeningFor);
+    const conflict = findKeybindConflict(keybinds, key, listeningFor);
 
-  if (conflict) {
-    const playerName =
-      conflict.playerId === "player1" ? "Player 1" : "Player 2";
+    if (conflict) {
+      const playerName =
+        conflict.playerId === "player1" ? "Player 1" : "Player 2";
 
-    setKeybindMessage(
-      `${getKeybindLabel(key)} is already assigned to ${playerName} ${conflict.label}.`,
-    );
-    return;
-  }
+      setKeybindMessage(
+        `${getKeybindLabel(key)} is already assigned to ${playerName} ${conflict.label}.`,
+      );
+      return;
+    }
 
-  const [playerId, action, slot] = listeningFor.split(".");
-  const updated = JSON.parse(JSON.stringify(keybinds));
+    const [playerId, action, slot] = listeningFor.split(".");
+    const updated = JSON.parse(JSON.stringify(keybinds));
 
-  if (action === "attack") {
-    updated[playerId].attacks[Number(slot)] = key;
-  } else {
-    updated[playerId][action] = key;
-  }
+    if (action === "attack") {
+      updated[playerId].attacks[Number(slot)] = key;
+    } else {
+      updated[playerId][action] = key;
+    }
 
-  setKeybinds(updated);
-  saveKeybinds(updated);
-  setListeningFor(null);
-  setKeybindMessage("");
-};
+    setKeybinds(updated);
+    saveKeybinds(updated);
+    setListeningFor(null);
+    setKeybindMessage("");
+  };
 
-useEffect(() => {
-  if (!listeningFor) return undefined;
+  useEffect(() => {
+    if (!listeningFor) return undefined;
 
-  window.addEventListener("keydown", handleKeybindCapture);
-  return () => window.removeEventListener("keydown", handleKeybindCapture);
-}, [listeningFor, keybinds]);
+    window.addEventListener("keydown", handleKeybindCapture);
+    return () => window.removeEventListener("keydown", handleKeybindCapture);
+  }, [listeningFor, keybinds]);
 
   const openMenu = (nextMenu) => {
     setMenuHistory((history) => [...history, nextMenu]);
@@ -99,7 +98,6 @@ useEffect(() => {
 
   const startBattle = () => {
     navigate("/character-select", {
-
       state: {
         gameMode: "quick",
         teamSize,
@@ -124,208 +122,220 @@ useEffect(() => {
   }, []);
 
   const renderSettings = () => {
-  const players = [
-    ["player1", "PLAYER 1"],
-    ["player2", "PLAYER 2"],
-  ];
+    const players = [
+      ["player1", "PLAYER 1"],
+      ["player2", "PLAYER 2"],
+    ];
 
-  const renderBindingButton = (playerId, actionId, key) => {
-    const listening = listeningFor === actionId;
+    const renderBindingButton = (playerId, actionId, key) => {
+      const listening = listeningFor === actionId;
+
+      return (
+        <button
+          key={actionId}
+          type="button"
+          className="keybind-button"
+          onClick={() => {
+            setListeningFor(actionId);
+            setKeybindMessage("Press a key. Escape cancels.");
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              setListeningFor(null);
+              setKeybindMessage("");
+            }
+          }}
+        >
+          {listening ? "PRESS A KEY…" : getKeybindLabel(key)}
+        </button>
+      );
+    };
 
     return (
-      <button
-        key={actionId}
-        type="button"
-        className="keybind-button"
-        onClick={() => {
-          setListeningFor(actionId);
-          setKeybindMessage("Press a key. Escape cancels.");
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            event.preventDefault();
-            setListeningFor(null);
-            setKeybindMessage("");
-          }
-        }}
-      >
-        {listening ? "PRESS A KEY…" : getKeybindLabel(key)}
-      </button>
+      <>
+        <p className="home-eyebrow">CUSTOMIZE CONTROLS</p>
+        <h2 className="menu-title">KEYBINDS</h2>
+        <p className="menu-description">
+          Select a binding, then press the key you want. Keys must be unique
+          across both players.
+        </p>
+
+        <div className="keybind-player-grid">
+          {players.map(([playerId, title]) => (
+            <section className="keybind-player" key={playerId}>
+              <h3>{title}</h3>
+
+              {Array.from({ length: ATTACK_SLOT_COUNT }, (_, index) => (
+                <div
+                  className="keybind-row"
+                  key={`${playerId}.attack.${index}`}
+                >
+                  <span>Attack {index + 1}</span>
+                  {renderBindingButton(
+                    playerId,
+                    `${playerId}.attack.${index}`,
+                    keybinds[playerId].attacks[index],
+                  )}
+                </div>
+              ))}
+
+              {[
+                ["finishTurn", "Finish turn"],
+                ["defend", "Defend"],
+                ["evade", "Evade"],
+                ["takeDamage", "Take full damage"],
+              ].map(([action, label]) => (
+                <div className="keybind-row" key={`${playerId}.${action}`}>
+                  <span>{label}</span>
+                  {renderBindingButton(
+                    playerId,
+                    `${playerId}.${action}`,
+                    keybinds[playerId][action],
+                  )}
+                </div>
+              ))}
+            </section>
+          ))}
+        </div>
+
+        {keybindMessage && (
+          <p className="keybind-message" role="status">
+            {keybindMessage}
+          </p>
+        )}
+
+        <div className="settings-actions">
+          <button
+            type="button"
+            className="arcade-button"
+            onClick={resetKeybinds}
+          >
+            RESTORE DEFAULTS
+          </button>
+
+          <button type="button" className="back-button" onClick={goBack}>
+            ← BACK
+          </button>
+        </div>
+      </>
     );
   };
 
-  return (
-    <>
-      <p className="home-eyebrow">CUSTOMIZE CONTROLS</p>
-      <h2 className="menu-title">KEYBINDS</h2>
-      <p className="menu-description">
-        Select a binding, then press the key you want. Keys must be unique
-        across both players.
-      </p>
+  const renderTeamControl = () => {
+    const options = [
+      {
+        id: "single-player",
+        title: "PLAYER VS FULL CPU",
+        description:
+          "One player controls both fighters using the current turn-based mechanics.",
+        disabled: false,
+        playerCount: 1,
+        allyCpuCount: 0,
+        enemyCpuCount: 2,
+      },
+      {
+        id: "local-coop",
+        title: "PLAYER + PLAYER VS FULL CPU",
+        description: "Two local players control one fighter each.",
+        disabled: false,
+        playerCount: 2,
+        allyCpuCount: 0,
+        enemyCpuCount: 2,
+      },
+      {
+        id: "pvp",
+        title: "PLAYER VS PLAYER",
+        description: "Coming soon.",
+        disabled: true,
+        playerCount: 2,
+        allyCpuCount: 0,
+        enemyCpuCount: 2,
+      },
+      {
+        id: "cpu-assist",
+        title: "PLAYER + CPU VS CPU TEAM",
+        description: "A CPU teammate fights alongside you.",
+        disabled: false,
+        playerCount: 1,
+        allyCpuCount: 1,
+        enemyCpuCount: 2,
+      },
+    ];
 
-      <div className="keybind-player-grid">
-        {players.map(([playerId, title]) => (
-          <section className="keybind-player" key={playerId}>
-            <h3>{title}</h3>
+    return (
+      <>
+        <p className="home-eyebrow">2V2 TEAM SETUP</p>
+        <h2 className="menu-title">CHOOSE YOUR TEAM CONTROLS</h2>
 
-            {Array.from({ length: ATTACK_SLOT_COUNT }, (_, index) => (
-              <div className="keybind-row" key={`${playerId}.attack.${index}`}>
-                <span>Attack {index + 1}</span>
-                {renderBindingButton(
-                  playerId,
-                  `${playerId}.attack.${index}`,
-                  keybinds[playerId].attacks[index],
-                )}
-              </div>
-            ))}
+        <div className="team-control-grid">
+          {options.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={`team-control-card ${
+                teamControl === option.id ? "selected" : ""
+              }`}
+              disabled={option.disabled}
+              aria-pressed={teamControl === option.id}
+              onClick={() => setTeamControl(option.id)}
+            >
+              <span className="team-control-title">{option.title}</span>
 
-            {[
-              ["finishTurn", "Finish turn"],
-              ["defend", "Defend"],
-              ["evade", "Evade"],
-              ["takeDamage", "Take full damage"],
-            ].map(([action, label]) => (
-              <div className="keybind-row" key={`${playerId}.${action}`}>
-                <span>{label}</span>
-                {renderBindingButton(
-                  playerId,
-                  `${playerId}.${action}`,
-                  keybinds[playerId][action],
-                )}
-              </div>
-            ))}
-          </section>
-        ))}
-      </div>
+              <span className="team-control-matchup" aria-hidden="true">
+                <span className="matchup-side">
+                  {Array.from({ length: option.playerCount }, (_, index) => (
+                    <span
+                      className="matchup-rectangle player"
+                      key={`p-${index}`}
+                    >
+                      <i className="fa-solid fa-circle-user" />
+                    </span>
+                  ))}
+                  {Array.from({ length: option.allyCpuCount }, (_, index) => (
+                    <span
+                      className="matchup-rectangle cpu"
+                      key={`ally-${index}`}
+                    >
+                      <i className="fa-solid fa-robot" />
+                    </span>
+                  ))}
+                </span>
 
-      {keybindMessage && (
-        <p className="keybind-message" role="status">
-          {keybindMessage}
-        </p>
-      )}
+                <b>VS</b>
 
-      <div className="settings-actions">
+                <span className="matchup-side">
+                  {Array.from({ length: option.enemyCpuCount }, (_, index) => (
+                    <span
+                      className="matchup-rectangle cpu"
+                      key={`cpu-${index}`}
+                    >
+                      <i className="fa-solid fa-robot" />
+                    </span>
+                  ))}
+                </span>
+              </span>
+
+              <span className="team-control-description">
+                {option.description}
+              </span>
+            </button>
+          ))}
+        </div>
+
         <button
-          type="button"
-          className="arcade-button"
-          onClick={resetKeybinds}
+          className="arcade-button primary-button continue-button"
+          onClick={() => openMenu("difficulty")}
         >
-          RESTORE DEFAULTS
+          CONTINUE <span>▶</span>
         </button>
 
-        <button type="button" className="back-button" onClick={goBack}>
+        <button className="back-button" onClick={goBack}>
           ← BACK
         </button>
-      </div>
-    </>
-  );
-};
-
-  const renderTeamControl = () => {
-  const options = [
-    {
-      id: "single-player",
-      title: "PLAYER VS FULL CPU",
-      description:
-        "One player controls both fighters using the current turn-based mechanics.",
-      disabled: false,
-      playerCount: 1,
-      allyCpuCount: 0,
-      enemyCpuCount: 2,
-    },
-    {
-      id: "local-coop",
-      title: "PLAYER + PLAYER VS FULL CPU",
-      description: "Two local players control one fighter each.",
-      disabled: false,
-      playerCount: 2,
-      allyCpuCount: 0,
-      enemyCpuCount: 2,
-    },
-    {
-      id: "pvp",
-      title: "PLAYER VS PLAYER",
-      description: "Coming soon.",
-      disabled: true,
-      playerCount: 2,
-      allyCpuCount: 0,
-      enemyCpuCount: 2,
-    },
-    {
-      id: "cpu-assist",
-      title: "PLAYER + CPU VS CPU TEAM",
-      description: "A CPU teammate fights alongside you.",
-      disabled: false,
-      playerCount: 1,
-      allyCpuCount: 1,
-      enemyCpuCount: 2,
-    },
-  ];
-
-  return (
-    <>
-      <p className="home-eyebrow">2V2 TEAM SETUP</p>
-      <h2 className="menu-title">CHOOSE YOUR TEAM CONTROLS</h2>
-
-      <div className="team-control-grid">
-        {options.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            className={`team-control-card ${
-              teamControl === option.id ? "selected" : ""
-            }`}
-            disabled={option.disabled}
-            aria-pressed={teamControl === option.id}
-            onClick={() => setTeamControl(option.id)}
-          >
-            <span className="team-control-title">{option.title}</span>
-
-            <span className="team-control-matchup" aria-hidden="true">
-              <span className="matchup-side">
-                {Array.from({ length: option.playerCount }, (_, index) => (
-                  <span className="matchup-rectangle player" key={`p-${index}`}>
-                    <i className="fa-solid fa-circle-user" />
-                  </span>
-                ))}
-                {Array.from({ length: option.allyCpuCount }, (_, index) => (
-                  <span className="matchup-rectangle cpu" key={`ally-${index}`}>
-                    <i className="fa-solid fa-robot" />
-                  </span>
-                ))}
-              </span>
-
-              <b>VS</b>
-
-              <span className="matchup-side">
-                {Array.from({ length: option.enemyCpuCount }, (_, index) => (
-                  <span className="matchup-rectangle cpu" key={`cpu-${index}`}>
-                    <i className="fa-solid fa-robot" />
-                  </span>
-                ))}
-              </span>
-            </span>
-
-            <span className="team-control-description">
-              {option.description}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <button
-        className="arcade-button primary-button continue-button"
-        onClick={() => openMenu("difficulty")}
-      >
-        CONTINUE <span>▶</span>
-      </button>
-
-      <button className="back-button" onClick={goBack}>
-        ← BACK
-      </button>
-    </>
-  );
-};
+      </>
+    );
+  };
 
   const renderHome = () => (
     <>
@@ -406,8 +416,11 @@ useEffect(() => {
           BOT VS BOT SIMULATOR <span>⚔</span>
         </button>
 
-        <button className="arcade-button" disabled>
-          STORY MODE <span>LOCKED</span>
+        <button
+          className="arcade-button"
+          onClick={() => navigate("/story-mode")}
+        >
+          STORY MODE <span>📖</span>
         </button>
 
         <button className="arcade-button" disabled>
@@ -527,7 +540,7 @@ useEffect(() => {
       case "difficulty":
         return renderDifficulty();
       case "settings":
-  return renderSettings();
+        return renderSettings();
       case "howToPlay":
         return renderPlaceholder(
           "HOW TO PLAY",

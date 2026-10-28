@@ -211,9 +211,15 @@ function CharacterSelection() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const teamSize = location.state?.teamSize ?? "1v1";
-  const difficulty = location.state?.difficulty ?? "Normal";
-  const teamControl = location.state?.teamControl ?? "single-player";
+  const levelConfig = location.state ?? {};
+
+  const isStoryMode = levelConfig.gameMode === "story";
+
+  const teamSize = levelConfig.teamSize ?? "1v1";
+  const difficulty = levelConfig.difficulty ?? "Normal";
+  const teamControl = levelConfig.teamControl ?? "single-player";
+
+  const storyOpponentId = isStoryMode ? levelConfig.opponentId : null;
 
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
 
@@ -224,18 +230,34 @@ function CharacterSelection() {
   //     ? 1
   //     : 2;
   const requiredFighters = teamSize === "2v2" ? 2 : 1;
-const cpuFighterCount = requiredFighters;
+  const cpuFighterCount = requiredFighters;
 
   const [selectedIndices, setSelectedIndices] = useState([]);
 
-  const [cpuIndices, setCpuIndices] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(() => {
-    const unlocked = getUnlockedCharacters();
-    const firstUnlocked = roster.findIndex((fighter) =>
-      unlocked.includes(fighter.id),
+  const [cpuIndices, setCpuIndices] = useState(() => {
+    if (levelConfig.gameMode !== "story" || !levelConfig.opponentId) {
+      return [];
+    }
+
+    const opponentIndex = roster.findIndex(
+      (fighter) => fighter.id === levelConfig.opponentId,
     );
 
-    return firstUnlocked >= 0 ? firstUnlocked : 0;
+    return opponentIndex >= 0 ? [opponentIndex] : [];
+  });
+  const [selectedIndex, setSelectedIndex] = useState(() => {
+    const unlocked = getUnlockedCharacters();
+
+    const firstSelectable = roster.findIndex(
+      (fighter) =>
+        unlocked.includes(fighter.id) &&
+        !(
+          location.state?.gameMode === "story" &&
+          fighter.id === location.state?.opponentId
+        ),
+    );
+
+    return firstSelectable >= 0 ? firstSelectable : 0;
   });
 
   const [playerAnimationKey, setPlayerAnimationKey] = useState(0);
@@ -277,7 +299,12 @@ const cpuFighterCount = requiredFighters;
     for (let step = 0; step < roster.length; step += 1) {
       nextIndex = (nextIndex + direction + roster.length) % roster.length;
 
-      if (isUnlocked(roster[nextIndex])) {
+      const candidate = roster[nextIndex];
+
+      if (
+        isUnlocked(candidate) &&
+        (!isStoryMode || candidate.id !== storyOpponentId)
+      ) {
         break;
       }
     }
@@ -336,6 +363,11 @@ const cpuFighterCount = requiredFighters;
 
     const fighter = roster[index];
 
+    // Story opponents are assigned by the level, not selected by the player.
+    if (isStoryMode && fighter.id === storyOpponentId) {
+      return;
+    }
+
     if (!isUnlocked(fighter)) {
       navigate("/shop");
       return;
@@ -370,12 +402,18 @@ const cpuFighterCount = requiredFighters;
       return;
     }
 
+    if (isStoryMode) {
+      // The story level has already assigned its opponent.
+      setPhase("ready");
+      return;
+    }
+
     setCpuIndices([]);
     setPhase("cpu");
   };
 
   useEffect(() => {
-    if (phase !== "cpu") return;
+    if (phase !== "cpu" || isStoryMode) return;
 
     const playerIds = selectedIndices.map((index) => roster[index].id);
 
@@ -384,8 +422,6 @@ const cpuFighterCount = requiredFighters;
     const eligibleOpponents = roster
       .map((fighter, index) => ({ fighter, index }))
       .filter(({ fighter }) => !playerIds.includes(fighter.id));
-
-   
 
     if (eligibleOpponents.length < cpuFighterCount) {
       setCpuIndices([]);
@@ -425,31 +461,28 @@ const cpuFighterCount = requiredFighters;
       return;
     }
 
-   
-    const selectedCpuIds = cpuIndices.map((index) => roster[index].id);
+    const playerTeamIds = selectedIndices.map((index) => roster[index].id);
 
-   const selectedPlayerIds = selectedIndices.map(
-  (index) => roster[index].id,
-);
-
-const opponentTeamIds = cpuIndices.map(
-  (index) => roster[index].id,
-);
-
-const playerTeamIds = selectedPlayerIds;
+    const opponentTeamIds = cpuIndices.map((index) => roster[index].id);
 
     navigate(teamSize === "1v1" ? "/battle" : "/team-battle", {
-  state: {
-    playerId: playerTeamIds[0],
-    opponentId: opponentTeamIds[0],
-    playerTeamIds,
-    opponentTeamIds,
-    teamSize,
-    difficulty,
-    teamControl,
-    gameMode: location.state?.gameMode ?? "quick",
-  },
-});
+      state: {
+        // Preserve every setting defined by the story level.
+        ...levelConfig,
+
+        // Pass the selected fighters to the battle.
+        playerId: playerTeamIds[0],
+        opponentId: opponentTeamIds[0],
+        playerTeamIds,
+        opponentTeamIds,
+
+        // Keep the established match settings.
+        teamSize,
+        difficulty,
+        teamControl,
+        gameMode: isStoryMode ? "story" : (levelConfig.gameMode ?? "quick"),
+      },
+    });
   };
 
   return (
@@ -519,16 +552,22 @@ const playerTeamIds = selectedPlayerIds;
             <span className="cpu-label">CPU</span>
             <div>
               <h2>
-                {teamControl === "cpu-assist" ? "CPU TEAM" : "CPU OPPONENT"}
+                {isStoryMode
+                  ? "STORY OPPONENT"
+                  : teamControl === "cpu-assist"
+                    ? "CPU TEAM"
+                    : "CPU OPPONENT"}
               </h2>
               <p>
-                {phase === "player"
-                  ? "WAITING FOR PLAYER"
-                  : phase === "cpu"
-                    ? "SELECTING TEAM..."
-                    : teamControl === "cpu-assist"
-                      ? "ALLY + OPPONENTS LOCKED"
-                      : "OPPONENT LOCKED"}
+                {isStoryMode
+                  ? "STORY OPPONENT ASSIGNED"
+                  : phase === "player"
+                    ? "WAITING FOR PLAYER"
+                    : phase === "cpu"
+                      ? "SELECTING TEAM..."
+                      : teamControl === "cpu-assist"
+                        ? "ALLY + OPPONENTS LOCKED"
+                        : "OPPONENT LOCKED"}
               </p>
             </div>
           </div>
@@ -567,6 +606,9 @@ const playerTeamIds = selectedPlayerIds;
 
         <div className="character-roster-grid">
           {roster.map((fighter, index) => {
+            if (isStoryMode && fighter.id === storyOpponentId) {
+              return null;
+            }
             const isPlayerSelected = selectedIndices.includes(index);
             const isKeyboardHighlighted = selectedIndex === index;
             const isCpuSelected = cpuIndices.includes(index);

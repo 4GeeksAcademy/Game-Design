@@ -1,0 +1,435 @@
+
+.story-cutscene {
+  --vn-accent: #13d5ff;
+  --vn-panel: rgba(9, 17, 34, 0.94);
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #f6f8ff;
+  background: #080f20;
+  font-family: inherit;
+}
+
+.vn-header {
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 4%;
+  background: #080f20ed;
+  border-bottom: 1px solid #ffffff18;
+}
+
+.vn-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.vn-logo-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 30px;
+  color: var(--vn-accent);
+  border: 2px solid var(--vn-accent);
+  transform: skew(-8deg);
+}
+
+.vn-chapter {
+  color: #9eafc8;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.vn-skip {
+  padding: 8px 12px;
+  color: #d9e8fa;
+  background: transparent;
+  border: 1px solid #8296b555;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.vn-skip:hover {
+  color: var(--vn-accent);
+  border-color: var(--vn-accent);
+}
+
+/* Main illustrated scene */
+
+.vn-scene {
+  position: relative;
+  isolation: isolate;
+  flex: 1;
+  min-height: 360px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #142844;
+  background-image:
+    radial-gradient(ellipse at 50% 85%, #28517b 0%, transparent 60%),
+    linear-gradient(145deg, #182b49, #0a1225 80%);
+  transition: filter 180ms ease;
+}
+
+.vn-scene.vn-bg-opening {
+  background-image:
+    radial-gradient(ellipse at 50% 50%, #1c4770, transparent 65%),
+    linear-gradient(135deg, #182f50, #080f20);
+}
+
+.vn-scene.vn-bg-arena {
+  background-image:
+    radial-gradient(ellipse at 50% 90%, #854c3b66, transparent 55%),
+    linear-gradient(155deg, #243751, #111729 70%, #080f20);
+}
+
+.vn-atmosphere {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(0deg, #080f20a8, transparent 35%),
+    linear-gradient(90deg, #07102030, transparent 50%, #07102030);
+  pointer-events: none;
+}
+
+.vn-scene-caption {
+  position: absolute;
+  top: 20px;
+  left: 4%;
+  padding: 7px 11px;
+  color: #c6d9f0;
+  background: #080f2077;
+  border-left: 2px solid var(--vn-accent);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+.vn-character {
+  position: absolute;
+  bottom: -3%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 95%;
+  width: min(48%, 460px);
+  transform-origin: center bottom;
+  pointer-events: none;
+}
+
+.vn-character img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 12px 18px #0005);
+  user-select: none;
+}
+
+/* Character placement */
+
+.vn-position-left {
+  left: 5%;
+}
+
+.vn-position-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.vn-position-right {
+  right: 5%;
+}
+
+/* Entrance and expression-change motions */
+
+.vn-motion-enter {
+  animation: vn-enter 360ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.vn-motion-fade {
+  animation: vn-fade 400ms ease both;
+}
+
+.vn-motion-bounce {
+  animation: vn-bounce 420ms ease both;
+}
+
+.vn-expression-excited img {
+  filter: drop-shadow(0 0 20px #13d5ff55);
+}
+
+.vn-expression-determined img {
+  filter: drop-shadow(0 10px 14px #ff315944);
+}
+
+.vn-transitioning .vn-dialogue-panel {
+  opacity: 0.45;
+  transform: translateY(5px);
+}
+
+.vn-dialogue-panel {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+/* Dialogue panel */
+
+.vn-dialogue-area {
+  position: relative;
+  z-index: 3;
+  padding: 0 4% 18px;
+  background: linear-gradient(180deg, #080f2000, #080f20 14%);
+  cursor: pointer;
+}
+
+.vn-dialogue-panel {
+  position: relative;
+  width: 100%;
+  min-height: 155px;
+  box-sizing: border-box;
+  padding: 28px 24px 22px;
+  background: var(--vn-panel);
+  border: 1px solid #8ba5c64a;
+  border-top: 2px solid var(--vn-accent);
+  border-radius: 5px;
+  box-shadow: 0 12px 40px #0006;
+  backdrop-filter: blur(12px);
+}
+
+.vn-nameplate {
+  position: absolute;
+  top: -18px;
+  left: 22px;
+  min-width: 110px;
+  padding: 9px 18px;
+  color: #071020;
+  background: var(--vn-accent);
+  clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+  font-size: 0.78rem;
+  font-weight: 1000;
+  letter-spacing: 1px;
+}
+
+.vn-dialogue-text {
+  min-height: 60px;
+  margin: 0 0 16px;
+  color: #f3f6ff;
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.vn-text-cursor {
+  display: inline-block;
+  margin-left: 3px;
+  color: var(--vn-accent);
+  animation: vn-cursor-blink 650ms steps(2, start) infinite;
+}
+
+.vn-next-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-left: auto;
+  padding: 10px 16px;
+  color: #f4f8ff;
+  background: #132b43;
+  border: 1px solid #13d5ff77;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    border-color 160ms ease;
+}
+
+.vn-next-button span {
+  color: var(--vn-accent);
+}
+
+.vn-next-button:hover {
+  transform: translateY(-2px);
+  background: #1a405e;
+  border-color: var(--vn-accent);
+}
+
+/* Story progress */
+
+.vn-progress {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  color: #8ea1bc;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.vn-progress-track {
+  flex: 1;
+  height: 3px;
+  overflow: hidden;
+  background: #ffffff1b;
+}
+
+.vn-progress-fill {
+  height: 100%;
+  background: var(--vn-accent);
+  box-shadow: 0 0 10px #13d5ff66;
+  transition: width 250ms ease;
+}
+
+.vn-click-hint {
+  position: absolute;
+  right: 4%;
+  bottom: 20px;
+  color: #ffffff75;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
+/* Motion keyframes */
+
+@keyframes vn-enter {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes vn-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vn-bounce {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes vn-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (min-height: 850px) {
+  .vn-scene {
+    min-height: 450px;
+  }
+
+  .vn-dialogue-panel {
+    min-height: 175px;
+  }
+}
+
+@media (max-width: 600px) {
+  .vn-header {
+    gap: 8px;
+    padding: 12px 3%;
+  }
+
+  .vn-logo {
+    font-size: 0.68rem;
+  }
+
+  .vn-logo-mark {
+    width: 27px;
+    height: 25px;
+  }
+
+  .vn-chapter {
+    font-size: 0.55rem;
+    text-align: center;
+  }
+
+  .vn-skip {
+    padding: 7px;
+    font-size: 0.6rem;
+  }
+
+  .vn-scene {
+    min-height: 300px;
+  }
+
+  .vn-character {
+    width: 75%;
+    height: 90%;
+  }
+
+  .vn-dialogue-area {
+    padding: 0 3% 12px;
+  }
+
+  .vn-dialogue-panel {
+    padding: 28px 15px 16px;
+  }
+
+  .vn-dialogue-text {
+    min-height: 75px;
+    font-size: 0.95rem;
+  }
+
+  .vn-click-hint {
+    font-size: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vn-character,
+  .vn-dialogue-text,
+  .vn-text-cursor {
+    animation: none !important;
+  }
+
+  .vn-progress-fill,
+  .vn-dialogue-panel,
+  .vn-next-button {
+    transition: none !important;
+  }
+}

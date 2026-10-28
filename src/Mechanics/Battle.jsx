@@ -1,5 +1,5 @@
 import Opponent from "./Opponent.jsx";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import VictoryScreen from "./VictoryScreen.jsx";
@@ -22,6 +22,7 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
+
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
@@ -53,8 +54,15 @@ function RoundIntroHealthBar({ fighter }) {
   );
 }
 
+
+
+
+
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const levelConfig = location.state ?? {};
+const isStoryMode = levelConfig.gameMode === "story";
 
   const fighterData = {
     mina: mina,
@@ -139,6 +147,9 @@ function App() {
   const characterRef = useRef(character);
   const opponentRef = useRef(opponent);
   const knockoutRef = useRef(knockout);
+
+
+
 
   useEffect(() => {
     characterRef.current = character;
@@ -321,6 +332,35 @@ useEffect(() => {
       setAiAttack(null);
     });
   }, [currentTurn]);
+
+  useEffect(() => {
+  if (!isStoryMode || !knockout || !showResults) return;
+
+  navigate("/story-cutscene", {
+    state: {
+      ...levelConfig,
+      gameMode: "story",
+      storyPhase: "results",
+      won: knockout.defeatedTeam === "opponent",
+      playerName: character.name,
+      opponentName: opponent.name,
+      damageDealt,
+      attacksUsed,
+    },
+    replace: true,
+  });
+}, [
+  isStoryMode,
+  knockout,
+  showResults,
+  navigate,
+  levelConfig,
+  character.name,
+  opponent.name,
+  damageDealt,
+  attacksUsed,
+]);
+
 
   // Display the round announcement before allowing combat.
 useEffect(() => {
@@ -635,13 +675,19 @@ useEffect(() => {
   </div>
 )}
 
-      {knockout && !showResults ? null : character.health <= 0 ? (
-        <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
-      ) : opponent.health <= 0 ? (
-        <div id="victorySection">
-          <VictoryScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
-        </div>
-      ) : (
+    {knockout && (!showResults || isStoryMode) ? null : character.health <= 0 ? (
+  <GameOverScreen
+    damageDealt={damageDealt}
+    attacksUsed={attacksUsed}
+  />
+) : opponent.health <= 0 ? (
+  <div id="victorySection">
+    <VictoryScreen
+      damageDealt={damageDealt}
+      attacksUsed={attacksUsed}
+    />
+  </div>
+) : (
         <>
           {/* Fighters and combat log share one layout. */}
           <div id="battleLayout">

@@ -1,17 +1,20 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 
 // Import components from Mechanics folder
-import Battle from '../Mechanics/Battle.jsx';
-import TeamBattle from '../Mechanics/TeamBattle.jsx';
-import Character from '../Mechanics/Character.jsx';
-import Opponent from '../Mechanics/Opponent.jsx';
-import VictoryScreen from '../Mechanics/VictoryScreen.jsx';
-import Homescreen from '../Mechanics/Main Page/Homescreen.jsx';
-import CharacterSelection from '../Mechanics/Main Page/CharacterSelection.jsx';
-import Shop from '../Mechanics/Main Page/Shop.jsx';
+import Battle from "../Mechanics/Battle.jsx";
+import TeamBattle from "../Mechanics/TeamBattle.jsx";
+import Character from "../Mechanics/Character.jsx";
+import Opponent from "../Mechanics/Opponent.jsx";
+import VictoryScreen from "../Mechanics/VictoryScreen.jsx";
+import Homescreen from "../Mechanics/Main Page/Homescreen.jsx";
+import CharacterSelection from "../Mechanics/Main Page/CharacterSelection.jsx";
+import Shop from "../Mechanics/Main Page/Shop.jsx";
 import BotSimulator from "../Mechanics/BotSimulator.jsx";
 import WatchMode from "../Mechanics/WatchMode";
+import StoryMode from "../Mechanics/Main Page/Story/StoryMode.jsx";
+
+import StoryLevel1 from "../Mechanics/Main Page/Story/StoryLevel1.jsx";
 
 export const AppRoutes = () => {
   return (
@@ -26,6 +29,8 @@ export const AppRoutes = () => {
       <Route path="/character" element={<Character />} />
       <Route path="/opponent" element={<Opponent />} />
       <Route path="/victory" element={<VictoryScreen />} />
+      <Route path="/story-mode" element={<StoryMode />} />
+      <Route path="/story-cutscene" element={<StoryLevel1 />} />
       <Route path="*" element={<h1>404 Not Found</h1>} />
     </Routes>
   );
