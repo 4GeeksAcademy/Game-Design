@@ -118,17 +118,7 @@
   pointer-events: none;
 }
 
-.vn-character {
-  position: absolute;
-  bottom: -3%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  height: 95%;
-  width: min(48%, 460px);
-  transform-origin: center bottom;
-  pointer-events: none;
-}
+
 
 .vn-character img {
   display: block;
@@ -432,4 +422,91 @@
   .vn-next-button {
     transition: none !important;
   }
+}
+
+/* The character's main stage position and appearance */
+.vn-character {
+  position: absolute;
+  bottom: 0;
+  z-index: 2;
+  max-height: 90%;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Place characters on either side of the scene */
+.vn-position-right {
+  right: 8%;
+}
+
+.vn-position-left {
+  left: 8%;
+}
+
+/* Slide the character into the scene */
+.vn-motion-enter {
+  animation: storyCharacterEnter 0.65s ease-out both;
+}
+
+@keyframes storyCharacterEnter {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Give the character a small energetic bounce */
+.vn-motion-bounce {
+  animation: storyCharacterBounce 0.55s ease-in-out both;
+}
+
+@keyframes storyCharacterBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(-12px);
+  }
+  70% {
+    transform: translateY(4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Fade in characters or narration */
+.vn-motion-fade {
+  animation: storyCharacterFade 0.5s ease-out both;
+}
+
+@keyframes storyCharacterFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.vn-scene {
+  position: relative;
+  overflow: hidden;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.vn-bg-arena {
+  background-image: url("../../assets/img/StoryBackgrounds/arena.jpg");
+}
+
+.vn-bg-opening {
+  background-image: url("../../assets/img/StoryBackgrounds/opening.jpg");
 }

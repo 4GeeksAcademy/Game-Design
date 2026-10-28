@@ -1,10 +1,14 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { roster } from "../CharacterSelection.jsx";
+import { storyExpressions } from "./StoryExpressions.js";
 import "./StoryCutscene.css";
 
-function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, onComplete, }) {
+function StoryCutscene({
+  dialogue: storyDialogue,
+  levelConfig: suppliedConfig,
+  onComplete,
+}) {
   const navigate = useNavigate();
 
   // Default configuration keeps the cutscene safe if opened directly.
@@ -41,25 +45,29 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, o
   const fighter = dialogue?.characterId
     ? roster.find((item) => item.id === dialogue.characterId)
     : null;
+  const expressionImage = dialogue?.characterId
+    ? storyExpressions[dialogue.characterId]?.[dialogue.expression]
+    : null;
 
+  const characterImage = expressionImage ?? fighter?.image;
   const fullText = dialogue?.text ?? "";
   const isTextComplete = visibleCharacters >= fullText.length;
   const isLastLine = dialogueIndex === dialogueLines.length - 1;
 
   const finishCutscene = () => {
-  if (onComplete) {
-    onComplete();
-    return;
-  }
+    if (onComplete) {
+      onComplete();
+      return;
+    }
 
-  // Preserve the old behavior when no callback is supplied.
-  navigate("/character-select", {
-    state: {
-      ...levelConfig,
-      gameMode: "story",
-    },
-  });
-};
+    // Preserve the old behavior when no callback is supplied.
+    navigate("/character-select", {
+      state: {
+        ...levelConfig,
+        gameMode: "story",
+      },
+    });
+  };
 
   // Reveal the current line gradually.
   useEffect(() => {
@@ -89,9 +97,9 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, o
     }
 
     if (isLastLine) {
-  finishCutscene();
-  return;
-}
+      finishCutscene();
+      return;
+    }
 
     setTransitioning(true);
 
@@ -112,8 +120,8 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, o
       }
 
       if (event.key === "Escape") {
-  finishCutscene();
-}
+        finishCutscene();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -144,12 +152,7 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, o
           CHAPTER {levelConfig.storyChapter} · LEVEL {levelConfig.storyLevel}
         </span>
 
-        <button
-          type="button"
-          className="vn-skip"
-          onClick={finishCutscene}
-          
-        >
+        <button type="button" className="vn-skip" onClick={finishCutscene}>
           SKIP ▶
         </button>
       </header>
@@ -163,7 +166,7 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, o
       >
         <div className="vn-atmosphere" />
 
-        {fighter && (
+        {fighter && characterImage && (
           <div
             key={`${dialogue.characterId}-${dialogue.expression}-${dialogueIndex}`}
             className={[
@@ -174,7 +177,7 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, o
             ].join(" ")}
           >
             <img
-              src={fighter.image}
+              src={characterImage}
               alt={`${fighter.data.name}, ${dialogue.expression}`}
               draggable="false"
             />
@@ -185,10 +188,7 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, o
         <div className="vn-click-hint">CLICK TO CONTINUE</div>
       </section>
 
-      <section
-        className="vn-dialogue-area"
-        onClick={advanceDialogue}
-      >
+      <section className="vn-dialogue-area" onClick={advanceDialogue}>
         <div className="vn-dialogue-panel">
           <div className="vn-nameplate">{dialogue.speaker}</div>
 
@@ -229,9 +229,7 @@ function StoryCutscene({ dialogue: storyDialogue, levelConfig: suppliedConfig, o
             <div
               className="vn-progress-fill"
               style={{
-                width: `${
-                  ((dialogueIndex + 1) / dialogueLines.length) * 100
-                }%`,
+                width: `${((dialogueIndex + 1) / dialogueLines.length) * 100}%`,
               }}
             />
           </div>
