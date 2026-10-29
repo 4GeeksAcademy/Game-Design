@@ -37,6 +37,8 @@ body {
 
 #opponentSection,
 #characterSection {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: center;
   width: 100%;
@@ -2308,9 +2310,34 @@ body {
   width: 100%;
 }
 
+/* Story arena background behind both fighters. */
 #battleArena {
-  min-width: 0;
+  position: relative;
+  isolation: isolate;
+
+  /* Rounded frame around the story background */
+  border: 2px solid #13d5ff;
+  border-radius: 14px;
+  overflow: hidden;
+
+  /* Subtle arcade-style glow */
+  box-shadow:
+    0 0 8px rgba(19, 213, 255, 0.35),
+    inset 0 0 8px rgba(19, 213, 255, 0.12);
 }
+
+.story-battle-background {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  pointer-events: none;
+}
+
 
 
 #battleLayout #battleArena {
@@ -3568,10 +3595,16 @@ body {
 ========================================= */
 
 #aiAttackSection {
-  position: relative;
-  width: min(420px, 92vw);
-  margin: 20px auto;
-  animation: incomingAttack 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  z-index: 20;
+
+  /* Keep the incoming attack panel compact */
+  width: min(275px, 90%);
+  max-height: 90%;
+  overflow-y: auto;
 }
 
 #aiAttackCard {

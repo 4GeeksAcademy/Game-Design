@@ -1,11 +1,15 @@
 
 .story-cutscene {
   --vn-accent: #13d5ff;
-  --vn-panel: rgba(9, 17, 34, 0.94);
+  --vn-panel: rgba(9, 17, 34, 0.88);
 
-  min-height: 100vh;
+  position: relative;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 500px;
   box-sizing: border-box;
   overflow: hidden;
   color: #f6f8ff;
@@ -13,13 +17,19 @@
   font-family: inherit;
 }
 
+/* =========================
+   HEADER
+========================= */
+
 .vn-header {
-  z-index: 5;
+  position: relative;
+  z-index: 10;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 4%;
+  padding: 12px 4%;
   background: #080f20ed;
   border-bottom: 1px solid #ffffff18;
 }
@@ -66,46 +76,76 @@
   border-color: var(--vn-accent);
 }
 
-/* Main illustrated scene */
+/* =========================
+   SCENE AND BACKGROUNDS
+========================= */
 
 .vn-scene {
   position: relative;
   isolation: isolate;
-  flex: 1;
-  min-height: 360px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
   cursor: pointer;
   background-color: #142844;
   background-image:
     radial-gradient(ellipse at 50% 85%, #28517b 0%, transparent 60%),
     linear-gradient(145deg, #182b49, #0a1225 80%);
-  transition: filter 180ms ease;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .vn-scene.vn-bg-opening {
   background-image:
+    linear-gradient(0deg, #080f2066, transparent 70%),
     radial-gradient(ellipse at 50% 50%, #1c4770, transparent 65%),
     linear-gradient(135deg, #182f50, #080f20);
 }
 
 .vn-scene.vn-bg-arena {
   background-image:
-    radial-gradient(ellipse at 50% 90%, #854c3b66, transparent 55%),
-    linear-gradient(155deg, #243751, #111729 70%, #080f20);
+    linear-gradient(rgba(8, 15, 32, 0.2), rgba(8, 15, 32, 0.45)),
+    url("../../../assets/img/Arena.jpg");
+
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
+
+/*
+  Optional image backgrounds:
+  Put these files in public/StoryBackgrounds/.
+  Then uncomment the corresponding background-image rule.
+*/
+
+/*
+.vn-scene.vn-bg-arena {
+  background-image:
+    linear-gradient(0deg, #080f2070, transparent 70%),
+    url("/StoryBackgrounds/arena.jpg");
+}
+
+.vn-scene.vn-bg-opening {
+  background-image:
+    linear-gradient(0deg, #080f2070, transparent 70%),
+    url("/StoryBackgrounds/opening.jpg");
+}
+*/
 
 .vn-atmosphere {
   position: absolute;
-  z-index: -1;
+  z-index: 0;
   inset: 0;
   background:
-    linear-gradient(0deg, #080f20a8, transparent 35%),
+    linear-gradient(0deg, #080f2070, transparent 40%),
     linear-gradient(90deg, #07102030, transparent 50%, #07102030);
   pointer-events: none;
 }
 
 .vn-scene-caption {
   position: absolute;
+  z-index: 1;
   top: 20px;
   left: 4%;
   padding: 7px 11px;
@@ -118,14 +158,43 @@
   pointer-events: none;
 }
 
+.vn-click-hint {
+  position: absolute;
+  z-index: 1;
+  right: 4%;
+  bottom: 20px;
+  color: #ffffff75;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
 
+/* =========================
+   CHARACTER SPRITES
+========================= */
+
+.vn-character {
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+
+  /* Controls the sprite's overall size. */
+  height: min(76%, 650px);
+  width: min(40%, 420px);
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  pointer-events: none;
+  transform-origin: center bottom;
+}
 
 .vn-character img {
   display: block;
-  max-width: 100%;
-  max-height: 100%;
   width: auto;
-  height: auto;
+  height: 100%;
+  max-width: 100%;
   object-fit: contain;
   object-position: center bottom;
   filter: drop-shadow(0 12px 18px #0005);
@@ -147,10 +216,11 @@
   right: 5%;
 }
 
-/* Entrance and expression-change motions */
+/* Character animations.
+   The translate property preserves the positioning transform. */
 
 .vn-motion-enter {
-  animation: vn-enter 360ms cubic-bezier(.2, .8, .2, 1) both;
+  animation: vn-enter 500ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
 .vn-motion-fade {
@@ -158,50 +228,108 @@
 }
 
 .vn-motion-bounce {
-  animation: vn-bounce 420ms ease both;
+  animation: vn-bounce 450ms ease both;
+}
+
+@keyframes vn-enter {
+  from {
+    opacity: 0;
+    translate: 70px 0;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes vn-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vn-bounce {
+  0% {
+    opacity: 0;
+    translate: 0 20px;
+  }
+
+  60% {
+    opacity: 1;
+    translate: 0 -10px;
+  }
+
+  100% {
+    translate: 0 0;
+  }
+}
+
+/* Expression effects */
+
+.vn-expression-happy img {
+  filter: drop-shadow(0 0 16px #ffd16666);
 }
 
 .vn-expression-excited img {
-  filter: drop-shadow(0 0 20px #13d5ff55);
+  filter: drop-shadow(0 0 20px #13d5ff88);
 }
 
 .vn-expression-determined img {
-  filter: drop-shadow(0 10px 14px #ff315944);
+  filter: drop-shadow(0 10px 14px #ff315966);
 }
 
-.vn-transitioning .vn-dialogue-panel {
-  opacity: 0.45;
-  transform: translateY(5px);
-}
-
-.vn-dialogue-panel {
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease;
-}
-
-/* Dialogue panel */
+/* =========================
+   OVERLAID DIALOGUE
+========================= */
 
 .vn-dialogue-area {
-  position: relative;
-  z-index: 3;
-  padding: 0 4% 18px;
-  background: linear-gradient(180deg, #080f2000, #080f20 14%);
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding: 0 4% 16px;
+  box-sizing: border-box;
+
+  background: linear-gradient(
+    180deg,
+    transparent,
+    #080f2040 10%,
+    #080f20b8 100%
+  );
+
   cursor: pointer;
 }
 
 .vn-dialogue-panel {
   position: relative;
   width: 100%;
-  min-height: 155px;
+  min-height: 145px;
   box-sizing: border-box;
-  padding: 28px 24px 22px;
+  padding: 28px 24px 18px;
+
   background: var(--vn-panel);
   border: 1px solid #8ba5c64a;
   border-top: 2px solid var(--vn-accent);
   border-radius: 5px;
+
   box-shadow: 0 12px 40px #0006;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.vn-transitioning .vn-dialogue-panel {
+  opacity: 0.45;
+  transform: translateY(5px);
 }
 
 .vn-nameplate {
@@ -210,20 +338,22 @@
   left: 22px;
   min-width: 110px;
   padding: 9px 18px;
+
   color: #071020;
   background: var(--vn-accent);
   clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+
   font-size: 0.78rem;
   font-weight: 1000;
   letter-spacing: 1px;
 }
 
 .vn-dialogue-text {
-  min-height: 60px;
-  margin: 0 0 16px;
+  min-height: 52px;
+  margin: 0 0 12px;
   color: #f3f6ff;
   font-size: clamp(0.95rem, 1.6vw, 1.15rem);
-  line-height: 1.8;
+  line-height: 1.7;
   white-space: pre-wrap;
 }
 
@@ -234,6 +364,12 @@
   animation: vn-cursor-blink 650ms steps(2, start) infinite;
 }
 
+@keyframes vn-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
 .vn-next-button {
   display: flex;
   align-items: center;
@@ -241,6 +377,7 @@
   gap: 10px;
   margin-left: auto;
   padding: 10px 16px;
+
   color: #f4f8ff;
   background: #132b43;
   border: 1px solid #13d5ff77;
@@ -249,6 +386,7 @@
   font-weight: 900;
   letter-spacing: 1px;
   cursor: pointer;
+
   transition:
     background 160ms ease,
     transform 160ms ease,
@@ -272,7 +410,8 @@
   align-items: center;
   gap: 14px;
   margin-top: 12px;
-  color: #8ea1bc;
+
+  color: #aabbd2;
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 1px;
@@ -292,80 +431,23 @@
   transition: width 250ms ease;
 }
 
-.vn-click-hint {
-  position: absolute;
-  right: 4%;
-  bottom: 20px;
-  color: #ffffff75;
-  font-size: 0.6rem;
-  letter-spacing: 1px;
-  pointer-events: none;
-}
-
-/* Motion keyframes */
-
-@keyframes vn-enter {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes vn-fade {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes vn-bounce {
-  0% {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-
-  65% {
-    opacity: 1;
-    transform: translateY(-5px);
-  }
-
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes vn-cursor-blink {
-  to {
-    visibility: hidden;
-  }
-}
-
-@media (min-height: 850px) {
-  .vn-scene {
-    min-height: 450px;
-  }
-
-  .vn-dialogue-panel {
-    min-height: 175px;
-  }
-}
+/* =========================
+   RESPONSIVE LAYOUT
+========================= */
 
 @media (max-width: 600px) {
+  .story-cutscene {
+    min-height: 480px;
+  }
+
   .vn-header {
     gap: 8px;
-    padding: 12px 3%;
+    padding: 10px 3%;
   }
 
   .vn-logo {
-    font-size: 0.68rem;
+    gap: 6px;
+    font-size: 0.65rem;
   }
 
   .vn-logo-mark {
@@ -374,7 +456,7 @@
   }
 
   .vn-chapter {
-    font-size: 0.55rem;
+    font-size: 0.52rem;
     text-align: center;
   }
 
@@ -384,25 +466,34 @@
   }
 
   .vn-scene {
-    min-height: 300px;
+    min-height: 0;
   }
 
   .vn-character {
-    width: 75%;
-    height: 90%;
+    height: 62%;
+    width: 60%;
+  }
+
+  .vn-position-left {
+    left: 0;
+  }
+
+  .vn-position-right {
+    right: 0;
   }
 
   .vn-dialogue-area {
-    padding: 0 3% 12px;
+    padding: 0 3% 10px;
   }
 
   .vn-dialogue-panel {
-    padding: 28px 15px 16px;
+    min-height: 135px;
+    padding: 27px 15px 14px;
   }
 
   .vn-dialogue-text {
-    min-height: 75px;
-    font-size: 0.95rem;
+    min-height: 60px;
+    font-size: 0.9rem;
   }
 
   .vn-click-hint {
@@ -424,89 +515,49 @@
   }
 }
 
-/* The character's main stage position and appearance */
-.vn-character {
+
+/* Two independent layers allow real image crossfading. */
+.vn-background-layers {
   position: absolute;
-  bottom: 0;
-  z-index: 2;
-  max-height: 90%;
-  display: flex;
-  align-items: flex-end;
-}
-
-/* Place characters on either side of the scene */
-.vn-position-right {
-  right: 8%;
-}
-
-.vn-position-left {
-  left: 8%;
-}
-
-/* Slide the character into the scene */
-.vn-motion-enter {
-  animation: storyCharacterEnter 0.65s ease-out both;
-}
-
-@keyframes storyCharacterEnter {
-  from {
-    opacity: 0;
-    transform: translateX(100px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Give the character a small energetic bounce */
-.vn-motion-bounce {
-  animation: storyCharacterBounce 0.55s ease-in-out both;
-}
-
-@keyframes storyCharacterBounce {
-  0% {
-    opacity: 0;
-    transform: translateY(25px);
-  }
-  45% {
-    opacity: 1;
-    transform: translateY(-12px);
-  }
-  70% {
-    transform: translateY(4px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-/* Fade in characters or narration */
-.vn-motion-fade {
-  animation: storyCharacterFade 0.5s ease-out both;
-}
-
-@keyframes storyCharacterFade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.vn-scene {
-  position: relative;
+  inset: 0;
+  z-index: 0;
   overflow: hidden;
-  background-position: center;
+  pointer-events: none;
+}
+
+.vn-background-layer {
+  position: absolute;
+  inset: 0;
   background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
+  transition: opacity 700ms ease-in-out;
 }
 
-.vn-bg-arena {
-  background-image: url("../../assets/img/StoryBackgrounds/arena.jpg");
+
+.vn-background-old {
+  opacity: 1;
+  z-index: 0;
 }
 
-.vn-bg-opening {
-  background-image: url("../../assets/img/StoryBackgrounds/opening.jpg");
+.vn-background-current {
+  opacity: 1;
+  z-index: 1;
+  animation: vnBackgroundEntrance 700ms ease-in-out both;
+}
+
+@keyframes vnBackgroundEntrance {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vn-background-current {
+    animation: none;
+  }
 }

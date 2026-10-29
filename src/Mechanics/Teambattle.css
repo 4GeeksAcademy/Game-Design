@@ -2697,3 +2697,29 @@ battlefield > .local-coop-incoming {
     opacity: 0;
   }
 }
+
+.battlefield {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  border: 2px solid #13d5ff;
+  border-radius: 14px;
+
+  box-shadow:
+    0 0 8px rgba(19, 213, 255, 0.35),
+    inset 0 0 8px rgba(19, 213, 255, 0.12);
+}
+
+.team-battle-story-background {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border-radius: inherit;
+  pointer-events: none;
+}

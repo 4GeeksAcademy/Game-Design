@@ -10,6 +10,7 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade } from "./AI.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import useKeybinds from "./Main Page/useKeybinds.js";
+import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
 import {
   chooseNormalAttack,
   normalDefendOrEvade,
@@ -1262,36 +1263,36 @@ export default function TeamBattle() {
       }
 
       const resetFighters = (fighters) =>
-  fighters.map((fighter) => ({
-    ...fighter,
+        fighters.map((fighter) => ({
+          ...fighter,
 
-    mana:
-      fighter.health > 0
-        ? Math.min(
-            fighter.maximumMana ?? fighter.mana,
-            fighter.mana + (fighter.manaRegen ?? 0),
-          )
-        : fighter.mana,
+          mana:
+            fighter.health > 0
+              ? Math.min(
+                  fighter.maximumMana ?? fighter.mana,
+                  fighter.mana + (fighter.manaRegen ?? 0),
+                )
+              : fighter.mana,
 
-    // Restore cooldown based on this fighter's recovery stat.
-    cooldown:
-      fighter.health > 0
-        ? Math.min(
-            fighter.maximumCooldown ?? fighter.cooldown ?? 0,
-            (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
-          )
-        : fighter.cooldown,
+          // Restore cooldown based on this fighter's recovery stat.
+          cooldown:
+            fighter.health > 0
+              ? Math.min(
+                  fighter.maximumCooldown ?? fighter.cooldown ?? 0,
+                  (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
+                )
+              : fighter.cooldown,
 
-    turnFinished: false,
-    blocked: false,
+          turnFinished: false,
+          blocked: false,
 
-    attacks: fighter.attacks.map((attack) => ({
-      ...attack,
-      state: true,
-      buff: attack.buff ? { ...attack.buff } : attack.buff,
-      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-    })),
-  }));
+          attacks: fighter.attacks.map((attack) => ({
+            ...attack,
+            state: true,
+            buff: attack.buff ? { ...attack.buff } : attack.buff,
+            debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+          })),
+        }));
 
       setTeams({
         player: resetFighters(teams.player),
@@ -1606,36 +1607,36 @@ export default function TeamBattle() {
         }
 
         const resetFighters = (fighters) =>
-  fighters.map((fighter) => ({
-    ...fighter,
+          fighters.map((fighter) => ({
+            ...fighter,
 
-    mana:
-      fighter.health > 0
-        ? Math.min(
-            fighter.maximumMana ?? fighter.mana,
-            fighter.mana + (fighter.manaRegen ?? 0),
-          )
-        : fighter.mana,
+            mana:
+              fighter.health > 0
+                ? Math.min(
+                    fighter.maximumMana ?? fighter.mana,
+                    fighter.mana + (fighter.manaRegen ?? 0),
+                  )
+                : fighter.mana,
 
-    // Restore cooldown based on this fighter's recovery stat.
-    cooldown:
-      fighter.health > 0
-        ? Math.min(
-            fighter.maximumCooldown ?? fighter.cooldown ?? 0,
-            (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
-          )
-        : fighter.cooldown,
+            // Restore cooldown based on this fighter's recovery stat.
+            cooldown:
+              fighter.health > 0
+                ? Math.min(
+                    fighter.maximumCooldown ?? fighter.cooldown ?? 0,
+                    (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
+                  )
+                : fighter.cooldown,
 
-    turnFinished: false,
-    blocked: false,
+            turnFinished: false,
+            blocked: false,
 
-    attacks: fighter.attacks.map((attack) => ({
-      ...attack,
-      state: true,
-      buff: attack.buff ? { ...attack.buff } : attack.buff,
-      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-    })),
-  }));
+            attacks: fighter.attacks.map((attack) => ({
+              ...attack,
+              state: true,
+              buff: attack.buff ? { ...attack.buff } : attack.buff,
+              debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+            })),
+          }));
 
         setTeams({
           player: resetFighters(updatedPlayers),
@@ -1851,14 +1852,14 @@ export default function TeamBattle() {
         addLog("The defensive action could not be completed.");
       } else {
         if (choice === "defend") {
-  currentDefender.cooldown = Math.max(
-    0,
-    (currentDefender.cooldown ?? 0) - 1,
-  );
-  currentDefender.blocked = true;
-} else if (choice === "evade") {
-  currentDefender.blocked = true;
-}
+          currentDefender.cooldown = Math.max(
+            0,
+            (currentDefender.cooldown ?? 0) - 1,
+          );
+          currentDefender.blocked = true;
+        } else if (choice === "evade") {
+          currentDefender.blocked = true;
+        }
 
         if (choice === "defend") {
           addLog(
@@ -2378,6 +2379,15 @@ export default function TeamBattle() {
       )}
 
       <section className="battlefield">
+          {isStoryMode && (
+    <div
+      className="team-battle-story-background"
+      style={{
+        backgroundImage: `url("${storyBackgrounds.arena}")`,
+      }}
+      aria-hidden="true"
+    />
+  )}
         <div className="battle-team cpu-team">
           <div className="team-heading">
             <span className="team-indicator" />

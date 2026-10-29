@@ -7,13 +7,32 @@ import StoryCutscene from "./StoryCutscene.jsx";
 const level1Cutscene1 = [
   {
     speaker: "NARRATOR",
-    text: "A new challenge awaits. The road to becoming a champion begins here.",
+    text: "This strange place seems endless. Your legs ache from the journey, leaving you no choice: you need to find a place to rest, and fast.",
     characterId: null,
     expression: "neutral",
     position: "center",
     animation: "fade",
     background: "opening",
   },
+ {
+  speaker: "NARRATOR",
+  text: "You emerge from the dense tree line, and there it lies: Konohagakure, the Hidden Leaf Village. Towering landmark hokage faces are carved into the great cliffside above, overlooking a bustling expanse of traditional shinobi architecture.",
+  characterId: null,
+  expression: "neutral",
+  position: "center",
+  animation: "fade",
+  background: "leafVillage",
+},
+
+{
+  speaker: "NARRATOR",
+  text: "Despite the peaceful hustle of the villagers below, the sheer scale of the surroundings reminds you that you've stepped into the heartland of powerful ninja.",
+  characterId: null,
+  expression: "neutral",
+  position: "center",
+  animation: "fade",
+  background: "leafVillage",
+},
   {
     speaker: "ROCK LEE",
     text: "I have been waiting for a worthy opponent!",

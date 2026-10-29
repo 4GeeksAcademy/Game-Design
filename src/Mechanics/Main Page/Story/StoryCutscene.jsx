@@ -1,8 +1,104 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { roster } from "../CharacterSelection.jsx";
 import { storyExpressions } from "./StoryExpressions.js";
+import { storyBackgrounds } from "./StoryBackgrounds.js";
+import { preloadStoryImages } from "./PreloadStoryImages.js";
 import "./StoryCutscene.css";
+
+function StoryBackground({ backgroundKey }) {
+  const backgroundUrl = storyBackgrounds[backgroundKey];
+
+  const [layers, setLayers] = useState({
+    current: { key: backgroundKey, url: backgroundUrl },
+    previous: null,
+  });
+
+  useEffect(() => {
+    if (!backgroundUrl || layers.current?.key === backgroundKey) {
+      return;
+    }
+
+    const image = new Image();
+    let cancelled = false;
+
+    const showBackground = () => {
+      if (cancelled) return;
+
+      setLayers((previousLayers) => {
+        // Avoid updating state if this background is already current.
+        if (previousLayers.current?.key === backgroundKey) {
+          return previousLayers;
+        }
+
+        return {
+          previous: previousLayers.current,
+          current: {
+            key: backgroundKey,
+            url: backgroundUrl,
+          },
+        };
+      });
+    };
+
+    image.onload = showBackground;
+    image.onerror = showBackground;
+    image.src = backgroundUrl;
+
+    // The image may already be cached by the browser.
+    if (image.complete) {
+      showBackground();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [backgroundKey, backgroundUrl, layers.current?.key]);
+
+    // Remove the old background after the crossfade completes.
+useEffect(() => {
+  if (!layers.previous) return;
+
+  const timer = setTimeout(() => {
+    setLayers((currentLayers) => ({
+      ...currentLayers,
+      previous: null,
+    }));
+  }, 700);
+
+  return () => clearTimeout(timer);
+}, [layers.previous]);
+
+  return (
+    <div className="vn-background-layers" aria-hidden="true">
+      {layers.previous && (
+        <div
+          key={`previous-${layers.previous.key}`}
+          className="vn-background-layer vn-background-old"
+          style={{
+            backgroundImage: `linear-gradient(
+              rgba(8, 15, 32, 0.2),
+              rgba(8, 15, 32, 0.45)
+            ), url("${layers.previous.url}")`,
+          }}
+        />
+      )}
+
+      {layers.current?.url && (
+        <div
+          key={`current-${layers.current.key}`}
+          className="vn-background-layer vn-background-current"
+          style={{
+            backgroundImage: `linear-gradient(
+              rgba(8, 15, 32, 0.2),
+              rgba(8, 15, 32, 0.45)
+            ), url("${layers.current.url}")`,
+          }}
+        />
+      )}
+    </div>
+  );
+}
 
 function StoryCutscene({
   dialogue: storyDialogue,
@@ -39,7 +135,7 @@ function StoryCutscene({
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [visibleCharacters, setVisibleCharacters] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
-
+  const typingTimerRef = useRef(null);
   const dialogue = dialogueLines[dialogueIndex];
 
   const fighter = dialogue?.characterId
@@ -70,44 +166,61 @@ function StoryCutscene({
   };
 
   // Reveal the current line gradually.
-  useEffect(() => {
-    setVisibleCharacters(0);
+useEffect(() => {
+  setVisibleCharacters(0);
 
-    let index = 0;
+  let index = 0;
 
-    const timer = setInterval(() => {
-      index += 1;
-      setVisibleCharacters(index);
+  // Clear any previous typing animation.
+  if (typingTimerRef.current) {
+    clearInterval(typingTimerRef.current);
+  }
 
-      if (index >= fullText.length) {
-        clearInterval(timer);
-      }
-    }, 24);
+  typingTimerRef.current = setInterval(() => {
+    index += 1;
+    setVisibleCharacters(index);
 
-    return () => clearInterval(timer);
-  }, [dialogueIndex, fullText]);
+    if (index >= fullText.length) {
+      clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+  }, 24);
+
+  return () => {
+    if (typingTimerRef.current) {
+      clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+  };
+}, [dialogueIndex, fullText]);
 
   // Continue the story or move to character selection.
   const advanceDialogue = () => {
-    if (transitioning) return;
+  if (transitioning) return;
 
-    if (!isTextComplete) {
-      setVisibleCharacters(fullText.length);
-      return;
+  // If text is still typing, reveal it and stop the animation.
+  if (!isTextComplete) {
+    if (typingTimerRef.current) {
+      clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
     }
 
-    if (isLastLine) {
-      finishCutscene();
-      return;
-    }
+    setVisibleCharacters(fullText.length);
+    return;
+  }
 
-    setTransitioning(true);
+  if (isLastLine) {
+    finishCutscene();
+    return;
+  }
 
-    setTimeout(() => {
-      setDialogueIndex((index) => index + 1);
-      setTransitioning(false);
-    }, 180);
-  };
+  setTransitioning(true);
+
+  setTimeout(() => {
+    setDialogueIndex((index) => index + 1);
+    setTransitioning(false);
+  }, 180);
+};
 
   // Space and Enter advance. Escape skips the cutscene.
   useEffect(() => {
@@ -140,6 +253,12 @@ function StoryCutscene({
     isLastLine,
   ]);
 
+  useEffect(() => {
+    preloadStoryImages(storyBackgrounds, storyExpressions, roster);
+  }, []);
+
+
+
   return (
     <main className="story-cutscene">
       <header className="vn-header">
@@ -161,14 +280,14 @@ function StoryCutscene({
         className={`vn-scene vn-bg-${dialogue.background} ${
           transitioning ? "vn-transitioning" : ""
         }`}
-        onClick={advanceDialogue}
-        aria-label="Story scene. Click to advance dialogue."
       >
+        <StoryBackground backgroundKey={dialogue.background} />
+
         <div className="vn-atmosphere" />
 
         {fighter && characterImage && (
           <div
-            key={`${dialogue.characterId}-${dialogue.expression}-${dialogueIndex}`}
+            key={dialogue.characterId}
             className={[
               "vn-character",
               `vn-position-${dialogue.position}`,
