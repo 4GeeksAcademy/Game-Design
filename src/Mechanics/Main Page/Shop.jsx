@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -48,8 +47,7 @@ function Shop() {
 
   useEffect(() => {
     const updateCoins = () => setCoins(getCoins());
-    const updateUnlocks = () =>
-      setUnlocked(getUnlockedCharacters());
+    const updateUnlocks = () => setUnlocked(getUnlockedCharacters());
 
     window.addEventListener("coinsUpdated", updateCoins);
     window.addEventListener("unlocksUpdated", updateUnlocks);
@@ -87,10 +85,7 @@ function Shop() {
   return (
     <main className="shop-screen">
       <header className="shop-header">
-        <button
-          className="shop-back-button"
-          onClick={() => navigate("/")}
-        >
+        <button className="shop-back-button" onClick={() => navigate("/")}>
           ← MAIN MENU
         </button>
 
@@ -115,8 +110,7 @@ function Shop() {
       <section className="shop-grid">
         {fighters.map((fighter) => {
           const isUnlocked = unlocked.includes(fighter.id);
-          const cost =
-            fighter.data.availability?.cost ?? fighter.cost;
+          const cost = fighter.data.availability?.cost ?? fighter.cost;
 
           return (
             <article
@@ -130,9 +124,55 @@ function Shop() {
                   loading="lazy"
                 />
 
-                {!isUnlocked && (
-                  <span className="shop-lock">🔒</span>
-                )}
+                
+{!isUnlocked && (
+  <div
+    className="shop-lock"
+    aria-label={`${fighter.data.name} is locked`}
+  >
+    <svg
+      className="shop-lock-icon"
+      viewBox="0 0 32 36"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      {/* Lock shackle */}
+      <path
+        d="M9 15V10C9 5.5 12 3 16 3C20 3 23 5.5 23 10V15"
+        stroke="currentColor"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+
+      {/* Main lock body */}
+      <rect
+        x="4"
+        y="13"
+        width="24"
+        height="20"
+        rx="3"
+        fill="#190711"
+        stroke="currentColor"
+        strokeWidth="2.5"
+      />
+
+      {/* Keyhole */}
+      <circle cx="16" cy="21" r="2.5" fill="currentColor" />
+      <path
+        d="M16 23V27"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
+
+    <span className="shop-lock-ribbon">
+      LOCKED
+    </span>
+  </div>
+)}
+
               </div>
 
               <div className="shop-card-info">
@@ -160,16 +200,12 @@ function Shop() {
       </section>
 
       <footer className="shop-footer">
-        <button
-          className="shop-back-button"
-          onClick={() => navigate("/character-select")}
-        >
-          GO TO CHARACTER SELECT →
+        <button className="shop-back-button" onClick={() => navigate(-1)}>
+          ← BACK TO PREVIOUS SCREEN
         </button>
       </footer>
     </main>
   );
 }
-
 
 export default Shop;
