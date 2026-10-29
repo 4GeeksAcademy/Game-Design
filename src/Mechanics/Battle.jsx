@@ -108,6 +108,7 @@ function App() {
 
   const [damageDealt, setDamageDealt] = useState(0);
   const lastRewardedDamage = useRef(0);
+  
   const aiControllerRef = useRef(null);
 
   useEffect(() => {
@@ -124,7 +125,7 @@ function App() {
   const [attacksUsed, setAttacksUsed] = useState(0);
   const [defenseTimeLeft, setDefenseTimeLeft] = useState(10);
   const [currentTurn, setCurrentTurn] = useState("intro");
-
+const [showIncomingAttack, setShowIncomingAttack] = useState(false);
   const [roundNumber, setRoundNumber] = useState(1);
   const [showRoundIntro, setShowRoundIntro] = useState(true);
 
@@ -487,6 +488,19 @@ function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [aiAttack, defenseTimeLeft, character.cooldown, resolveIncomingAttack]);
 
+  useEffect(() => {
+  if (!aiAttack) {
+    setShowIncomingAttack(false);
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    setShowIncomingAttack(true);
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [aiAttack]);
+
   return (
     <div className="container-fluid mt-3" id="gameContainer">
       {/* Full-screen round intro with both fighters and their health. */}
@@ -677,8 +691,12 @@ function App() {
               </div>
 
               {/* Opponent's attack and defensive choices. */}
-              {aiAttack && (
-                <div id="aiAttackSection" key={aiAttack.id ?? aiAttack.name}>
+              {aiAttack && showIncomingAttack && (
+                <div
+    id="aiAttackSection"
+    className="incoming-attack-card"
+    key={aiAttack.id ?? aiAttack.name}
+  >
                   {/*
       The key helps React remount the card when the attack changes.
       This retriggers its entrance animation for queued attacks.
@@ -755,7 +773,7 @@ function App() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                
 
                   <div id="defensiveActions">
                     <button
@@ -838,6 +856,7 @@ function App() {
                       <span>TAKE FULL DAMAGE</span>
                     </button>
                   </div>
+                </div>
                 </div>
               )}
 
