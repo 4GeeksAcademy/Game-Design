@@ -120,7 +120,7 @@ function StoryMode() {
           title={
             level1Complete
               ? "Level 2 unlocked — story coming soon"
-              : "Win both Level 1 battles to unlock"
+              : "Complete Level 1 to unlock"
           }
         >
           <strong>02</strong>

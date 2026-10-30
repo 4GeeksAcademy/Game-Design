@@ -885,7 +885,7 @@ function StoryLevel1() {
         firstBattleWon: levelConfig.firstBattleWon,
         lastBattleWon: previousBattleWon,
         storyLevelComplete: level1Completed,
-        level1Completed,
+        level1Completed: true,
       },
     });
   };
