@@ -503,6 +503,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .vn-character,
+  .vn-character img,
   .vn-dialogue-text,
   .vn-text-cursor {
     animation: none !important;
@@ -561,3 +562,252 @@
     animation: none;
   }
 }
+
+.vn-character-rocklee-pushups {
+  z-index: 5;
+}
+/* =========================
+   ROCK LEE PUSH-UP POSES
+========================= */
+
+.vn-character-rocklee-pushups {
+  height: min(58%, 500px);
+
+  /* Raise Lee above the dialogue box */
+  bottom: 190px;
+
+  /* Put Lee above the dialogue layer */
+  z-index: 6;
+
+  pointer-events: none;
+}
+
+/* Dialogue stays below the special character sprite */
+.vn-dialogue-area {
+  z-index: 5;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .vn-character-rocklee-pushups {
+    height: 48%;
+    bottom: 205px;
+  }
+}
+
+/* =========================
+   CHARACTER EXPRESSION ANIMATIONS
+========================= */
+
+/* Default idle: subtle breathing for every character. */
+.vn-character img {
+  transform-origin: center bottom;
+  animation: vn-idle 4s ease-in-out infinite;
+}
+
+/* Neutral: calm breathing. */
+.vn-expression-neutral img {
+  animation: vn-idle 4s ease-in-out infinite;
+}
+
+/* Happy: gentle, friendly bounce. */
+.vn-expression-happy img {
+  filter: drop-shadow(0 0 16px #ffd16666);
+  animation:
+    vn-idle 4s ease-in-out infinite,
+    vn-happy 2.2s ease-in-out infinite;
+}
+
+/* Excited: more energetic movement. */
+.vn-expression-excited img {
+  filter: drop-shadow(0 0 20px #13d5ff88);
+  animation: vn-excited 1.3s ease-in-out infinite;
+}
+
+/* Angry: brief bursts of shaking, with pauses. */
+.vn-expression-angry img {
+  animation: vn-angry 2.6s ease-in-out infinite;
+}
+
+/* Determined: subtle forward movement. */
+.vn-expression-determined img {
+  filter: drop-shadow(0 10px 14px #ff315966);
+  animation: vn-determined 3s ease-in-out infinite;
+}
+
+/* Serious: almost still, with restrained breathing. */
+.vn-expression-serious img {
+  animation: vn-serious 5s ease-in-out infinite;
+}
+
+/* Tenten: understanding / relating with a small nod. */
+.vn-expression-relate img {
+  animation: vn-relate 3s ease-in-out infinite;
+}
+
+/* Tenten: facepalm with a slight head-and-body dip. */
+.vn-expression-facepalm img {
+  animation: vn-facepalm 3.5s ease-in-out infinite;
+}
+
+/* Tenten: exasperated head tilt. */
+.vn-expression-exasperated img {
+  animation: vn-exasperated 3s ease-in-out infinite;
+}
+
+/* Rock Lee: alternating push-up poses. */
+.vn-expression-pushups1 img {
+  animation: vn-pushup-up 1.2s ease-in-out infinite;
+}
+
+.vn-expression-pushups2 img {
+  animation: vn-pushup-down 1.2s ease-in-out infinite;
+}
+
+
+/* =========================
+   ANIMATION KEYFRAMES
+========================= */
+
+@keyframes vn-idle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes vn-happy {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+@keyframes vn-excited {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+
+  25% {
+    transform: translateY(-8px) scale(1.015);
+  }
+
+  50% {
+    transform: translateY(0) scale(1);
+  }
+
+  75% {
+    transform: translateY(-5px) scale(1.01);
+  }
+}
+
+@keyframes vn-angry {
+  0%, 75%, 100% {
+    transform: translateX(0);
+  }
+
+  78% {
+    transform: translateX(-4px);
+  }
+
+  81% {
+    transform: translateX(4px);
+  }
+
+  84% {
+    transform: translateX(-3px);
+  }
+
+  87% {
+    transform: translateX(3px);
+  }
+
+  90% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes vn-determined {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-3px) scale(1.01);
+  }
+}
+
+@keyframes vn-serious {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes vn-relate {
+  0%, 100% {
+    transform: rotate(0);
+  }
+
+  35% {
+    transform: rotate(-2deg);
+  }
+
+  65% {
+    transform: rotate(1deg);
+  }
+}
+
+@keyframes vn-facepalm {
+  0%, 100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(3px) rotate(1deg);
+  }
+}
+
+@keyframes vn-exasperated {
+  0%, 100% {
+    transform: rotate(0);
+  }
+
+  40% {
+    transform: rotate(-2deg);
+  }
+
+  70% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes vn-pushup-up {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes vn-pushup-down {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(3px);
+  }
+}
+

@@ -6,7 +6,11 @@ import { storyBackgrounds } from "./StoryBackgrounds.js";
 import { preloadStoryImages } from "./PreloadStoryImages.js";
 import "./StoryCutscene.css";
 
+
+
+
 function StoryBackground({ backgroundKey }) {
+  
   const backgroundUrl = storyBackgrounds[backgroundKey];
 
   const [layers, setLayers] = useState({
@@ -55,19 +59,21 @@ function StoryBackground({ backgroundKey }) {
     };
   }, [backgroundKey, backgroundUrl, layers.current?.key]);
 
-    // Remove the old background after the crossfade completes.
-useEffect(() => {
-  if (!layers.previous) return;
+  
 
-  const timer = setTimeout(() => {
-    setLayers((currentLayers) => ({
-      ...currentLayers,
-      previous: null,
-    }));
-  }, 700);
+  // Remove the old background after the crossfade completes.
+  useEffect(() => {
+    if (!layers.previous) return;
 
-  return () => clearTimeout(timer);
-}, [layers.previous]);
+    const timer = setTimeout(() => {
+      setLayers((currentLayers) => ({
+        ...currentLayers,
+        previous: null,
+      }));
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [layers.previous]);
 
   return (
     <div className="vn-background-layers" aria-hidden="true">
@@ -144,7 +150,7 @@ function StoryCutscene({
   const expressionImage = dialogue?.characterId
     ? storyExpressions[dialogue.characterId]?.[dialogue.expression]
     : null;
-
+const [sceneCharacters, setSceneCharacters] = useState({});
   const characterImage = expressionImage ?? fighter?.image;
   const fullText = dialogue?.text ?? "";
   const isTextComplete = visibleCharacters >= fullText.length;
@@ -165,62 +171,110 @@ function StoryCutscene({
     });
   };
 
+  useEffect(() => {
+    const currentLine = dialogueLines[dialogueIndex];
+
+    if (!currentLine) return;
+
+    setSceneCharacters((previousCharacters) => {
+      // Start with the characters already present.
+      let updatedCharacters = { ...previousCharacters };
+
+      // Explicitly clear everyone from the scene.
+      if (currentLine.clearCharacters) {
+        updatedCharacters = {};
+      }
+
+      // Explicitly remove selected characters.
+      if (currentLine.hideCharacters?.length) {
+        currentLine.hideCharacters.forEach((characterId) => {
+          delete updatedCharacters[characterId];
+        });
+      }
+
+      // Add or update the character associated with this line.
+      if (currentLine.characterId) {
+        const characterId = currentLine.characterId;
+
+        const fighter = roster.find((item) => item.id === characterId);
+
+        const expression =
+          storyExpressions[characterId]?.[currentLine.expression];
+
+        const image = expression ?? fighter?.image;
+
+        if (fighter && image) {
+          updatedCharacters[characterId] = {
+            characterId,
+            fighter,
+            image,
+            expression: currentLine.expression ?? "neutral",
+            position: currentLine.position ?? "right",
+            animation: currentLine.animation ?? "fade",
+          };
+        }
+      }
+
+      return updatedCharacters;
+    });
+  }, [dialogueIndex, dialogueLines]);
+
   // Reveal the current line gradually.
-useEffect(() => {
-  setVisibleCharacters(0);
+  useEffect(() => {
+    setVisibleCharacters(0);
 
-  let index = 0;
+    let index = 0;
 
-  // Clear any previous typing animation.
-  if (typingTimerRef.current) {
-    clearInterval(typingTimerRef.current);
-  }
-
-  typingTimerRef.current = setInterval(() => {
-    index += 1;
-    setVisibleCharacters(index);
-
-    if (index >= fullText.length) {
-      clearInterval(typingTimerRef.current);
-      typingTimerRef.current = null;
-    }
-  }, 24);
-
-  return () => {
+    // Clear any previous typing animation.
     if (typingTimerRef.current) {
       clearInterval(typingTimerRef.current);
-      typingTimerRef.current = null;
     }
-  };
-}, [dialogueIndex, fullText]);
+
+    typingTimerRef.current = setInterval(() => {
+      index += 1;
+      setVisibleCharacters(index);
+
+      if (index >= fullText.length) {
+        clearInterval(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
+    }, 24);
+
+    return () => {
+      if (typingTimerRef.current) {
+        clearInterval(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
+    };
+  }, [dialogueIndex, fullText]);
 
   // Continue the story or move to character selection.
   const advanceDialogue = () => {
-  if (transitioning) return;
+    if (transitioning) return;
 
-  // If text is still typing, reveal it and stop the animation.
-  if (!isTextComplete) {
-    if (typingTimerRef.current) {
-      clearInterval(typingTimerRef.current);
-      typingTimerRef.current = null;
+    // If text is still typing, reveal it and stop the animation.
+    if (!isTextComplete) {
+      if (typingTimerRef.current) {
+        clearInterval(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
+
+      setVisibleCharacters(fullText.length);
+      return;
     }
 
-    setVisibleCharacters(fullText.length);
-    return;
-  }
+    if (isLastLine) {
+      finishCutscene();
+      return;
+    }
 
-  if (isLastLine) {
-    finishCutscene();
-    return;
-  }
+    setTransitioning(true);
 
-  setTransitioning(true);
-
-  setTimeout(() => {
-    setDialogueIndex((index) => index + 1);
-    setTransitioning(false);
-  }, 180);
-};
+    setTimeout(() => {
+      setDialogueIndex((index) => index + 1);
+      setTransitioning(false);
+    }, 180);
+  };
 
   // Space and Enter advance. Escape skips the cutscene.
   useEffect(() => {
@@ -257,8 +311,6 @@ useEffect(() => {
     preloadStoryImages(storyBackgrounds, storyExpressions, roster);
   }, []);
 
-
-
   return (
     <main className="story-cutscene">
       <header className="vn-header">
@@ -285,23 +337,29 @@ useEffect(() => {
 
         <div className="vn-atmosphere" />
 
-        {fighter && characterImage && (
+        {Object.values(sceneCharacters).map((character) => (
           <div
-            key={dialogue.characterId}
+            key={character.characterId}
             className={[
               "vn-character",
-              `vn-position-${dialogue.position}`,
-              `vn-motion-${dialogue.animation}`,
-              `vn-expression-${dialogue.expression}`,
-            ].join(" ")}
+              `vn-position-${character.position}`,
+              `vn-motion-${character.animation}`,
+              `vn-expression-${character.expression}`,
+              character.characterId === "rockLee" &&
+              ["pushups1", "pushups2"].includes(character.expression)
+                ? "vn-character-rocklee-pushups"
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
           >
             <img
-              src={characterImage}
-              alt={`${fighter.data.name}, ${dialogue.expression}`}
+              src={character.image}
+              alt={`${character.fighter.data.name}, ${character.expression}`}
               draggable="false"
             />
           </div>
-        )}
+        ))}
 
         <div className="vn-scene-caption">FIGHTER'S ARENA</div>
         <div className="vn-click-hint">CLICK TO CONTINUE</div>
