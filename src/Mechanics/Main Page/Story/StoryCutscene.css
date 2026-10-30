@@ -170,7 +170,7 @@
 }
 
 /* =========================
-   CHARACTER SPRITES
+   CHARACTER POSITIONING
 ========================= */
 
 .vn-character {
@@ -178,7 +178,6 @@
   z-index: 2;
   bottom: 0;
 
-  /* Controls the sprite's overall size. */
   height: min(76%, 650px);
   width: min(40%, 420px);
 
@@ -188,6 +187,39 @@
 
   pointer-events: none;
   transform-origin: center bottom;
+
+  /* Smooth movement and zoom */
+  transition:
+    left 750ms cubic-bezier(.22, .8, .25, 1),
+    right 750ms cubic-bezier(.22, .8, .25, 1),
+    scale 750ms cubic-bezier(.22, .8, .25, 1);
+    
+
+  scale: var(--vn-zoom, 1);
+}
+
+/* LEFT: character stays on the left side. */
+.vn-position-left {
+  left: 0%;
+  right: auto;
+  transform: none;
+  transform-origin: left bottom;
+}
+
+/* CENTER: character is centered using its own width. */
+.vn-position-center {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  transform-origin: center bottom;
+}
+
+/* RIGHT: character stays on the right side. */
+.vn-position-right {
+  left: auto;
+  right: 0%;
+  transform: none;
+  transform-origin: right bottom;
 }
 
 .vn-character img {
@@ -199,21 +231,6 @@
   object-position: center bottom;
   filter: drop-shadow(0 12px 18px #0005);
   user-select: none;
-}
-
-/* Character placement */
-
-.vn-position-left {
-  left: 5%;
-}
-
-.vn-position-center {
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.vn-position-right {
-  right: 5%;
 }
 
 /* Character animations.
@@ -269,19 +286,7 @@
   }
 }
 
-/* Expression effects */
 
-.vn-expression-happy img {
-  filter: drop-shadow(0 0 16px #ffd16666);
-}
-
-.vn-expression-excited img {
-  filter: drop-shadow(0 0 20px #13d5ff88);
-}
-
-.vn-expression-determined img {
-  filter: drop-shadow(0 10px 14px #ff315966);
-}
 
 /* =========================
    OVERLAID DIALOGUE
@@ -469,18 +474,6 @@
     min-height: 0;
   }
 
-  .vn-character {
-    height: 62%;
-    width: 60%;
-  }
-
-  .vn-position-left {
-    left: 0;
-  }
-
-  .vn-position-right {
-    right: 0;
-  }
 
   .vn-dialogue-area {
     padding: 0 3% 10px;
@@ -613,9 +606,7 @@
 /* Happy: gentle, friendly bounce. */
 .vn-expression-happy img {
   filter: drop-shadow(0 0 16px #ffd16666);
-  animation:
-    vn-idle 4s ease-in-out infinite,
-    vn-happy 2.2s ease-in-out infinite;
+  animation: vn-happy 2.2s ease-in-out infinite;
 }
 
 /* Excited: more energetic movement. */
@@ -759,11 +750,11 @@
   }
 
   35% {
-    transform: rotate(-2deg);
+    transform: rotate(-0.8deg) translateY(-2px);
   }
 
   65% {
-    transform: rotate(1deg);
+    transform: rotate(0.5deg) translateY(0);
   }
 }
 
@@ -810,4 +801,5 @@
     transform: translateY(3px);
   }
 }
+
 

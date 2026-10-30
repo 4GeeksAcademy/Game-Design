@@ -6,11 +6,7 @@ import { storyBackgrounds } from "./StoryBackgrounds.js";
 import { preloadStoryImages } from "./PreloadStoryImages.js";
 import "./StoryCutscene.css";
 
-
-
-
 function StoryBackground({ backgroundKey }) {
-  
   const backgroundUrl = storyBackgrounds[backgroundKey];
 
   const [layers, setLayers] = useState({
@@ -58,8 +54,6 @@ function StoryBackground({ backgroundKey }) {
       cancelled = true;
     };
   }, [backgroundKey, backgroundUrl, layers.current?.key]);
-
-  
 
   // Remove the old background after the crossfade completes.
   useEffect(() => {
@@ -150,7 +144,7 @@ function StoryCutscene({
   const expressionImage = dialogue?.characterId
     ? storyExpressions[dialogue.characterId]?.[dialogue.expression]
     : null;
-const [sceneCharacters, setSceneCharacters] = useState({});
+  const [sceneCharacters, setSceneCharacters] = useState({});
   const characterImage = expressionImage ?? fighter?.image;
   const fullText = dialogue?.text ?? "";
   const isTextComplete = visibleCharacters >= fullText.length;
@@ -211,6 +205,7 @@ const [sceneCharacters, setSceneCharacters] = useState({});
             expression: currentLine.expression ?? "neutral",
             position: currentLine.position ?? "right",
             animation: currentLine.animation ?? "fade",
+            zoom: currentLine.zoom ?? 1,
           };
         }
       }
@@ -352,6 +347,9 @@ const [sceneCharacters, setSceneCharacters] = useState({});
             ]
               .filter(Boolean)
               .join(" ")}
+            style={{
+              "--vn-zoom": character.zoom ?? 1,
+            }}
           >
             <img
               src={character.image}
