@@ -1,0 +1,707 @@
+/* =========================================
+   FESTIVAL PAGE
+========================================= */
+
+.festival-screen {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  padding: 25px 4%;
+  background: #090b12;
+  color: #fff;
+  font-family: inherit;
+}
+
+.festival-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 50% 10%,
+      rgba(19, 213, 255, 0.12),
+      transparent 55%
+    ),
+    linear-gradient(135deg, #090b12, #15101a);
+}
+
+.festival-header,
+.festival-intro,
+.festival-progress-section,
+.festival-rewards-section,
+.festival-challenges-section,
+.festival-daily-section {
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.festival-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.festival-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.festival-logo span {
+  color: #13d5ff;
+  font-size: 27px;
+  font-weight: 1000;
+}
+
+.festival-logo h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.festival-back-button {
+  padding: 10px 17px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.festival-back-button:hover {
+  border-color: #13d5ff;
+  color: #13d5ff;
+}
+
+/* =========================================
+   INTRO
+========================================= */
+
+.festival-intro {
+  text-align: center;
+  margin: 45px auto 30px;
+}
+
+.festival-eyebrow {
+  color: #13d5ff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+
+.festival-intro h2 {
+  margin: 5px 0 10px;
+  font-size: clamp(35px, 5vw, 58px);
+  font-weight: 1000;
+  letter-spacing: 3px;
+  text-shadow: 0 0 22px rgba(19, 213, 255, 0.25);
+}
+
+.festival-description {
+  color: #aeb7c5;
+  font-size: 14px;
+}
+
+.festival-status {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.festival-status span {
+  padding: 7px 12px;
+  border: 1px solid rgba(19, 213, 255, 0.25);
+  background: rgba(19, 213, 255, 0.06);
+  color: #bdefff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+/* =========================================
+   OVERALL PROGRESS
+========================================= */
+
+.festival-progress-section {
+  max-width: 850px;
+  margin: 0 auto 55px;
+}
+
+.festival-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.festival-progress-info > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.festival-section-label {
+  color: #aeb7c5;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.festival-progress-info strong {
+  color: #13d5ff;
+  font-size: 22px;
+}
+
+.festival-progress-percent {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.festival-progress-track {
+  width: 100%;
+  height: 12px;
+  background: #252b38;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.festival-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #087fa6, #13d5ff);
+  border-radius: inherit;
+  box-shadow: 0 0 12px rgba(19, 213, 255, 0.45);
+  transition: width 0.3s ease;
+}
+
+/* =========================================
+   SECTION HEADINGS
+========================================= */
+
+.festival-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.festival-section-heading h3 {
+  margin: 0;
+  font-size: clamp(19px, 2.5vw, 25px);
+  font-weight: 1000;
+  letter-spacing: 1px;
+}
+
+.festival-tier-count,
+.festival-refresh-label,
+.festival-daily-label {
+  color: #13d5ff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+/* =========================================
+   REWARD TRACK
+========================================= */
+
+.festival-rewards-section {
+  margin-bottom: 60px;
+}
+
+.festival-track-container {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 14, 24, 0.88);
+  border-radius: 10px;
+  scrollbar-color: #13d5ff #202633;
+  scrollbar-width: thin;
+}
+
+.festival-track {
+  min-width: 1650px;
+  padding: 14px;
+}
+
+.festival-tier-row {
+  display: grid;
+  grid-template-columns: 115px repeat(15, minmax(90px, 1fr));
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.festival-tier-row::before {
+  content: "";
+}
+
+.festival-tier-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 52px;
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #171e2b;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.festival-tier-number {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 1000;
+}
+
+.festival-tier-header strong {
+  color: #13d5ff;
+  font-size: 11px;
+}
+
+.festival-tier-header.tier-unlocked {
+  border-color: #13d5ff;
+  background: rgba(19, 213, 255, 0.12);
+}
+
+.festival-reward-row {
+  display: grid;
+  grid-template-columns: 115px repeat(15, minmax(90px, 1fr));
+  gap: 6px;
+}
+
+.festival-reward-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 1px;
+}
+
+.free-reward-row .festival-reward-label {
+  background: rgba(19, 213, 255, 0.1);
+  color: #13d5ff;
+}
+
+.elite-reward-row .festival-reward-label {
+  background: rgba(255, 177, 48, 0.1);
+  color: #ffbd55;
+}
+
+.festival-reward-label span {
+  font-size: 23px;
+}
+
+.festival-reward-slot {
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #121824;
+  border-radius: 5px;
+  text-align: center;
+  transition: 0.2s ease;
+}
+
+.free-reward-row .festival-reward-slot:hover {
+  border-color: #13d5ff;
+}
+
+.elite-reward-row .festival-reward-slot:hover {
+  border-color: #ffbd55;
+}
+
+.reward-icon {
+  font-size: 25px;
+}
+
+.reward-name {
+  color: #aeb7c5;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.reward-status {
+  color: #13d5ff;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.elite-reward-row .reward-status {
+  color: #ffbd55;
+}
+
+.reward-unlocked {
+  border-color: rgba(19, 213, 255, 0.55);
+  background: rgba(19, 213, 255, 0.08);
+}
+
+/* The horizontal divider separating the two reward tracks */
+
+.festival-track-divider {
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0;
+  border-top: 2px solid rgba(255, 189, 85, 0.6);
+  border-bottom: 2px solid rgba(255, 189, 85, 0.6);
+  color: #ffbd55;
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 3px;
+}
+
+.festival-track-hint {
+  margin: 12px 0 20px;
+  text-align: center;
+  color: #929baa;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+/* =========================================
+   ELITE PASS BANNER
+========================================= */
+
+.festival-elite-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid rgba(255, 189, 85, 0.35);
+  background: linear-gradient(
+    100deg,
+    rgba(255, 189, 85, 0.1),
+    rgba(20, 20, 28, 0.8)
+  );
+  border-radius: 8px;
+}
+
+.festival-elite-banner > div {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.elite-crown {
+  font-size: 35px;
+}
+
+.festival-elite-banner h4 {
+  margin: 0 0 5px;
+  color: #ffbd55;
+  font-size: 16px;
+  font-weight: 1000;
+}
+
+.festival-elite-banner p {
+  margin: 0;
+  color: #aeb7c5;
+  font-size: 12px;
+}
+
+.festival-elite-button {
+  padding: 11px 18px;
+  border: 1px solid #ffbd55;
+  background: rgba(255, 189, 85, 0.08);
+  color: #ffbd55;
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: 1px;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* =========================================
+   ROTATING CHALLENGES
+========================================= */
+
+.festival-challenges-section {
+  margin-bottom: 60px;
+}
+
+.festival-challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.festival-challenge-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 205px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-left: 3px solid #13d5ff;
+  background: rgba(17, 23, 35, 0.94);
+  border-radius: 7px;
+  transition: 0.2s ease;
+}
+
+.festival-challenge-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(19, 213, 255, 0.6);
+  box-shadow: 0 5px 18px rgba(19, 213, 255, 0.08);
+}
+
+.challenge-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.challenge-icon {
+  font-size: 25px;
+}
+
+.challenge-category {
+  color: #13d5ff;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.festival-challenge-card h4 {
+  margin: 0 0 7px;
+  font-size: 16px;
+  font-weight: 1000;
+}
+
+.festival-challenge-card p {
+  flex: 1;
+  margin: 0 0 18px;
+  color: #aeb7c5;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.challenge-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.challenge-points {
+  color: #13d5ff;
+  font-size: 13px;
+  font-weight: 1000;
+}
+
+.challenge-progress {
+  color: #929baa;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.challenge-progress-track {
+  height: 5px;
+  overflow: hidden;
+  background: #2a3241;
+  border-radius: 10px;
+}
+
+.challenge-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: #13d5ff;
+  border-radius: inherit;
+}
+
+/* =========================================
+   DAILY OBJECTIVES
+========================================= */
+
+.festival-daily-section {
+  margin-bottom: 40px;
+}
+
+.festival-daily-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.festival-daily-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(17, 23, 35, 0.94);
+  border-radius: 7px;
+}
+
+.festival-daily-card h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.festival-daily-card p {
+  margin: 0;
+  color: #aeb7c5;
+  font-size: 11px;
+}
+
+.festival-daily-card strong {
+  flex-shrink: 0;
+  color: #13d5ff;
+  font-size: 13px;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+  .festival-challenge-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .festival-daily-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .festival-screen {
+    padding: 18px 4%;
+  }
+
+  .festival-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .festival-logo h1 {
+    font-size: 15px;
+  }
+
+  .festival-intro {
+    margin-top: 35px;
+  }
+
+  .festival-intro h2 {
+    font-size: 35px;
+  }
+
+  .festival-progress-section {
+    margin-bottom: 40px;
+  }
+
+  .festival-progress-info strong {
+    font-size: 18px;
+  }
+
+  .festival-challenge-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .festival-elite-banner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .festival-elite-button {
+    width: 100%;
+  }
+
+  .festival-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .festival-daily-card {
+    align-items: flex-start;
+  }
+}
+.festival-test-button {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border: 1px dashed #13d5ff;
+  background: rgba(19, 213, 255, 0.08);
+  color: #13d5ff;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.festival-coin-balance {
+  display: block;
+  margin-top: 10px;
+  color: #ffbd55;
+  font-size: 12px;
+}
+
+.festival-purchase-message {
+  width: 100%;
+  margin: 10px 0 0;
+  color: #13d5ff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.festival-elite-button:not(:disabled):hover {
+  background: #ffbd55;
+  color: #17120a;
+  box-shadow: 0 0 15px rgba(255, 189, 85, 0.3);
+}
+
+.festival-elite-button:disabled {
+  border-color: #13d5ff;
+  color: #13d5ff;
+  opacity: 0.8;
+  cursor: default;
+}
+
+/* Completed rotating challenges */
+.challenge-completed {
+  border-color: #13d5ff;
+  box-shadow: 0 0 12px rgba(19, 213, 255, 0.15);
+}
+
+.challenge-completed .challenge-progress-fill {
+  background: #13d5ff;
+  box-shadow: 0 0 10px rgba(19, 213, 255, 0.5);
+}
+
+.challenge-complete-label {
+  display: block;
+  margin-top: 10px;
+  color: #13d5ff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}

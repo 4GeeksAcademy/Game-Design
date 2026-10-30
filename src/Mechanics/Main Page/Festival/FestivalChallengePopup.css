@@ -1,0 +1,79 @@
+
+.festival-completion-container {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100000;
+  width: min(420px, calc(100vw - 30px));
+  pointer-events: none;
+  animation: festival-popup-enter 0.4s ease-out;
+}
+
+.festival-completion-popup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #171b29, #252b3b);
+  border: 1px solid #13d5ff;
+  border-left: 5px solid #13d5ff;
+  border-radius: 10px;
+  box-shadow:
+    0 0 12px rgba(19, 213, 255, 0.35),
+    0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.festival-completion-icon {
+  font-size: 36px;
+  min-width: 45px;
+  text-align: center;
+  filter: drop-shadow(0 0 7px rgba(19, 213, 255, 0.5));
+}
+
+.festival-completion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.festival-completion-label {
+  color: #13d5ff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.festival-completion-content h3 {
+  margin: 0;
+  color: white;
+  font-size: 18px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.festival-completion-content p {
+  margin: 0;
+  color: #c3c9d5;
+  font-size: 12px;
+}
+
+.festival-completion-points {
+  margin-top: 5px;
+  color: #ffe16b;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+@keyframes festival-popup-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}

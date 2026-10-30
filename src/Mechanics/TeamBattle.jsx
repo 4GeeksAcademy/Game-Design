@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection";
+import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
@@ -314,6 +315,27 @@ export default function TeamBattle() {
   const [pendingAllyAttack, setPendingAllyAttack] = useState(null);
   const [defenseOutcome, setDefenseOutcome] = useState(null);
   const [phase, setPhase] = useState("selecting");
+  const festivalBattleRecorded = useRef(false);
+
+useEffect(() => {
+  if (
+    (phase !== "victory" && phase !== "defeat") ||
+    festivalBattleRecorded.current
+  ) {
+    return;
+  }
+
+  // Make sure the match is recorded only once.
+  festivalBattleRecorded.current = true;
+
+  // Both victories and defeats count as completed battles.
+  recordFestivalEvent("battle", 1);
+
+  // Only victories count toward victory challenges.
+  if (phase === "victory") {
+    recordFestivalEvent("victory", 1);
+  }
+}, [phase]);
   const [roundNumber, setRoundNumber] = useState(1);
   const [showRoundIntro, setShowRoundIntro] = useState(true);
   const [roundTargets, setRoundTargets] = useState({});
@@ -344,6 +366,33 @@ export default function TeamBattle() {
   ]);
   const [damageDealt, setDamageDealt] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
+  // Prevent previously recorded damage from being counted again.
+  const lastFestivalDamage = useRef(0);
+
+  // Prevent previously recorded attacks from being counted again.
+  const lastFestivalAttacks = useRef(0);
+
+  // Track damage dealt by the player team.
+  useEffect(() => {
+    const newDamage = damageDealt - lastFestivalDamage.current;
+
+    lastFestivalDamage.current = damageDealt;
+
+    if (newDamage > 0) {
+      recordFestivalEvent("damage", newDamage);
+    }
+  }, [damageDealt]);
+
+  // Track attacks executed by the player team.
+  useEffect(() => {
+    const newAttacks = attacksUsed - lastFestivalAttacks.current;
+
+    lastFestivalAttacks.current = attacksUsed;
+
+    if (newAttacks > 0) {
+      recordFestivalEvent("attack", newAttacks);
+    }
+  }, [attacksUsed]);
 
   const defenseResolvedRef = useRef(false);
 
@@ -1527,6 +1576,14 @@ export default function TeamBattle() {
       Object.assign(currentAttacker, result.attacker ?? {});
       Object.assign(currentDefender, result.defender ?? {});
     }
+    // Record successful defensive actions.
+    if (result) {
+      if (choice === "defend") {
+        recordFestivalEvent("block", 1);
+      } else if (choice === "evade" && result.evaded) {
+        recordFestivalEvent("evade", 1);
+      }
+    }
 
     const healthAfter = Number(currentDefender.health) || 0;
 
@@ -1851,6 +1908,12 @@ export default function TeamBattle() {
       if (!result) {
         addLog("The defensive action could not be completed.");
       } else {
+        // Record successful defensive actions.
+        if (choice === "defend") {
+          recordFestivalEvent("block", 1);
+        } else if (choice === "evade" && result.evaded) {
+          recordFestivalEvent("evade", 1);
+        }
         if (choice === "defend") {
           currentDefender.cooldown = Math.max(
             0,
@@ -1954,6 +2017,11 @@ export default function TeamBattle() {
       );
 
       if (result) {
+        if (result.action === "defend") {
+          recordFestivalEvent("block", 1);
+        } else if (result.evaded) {
+          recordFestivalEvent("evade", 1);
+        }
         defenseResolvedRef.current = true;
 
         const updatedPlayers = teams.player.map((fighter) =>
@@ -2009,6 +2077,7 @@ export default function TeamBattle() {
     setCombatLog(["Choose your fighters' targets."]);
     setCombatMessage("Choose your fighters' targets.");
     setPhase("selecting");
+    festivalBattleRecorded.current = false;
   };
 
   const pendingAttacker = pendingDefense
@@ -2103,6 +2172,7 @@ export default function TeamBattle() {
 
   return (
     <main className="team-battle">
+      <FestivalChallengePopup />
       {isFinalTeamPhase && (
         <div
           className={`team-finish-overlay ${
@@ -2379,15 +2449,15 @@ export default function TeamBattle() {
       )}
 
       <section className="battlefield">
-          {isStoryMode && (
-    <div
-      className="team-battle-story-background"
-      style={{
-        backgroundImage: `url("${storyBackgrounds.arena}")`,
-      }}
-      aria-hidden="true"
-    />
-  )}
+        {isStoryMode && (
+          <div
+            className="team-battle-story-background"
+            style={{
+              backgroundImage: `url("${storyBackgrounds.arena}")`,
+            }}
+            aria-hidden="true"
+          />
+        )}
         <div className="battle-team cpu-team">
           <div className="team-heading">
             <span className="team-indicator" />

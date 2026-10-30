@@ -1,5 +1,7 @@
 import Opponent from "./Opponent.jsx";
 import { useLocation, useNavigate } from "react-router-dom";
+import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
+import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import VictoryScreen from "./VictoryScreen.jsx";
@@ -112,17 +114,33 @@ function App() {
   const aiControllerRef = useRef(null);
 
   useEffect(() => {
-    const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
+  const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
 
-    // Update the tracker before awarding the coins.
-    lastRewardedDamage.current = damageDealt;
+  // Update the tracker before recording rewards.
+  lastRewardedDamage.current = damageDealt;
 
-    if (damageSinceLastUpdate > 0) {
-      addCoins(Math.floor(damageSinceLastUpdate));
-    }
-  }, [damageDealt]);
+  if (damageSinceLastUpdate > 0) {
+    // Preserve the existing coin reward system.
+    addCoins(Math.floor(damageSinceLastUpdate));
+
+    // Update Festival damage challenges.
+    recordFestivalEvent("damage", damageSinceLastUpdate);
+  }
+}, [damageDealt]);
 
   const [attacksUsed, setAttacksUsed] = useState(0);
+  const lastRecordedAttacks = useRef(0);
+
+useEffect(() => {
+  const newAttacks =
+    attacksUsed - lastRecordedAttacks.current;
+
+  lastRecordedAttacks.current = attacksUsed;
+
+  if (newAttacks > 0) {
+    recordFestivalEvent("attack", newAttacks);
+  }
+}, [attacksUsed]);
   const [defenseTimeLeft, setDefenseTimeLeft] = useState(10);
   const [currentTurn, setCurrentTurn] = useState("intro");
 const [showIncomingAttack, setShowIncomingAttack] = useState(false);
@@ -145,6 +163,22 @@ const [showIncomingAttack, setShowIncomingAttack] = useState(false);
   const characterRef = useRef(character);
   const opponentRef = useRef(opponent);
   const knockoutRef = useRef(knockout);
+  const festivalBattleRecorded = useRef(false);
+
+useEffect(() => {
+  if (!knockout || festivalBattleRecorded.current) return;
+
+  // Prevent the same match from being counted twice.
+  festivalBattleRecorded.current = true;
+
+  // Every completed match counts, including defeats.
+  recordFestivalEvent("battle", 1);
+
+  // Only victories count toward victory challenges.
+  if (knockout.defeatedTeam === "opponent") {
+    recordFestivalEvent("victory", 1);
+  }
+}, [knockout]);
 
   useEffect(() => {
     characterRef.current = character;
@@ -417,6 +451,12 @@ const [showIncomingAttack, setShowIncomingAttack] = useState(false);
             : attackCharacter(aiAttack, opponent, character);
 
       if (!result) return;
+      // Record successful defensive actions for Festival challenges.
+if (choice === "defend") {
+  recordFestivalEvent("block", 1);
+} else if (choice === "evade" && result.evaded) {
+  recordFestivalEvent("evade", 1);
+}
 
       if (choice === "defend" || choice === "evade") {
         result.defender.cooldown -= 1;
@@ -503,6 +543,7 @@ const [showIncomingAttack, setShowIncomingAttack] = useState(false);
 
   return (
     <div className="container-fluid mt-3" id="gameContainer">
+      <FestivalChallengePopup />
       {/* Full-screen round intro with both fighters and their health. */}
       {showRoundIntro && !knockout && (
         <div
@@ -779,30 +820,7 @@ const [showIncomingAttack, setShowIncomingAttack] = useState(false);
                     <button
                       id="defendButton"
                       disabled={character.cooldown <= 0 || defenseTimeLeft <= 0}
-                      // onClick={() => {
-                      //   const result = attackCharacter(
-                      //     aiAttack,
-                      //     opponent,
-                      //     character,
-                      //     character.defense.amount,
-                      //   );
-
-                      //   if (result) {
-                      //     character.cooldown -= 1;
-                      //     character.blocked = true;
-
-                      //     showCombatMessage("🛡️ BLOCKED!", "blocked");
-
-                      //     setOpponent({ ...result.attacker });
-                      //     setCharacter({ ...result.defender });
-
-                      //     if (aiControllerRef.current) {
-                      //       aiControllerRef.current.respondToDefense();
-                      //     } else {
-                      //       setAiAttack(null);
-                      //     }
-                      //   }
-                      // }}
+                     
                       onClick={() => resolveIncomingAttack("defend")}
                     >
                       <span id="defendButtonIcon">🛡</span>
@@ -812,34 +830,7 @@ const [showIncomingAttack, setShowIncomingAttack] = useState(false);
                     <button
                       id="evadeButton"
                       disabled={defenseTimeLeft <= 0}
-                      // onClick={() => {
-                      //   const result = evadeAttack(
-                      //     aiAttack,
-                      //     opponent,
-                      //     character,
-                      //   );
-
-                      //   if (result) {
-                      //     character.cooldown -= 1;
-                      //     character.blocked = true;
-
-                      //     showCombatMessage(
-                      //       result.evaded
-                      //         ? "💨 EVADED!"
-                      //         : "💥 FAILED TO EVADE!",
-                      //       result.evaded ? "evaded" : "hit",
-                      //     );
-
-                      //     setOpponent({ ...result.attacker });
-                      //     setCharacter({ ...result.defender });
-
-                      //     if (aiControllerRef.current) {
-                      //       aiControllerRef.current.respondToDefense();
-                      //     } else {
-                      //       setAiAttack(null);
-                      //     }
-                      //   }
-                      // }}
+                      
                       onClick={() => resolveIncomingAttack("evade")}
                     >
                       <span id="evadeButtonIcon">💨</span>

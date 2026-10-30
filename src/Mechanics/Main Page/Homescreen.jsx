@@ -423,8 +423,8 @@ function Homescreen() {
           STORY MODE <span>📖</span>
         </button>
 
-        <button className="arcade-button" disabled>
-          CHALLENGES <span>LOCKED</span>
+        <button className="arcade-button" onClick={() => navigate("/festival")}>
+          FESTIVAL <span>🏆</span>
         </button>
       </div>
 

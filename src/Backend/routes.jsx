@@ -13,6 +13,7 @@ import Shop from "../Mechanics/Main Page/Shop.jsx";
 import BotSimulator from "../Mechanics/BotSimulator.jsx";
 import WatchMode from "../Mechanics/WatchMode";
 import StoryMode from "../Mechanics/Main Page/Story/StoryMode.jsx";
+import Festival from "../Mechanics/Main Page/Festival/Festival.jsx";
 
 import StoryLevel1 from "../Mechanics/Main Page/Story/StoryLevel1.jsx";
 
@@ -30,8 +31,10 @@ export const AppRoutes = () => {
       <Route path="/opponent" element={<Opponent />} />
       <Route path="/victory" element={<VictoryScreen />} />
       <Route path="/story-mode" element={<StoryMode />} />
+       <Route path="/Festival" element={<Festival />} />
       <Route path="/story-cutscene" element={<StoryLevel1 />} />
       <Route path="*" element={<h1>404 Not Found</h1>} />
+     
     </Routes>
   );
 };
