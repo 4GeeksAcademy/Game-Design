@@ -1,4 +1,4 @@
-import { acidShot, acidBomb, acidRain, acidStorm } from "./Attack(list)";
+
 
 // const mina = {
 //     name: "Mina Ashido",

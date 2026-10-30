@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import Toga from "../All_Character_Stats/TogaStats.js";
+import TogaImage from "/workspaces/Game-Design/src/assets/img/Toga.png";
+import { Kenpachi } from "../All_Character_Stats/KempachiStats.js";
+import KenpachiImage from "/workspaces/Game-Design/src/assets/img/Kenpachi.png";
+import Hinata from "../All_Character_Stats/HinataStats.js";
+import HinataImage from "/workspaces/Game-Design/src/assets/img/Hinata.png";
+import Goku from "../All_Character_Stats/GokuStats.js";
+import GokuImage from "/workspaces/Game-Design/src/assets/img/Goku.jpeg"
 import mina from "../All_Character_Stats/Mina_AshidoStats.js";
 import minaArena from "../../assets/img/MinaAshidoArena.jpg";
 import rockLee from "../All_Character_Stats/Rock_LeeStats.js";
@@ -25,6 +32,7 @@ import Naruto from "../All_Character_Stats/NarutoStats.js";
 import NarutoArenaImage from "../../assets/img/Naruto.png";
 import Yoruichi from "../All_Character_Stats/YoruichiStats.js";
 import YoruichiArenaImage from "../../assets/img/Yoruichi.png";
+
 
 import { getUnlockedCharacters } from "../Currency.js";
 
@@ -114,6 +122,42 @@ export const roster = [
     data: Yoruichi,
     color: "yoruichi",
     description: "THE THUNDER GOD",
+  },
+    // =====================================
+  // FESTIVAL SECRET CHARACTERS
+  // =====================================
+
+  {
+    id: "goku",
+    image: GokuImage,
+    data: Goku,
+    color: "goku",
+    description: "THE SAIYAN WARRIOR",
+    isFestivalSecret: true,
+  },
+  {
+    id: "kenpachi",
+    image: KenpachiImage,
+    data: Kenpachi,
+    color: "kenpachi",
+    description: "THE BLOODTHIRSTY SWORDSMAN",
+    isFestivalSecret: true,
+  },
+  {
+    id: "toga",
+    image: TogaImage,
+    data: Toga,
+    color: "toga",
+    description: "THE LOVABLE VILLAIN",
+    isFestivalSecret: true,
+  },
+  {
+    id: "hinata",
+    image: HinataImage,
+    data: Hinata,
+    color: "hinata",
+    description: "THE GENTLE FIST",
+    isFestivalSecret: true,
   },
 ];
 
@@ -303,6 +347,12 @@ function CharacterSelection() {
   }, []);
 
   const isUnlocked = (fighter) => unlockedIds.includes(fighter.id);
+  const visibleRoster = roster
+  .map((fighter, index) => ({ fighter, index }))
+  .filter(
+    ({ fighter }) =>
+      !fighter.isFestivalSecret || isUnlocked(fighter)
+  );
 
   const changeFighter = (direction) => {
     if (phase !== "player") return;
@@ -435,7 +485,11 @@ function CharacterSelection() {
     // The CPU can choose from the entire roster, including locked fighters.
     const eligibleOpponents = roster
       .map((fighter, index) => ({ fighter, index }))
-      .filter(({ fighter }) => !playerIds.includes(fighter.id));
+      .filter(
+  ({ fighter }) =>
+    !playerIds.includes(fighter.id) &&
+    (!fighter.isFestivalSecret || unlockedIds.includes(fighter.id))
+);
 
     if (eligibleOpponents.length < cpuFighterCount) {
       setCpuIndices([]);
@@ -613,16 +667,14 @@ function CharacterSelection() {
           <h2>FIGHTER ROSTER</h2>
           <span>
             {
-              unlockedIds.filter((id) =>
-                roster.some((fighter) => fighter.id === id),
-              ).length
-            }{" "}
-            / {roster.length} UNLOCKED
+  visibleRoster.filter(({ fighter }) => isUnlocked(fighter)).length
+}{" "}
+ / {visibleRoster.length} UNLOCKED
           </span>
         </div>
 
         <div className="character-roster-grid">
-          {roster.map((fighter, index) => {
+          {visibleRoster.map(({ fighter, index }) => {
             if (isStoryMode && fighter.id === storyOpponentId) {
               return null;
             }

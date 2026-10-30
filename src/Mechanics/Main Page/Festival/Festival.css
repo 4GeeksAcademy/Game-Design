@@ -238,13 +238,14 @@
 }
 
 .festival-track {
-  min-width: 1650px;
+  width: max-content;
+  min-width: 100%;
   padding: 14px;
 }
 
 .festival-tier-row {
   display: grid;
-  grid-template-columns: 115px repeat(15, minmax(90px, 1fr));
+  grid-template-columns: 115px repeat(15, minmax(200px, 1fr));
   gap: 6px;
   margin-bottom: 10px;
 }
@@ -285,7 +286,7 @@
 
 .festival-reward-row {
   display: grid;
-  grid-template-columns: 115px repeat(15, minmax(90px, 1fr));
+  grid-template-columns: 115px repeat(15, minmax(200px, 1fr));
   gap: 6px;
 }
 
@@ -704,4 +705,352 @@
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 1px;
+}
+
+/* Daily objectives use the same card design as rotating challenges */
+.festival-daily-grid .festival-challenge-card {
+  min-height: 205px;
+}
+
+
+/* FESTIVAL REWARD CLAIM BUTTONS */
+
+.festival-claim-button {
+  width: 90%;
+  padding: 7px 5px;
+  margin-top: 8px;
+  border: 1px solid #13d5ff;
+  background: rgba(19, 213, 255, 0.12);
+  color: #13d5ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.festival-claim-button:not(:disabled):hover {
+  background: #13d5ff;
+  color: #080b12;
+  box-shadow: 0 0 12px rgba(19, 213, 255, 0.45);
+}
+
+.festival-claim-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.festival-claim-button:disabled:not(:hover) {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+
+
+/* ==========================================
+   FESTIVAL REWARD POPUP
+========================================== */
+
+.festival-reward-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+  animation: reward-overlay-in 0.25s ease;
+}
+
+.festival-reward-popup {
+  width: min(90%, 420px);
+  padding: 35px 25px;
+  text-align: center;
+  background: linear-gradient(145deg, #151d2b, #080d16);
+  border: 2px solid #13d5ff;
+  box-shadow: 0 0 25px rgba(19, 213, 255, 0.3);
+  animation: reward-popup-in 0.4s ease;
+}
+
+.reward-popup-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.reward-popup-eyebrow {
+  color: #13d5ff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+}
+
+.festival-reward-popup h2 {
+  color: white;
+  font-size: clamp(22px, 5vw, 32px);
+  font-weight: 900;
+  margin: 0 0 12px;
+  text-shadow: 0 0 12px rgba(19, 213, 255, 0.45);
+}
+
+.reward-popup-description {
+  color: #b9c5d5;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.reward-popup-line {
+  width: 65%;
+  height: 3px;
+  margin: 22px auto 0;
+  background: #13d5ff;
+  box-shadow: 0 0 12px rgba(19, 213, 255, 0.7);
+}
+
+.character-reward-popup {
+  border-color: #f5c542;
+  box-shadow: 0 0 30px rgba(245, 197, 66, 0.25);
+}
+
+.character-reward-popup .reward-popup-eyebrow {
+  color: #f5c542;
+}
+
+.character-reward-popup h2 {
+  text-shadow: 0 0 12px rgba(245, 197, 66, 0.45);
+}
+
+.character-reward-popup .reward-popup-line {
+  background: #f5c542;
+  box-shadow: 0 0 12px rgba(245, 197, 66, 0.7);
+}
+
+@keyframes reward-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes reward-popup-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* REWARD POPUP FADE OUT */
+
+.festival-reward-popup-overlay {
+  transition: opacity 0.6s ease;
+}
+
+.festival-reward-popup-overlay.reward-popup-closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reward-popup-closing .festival-reward-popup {
+  transform: scale(0.9) translateY(10px);
+  transition: transform 0.6s ease;
+}
+
+/* ========================================
+   FESTIVAL EXCLUSIVE CHARACTER REWARDS
+======================================== */
+
+.festival-reward-slot.character-reward-slot {
+  min-height: 145px;
+  justify-content: space-between;
+  padding: 9px 5px;
+}
+
+/* Character portrait inside reward track */
+.reward-character-image {
+  width: 58px;
+  height: 68px;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  filter: drop-shadow(0 0 5px rgba(19, 213, 255, 0.3));
+}
+
+/* Free character reward: cyan styling */
+.free-reward-row .character-reward-slot {
+  border-color: rgba(19, 213, 255, 0.65);
+  background: linear-gradient(
+    180deg,
+    rgba(19, 213, 255, 0.13),
+    #121824
+  );
+}
+
+/* Elite character reward: premium gold styling */
+.elite-reward-row .character-reward-slot {
+  border-color: rgba(255, 189, 85, 0.7);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 189, 85, 0.15),
+    #121824
+  );
+}
+
+.elite-reward-row .reward-character-image {
+  filter: drop-shadow(0 0 6px rgba(255, 189, 85, 0.4));
+}
+
+/* Character artwork in claim popup */
+.reward-popup-character-image {
+  display: block;
+  width: 145px;
+  height: 155px;
+  object-fit: contain;
+  object-position: center;
+  margin: 0 auto 12px;
+  filter: drop-shadow(0 0 12px rgba(255, 189, 85, 0.45));
+}
+
+/* ========================================
+   PREMIUM FESTIVAL REWARD TRACK
+======================================== */
+
+/* Tier header cards */
+.festival-tier-header {
+  min-height: 75px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+
+  background: linear-gradient(
+    180deg,
+    #202b3b,
+    #111824
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  transition: all 0.25s ease;
+}
+
+.festival-tier-number {
+  font-size: 13px;
+  font-weight: 1000;
+  letter-spacing: 1px;
+  color: #ffffff;
+}
+
+.festival-tier-header strong {
+  font-size: 11px;
+  color: #9ba9ba;
+}
+
+.festival-tier-header.tier-unlocked {
+  border-color: rgba(19, 213, 255, 0.7);
+  background: linear-gradient(
+    180deg,
+    rgba(19, 213, 255, 0.22),
+    #111824
+  );
+
+  box-shadow: inset 0 0 12px rgba(19, 213, 255, 0.08);
+}
+
+.festival-tier-header.tier-unlocked .festival-tier-number,
+.festival-tier-header.tier-unlocked strong {
+  color: #13d5ff;
+}
+
+/* Larger reward cards */
+.festival-reward-slot {
+  min-height: 185px;
+  padding: 14px 7px;
+  gap: 9px;
+
+  border-radius: 8px;
+  background: linear-gradient(
+    160deg,
+    #1b2635,
+    #101722
+  );
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.festival-reward-slot:hover {
+  transform: translateY(-4px);
+  border-color: rgba(19, 213, 255, 0.75);
+  box-shadow: 0 5px 16px rgba(19, 213, 255, 0.13);
+}
+
+/* Larger character portraits */
+.festival-reward-slot.character-reward-slot {
+  min-height: 185px;
+  padding: 12px 6px;
+}
+
+.reward-character-image {
+  width: 85px;
+  height: 100px;
+  object-fit: contain;
+}
+
+/* More visible reward names */
+.reward-name {
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Larger coin icons */
+.reward-icon {
+  font-size: 34px;
+}
+
+/* Reward status */
+.reward-status {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+/* More substantial claim buttons */
+.festival-claim-button {
+  min-height: 28px;
+  padding: 6px 5px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  border-radius: 4px;
+}
+
+/* More prominent character reward cards */
+.free-reward-row .character-reward-slot {
+  border-width: 1.5px;
+  box-shadow: inset 0 0 15px rgba(19, 213, 255, 0.06);
+}
+
+.elite-reward-row .character-reward-slot {
+  border-width: 1.5px;
+  box-shadow: inset 0 0 15px rgba(255, 189, 85, 0.07);
+}
+
+.elite-reward-row .character-reward-slot:hover {
+  border-color: #ffbd55;
+  box-shadow: 0 5px 18px rgba(255, 189, 85, 0.18);
 }

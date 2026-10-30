@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection";
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
+import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
@@ -330,10 +331,12 @@ useEffect(() => {
 
   // Both victories and defeats count as completed battles.
   recordFestivalEvent("battle", 1);
+  recordDailyObjectiveEvent("battle", 1)
 
   // Only victories count toward victory challenges.
   if (phase === "victory") {
     recordFestivalEvent("victory", 1);
+    recordDailyObjectiveEvent("victory", 1)
   }
 }, [phase]);
   const [roundNumber, setRoundNumber] = useState(1);
@@ -380,6 +383,7 @@ useEffect(() => {
 
     if (newDamage > 0) {
       recordFestivalEvent("damage", newDamage);
+      recordDailyObjectiveEvent("damage", newDamage)
     }
   }, [damageDealt]);
 

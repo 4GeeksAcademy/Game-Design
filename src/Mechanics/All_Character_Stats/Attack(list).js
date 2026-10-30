@@ -1,31 +1,3 @@
-const acidShot = {
-    name: "Acid Shot",
-    damage: 20,
-    cost: 10,
-    state: true
-};
-
-const acidBomb = {
-    name: "Acid Bomb",
-    damage: 30,
-    cost: 15,
-    state: true
-};
-
-const acidRain = {
-    name: "Acid Rain",
-    damage: 40,
-    cost: 20,
-    state: true
-};
-
-const acidStorm = {
-    name: "Acid Storm",
-    damage: 50,
-    cost: 25,
-    state: true
-};
-
 
 //  {
 //       name: "All buff and debuff list",
@@ -40,6 +12,9 @@ const acidStorm = {
 //         cooldown: 2,
 //         maximumCooldown: 2,
 //         recovery: 1,
+//         manaRegen: 5,
+//         maximumHealth: 50,
+//         maximumMana: 50,
 //       },
 //       debuff: {
 //         health: 10,
@@ -49,6 +24,9 @@ const acidStorm = {
 //         cooldown: 2,
 //         maximumCooldown: 2,
 //         recovery: 1,
+//         manaRegen: 5,
+//         maximumHealth: 50,
+//         maximumMana: 50,
 //       },
 
-export { acidShot, acidBomb, acidRain, acidStorm };
+export { };

@@ -1,6 +1,7 @@
 import Opponent from "./Opponent.jsx";
 import { useLocation, useNavigate } from "react-router-dom";
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
+import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
@@ -21,6 +22,10 @@ import Luffy from "./All_Character_Stats/LuffyStats.js";
 import Ichigo from "./All_Character_Stats/IchigoStats.js";
 import Naruto from "./All_Character_Stats/NarutoStats.js";
 import Yoruichi from "./All_Character_Stats/YoruichiStats.js";
+import Goku from "./All_Character_Stats/GokuStats.js";
+import Toga from "./All_Character_Stats/TogaStats.js";
+import { Kenpachi } from "./All_Character_Stats/KempachiStats.js";
+import Hinata from "./All_Character_Stats/HinataStats.js";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
@@ -28,6 +33,7 @@ import { addCoins } from "./Currency.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback } from "react";
+
 
 function RoundIntroHealthBar({ fighter }) {
   const maximumHealth = Number(fighter.maximumHealth) || 1;
@@ -76,6 +82,10 @@ function App() {
     ichigo: Ichigo,
     naruto: Naruto,
     yoruichi: Yoruichi,
+    goku: Goku,
+    toga: Toga,
+    kenpachi: Kenpachi,
+    hinata: Hinata,
   };
 
   const playerData = fighterData[location.state?.playerId] ?? mina;
@@ -125,6 +135,7 @@ function App() {
 
     // Update Festival damage challenges.
     recordFestivalEvent("damage", damageSinceLastUpdate);
+    recordDailyObjectiveEvent("damage", damageSinceLastUpdate);
   }
 }, [damageDealt]);
 
@@ -173,10 +184,12 @@ useEffect(() => {
 
   // Every completed match counts, including defeats.
   recordFestivalEvent("battle", 1);
+  recordDailyObjectiveEvent("battle", 1);
 
   // Only victories count toward victory challenges.
   if (knockout.defeatedTeam === "opponent") {
     recordFestivalEvent("victory", 1);
+    recordDailyObjectiveEvent("victory", 1);
   }
 }, [knockout]);
 

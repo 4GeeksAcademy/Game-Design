@@ -130,3 +130,33 @@ export const isFestivalTierUnlocked = (tierNumber, points) => {
 
   return points >= requiredPoints;
 };
+
+
+export const claimFestivalReward = (tierNumber, rewardTrack) => {
+  if (
+    !Number.isInteger(tierNumber) ||
+    tierNumber < 1 ||
+    tierNumber > FESTIVAL_TOTAL_TIERS ||
+    !["free", "elite"].includes(rewardTrack)
+  ) {
+    return false;
+  }
+
+  const progress = getFestivalProgress();
+
+  const claimedKey =
+    rewardTrack === "free"
+      ? "claimedFreeRewards"
+      : "claimedEliteRewards";
+
+  if (progress[claimedKey].includes(tierNumber)) {
+    return false;
+  }
+
+  const updatedProgress = {
+    ...progress,
+    [claimedKey]: [...progress[claimedKey], tierNumber],
+  };
+
+  return saveFestivalProgress(updatedProgress);
+};
