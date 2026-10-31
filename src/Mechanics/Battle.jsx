@@ -34,7 +34,6 @@ import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-
 function RoundIntroHealthBar({ fighter }) {
   const maximumHealth = Number(fighter.maximumHealth) || 1;
   const health = Math.max(0, Number(fighter.health) || 0);
@@ -120,41 +119,40 @@ function App() {
 
   const [damageDealt, setDamageDealt] = useState(0);
   const lastRewardedDamage = useRef(0);
-  
+
   const aiControllerRef = useRef(null);
 
   useEffect(() => {
-  const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
+    const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
 
-  // Update the tracker before recording rewards.
-  lastRewardedDamage.current = damageDealt;
+    // Update the tracker before recording rewards.
+    lastRewardedDamage.current = damageDealt;
 
-  if (damageSinceLastUpdate > 0) {
-    // Preserve the existing coin reward system.
-    addCoins(Math.floor(damageSinceLastUpdate));
+    if (damageSinceLastUpdate > 0) {
+      // Preserve the existing coin reward system.
+      addCoins(Math.floor(damageSinceLastUpdate));
 
-    // Update Festival damage challenges.
-    recordFestivalEvent("damage", damageSinceLastUpdate);
-    recordDailyObjectiveEvent("damage", damageSinceLastUpdate);
-  }
-}, [damageDealt]);
+      // Update Festival damage challenges.
+      recordFestivalEvent("damage", damageSinceLastUpdate);
+      recordDailyObjectiveEvent("damage", damageSinceLastUpdate);
+    }
+  }, [damageDealt]);
 
   const [attacksUsed, setAttacksUsed] = useState(0);
   const lastRecordedAttacks = useRef(0);
 
-useEffect(() => {
-  const newAttacks =
-    attacksUsed - lastRecordedAttacks.current;
+  useEffect(() => {
+    const newAttacks = attacksUsed - lastRecordedAttacks.current;
 
-  lastRecordedAttacks.current = attacksUsed;
+    lastRecordedAttacks.current = attacksUsed;
 
-  if (newAttacks > 0) {
-    recordFestivalEvent("attack", newAttacks);
-  }
-}, [attacksUsed]);
+    if (newAttacks > 0) {
+      recordFestivalEvent("attack", newAttacks);
+    }
+  }, [attacksUsed]);
   const [defenseTimeLeft, setDefenseTimeLeft] = useState(10);
   const [currentTurn, setCurrentTurn] = useState("intro");
-const [showIncomingAttack, setShowIncomingAttack] = useState(false);
+  const [showIncomingAttack, setShowIncomingAttack] = useState(false);
   const [roundNumber, setRoundNumber] = useState(1);
   const [showRoundIntro, setShowRoundIntro] = useState(true);
 
@@ -176,22 +174,22 @@ const [showIncomingAttack, setShowIncomingAttack] = useState(false);
   const knockoutRef = useRef(knockout);
   const festivalBattleRecorded = useRef(false);
 
-useEffect(() => {
-  if (!knockout || festivalBattleRecorded.current) return;
+  useEffect(() => {
+    if (!knockout || festivalBattleRecorded.current) return;
 
-  // Prevent the same match from being counted twice.
-  festivalBattleRecorded.current = true;
+    // Prevent the same match from being counted twice.
+    festivalBattleRecorded.current = true;
 
-  // Every completed match counts, including defeats.
-  recordFestivalEvent("battle", 1);
-  recordDailyObjectiveEvent("battle", 1);
+    // Every completed match counts, including defeats.
+    recordFestivalEvent("battle", 1);
+    recordDailyObjectiveEvent("battle", 1);
 
-  // Only victories count toward victory challenges.
-  if (knockout.defeatedTeam === "opponent") {
-    recordFestivalEvent("victory", 1);
-    recordDailyObjectiveEvent("victory", 1);
-  }
-}, [knockout]);
+    // Only victories count toward victory challenges.
+    if (knockout.defeatedTeam === "opponent") {
+      recordFestivalEvent("victory", 1);
+      recordDailyObjectiveEvent("victory", 1);
+    }
+  }, [knockout]);
 
   useEffect(() => {
     characterRef.current = character;
@@ -465,11 +463,11 @@ useEffect(() => {
 
       if (!result) return;
       // Record successful defensive actions for Festival challenges.
-if (choice === "defend") {
-  recordFestivalEvent("block", 1);
-} else if (choice === "evade" && result.evaded) {
-  recordFestivalEvent("evade", 1);
-}
+      if (choice === "defend") {
+        recordFestivalEvent("block", 1);
+      } else if (choice === "evade" && result.evaded) {
+        recordFestivalEvent("evade", 1);
+      }
 
       if (choice === "defend" || choice === "evade") {
         result.defender.cooldown -= 1;
@@ -542,17 +540,17 @@ if (choice === "defend") {
   }, [aiAttack, defenseTimeLeft, character.cooldown, resolveIncomingAttack]);
 
   useEffect(() => {
-  if (!aiAttack) {
-    setShowIncomingAttack(false);
-    return;
-  }
+    if (!aiAttack) {
+      setShowIncomingAttack(false);
+      return;
+    }
 
-  const timer = setTimeout(() => {
-    setShowIncomingAttack(true);
-  }, 500);
+    const timer = setTimeout(() => {
+      setShowIncomingAttack(true);
+    }, 500);
 
-  return () => clearTimeout(timer);
-}, [aiAttack]);
+    return () => clearTimeout(timer);
+  }, [aiAttack]);
 
   return (
     <div className="container-fluid mt-3" id="gameContainer">
@@ -725,38 +723,18 @@ if (choice === "defend") {
         <>
           {/* Fighters and combat log share one layout. */}
           <div id="battleLayout">
-            <div id="battleArena">
-              {/* Story background behind both fighters. */}
-              {isStoryMode && (
-                <div
-                  className="story-battle-background"
-                  style={{
-                    backgroundImage: `url("${storyBackgrounds.arena}")`,
-                  }}
-                  aria-hidden="true"
-                />
-              )}
-
-              <div
-                id="opponentSection"
-                className={aiAttack ? "opponent-is-attacking" : ""}
-              >
-                <Opponent opponent={opponent} setOpponent={setOpponent} />
-              </div>
-
-              {/* Opponent's attack and defensive choices. */}
+           {/* Opponent's attack and defensive choices. */}
               {aiAttack && showIncomingAttack && (
                 <div
-    id="aiAttackSection"
-    className="incoming-attack-card"
-    key={aiAttack.id ?? aiAttack.name}
-  >
+                  id="aiAttackSection"
+                  className="incoming-attack-card"
+                  key={aiAttack.id ?? aiAttack.name}
+                >
                   {/*
       The key helps React remount the card when the attack changes.
       This retriggers its entrance animation for queued attacks.
     */}
-
-                  <div id="aiAttackCard">
+<div id="aiAttackCard">
                     <div id="aiAttackHeader">
                       <span>⚠ INCOMING ATTACK</span>
                       <span className="attack-warning-dot" />
@@ -787,7 +765,11 @@ if (choice === "defend") {
 
                     <div id="aiAttackInfo">
                       <h5 id="aiAttackName">{aiAttack.name}</h5>
-
+                      {aiAttack.image && (
+                        <div className="incoming-attack-image">
+                          <img src={aiAttack.image} alt={aiAttack.name} />
+                        </div>
+                      )}
                       <div id="aiAttackStats">
                         {/* Damage threat */}
                         <div
@@ -827,42 +809,66 @@ if (choice === "defend") {
                         </div>
                       </div>
                     </div>
-                
 
-                  <div id="defensiveActions">
-                    <button
-                      id="defendButton"
-                      disabled={character.cooldown <= 0 || defenseTimeLeft <= 0}
-                     
-                      onClick={() => resolveIncomingAttack("defend")}
-                    >
-                      <span id="defendButtonIcon">🛡</span>
-                      <span>DEFEND</span>
-                    </button>
+                    <div id="defensiveActions">
+                      <button
+                        id="defendButton"
+                        disabled={
+                          character.cooldown <= 0 || defenseTimeLeft <= 0
+                        }
+                        onClick={() => resolveIncomingAttack("defend")}
+                      >
+                        <span id="defendButtonIcon">🛡</span>
+                        <span>DEFEND</span>
+                      </button>
 
-                    <button
-                      id="evadeButton"
-                      disabled={defenseTimeLeft <= 0}
-                      
-                      onClick={() => resolveIncomingAttack("evade")}
-                    >
-                      <span id="evadeButtonIcon">💨</span>
-                      <span>EVADE</span>
-                    </button>
+                      <button
+                        id="evadeButton"
+                        disabled={defenseTimeLeft <= 0}
+                        onClick={() => resolveIncomingAttack("evade")}
+                      >
+                        <span id="evadeButtonIcon">💨</span>
+                        <span>EVADE</span>
+                      </button>
 
-                    <button
-                      id="takeDamageButton"
-                      type="button"
-                      disabled={!aiAttack || defenseTimeLeft <= 0}
-                      onClick={() => resolveIncomingAttack("take-damage")}
-                    >
-                      <span>💥</span>
-                      <span>TAKE FULL DAMAGE</span>
-                    </button>
+                      <button
+                        id="takeDamageButton"
+                        type="button"
+                        disabled={!aiAttack || defenseTimeLeft <= 0}
+                        onClick={() => resolveIncomingAttack("take-damage")}
+                      >
+                        <span>💥</span>
+                        <span>TAKE FULL DAMAGE</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
+                  
                 </div>
               )}
+            <div id="battleArena">
+
+            
+              {/* Story background behind both fighters. */}
+              {isStoryMode && (
+                <div
+                  className="story-battle-background"
+                  style={{
+                    backgroundImage: `url("${storyBackgrounds.arena}")`,
+                  }}
+                  aria-hidden="true"
+                />
+              )}
+
+              <div
+                id="opponentSection"
+                className={aiAttack ? "opponent-is-attacking" : ""}
+              >
+                <Opponent opponent={opponent} setOpponent={setOpponent} />
+              </div>
+
+              
+
+             
 
               <div id="characterSection">
                 <Character

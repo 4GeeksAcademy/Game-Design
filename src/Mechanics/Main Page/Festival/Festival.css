@@ -367,6 +367,8 @@
 /* The horizontal divider separating the two reward tracks */
 
 .festival-track-divider {
+  width: 100%;
+  box-sizing: border-box;
   height: 45px;
   display: flex;
   align-items: center;

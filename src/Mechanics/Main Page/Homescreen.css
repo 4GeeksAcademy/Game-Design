@@ -234,6 +234,9 @@
 .home-menu-buttons > .arcade-button:nth-child(4) {
   animation-delay: 0.45s;
 }
+.home-menu-buttons > .arcade-button:nth-child(5) {
+  animation-delay: 0.54s;
+}
 
 .arcade-button {
   position: relative;
@@ -824,3 +827,4 @@
     max-height: 60vh;
   }
 }
+

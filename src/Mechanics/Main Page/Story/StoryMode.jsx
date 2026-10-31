@@ -26,6 +26,7 @@ function StoryMode() {
       <p className="story-description">
         Fight your way through the story of Fighter's Arena.
       </p>
+      
 
       <div className="story-chapter-list">
         <button

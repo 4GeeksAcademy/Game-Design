@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 // Import components from Mechanics folder
+import Achievements from "../Mechanics/Main Page/Achievements.jsx";
 import Battle from "../Mechanics/Battle.jsx";
 import TeamBattle from "../Mechanics/TeamBattle.jsx";
 import Character from "../Mechanics/Character.jsx";
@@ -14,7 +15,7 @@ import BotSimulator from "../Mechanics/BotSimulator.jsx";
 import WatchMode from "../Mechanics/WatchMode";
 import StoryMode from "../Mechanics/Main Page/Story/StoryMode.jsx";
 import Festival from "../Mechanics/Main Page/Festival/Festival.jsx";
-
+import StoryRewardScreen from "../Mechanics/Main Page/Story/StoryRewardScreen.jsx";
 import StoryLevel1 from "../Mechanics/Main Page/Story/StoryLevel1.jsx";
 
 export const AppRoutes = () => {
@@ -32,7 +33,9 @@ export const AppRoutes = () => {
       <Route path="/victory" element={<VictoryScreen />} />
       <Route path="/story-mode" element={<StoryMode />} />
        <Route path="/Festival" element={<Festival />} />
+       <Route path="/story-reward" element={<StoryRewardScreen />} />
       <Route path="/story-cutscene" element={<StoryLevel1 />} />
+      <Route path="/achievements" element={<Achievements />} />
       <Route path="*" element={<h1>404 Not Found</h1>} />
      
     </Routes>

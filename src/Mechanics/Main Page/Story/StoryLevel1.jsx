@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { unlockCharacter } from "../../Currency.js";
 import StoryCutscene from "./StoryCutscene.jsx";
 
 // ============================================================
@@ -868,27 +869,56 @@ function StoryLevel1() {
   };
 
   // Finish the chapter after the hotel-room ending.
+  
+  // Finish Level 1 after the final cutscene.
   const finishLevel = () => {
-    const level1Completed =
+    // Both victories are required for the Rock Lee reward.
+    const bothBattlesWon =
       levelConfig.firstBattleWon === true &&
       previousBattleWon === true;
 
-    if (level1Completed) {
-      localStorage.setItem("storyLevel1Complete", "true");
+    // Award Rock Lee permanently.
+    // unlockCharacter prevents duplicate entries.
+    if (bothBattlesWon) {
+      unlockCharacter("rockLee");
     }
 
+    // Completing Level 1 always unlocks Level 2,
+    // regardless of the battle results.
+    const level1Completed = true;
+
+    localStorage.setItem("storyLevel1Complete", "true");
+
+    const returnState = {
+      gameMode: "story",
+      storyChapter: levelConfig.storyChapter,
+      storyLevel: levelConfig.storyLevel,
+      firstBattleWon: levelConfig.firstBattleWon,
+      lastBattleWon: previousBattleWon,
+      storyLevelComplete: level1Completed,
+      level1Completed,
+      rockLeeUnlocked: bothBattlesWon,
+    };
+
+    // Show the reward only if both battles were won.
+    if (bothBattlesWon) {
+      navigate("/story-reward", {
+        state: {
+          rewardKey: "1-1",
+          returnTo: "/story-mode",
+          returnState,
+        },
+      });
+
+      return;
+    }
+
+    // Otherwise, return directly to Story Mode.
     navigate("/story-mode", {
-      state: {
-        gameMode: "story",
-        storyChapter: levelConfig.storyChapter,
-        storyLevel: levelConfig.storyLevel,
-        firstBattleWon: levelConfig.firstBattleWon,
-        lastBattleWon: previousBattleWon,
-        storyLevelComplete: level1Completed,
-        level1Completed: true,
-      },
+      state: returnState,
     });
   };
+
 
   // After Battle 1, show the aftermath and Tenten's introduction.
   if (isAfterBattle && !isSecondBattle) {

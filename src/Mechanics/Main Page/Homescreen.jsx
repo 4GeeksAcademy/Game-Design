@@ -365,9 +365,19 @@ function Homescreen() {
           SETTINGS
         </button>
 
+        
+
         <button className="arcade-button" onClick={() => openMenu("howToPlay")}>
           HOW TO PLAY
         </button>
+
+        <button
+          className="arcade-button"
+          onClick={() => navigate("/achievements")}
+        >
+          ACHIEVEMENTS <span>🏅</span>
+        </button>
+
       </div>
     </>
   );

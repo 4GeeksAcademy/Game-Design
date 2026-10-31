@@ -1,7 +1,7 @@
 const CURRENCY_KEY = "fightersArenaCoins";
 const UNLOCKED_KEY = "fightersArenaUnlockedCharacters";
 
-const STARTER_CHARACTERS = ["mina", "rockLee"];
+const STARTER_CHARACTERS = ["mina", "kirishima"];
 
 export function getCoins() {
   const savedCoins = Number(localStorage.getItem(CURRENCY_KEY));

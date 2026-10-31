@@ -24,18 +24,20 @@ import {
 import "./Shop.css";
 
 const fighters = [
-  { id: "mina", data: mina, cost: 0 },
-  { id: "rockLee", data: rockLee, cost: 0 },
-  { id: "usopp", data: Usopp, cost: 250 },
-  { id: "chad", data: Chad, cost: 350 },
-  { id: "picolo", data: Picolo, cost: 400 },
-  { id: "tenten", data: TenTen, cost: 300 },
-  { id: "kirishima", data: Kirishima, cost: 350 },
-  { id: "ochaco", data: Ochaco, cost: 300 },
-  { id: "luffy", data: Luffy, cost: 500 },
-  { id: "ichigo", data: Ichigo, cost: 500 },
-  { id: "naruto", data: Naruto, cost: 500 },
-  { id: "yoruichi", data: Yoruichi, cost: 450 },
+  { id: "mina", data: mina, cost: 0, unlockable: false },
+  { id: "rockLee", data: rockLee, cost: 0, unlockable: false },
+
+  { id: "usopp", data: Usopp, cost: 250, unlockable: true },
+  { id: "chad", data: Chad, cost: 350, unlockable: true },
+  { id: "picolo", data: Picolo, cost: 400, unlockable: true },
+  { id: "tenten", data: TenTen, cost: 300, unlockable: true },
+  { id: "kirishima", data: Kirishima, cost: 350, unlockable: true },
+  { id: "ochaco", data: Ochaco, cost: 300, unlockable: true },
+
+  { id: "luffy", data: Luffy, cost: 500, unlockable: true },
+  { id: "ichigo", data: Ichigo, cost: 500, unlockable: true },
+  { id: "naruto", data: Naruto, cost: 500, unlockable: true },
+  { id: "yoruichi", data: Yoruichi, cost: 450, unlockable: true },
 ];
 
 function Shop() {
@@ -108,95 +110,93 @@ function Shop() {
       )}
 
       <section className="shop-grid">
-        {fighters.map((fighter) => {
-          const isUnlocked = unlocked.includes(fighter.id);
-          const cost = fighter.data.availability?.cost ?? fighter.cost;
+        {fighters
+          .filter((fighter) => fighter.unlockable)
+          .map((fighter) => {
+            const isUnlocked = unlocked.includes(fighter.id);
+            const cost = fighter.data.availability?.cost ?? fighter.cost;
 
-          return (
-            <article
-              className={`shop-card ${isUnlocked ? "shop-card-unlocked" : ""}`}
-              key={fighter.id}
-            >
-              <div className="shop-portrait">
-                <img
-                  src={fighter.data.image}
-                  alt={fighter.data.name}
-                  loading="lazy"
-                />
+            return (
+              <article
+                className={`shop-card ${isUnlocked ? "shop-card-unlocked" : ""}`}
+                key={fighter.id}
+              >
+                <div className="shop-portrait">
+                  <img
+                    src={fighter.data.image}
+                    alt={fighter.data.name}
+                    loading="lazy"
+                  />
 
-                
-{!isUnlocked && (
-  <div
-    className="shop-lock"
-    aria-label={`${fighter.data.name} is locked`}
-  >
-    <svg
-      className="shop-lock-icon"
-      viewBox="0 0 32 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      {/* Lock shackle */}
-      <path
-        d="M9 15V10C9 5.5 12 3 16 3C20 3 23 5.5 23 10V15"
-        stroke="currentColor"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
+                  {!isUnlocked && (
+                    <div
+                      className="shop-lock"
+                      aria-label={`${fighter.data.name} is locked`}
+                    >
+                      <svg
+                        className="shop-lock-icon"
+                        viewBox="0 0 32 36"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        {/* Lock shackle */}
+                        <path
+                          d="M9 15V10C9 5.5 12 3 16 3C20 3 23 5.5 23 10V15"
+                          stroke="currentColor"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                        />
 
-      {/* Main lock body */}
-      <rect
-        x="4"
-        y="13"
-        width="24"
-        height="20"
-        rx="3"
-        fill="#190711"
-        stroke="currentColor"
-        strokeWidth="2.5"
-      />
+                        {/* Main lock body */}
+                        <rect
+                          x="4"
+                          y="13"
+                          width="24"
+                          height="20"
+                          rx="3"
+                          fill="#190711"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                        />
 
-      {/* Keyhole */}
-      <circle cx="16" cy="21" r="2.5" fill="currentColor" />
-      <path
-        d="M16 23V27"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-    </svg>
+                        {/* Keyhole */}
+                        <circle cx="16" cy="21" r="2.5" fill="currentColor" />
+                        <path
+                          d="M16 23V27"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
 
-    <span className="shop-lock-ribbon">
-      LOCKED
-    </span>
-  </div>
-)}
+                      <span className="shop-lock-ribbon">LOCKED</span>
+                    </div>
+                  )}
+                </div>
 
-              </div>
+                <div className="shop-card-info">
+                  <h2>{fighter.data.name}</h2>
 
-              <div className="shop-card-info">
-                <h2>{fighter.data.name}</h2>
+                  <p>
+                    {isUnlocked
+                      ? "AVAILABLE TO PLAY"
+                      : `${cost.toLocaleString()} COINS`}
+                  </p>
 
-                <p>
-                  {isUnlocked
-                    ? "AVAILABLE TO PLAY"
-                    : `${cost.toLocaleString()} COINS`}
-                </p>
-
-                <button
-                  className={`shop-purchase-button ${
-                    isUnlocked ? "purchased" : ""
-                  }`}
-                  disabled={isUnlocked}
-                  onClick={() => purchaseCharacter(fighter)}
-                >
-                  {isUnlocked ? "UNLOCKED ✓" : "UNLOCK FIGHTER"}
-                </button>
-              </div>
-            </article>
-          );
-        })}
+                  <button
+                    className={`shop-purchase-button ${
+                      isUnlocked ? "purchased" : ""
+                    }`}
+                    disabled={isUnlocked}
+                    onClick={() => purchaseCharacter(fighter)}
+                  >
+                    {isUnlocked ? "UNLOCKED ✓" : "UNLOCK FIGHTER"}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
       </section>
 
       <footer className="shop-footer">

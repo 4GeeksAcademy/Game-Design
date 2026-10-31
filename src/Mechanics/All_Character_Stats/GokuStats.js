@@ -1,6 +1,6 @@
 import GokuImage from "/workspaces/Game-Design/src/assets/img/Goku.jpeg";
 
-import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
+import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/GokuKamekameha.jpeg";
 import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
 import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
 import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
@@ -33,6 +33,7 @@ image: GokuImage,
   attacks: [
     {
       name: "Kamehameha",
+      image: Attack1,
       damage: 55,
       speed: 30,
       cost: 18,

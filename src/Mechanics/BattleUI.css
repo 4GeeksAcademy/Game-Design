@@ -4350,3 +4350,238 @@ body {
   width: 100%;
   box-sizing: border-box;
 }
+
+/* Incoming attack artwork */
+.incoming-attack-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 115px;
+  margin: 10px auto;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.incoming-attack-image img {
+  width: 100%;
+  height: 100%;
+  max-width: 180px;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+}
+
+/* Incoming attack overlay */
+#aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  transform: translate(-50%, -50%) !important;
+  translate: none !important;
+  z-index: 100000 !important;
+}
+
+#aiAttackSection,
+#aiAttackCard,
+#aiAttackInfo,
+#aiAttackStats,
+.incoming-attack-image {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#aiAttackInfo {
+  padding: 12px;
+}
+
+#aiAttackName {
+  margin-bottom: 10px;
+}
+
+/* Compact artwork: the image can never set the card's width */
+.incoming-attack-image {
+  width: 100%;
+  height: 76px;
+  margin: 8px auto;
+  overflow: hidden;
+  border: 1px solid rgb(255 49 89 / 30%);
+  background: #080d1c;
+}
+
+.incoming-attack-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* Smaller stat tiles help the warning feel like a card */
+.attack-threat-badge,
+.attack-cost-badge {
+  min-height: 72px;
+  padding: 7px 3px;
+}
+
+#defensiveActions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#defendButton,
+#evadeButton {
+  min-width: 0;
+  padding: 10px 8px;
+}
+
+#takeDamageButton {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 8px;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+#aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 12px !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  transform: translateX(-50%) !important;
+  translate: none !important;
+  z-index: 1000000 !important;
+}
+
+/* Keep animation transforms from overriding the fixed positioning. */
+#aiAttackSection.incoming-attack-card {
+  animation: incomingCardAppear 0.3s ease-out both;
+}
+
+@keyframes incomingCardAppear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.incoming-attack-image {
+  height: 60px;
+  margin: 6px auto;
+}
+
+#aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: min(380px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%) !important;
+  translate: none !important;
+  z-index: 1000000 !important;
+}
+
+/* Give each part of the card consistent breathing room */
+#aiAttackHeader {
+  padding: 10px 14px;
+}
+
+#aiAttackInfo {
+  padding: 14px 16px 16px;
+}
+
+#aiAttackName {
+  margin: 0 0 12px;
+  line-height: 1.15;
+}
+
+/* Fill the frame edge-to-edge; crop the artwork rather than letterbox it */
+.incoming-attack-image {
+  display: block;
+  width: 100%;
+  height: 112px;
+  margin: 0 0 14px;
+  overflow: hidden;
+  border: 1px solid rgb(255 49 89 / 35%);
+  border-radius: 8px;
+  background: #080d1c;
+}
+
+.incoming-attack-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 0;
+}
+
+#defenseTimer {
+  margin: 0 0 12px;
+}
+
+#aiAttackStats {
+  gap: 8px;
+}
+
+.attack-threat-badge,
+.attack-cost-badge {
+  min-height: 80px;
+}
+
+#defensiveActions {
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 12px 12px;
+  margin-top: 0;
+}
+
+#defendButton,
+#evadeButton {
+  min-width: 0;
+  padding: 11px 8px;
+}
+
+#takeDamageButton {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 8px;
+}
+
+#aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 12px !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  transform: translateX(-50%) !important;
+  translate: none !important;
+  z-index: 2147483647 !important;
+}

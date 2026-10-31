@@ -1,11 +1,11 @@
 import YoruichiArenaImage from "../../assets/img/Yoruichi.png";
 
-import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
-import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
-import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
-import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
-
+import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Shunpo_Strike.png";
+import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Hakuda_Combo.png";
+import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Shunko:_Lightning_Release.png";
+import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Raijin_Senkei.png";
+import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Afterimage_Strike.png";
+import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Raiju_Senkei.png"
 const Yoruichi = {
   name: "Yoruichi Shihōin",
   image: YoruichiArenaImage,
@@ -29,6 +29,7 @@ const Yoruichi = {
   attacks: [
     {
       name: "Shunpo Strike",
+      image: Attack1,
       damage: 18,
       cost: 5,
       speed: 90,
@@ -43,6 +44,7 @@ const Yoruichi = {
 
     {
       name: "Hakuda Combo",
+      image: Attack2,
       damage: 28,
       cost: 9,
       speed: 70,
@@ -57,6 +59,7 @@ const Yoruichi = {
 
     {
       name: "Shunko: Lightning Release",
+      image: Attack3,
       damage: 12,
       cost: 13,
       speed: 80,
@@ -72,6 +75,7 @@ const Yoruichi = {
 
     {
       name: "Raijin Senkei",
+      image: Attack4,
       damage: 42,
       cost: 20,
       speed: 50,
@@ -91,6 +95,7 @@ const Yoruichi = {
 
     {
       name: "Utsusemi: Afterimage Strike",
+      image: Attack5,
       damage: 24,
       cost: 24,
       speed: 50,
@@ -103,6 +108,7 @@ const Yoruichi = {
     },
     {
       name: "Shunko: Raiju Senkei",
+      image: Attack6,
       damage: 35,
       cost: 30,
       speed: 38,
