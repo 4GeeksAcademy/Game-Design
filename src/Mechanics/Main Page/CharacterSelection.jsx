@@ -7,7 +7,7 @@ import KenpachiImage from "/workspaces/Game-Design/src/assets/img/Kenpachi.png";
 import Hinata from "../All_Character_Stats/HinataStats.js";
 import HinataImage from "/workspaces/Game-Design/src/assets/img/Hinata.png";
 import Goku from "../All_Character_Stats/GokuStats.js";
-import GokuImage from "/workspaces/Game-Design/src/assets/img/Goku.jpeg"
+import GokuImage from "/workspaces/Game-Design/src/assets/img/Goku.jpeg";
 import mina from "../All_Character_Stats/Mina_AshidoStats.js";
 import minaArena from "../../assets/img/MinaAshidoArena.jpg";
 import rockLee from "../All_Character_Stats/Rock_LeeStats.js";
@@ -32,7 +32,6 @@ import Naruto from "../All_Character_Stats/NarutoStats.js";
 import NarutoArenaImage from "../../assets/img/Naruto.png";
 import Yoruichi from "../All_Character_Stats/YoruichiStats.js";
 import YoruichiArenaImage from "../../assets/img/Yoruichi.png";
-
 
 import { getUnlockedCharacters } from "../Currency.js";
 
@@ -123,7 +122,7 @@ export const roster = [
     color: "yoruichi",
     description: "THE THUNDER GOD",
   },
-    // =====================================
+  // =====================================
   // FESTIVAL SECRET CHARACTERS
   // =====================================
 
@@ -348,11 +347,8 @@ function CharacterSelection() {
 
   const isUnlocked = (fighter) => unlockedIds.includes(fighter.id);
   const visibleRoster = roster
-  .map((fighter, index) => ({ fighter, index }))
-  .filter(
-    ({ fighter }) =>
-      !fighter.isFestivalSecret || isUnlocked(fighter)
-  );
+    .map((fighter, index) => ({ fighter, index }))
+    .filter(({ fighter }) => !fighter.isFestivalSecret || isUnlocked(fighter));
 
   const changeFighter = (direction) => {
     if (phase !== "player") return;
@@ -486,10 +482,10 @@ function CharacterSelection() {
     const eligibleOpponents = roster
       .map((fighter, index) => ({ fighter, index }))
       .filter(
-  ({ fighter }) =>
-    !playerIds.includes(fighter.id) &&
-    (!fighter.isFestivalSecret || unlockedIds.includes(fighter.id))
-);
+        ({ fighter }) =>
+          !playerIds.includes(fighter.id) &&
+          (!fighter.isFestivalSecret || unlockedIds.includes(fighter.id)),
+      );
 
     if (eligibleOpponents.length < cpuFighterCount) {
       setCpuIndices([]);
@@ -662,14 +658,31 @@ function CharacterSelection() {
         </section>
       </section>
 
+      {phase === "player" ? (
+          <button className="confirm-fighter-button" onClick={confirmSelection}>
+            {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
+            <span>▶</span>
+          </button>
+        ) : (
+          <button
+            className="confirm-fighter-button"
+            onClick={startBattle}
+            disabled={
+              phase !== "ready" ||
+              selectedIndices.length !== requiredFighters ||
+              cpuIndices.length !== cpuFighterCount
+            }
+          >
+            {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
+          </button>
+        )}
+
       <section className="roster-section">
         <div className="roster-title-row">
           <h2>FIGHTER ROSTER</h2>
           <span>
-            {
-  visibleRoster.filter(({ fighter }) => isUnlocked(fighter)).length
-}{" "}
- / {visibleRoster.length} UNLOCKED
+            {visibleRoster.filter(({ fighter }) => isUnlocked(fighter)).length}{" "}
+            / {visibleRoster.length} UNLOCKED
           </span>
         </div>
 
@@ -802,25 +815,6 @@ function CharacterSelection() {
               .join(" + ") || "???"}
           </strong>
         </p>
-
-        {phase === "player" ? (
-          <button className="confirm-fighter-button" onClick={confirmSelection}>
-            {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
-            <span>▶</span>
-          </button>
-        ) : (
-          <button
-            className="confirm-fighter-button"
-            onClick={startBattle}
-            disabled={
-              phase !== "ready" ||
-              selectedIndices.length !== requiredFighters ||
-              cpuIndices.length !== cpuFighterCount
-            }
-          >
-            {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
-          </button>
-        )}
       </footer>
     </main>
   );
