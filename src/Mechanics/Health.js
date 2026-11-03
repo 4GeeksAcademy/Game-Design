@@ -239,6 +239,41 @@ function applyEffects(effects, character, direction = 1) {
   return applied;
 }
 
+function canUseAttack(attack) {
+  if (!attack || attack.state !== true) return false;
+
+  const remainingUses = attack.remainingUses ?? attack.uses;
+
+  if (Number.isInteger(attack.uses) && remainingUses <= 0) {
+    return false;
+  }
+
+  if ((attack.cooldownRemaining ?? 0) > 0) {
+    return false;
+  }
+
+  return true;
+}
+
+function consumeAttack(attack) {
+  // Reduce remaining uses when the attack has a uses limit.
+  if (Number.isInteger(attack.uses)) {
+    attack.remainingUses = Math.max(
+      0,
+      (attack.remainingUses ?? attack.uses) - 1,
+    );
+  }
+
+  // Start the configured turn cooldown.
+  if (Number(attack.turnCooldown) > 0) {
+    attack.cooldownRemaining = Number(attack.turnCooldown);
+    attack.cooldownStartedThisRound = true;
+  }
+
+  // Mark the attack as used for this round.
+  attack.state = false;
+}
+
 function attackCharacter(ATK, attacker, defender, defense = 0) {
   if (!ATK || !attacker || !defender) {
     return null;
@@ -249,10 +284,10 @@ function attackCharacter(ATK, attacker, defender, defense = 0) {
     return null;
   }
 
-  if (ATK.state !== true) {
-    console.log("Attack already used!");
-    return null;
-  }
+  if (!canUseAttack(ATK)) {
+  console.log("Attack is unavailable!");
+  return null;
+}
 
   // Pay the attack cost once.
   attacker.mana -= ATK.cost ?? 0;
@@ -273,7 +308,7 @@ const debuffsApplied = applyEffects(ATK.debuff, defender, -1);
     );
   }
 
-  ATK.state = false;
+  consumeAttack(ATK);
 
   if (defender.health <= 0) {
     console.log("Game over");
@@ -312,9 +347,9 @@ function currentHealth(ATK, character, defense = 0) {
 
 
 function evadeAttack(ATK, attacker, defender) {
-  if (!ATK || !attacker || !defender || ATK.state !== true) {
-    return null;
-  }
+  if (!ATK || !attacker || !defender || !canUseAttack(ATK)) {
+  return null;
+}
 
   const attackCost = Number(ATK.cost) || 0;
   const attackSpeed = Number(ATK.speed) || 0;
@@ -364,8 +399,8 @@ function evadeAttack(ATK, attacker, defender) {
     defender.health = Math.max(0, defender.health - damageReceived);
   }
 
-  // Prevent this attack from being resolved twice.
-  ATK.state = false;
+  // Consume the attack whether the defender evaded or was hit.
+consumeAttack(ATK);
 
   return {
     attacker,
@@ -380,5 +415,5 @@ function evadeAttack(ATK, attacker, defender) {
 }
 
 
-export { attackCharacter, currentHealth, evadeAttack, applyEffects };
+export { attackCharacter, currentHealth, evadeAttack, applyEffects, consumeAttack, canUseAttack };
 

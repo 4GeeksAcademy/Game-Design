@@ -1,4 +1,8 @@
-import { attackCharacter, evadeAttack } from "./Health.js";
+import {
+  attackCharacter,
+  evadeAttack,
+  canUseAttack,
+} from "./Health.js";
 
 const MAX_QUEUE_SIZE = 10;
 const ATTACK_TIMEOUT = 10000;
@@ -137,9 +141,9 @@ function getNormalAttackPriority(attacks) {
 function aiChooseNormalAttacks(ai) {
   if (!ai || !Array.isArray(ai.attacks)) return [];
 
-  const usableAttacks = ai.attacks.filter(
-    (attack) => attack.state === true
-  );
+  const usableAttacks = ai.attacks.filter((attack) =>
+  canUseAttack(attack)
+);
 
   return getNormalAttackPriority(usableAttacks).slice(
     0,
@@ -150,11 +154,11 @@ function aiChooseNormalAttacks(ai) {
 function chooseNormalAttack(fighter) {
   if (!fighter || !Array.isArray(fighter.attacks)) return null;
 
-  const usableAttacks = fighter.attacks.filter(
-    (attack) =>
-      attack.state === true &&
-      fighter.mana >= (attack.cost ?? 0)
-  );
+ const usableAttacks = fighter.attacks.filter(
+  (attack) =>
+    canUseAttack(attack) &&
+    fighter.mana >= (attack.cost ?? 0)
+);
 
   return getNormalAttackPriority(usableAttacks)[0] ?? null;
 }
@@ -223,11 +227,11 @@ function createNormalAIController({
     const currentAI = readAI();
 
     // Choose the next queued move that is still usable.
-    const index = queue.findIndex(
-      (attack) =>
-        attack.state === true &&
-        (attack.cost ?? 0) <= currentAI.mana,
-    );
+   const index = queue.findIndex(
+  (attack) =>
+    canUseAttack(attack) &&
+    (attack.cost ?? 0) <= currentAI.mana,
+);
 
     if (index === -1) {
       finishTurn();

@@ -29,10 +29,38 @@ function recoverCooldown(character) {
 }
 
 function resetAttacks(attacks) {
-  return attacks.map((attack) => ({
-    ...attack,
-    state: true,
-  }));
+  return attacks.map((attack) => {
+    let cooldownRemaining = attack.cooldownRemaining ?? 0;
+
+    // Don't reduce a cooldown during the same round it was started.
+    if (attack.cooldownStartedThisRound) {
+      return {
+        ...attack,
+        cooldownStartedThisRound: false,
+        state:
+          (attack.remainingUses === undefined ||
+            attack.remainingUses === null ||
+            attack.remainingUses > 0) &&
+          cooldownRemaining <= 0,
+      };
+    }
+
+    // Reduce cooldown by one completed round.
+    if (cooldownRemaining > 0) {
+      cooldownRemaining -= 1;
+    }
+
+    const usesAvailable =
+      attack.remainingUses === undefined ||
+      attack.remainingUses === null ||
+      attack.remainingUses > 0;
+
+    return {
+      ...attack,
+      cooldownRemaining,
+      state: usesAvailable && cooldownRemaining <= 0,
+    };
+  });
 }
 
 function turn(playerOne, playerTwo) {

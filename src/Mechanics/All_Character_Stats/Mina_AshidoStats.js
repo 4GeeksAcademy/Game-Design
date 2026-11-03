@@ -26,6 +26,7 @@ const mina = {
       speed: 40,
       cost: 12,
       state: true,
+      uses: 1,
       buff: {
         mana: 20,
       },
@@ -55,6 +56,7 @@ const mina = {
       damage: 40,
       speed: 10,
       cost: 40,
+      turnCooldown: 2,
       buff: {
         defense: 6,
       },

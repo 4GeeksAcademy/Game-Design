@@ -1,7 +1,23 @@
 import React, { useEffect, useCallback } from "react";
 import { aiDefendOrEvade } from "./AI.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
+import { canUseAttack } from "./Health.js";
 import "./BattleUI.css";
+
+function isAttackAvailable(attack) {
+  return canUseAttack(attack);
+}
+
+function getAttackCardType(attack) {
+  const hasUses = Number.isInteger(attack.uses);
+  const hasCooldown = Number(attack.turnCooldown) > 0;
+
+  if (hasUses && hasCooldown) return "attack-limited-cooldown";
+  if (hasUses) return "attack-limited";
+  if (hasCooldown) return "attack-cooldown";
+
+  return "attack-standard";
+}
 
 function AttackEffects({ attack }) {
   const buffs = Object.entries(attack.buff ?? {}).filter(
@@ -74,7 +90,7 @@ function AttackOptions({
       if (
         !attack ||
         currentTurn !== "player" ||
-        !attack.state ||
+        !isAttackAvailable(attack) ||
         openingTurnAttackLimitReached
       ) {
         return;
@@ -136,6 +152,7 @@ function AttackOptions({
       setDamageDealt,
       setAttacksUsed,
       showCombatMessage,
+      openingTurnAttackLimitReached,
     ],
   );
 
@@ -152,7 +169,7 @@ function AttackOptions({
 
       if (
         index === -1 ||
-        !character.attacks[index]?.state ||
+        !isAttackAvailable(character.attacks[index]) ||
         openingTurnAttackLimitReached
       ) {
         return;
@@ -164,72 +181,92 @@ function AttackOptions({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [character.attacks, currentTurn, handleAttack]);
-  {
-    return (
-      <div
-        id="attackSection"
-        className="d-flex justify-content-center w-100 my-3"
-      >
-        <div id="attack" className="card w-100">
-          <div id="attackHeader" className="card-header text-center fw-bold">
-            Attack Options
-          </div>
+  }, [
+    character.attacks,
+    currentTurn,
+    handleAttack,
+    openingTurnAttackLimitReached,
+  ]);
 
-          <div id="attackBody" className="card-body">
-            <div
-              id="attackList"
-              className="d-flex flex-row flex-nowrap gap-3 overflow-x-auto pb-2"
-            >
-              {character.attacks.map((attack, index) => (
-                <div className="attack-card-wrapper" key={attack.name}>
-                  <button
-                    id={`attackCard${index}`}
-                    type="button"
-                    className="card text-start p-3 attack-card"
-                    style={{ minWidth: "200px" }}
-                    disabled={
-                      currentTurn !== "player" ||
-                      !attack.state ||
-                      openingTurnAttackLimitReached
-                    }
-                    onClick={() => handleAttack(index)}
-                  >
-                    <img
-                      id={`attackImage${index}`}
-                      src={attack.image}
-                      className="card-img-top attack-image"
-                      alt={attack.name}
-                      loading="lazy"
-                    />
+  return (
+    <div
+      id="attackSection"
+      className="d-flex justify-content-center w-100 my-3"
+    >
+      <div id="attack" className="card w-100">
+        <div id="attackHeader" className="card-header text-center fw-bold">
+          Attack Options
+        </div>
 
-                    <h5 id={`attackName${index}`} className="text-center">
-                      {attack.name}
-                    </h5>
+        <div id="attackBody" className="card-body">
+          <div
+            id="attackList"
+            className="d-flex flex-row flex-nowrap gap-3 overflow-x-auto pb-2"
+          >
+            {character.attacks.map((attack, index) => (
+              <div className="attack-card-wrapper" key={attack.name}>
+                <button
+                  id={`attackCard${index}`}
+                  type="button"
+                  className={`card text-start p-3 attack-card ${getAttackCardType(attack)} ${
+                    !isAttackAvailable(attack) ? "attack-unavailable" : ""
+                  }`}
+                  style={{ minWidth: "200px" }}
+                  disabled={
+                    currentTurn !== "player" ||
+                    !isAttackAvailable(attack) ||
+                    openingTurnAttackLimitReached
+                  }
+                  onClick={() => handleAttack(index)}
+                >
+                  <img
+                    id={`attackImage${index}`}
+                    src={attack.image}
+                    className="card-img-top attack-image"
+                    alt={attack.name}
+                    loading="lazy"
+                  />
 
-                    <div id={`attackStats${index}`} className="attack-stats">
-                      <span className="attack-damage">
-                        DAMAGE: {attack.damage ?? 0}
-                      </span>
-                    </div>
+                  <h5 id={`attackName${index}`} className="text-center">
+                    {attack.name}
+                  </h5>
 
-                    <span
-                      id={`attackButton${index}`}
-                      className="btn btn-success attack-cost-button"
-                    >
-                      COST: {attack.cost ?? 0} MANA
+                  <div id={`attackStats${index}`} className="attack-stats">
+                    <span className="attack-damage">
+                      DAMAGE: {attack.damage ?? 0}
                     </span>
-                  </button>
+                  </div>
 
-                  <AttackEffects attack={attack} />
-                </div>
-              ))}
-            </div>
+                  <div className="attack-cost">
+                    <span className="attack-mana-cost">
+                      COST: {attack.cost} MANA
+                    </span>
+
+                    {Number.isInteger(attack.uses) && (
+                      <span className="attack-availability-info">
+                        USES: {attack.remainingUses ?? attack.uses}/
+                        {attack.uses}
+                      </span>
+                    )}
+
+                    {Number(attack.turnCooldown) > 0 && (
+                      <span className="attack-availability-info">
+                        {(attack.cooldownRemaining ?? 0) > 0
+                          ? `COOLDOWN: ${attack.cooldownRemaining} ROUNDS`
+                          : "COOLDOWN: READY"}
+                      </span>
+                    )}
+                  </div>
+                </button>
+
+                <AttackEffects attack={attack} />
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default AttackOptions;
