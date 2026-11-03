@@ -1,10 +1,10 @@
 import OchacoArenaImage from "../../assets/img/Ochaco.png";
 
-import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
-import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
-import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
-import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
+import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Zero Gravity.jpeg";
+import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Release!.png";
+import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Gunhead Martial Arts.jpeg";
+import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Meteor Fafrotskies.jpeg";
+import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Zero Gravity: Floating Combo.jpeg";
 
 const Ochaco = {
   name: "Ochaco Uraraka",
@@ -26,7 +26,7 @@ const Ochaco = {
   attacks: [
     {
       name: "Zero Gravity",
-      image: ExplodingPineconeImage,
+      image: Attack1,
       damage: 15,
       speed: 45,
       cost: 7,
@@ -40,7 +40,7 @@ const Ochaco = {
 
     {
       name: "Release!",
-      image: TabascoStarImage,
+      image: Attack2,
       damage: 35,
       speed: 45,
       cost: 7,
@@ -54,7 +54,7 @@ const Ochaco = {
 
     {
       name: "Gunhead Martial Arts",
-      image: FakeHammerImage,
+      image: Attack3,
       damage: 25,
       speed: 55,
       cost: 12,
@@ -70,7 +70,7 @@ const Ochaco = {
 
     {
       name: "Meteor Fafrotskies",
-      image: FireBirdStarImage,
+      image: Attack4,
       damage: 55,
       speed: 40,
       cost: 15,
@@ -83,13 +83,13 @@ const Ochaco = {
 
     {
       name: "Zero Gravity: Floating Combo",
-      image: GasStarImage,
+      image: Attack5,
       damage: 20,
       speed: 50,
       cost: 18,
       state: true,
       debuff: {
-        agility: 30,
+        agility: 15,
         cooldown: 2,
       },
     },

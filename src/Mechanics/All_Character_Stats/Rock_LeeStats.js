@@ -1,5 +1,16 @@
 import RockLeeArena from "../../assets/img/RockLeeArena.jpg";
 
+import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Hidden Lotus Awakening.png"
+import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Rapid Fists.jpeg"
+import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Leaf Hurricane.jpeg"
+import Attack4 from ""
+import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Barrier Breaker Kick.jpeg"
+import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Ultra Wind Wave.png"
+
+
+
+
+
 const rockLee = {
   name: "Rock Lee",
   image: RockLeeArena,
@@ -21,6 +32,7 @@ const rockLee = {
 
     {
       name: "Hidden Lotus Awakening",
+      image: Attack1,
       damage: 0,
       speed: 0,
       cost: 40,
@@ -37,6 +49,7 @@ const rockLee = {
 
     {
       name: "Rapid Fists",
+      image: Attack2,
       damage: 15,
       speed: 45,
       cost: 5,
@@ -49,6 +62,7 @@ const rockLee = {
 
     {
       name: "Leaf Hurricane",
+      image: Attack3,
       damage: 35,
       speed: 45,
       cost: 11,
@@ -61,6 +75,7 @@ const rockLee = {
 
     {
       name: "Youthful Burst",
+      image: Attack4,
       damage: 30,
       speed: 70,
       cost: 15,
@@ -73,6 +88,7 @@ const rockLee = {
 
     {
       name: "Barrier Breaker Kick",
+      image: Attack5,
       damage: 20,
       speed: 55,
       cost: 20,
@@ -90,6 +106,7 @@ const rockLee = {
     
     {
       name: "Ultra Wind Wave",
+      image: Attack6,
       damage: 70,
       speed: 70,
       cost: 50,
