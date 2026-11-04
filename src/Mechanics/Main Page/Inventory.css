@@ -435,7 +435,7 @@
   object-fit: cover;
 }
 
-.inventory-skin-locked .inventory-skin-image > img {
+.inventory-skin-card.skin-locked .inventory-skin-image > img {
   filter: grayscale(1) brightness(0.35) blur(2px);
   transform: scale(1.04);
 }
@@ -572,4 +572,83 @@
   .inventory-skins-section {
     padding: 15px;
   }
+}
+
+/* =====================================
+   SKIN RARITY
+===================================== */
+
+.skin-rarity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  border: 1px solid currentColor;
+}
+
+.rarity-common {
+  color: #c5cbd3;
+  background: rgba(197, 203, 211, 0.12);
+}
+
+.rarity-uncommon {
+  color: #50d890;
+  background: rgba(80, 216, 144, 0.12);
+}
+
+.rarity-rare {
+  color: #42baff;
+  background: rgba(66, 186, 255, 0.12);
+}
+
+.rarity-epic {
+  color: #bd79ff;
+  background: rgba(189, 121, 255, 0.12);
+}
+
+.rarity-legendary {
+  color: #ffbd45;
+  background: rgba(255, 189, 69, 0.12);
+}
+
+/* =====================================
+   SKIN GALLERY
+===================================== */
+
+.inventory-gallery-section {
+  width: 100%;
+}
+
+.skin-rarity-key {
+  margin: 25px 0 35px;
+  padding: 20px;
+  background: rgba(15, 20, 30, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+}
+
+.skin-rarity-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.skin-rarity-key > p {
+  margin-top: 12px;
+  color: #aeb6c4;
+  font-size: 0.85rem;
+}
+
+.inventory-skin-character {
+  color: #13d5ff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }

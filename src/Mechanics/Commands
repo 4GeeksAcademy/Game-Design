@@ -10,3 +10,46 @@ window.dispatchEvent(new Event("coinsUpdated"));
 
 console.log("Progress reset! Coins:", localStorage.getItem("fightersArenaCoins"));
 console.log("Unlocked characters reset to the starter roster.");
+
+localStorage.removeItem("fightersArenaOwnedSkins");
+
+
+(() => {
+  const keysToReset = [
+    // Currency and character unlocks
+    "fightersArenaCoins",
+    "fightersArenaUnlockedCharacters",
+
+    // Skins
+    "fightersArenaOwnedSkins",
+    "fightersArenaEquippedSkins",
+
+    // Festival
+    "fighters-arena-combat-festival-2026",
+    "fighters-arena-rotating-challenges",
+
+    // Daily objectives
+    "fighters-arena-daily-objectives",
+
+    // Achievements and story progression
+    "fightersArenaAchievements",
+    "storyLevel1Complete",
+  ];
+
+  keysToReset.forEach((key) => {
+    localStorage.removeItem(key);
+  });
+
+  // Refresh game data and UI
+  window.dispatchEvent(new Event("coinsUpdated"));
+  window.dispatchEvent(new Event("unlocksUpdated"));
+  window.dispatchEvent(new Event("skinsUpdated"));
+
+  console.clear();
+
+  console.log("🔥 FIGHTER'S ARENA FACTORY RESET COMPLETE!");
+  console.log("Coins, characters, skins, Festival, and progression reset.");
+  console.log("Restarting game...");
+
+  location.reload();
+})();
