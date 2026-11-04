@@ -125,6 +125,18 @@ function AttackOptions({
         showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
       }
 
+      if (result.buffNotAppliedReason) {
+  const reason =
+    result.buffNotAppliedReason === "evaded"
+      ? "evaded"
+      : "blocked";
+
+  showCombatMessage(
+    `BUFF NOT APPLIED — ATTACK WAS ${reason.toUpperCase()}!`,
+    "blocked",
+  );
+}
+
       Object.entries(result.buffsApplied ?? {}).forEach(([stat, amount]) => {
         if (typeof amount === "number" && amount !== 0) {
           showCombatMessage(

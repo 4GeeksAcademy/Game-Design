@@ -126,6 +126,7 @@ function aiDefendOrEvade(attack, attacker, defender) {
         attacker,
         defender,
         defender.defense.amount,
+         { blocked: true },
       );
 
       if (result) {
@@ -137,7 +138,7 @@ function aiDefendOrEvade(attack, attacker, defender) {
       result = evadeAttack(attack, attacker, defender);
 
       if (result) {
-        defender.cooldown -= 1;
+        
         result.action = result.evaded ? "evade" : "attack";
       }
     }

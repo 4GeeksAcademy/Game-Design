@@ -274,10 +274,14 @@ function consumeAttack(attack) {
   attack.state = false;
 }
 
-function attackCharacter(ATK, attacker, defender, defense = 0) {
-  if (!ATK || !attacker || !defender) {
-    return null;
-  }
+function attackCharacter(
+  ATK,
+  attacker,
+  defender,
+  defense = 0,
+  options = {},
+) {
+  if (!ATK || !attacker || !defender) return null;
 
   if (attacker.mana < (ATK.cost ?? 0)) {
     console.log("Not enough mana!");
@@ -285,34 +289,38 @@ function attackCharacter(ATK, attacker, defender, defense = 0) {
   }
 
   if (!canUseAttack(ATK)) {
-  console.log("Attack is unavailable!");
-  return null;
-}
+    console.log("Attack is unavailable!");
+    return null;
+  }
 
-  // Pay the attack cost once.
+  const blocked = options.blocked === true;
+
   attacker.mana -= ATK.cost ?? 0;
 
-  // Apply the attacker's buffs and opponent's debuffs.
-  // Apply the attacker's buffs and opponent's debuffs.
-const buffsApplied = applyEffects(ATK.buff, attacker);
-const debuffsApplied = applyEffects(ATK.debuff, defender, -1);
-  // Buffs and debuffs do not prevent normal attack damage.
+  // A conditional buff only activates when the attack isn't blocked.
+  const buffNotAppliedReason =
+    ATK.buffRequiresHit && blocked ? "blocked" : null;
+
+  const buffsApplied =
+    buffNotAppliedReason
+      ? {}
+      : applyEffects(ATK.buff, attacker);
+
+  // Debuffs must never affect a defender who successfully blocks.
+  const debuffsApplied = blocked
+    ? {}
+    : applyEffects(ATK.debuff, defender, -1);
+
   let damageReceived = 0;
 
   if (ATK.damage > 0 && defender.health > 0) {
     damageReceived = Math.max(0, ATK.damage - defense);
-
-    defender.health = Math.max(
-      0,
-      defender.health - damageReceived
-    );
+    defender.health = Math.max(0, defender.health - damageReceived);
   }
 
   consumeAttack(ATK);
 
-  if (defender.health <= 0) {
-    console.log("Game over");
-  }
+  if (defender.health <= 0) console.log("Game over");
 
   return {
     attacker,
@@ -320,10 +328,8 @@ const debuffsApplied = applyEffects(ATK.debuff, defender, -1);
     damageReceived,
     buffsApplied,
     debuffsApplied,
-    action:
-      ATK.buff || ATK.debuff
-        ? "effect"
-        : "attack",
+    buffNotAppliedReason,
+    action: ATK.buff || ATK.debuff ? "effect" : "attack",
   };
 }
 
@@ -348,8 +354,8 @@ function currentHealth(ATK, character, defense = 0) {
 
 function evadeAttack(ATK, attacker, defender) {
   if (!ATK || !attacker || !defender || !canUseAttack(ATK)) {
-  return null;
-}
+    return null;
+  }
 
   const attackCost = Number(ATK.cost) || 0;
   const attackSpeed = Number(ATK.speed) || 0;
@@ -363,31 +369,32 @@ function evadeAttack(ATK, attacker, defender) {
     return null;
   }
 
-  // The attacker pays the attack's mana cost.
   attacker.mana = attackerMana - attackCost;
 
-  // Check whether the defender has a cooldown available.
   const hasCooldown = defenderCooldown > 0;
 
-  // Spend one cooldown when available.
   if (hasCooldown) {
     defender.cooldown = defenderCooldown - 1;
   }
 
-  // Agility only helps when the defender has cooldown available.
   const usableAgility = hasCooldown ? defenderAgility : 0;
-
-  // Mana must cover whatever attack speed agility cannot cover.
   const manaNeeded = Math.max(0, attackSpeed - usableAgility);
   const manaSpent = Math.min(defenderMana, manaNeeded);
 
   defender.mana = defenderMana - manaSpent;
 
-  // Evasion succeeds if agility plus spent mana covers attack speed.
   const evaded = usableAgility + manaSpent >= attackSpeed;
 
-  // Preserve the existing buff/debuff behavior.
-  const buffsApplied = applyEffects(ATK.buff, attacker);
+  // Conditional buffs only activate if the attack connects.
+  const buffNotAppliedReason =
+    ATK.buffRequiresHit && evaded ? "evaded" : null;
+
+  const buffsApplied =
+    buffNotAppliedReason
+      ? {}
+      : applyEffects(ATK.buff, attacker);
+
+  // An evaded attack cannot apply debuffs.
   const debuffsApplied = evaded
     ? {}
     : applyEffects(ATK.debuff, defender, -1);
@@ -399,8 +406,7 @@ function evadeAttack(ATK, attacker, defender) {
     defender.health = Math.max(0, defender.health - damageReceived);
   }
 
-  // Consume the attack whether the defender evaded or was hit.
-consumeAttack(ATK);
+  consumeAttack(ATK);
 
   return {
     attacker,
@@ -410,6 +416,7 @@ consumeAttack(ATK);
     damageReceived,
     buffsApplied,
     debuffsApplied,
+    buffNotAppliedReason,
     action: evaded ? "evade" : "attack",
   };
 }

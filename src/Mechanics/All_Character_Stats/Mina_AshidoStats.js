@@ -57,6 +57,7 @@ const mina = {
       speed: 10,
       cost: 40,
       turnCooldown: 2,
+      buffRequiresHit: true,
       buff: {
         defense: 6,
       },
