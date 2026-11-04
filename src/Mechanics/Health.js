@@ -118,7 +118,6 @@ import React from "react";
 
 // export { attackCharacter, currentHealth, evadeAttack };
 
-
 function applyEffects(effects, character, direction = 1) {
   const applied = {};
 
@@ -184,10 +183,7 @@ function applyEffects(effects, character, direction = 1) {
       const previous = character.health;
       const maximum = character.maximumHealth ?? previous;
 
-      character.health = Math.max(
-        0,
-        Math.min(maximum, previous + change),
-      );
+      character.health = Math.max(0, Math.min(maximum, previous + change));
 
       applied.health = character.health - previous;
     }
@@ -197,10 +193,7 @@ function applyEffects(effects, character, direction = 1) {
       const previous = character.mana;
       const maximum = character.maximumMana ?? previous;
 
-      character.mana = Math.max(
-        0,
-        Math.min(maximum, previous + change),
-      );
+      character.mana = Math.max(0, Math.min(maximum, previous + change));
 
       applied.mana = character.mana - previous;
     }
@@ -210,7 +203,7 @@ function applyEffects(effects, character, direction = 1) {
       const previous =
         typeof character.defense === "number"
           ? character.defense
-          : character.defense?.amount ?? 0;
+          : (character.defense?.amount ?? 0);
 
       const next = Math.max(0, previous + change);
 
@@ -274,13 +267,32 @@ function consumeAttack(attack) {
   attack.state = false;
 }
 
-function attackCharacter(
-  ATK,
-  attacker,
-  defender,
-  defense = 0,
-  options = {},
-) {
+function recordTemporaryEffects(attack, target, effects) {
+  if (
+    !attack ||
+    !target ||
+    !target.id ||
+    !effects ||
+    Number(attack.turnCooldown) <= 0
+  ) {
+    return;
+  }
+
+  const appliedEffects = Object.fromEntries(
+    Object.entries(effects).filter(([, amount]) => amount !== 0),
+  );
+
+  if (Object.keys(appliedEffects).length === 0) return;
+
+  attack.activeEffects ??= [];
+
+  attack.activeEffects.push({
+    targetId: target.id,
+    effects: appliedEffects,
+  });
+}
+
+function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
   if (!ATK || !attacker || !defender) return null;
 
   if (attacker.mana < (ATK.cost ?? 0)) {
@@ -293,28 +305,41 @@ function attackCharacter(
     return null;
   }
 
+  // Calculate the health cost of a sacrifice attack.
+  const sacrificeHealth = Math.max(0, Number(ATK.sacrifice?.health) || 0);
+
+  // Prevent the attack from knocking out its own user.
+  if (attacker.health <= sacrificeHealth) {
+    console.log("Not enough health to use this sacrifice attack!");
+    return null;
+  }
+
   const blocked = options.blocked === true;
 
+  // Pay both costs when the attack is activated.
   attacker.mana -= ATK.cost ?? 0;
+  attacker.health -= sacrificeHealth;
 
   // A conditional buff only activates when the attack isn't blocked.
   const buffNotAppliedReason =
     ATK.buffRequiresHit && blocked ? "blocked" : null;
 
-  const buffsApplied =
-    buffNotAppliedReason
-      ? {}
-      : applyEffects(ATK.buff, attacker);
+  const buffsApplied = buffNotAppliedReason
+    ? {}
+    : applyEffects(ATK.buff, attacker);
 
-// By default, debuffs can still affect a defender who blocks.
-// Set debuffRequiresHit to make the debuff require a successful hit.
-const debuffNotAppliedReason =
-  ATK.debuffRequiresHit && blocked ? "blocked" : null;
+  recordTemporaryEffects(ATK, attacker, buffsApplied);
 
-const debuffsApplied = debuffNotAppliedReason
-  ? {}
-  : applyEffects(ATK.debuff, defender, -1);
+  // By default, debuffs can still affect a defender who blocks.
+  // Set debuffRequiresHit to make the debuff require a successful hit.
+  const debuffNotAppliedReason =
+    ATK.debuffRequiresHit && blocked ? "blocked" : null;
+
+  const debuffsApplied = debuffNotAppliedReason
+    ? {}
+    : applyEffects(ATK.debuff, defender, -1);
   let damageReceived = 0;
+  recordTemporaryEffects(ATK, defender, debuffsApplied);
 
   if (ATK.damage > 0 && defender.health > 0) {
     damageReceived = Math.max(0, ATK.damage - defense);
@@ -333,6 +358,7 @@ const debuffsApplied = debuffNotAppliedReason
     debuffsApplied,
     buffNotAppliedReason,
     debuffNotAppliedReason,
+    sacrificePaid: sacrificeHealth,
     action: ATK.buff || ATK.debuff ? "effect" : "attack",
   };
 }
@@ -355,7 +381,6 @@ function currentHealth(ATK, character, defense = 0) {
   }
 }
 
-
 function evadeAttack(ATK, attacker, defender) {
   if (!ATK || !attacker || !defender || !canUseAttack(ATK)) {
     return null;
@@ -373,7 +398,18 @@ function evadeAttack(ATK, attacker, defender) {
     return null;
   }
 
+  // Calculate sacrifice health.
+  const sacrificeHealth = Math.max(0, Number(ATK.sacrifice?.health) || 0);
+
+  // Prevent the attacker from knocking themselves out.
+  if (attacker.health <= sacrificeHealth) {
+    console.log("Not enough health to use this sacrifice attack!");
+    return null;
+  }
+
+  // Pay both costs when the attack is activated.
   attacker.mana = attackerMana - attackCost;
+  attacker.health -= sacrificeHealth;
 
   const hasCooldown = defenderCooldown > 0;
 
@@ -390,22 +426,20 @@ function evadeAttack(ATK, attacker, defender) {
   const evaded = usableAgility + manaSpent >= attackSpeed;
 
   // Conditional buffs only activate if the attack connects.
-  const buffNotAppliedReason =
-    ATK.buffRequiresHit && evaded ? "evaded" : null;
+  const buffNotAppliedReason = ATK.buffRequiresHit && evaded ? "evaded" : null;
 
-  const buffsApplied =
-    buffNotAppliedReason
-      ? {}
-      : applyEffects(ATK.buff, attacker);
+  const buffsApplied = buffNotAppliedReason
+    ? {}
+    : applyEffects(ATK.buff, attacker);
+
+  recordTemporaryEffects(ATK, attacker, buffsApplied);
 
   // An evaded attack cannot apply debuffs.
- // A successful evade prevents debuffs.
-const debuffNotAppliedReason = evaded ? "evaded" : null;
+  // A successful evade prevents debuffs.
+  const debuffNotAppliedReason = evaded ? "evaded" : null;
 
-const debuffsApplied = evaded
-  ? {}
-  : applyEffects(ATK.debuff, defender, -1);
-
+  const debuffsApplied = evaded ? {} : applyEffects(ATK.debuff, defender, -1);
+  recordTemporaryEffects(ATK, defender, debuffsApplied);
 
   let damageReceived = 0;
 
@@ -426,10 +460,16 @@ const debuffsApplied = evaded
     debuffsApplied,
     buffNotAppliedReason,
     debuffNotAppliedReason,
+    sacrificePaid: sacrificeHealth,
     action: evaded ? "evade" : "attack",
   };
 }
 
-
-export { attackCharacter, currentHealth, evadeAttack, applyEffects, consumeAttack, canUseAttack };
-
+export {
+  attackCharacter,
+  currentHealth,
+  evadeAttack,
+  applyEffects,
+  consumeAttack,
+  canUseAttack,
+};

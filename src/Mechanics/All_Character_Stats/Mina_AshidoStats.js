@@ -56,6 +56,7 @@ const mina = {
       damage: 40,
       speed: 10,
       cost: 40,
+      
       turnCooldown: 2,
       buffRequiresHit: true,
       buff: {
@@ -76,6 +77,9 @@ const mina = {
       damage: 10,
       speed: 20,
       cost: 20,
+      sacrifice: {
+    health: 25,
+  },
       debuff: { health: 5, defense: 10, agility: 10, cooldown: 1, recovery: 1 },
       state: true,
     },

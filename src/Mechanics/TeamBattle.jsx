@@ -5,7 +5,9 @@ import { roster } from "./Main Page/CharacterSelection";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup";
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives";
-import { attackCharacter, evadeAttack } from "./Health.js";
+import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
+
+import { resetAttacks } from "./Turns.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
@@ -39,12 +41,25 @@ function createBattleFighter(id) {
       typeof data.defense === "object" && data.defense
         ? { ...data.defense }
         : data.defense,
-    attacks: (data.attacks ?? []).map((attack) => ({
-      ...attack,
-      state: true,
-      buff: attack.buff ? { ...attack.buff } : attack.buff,
-      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-    })),
+    attacks: (data.attacks ?? []).map((attack) => {
+      const remainingUses = Number.isInteger(attack.uses)
+        ? attack.uses
+        : attack.remainingUses;
+
+      const cooldownRemaining = attack.cooldownRemaining ?? 0;
+
+      return {
+        ...attack,
+        remainingUses,
+        cooldownRemaining,
+        cooldownStartedThisRound: false,
+        state:
+          (remainingUses == null || remainingUses > 0) &&
+          cooldownRemaining <= 0,
+        buff: attack.buff ? { ...attack.buff } : attack.buff,
+        debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+      };
+    }),
     turnFinished: false,
     blocked: false,
   };
@@ -319,27 +334,27 @@ export default function TeamBattle() {
   const [phase, setPhase] = useState("selecting");
   const festivalBattleRecorded = useRef(false);
 
-useEffect(() => {
-  if (
-    (phase !== "victory" && phase !== "defeat") ||
-    festivalBattleRecorded.current
-  ) {
-    return;
-  }
+  useEffect(() => {
+    if (
+      (phase !== "victory" && phase !== "defeat") ||
+      festivalBattleRecorded.current
+    ) {
+      return;
+    }
 
-  // Make sure the match is recorded only once.
-  festivalBattleRecorded.current = true;
+    // Make sure the match is recorded only once.
+    festivalBattleRecorded.current = true;
 
-  // Both victories and defeats count as completed battles.
-  recordFestivalEvent("battle", 1);
-  recordDailyObjectiveEvent("battle", 1)
+    // Both victories and defeats count as completed battles.
+    recordFestivalEvent("battle", 1);
+    recordDailyObjectiveEvent("battle", 1);
 
-  // Only victories count toward victory challenges.
-  if (phase === "victory") {
-    recordFestivalEvent("victory", 1);
-    recordDailyObjectiveEvent("victory", 1)
-  }
-}, [phase]);
+    // Only victories count toward victory challenges.
+    if (phase === "victory") {
+      recordFestivalEvent("victory", 1);
+      recordDailyObjectiveEvent("victory", 1);
+    }
+  }, [phase]);
   const [roundNumber, setRoundNumber] = useState(1);
   const [showRoundIntro, setShowRoundIntro] = useState(true);
   const [roundTargets, setRoundTargets] = useState({});
@@ -384,7 +399,7 @@ useEffect(() => {
 
     if (newDamage > 0) {
       recordFestivalEvent("damage", newDamage);
-      recordDailyObjectiveEvent("damage", newDamage)
+      recordDailyObjectiveEvent("damage", newDamage);
     }
   }, [damageDealt]);
 
@@ -802,8 +817,13 @@ useEffect(() => {
 
     const attack = attacker.attacks[attackIndex];
 
-    if (!attack || attack.state !== true) {
-      addLog("That attack has already been used.");
+    if (!attack || !canUseAttack(attack)) {
+      addLog("That attack is unavailable or still on cooldown.");
+      return;
+    }
+
+    if (attacker.mana < (attack.cost ?? 0)) {
+      addLog(`${attacker.name} does not have enough mana.`);
       return;
     }
 
@@ -836,6 +856,11 @@ useEffect(() => {
         : difficulty === "Normal"
           ? normalDefendOrEvade(attack, attacker, defender)
           : aiDefendOrEvade(attack, attacker, defender);
+
+    if (!result) {
+      addLog(`${attack.name} could not be used.`);
+      return;
+    }
 
     const outcome = result.evaded
       ? `${defender.name} evaded ${attack.name}.`
@@ -883,7 +908,7 @@ useEffect(() => {
 
         const hasUsableAttack = attacker.attacks.some(
           (candidate) =>
-            candidate.state === true && attacker.mana >= (candidate.cost ?? 0),
+            canUseAttack(candidate) && attacker.mana >= (candidate.cost ?? 0),
         );
 
         return {
@@ -932,7 +957,7 @@ useEffect(() => {
 
       const nextAttackIndex = attacker.attacks.findIndex(
         (candidate) =>
-          candidate.state === true && attacker.mana >= (candidate.cost ?? 0),
+          canUseAttack(candidate) && attacker.mana >= (candidate.cost ?? 0),
       );
 
       const canAttackAgain =
@@ -1101,8 +1126,7 @@ useEffect(() => {
     const selectedAttack =
       difficulty === "Easy"
         ? ally.attacks.find(
-            (attack) =>
-              attack.state === true && ally.mana >= (attack.cost ?? 0),
+            (attack) => canUseAttack(attack) && ally.mana >= (attack.cost ?? 0),
           )
         : chooseNormalAttack(ally);
 
@@ -1201,7 +1225,7 @@ useEffect(() => {
           .map((attack, attackIndex) => ({ attack, attackIndex }))
           .filter(
             ({ attack }) =>
-              attack.state === true && cpu.mana >= (attack.cost ?? 0),
+              canUseAttack(attack) && cpu.mana >= (attack.cost ?? 0),
           )
           .map(({ attackIndex }) => ({
             id: `${cpu.id}-${attackIndex}-${target.id}`,
@@ -1262,7 +1286,7 @@ useEffect(() => {
         .map((attack, attackIndex) => ({ attack, attackIndex }))
         .filter(
           ({ attack }) =>
-            attack.state === true && cpu.mana >= (attack.cost ?? 0),
+            canUseAttack(attack) && cpu.mana >= (attack.cost ?? 0),
         )
         .slice(0, limit);
 
@@ -1340,12 +1364,17 @@ useEffect(() => {
           turnFinished: false,
           blocked: false,
 
-          attacks: fighter.attacks.map((attack) => ({
-            ...attack,
-            state: true,
-            buff: attack.buff ? { ...attack.buff } : attack.buff,
-            debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-          })),
+          attacks: resetAttacks(
+            fighter.attacks.map((attack) => ({
+              ...attack,
+              buff: attack.buff ? { ...attack.buff } : attack.buff,
+              debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+              activeEffects: attack.activeEffects
+                ? [...attack.activeEffects]
+                : [],
+            })),
+            [...updatedPlayers, ...updatedOpponents],
+          ),
         }));
 
       setTeams({
@@ -1376,7 +1405,7 @@ useEffect(() => {
     }
 
     const attack = cpu.attacks[action.attackIndex];
-    if (!attack || attack.state !== true || cpu.mana < (attack.cost ?? 0)) {
+    if (!attack || !canUseAttack(attack) || cpu.mana < (attack.cost ?? 0)) {
       setCpuActionIndex((index) => index + 1);
       return;
     }
@@ -1694,12 +1723,13 @@ useEffect(() => {
             turnFinished: false,
             blocked: false,
 
-            attacks: fighter.attacks.map((attack) => ({
-              ...attack,
-              state: true,
-              buff: attack.buff ? { ...attack.buff } : attack.buff,
-              debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-            })),
+            attacks: resetAttacks(
+              fighter.attacks.map((attack) => ({
+                ...attack,
+                buff: attack.buff ? { ...attack.buff } : attack.buff,
+                debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+              })),
+            ),
           }));
 
         setTeams({

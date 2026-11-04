@@ -4785,3 +4785,61 @@ body {
     inset 0 0 20px rgba(100, 5, 25, 0.4);
 }
 
+/* =========================================
+   SACRIFICE ATTACK — OBSIDIAN BLACK
+========================================= */
+
+.attack-card.attack-sacrifice {
+  background:
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(95, 0, 18, 0.2),
+      transparent 65%
+    ),
+    #000000 !important;
+
+  color: #ffffff !important;
+  border: 1px solid #64121f !important;
+
+  box-shadow:
+    inset 0 0 18px rgba(100, 0, 20, 0.12),
+    0 0 8px rgba(100, 0, 20, 0.18);
+}
+
+.attack-card.attack-sacrifice:hover:not(:disabled),
+.attack-card.attack-sacrifice:focus-visible {
+  background:
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(120, 0, 24, 0.25),
+      transparent 65%
+    ),
+    #000000 !important;
+
+  border-color: #a51d35 !important;
+
+  box-shadow:
+    inset 0 0 22px rgba(120, 0, 24, 0.2),
+    0 0 14px rgba(140, 0, 25, 0.3);
+}
+
+.attack-sacrifice .attack-image {
+  background: #000000;
+}
+
+.attack-sacrifice-cost {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 6px 4px;
+
+  color: #ff526b;
+  background: #160307;
+  border: 1px solid #701426;
+  border-radius: 5px;
+
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-align: center;
+}

@@ -221,8 +221,8 @@ function AttackOptions({
                   id={`attackCard${index}`}
                   type="button"
                   className={`card text-start p-3 attack-card ${getAttackCardType(attack)} ${
-                    !isAttackAvailable(attack) ? "attack-unavailable" : ""
-                  }`}
+  Number(attack.sacrifice?.health) > 0 ? "attack-sacrifice" : ""
+} ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}`}
                   style={{ minWidth: "200px" }}
                   disabled={
                     currentTurn !== "player" ||
@@ -253,6 +253,12 @@ function AttackOptions({
                     <span className="attack-mana-cost">
                       COST: {attack.cost} MANA
                     </span>
+
+                    {Number(attack.sacrifice?.health) > 0 && (
+  <span className="attack-sacrifice-cost">
+    HEALTH SACRIFICE: {attack.sacrifice.health}
+  </span>
+)}
 
                     {Number.isInteger(attack.uses) && (
                       <span className="attack-availability-info">
