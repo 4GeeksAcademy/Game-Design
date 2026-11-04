@@ -4,6 +4,16 @@ import { useNavigate } from "react-router-dom";
 
 import { roster } from "./CharacterSelection.jsx";
 import { getUnlockedCharacters } from "../Currency.js";
+import { skins } from "../Skins.js";
+
+import {
+  getOwnedSkins,
+  getEquippedSkin,
+  getEquippedSkins,
+  getCharacterImage,
+  equipSkin,
+  unequipSkin,
+} from "../SkinManager.js";
 
 import "./Inventory.css";
 
@@ -18,16 +28,32 @@ function Inventory() {
   // Track the character currently being viewed.
   const [selectedCharacterId, setSelectedCharacterId] = useState(null);
 
-  // Refresh the collection whenever a character is unlocked.
+  // Track skin ownership and equipment.
+  const [ownedSkinIds, setOwnedSkinIds] = useState(
+    () => getOwnedSkins()
+  );
+
+  const [equippedSkins, setEquippedSkins] = useState(
+    () => getEquippedSkins()
+  );
+
+  // Refresh character and skin data.
   useEffect(() => {
     const updateUnlocks = () => {
       setUnlockedIds(getUnlockedCharacters());
     };
 
+    const updateSkins = () => {
+      setOwnedSkinIds(getOwnedSkins());
+      setEquippedSkins(getEquippedSkins());
+    };
+
     window.addEventListener("unlocksUpdated", updateUnlocks);
+    window.addEventListener("skinsUpdated", updateSkins);
 
     return () => {
       window.removeEventListener("unlocksUpdated", updateUnlocks);
+      window.removeEventListener("skinsUpdated", updateSkins);
     };
   }, []);
 
@@ -57,6 +83,45 @@ function Inventory() {
       setSelectedCharacterId(ownedCharacters[0].id);
     }
   }, [unlockedIds, selectedCharacterId]);
+
+  // Get the skins belonging to the selected character.
+  const characterSkins = selectedCharacter
+    ? skins.filter(
+        (skin) => skin.characterId === selectedCharacter.id
+      )
+    : [];
+
+  // Get the selected character's equipped skin.
+  const equippedSkinId = selectedCharacter
+    ? getEquippedSkin(selectedCharacter.id)
+    : null;
+
+  // Equip or remove a skin.
+  const handleEquipSkin = (skin) => {
+    const success = equipSkin(skin.id);
+
+    if (success) {
+      setOwnedSkinIds(getOwnedSkins());
+      setEquippedSkins(getEquippedSkins());
+    }
+  };
+
+  const handleUnequipSkin = (characterId) => {
+    const success = unequipSkin(characterId);
+
+    if (success) {
+      setOwnedSkinIds(getOwnedSkins());
+      setEquippedSkins(getEquippedSkins());
+    }
+  };
+
+  // Show the currently equipped artwork in the profile portrait.
+  const selectedCharacterImage = selectedCharacter
+    ? getCharacterImage(
+        selectedCharacter.id,
+        selectedCharacter.image
+      )
+    : null;
 
   return (
     <main className="inventory-screen">
@@ -152,7 +217,9 @@ function Inventory() {
             <div className="inventory-empty">
               <span>⚔</span>
               <h3>NO FIGHTERS FOUND</h3>
-              <p>Unlock a character to add them to your collection.</p>
+              <p>
+                Unlock a character to add them to your collection.
+              </p>
             </div>
           )}
         </section>
@@ -169,9 +236,15 @@ function Inventory() {
             <div className="inventory-details-layout">
               <div className="inventory-details-portrait">
                 <img
-                  src={selectedCharacter.image}
+                  src={selectedCharacterImage}
                   alt={selectedCharacter.data.name}
                 />
+
+                {equippedSkinId && (
+                  <span className="inventory-equipped-portrait-label">
+                    SKIN EQUIPPED
+                  </span>
+                )}
               </div>
 
               <div className="inventory-details-content">
@@ -218,13 +291,111 @@ function Inventory() {
                     ))}
                 </div>
 
-                <div className="inventory-skins-placeholder">
-                  <h3>CHARACTER SKINS</h3>
-                  <p>
-                    Your obtainable and equipped skins will appear here.
-                  </p>
-                  <span>SKIN CUSTOMIZATION COMING SOON</span>
-                </div>
+                {/* CHARACTER SKINS */}
+                <section className="inventory-skins-section">
+                  <div className="inventory-skins-heading">
+                    <div>
+                      <p>CUSTOMIZATION</p>
+                      <h3>CHARACTER SKINS</h3>
+                    </div>
+
+                    <span>
+                      {characterSkins.filter((skin) =>
+                        ownedSkinIds.includes(skin.id)
+                      ).length} / {characterSkins.length} OWNED
+                    </span>
+                  </div>
+
+                  {characterSkins.length > 0 ? (
+                    <div className="inventory-skin-grid">
+                      {characterSkins.map((skin) => {
+                        const isOwned = ownedSkinIds.includes(skin.id);
+                        const isEquipped = equippedSkins[
+                          selectedCharacter.id
+                        ] === skin.id;
+
+                        return (
+                          <article
+                            className={`inventory-skin-card ${
+                              isOwned ? "skin-owned" : "skin-locked"
+                            }`}
+                            key={skin.id}
+                          >
+                            <div className="inventory-skin-image">
+                              <img
+                                src={skin.image}
+                                alt={skin.name}
+                              />
+
+                              {!isOwned && (
+                                <div className="inventory-skin-lock">
+                                  <span>🔒</span>
+                                  <strong>LOCKED</strong>
+                                </div>
+                              )}
+
+                              {isEquipped && (
+                                <span className="inventory-skin-equipped">
+                                  EQUIPPED
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="inventory-skin-info">
+                              <strong>{skin.name}</strong>
+
+                              <span className="inventory-skin-rarity">
+                                {skin.rarity?.toUpperCase() ?? "STANDARD"} SKIN
+                              </span>
+
+                              <p>{skin.description}</p>
+
+                              {isOwned ? (
+                                isEquipped ? (
+                                  <button
+                                    type="button"
+                                    className="inventory-skin-button unequip"
+                                    onClick={() =>
+                                      handleUnequipSkin(
+                                        selectedCharacter.id
+                                      )
+                                    }
+                                  >
+                                    UNEQUIP
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="inventory-skin-button equip"
+                                    onClick={() => handleEquipSkin(skin)}
+                                  >
+                                    EQUIP SKIN
+                                  </button>
+                                )
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="inventory-skin-button locked"
+                                  disabled
+                                >
+                                  NOT UNLOCKED
+                                </button>
+                              )}
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="inventory-no-skins">
+                      <span>◇</span>
+                      <p>
+                        No alternate skins have been released for this
+                        character yet.
+                      </p>
+                    </div>
+                  )}
+                </section>
               </div>
             </div>
           </section>

@@ -1,4 +1,6 @@
 import Opponent from "./Opponent.jsx";
+import { roster } from "./Main Page/CharacterSelection.jsx";
+import { getCharacterImage } from "./SkinManager.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives";
@@ -87,14 +89,37 @@ function App() {
     hinata: Hinata,
   };
 
-  const playerData = fighterData[location.state?.playerId] ?? mina;
+  // Resolve the selected fighter IDs, including safe fallbacks.
+const requestedPlayerId = location.state?.playerId;
+const playerId = fighterData[requestedPlayerId]
+  ? requestedPlayerId
+  : "mina";
 
-  const opponentData =
-    fighterData[location.state?.opponentId] ??
-    (playerData === mina ? rockLee : mina);
+const requestedOpponentId = location.state?.opponentId;
+const opponentId = fighterData[requestedOpponentId]
+  ? requestedOpponentId
+  : playerId === "mina"
+    ? "rockLee"
+    : "mina";
+
+const playerData = fighterData[playerId];
+const opponentData = fighterData[opponentId];
+
+// Find the original roster artwork for each fighter.
+const playerRosterEntry = roster.find(
+  (fighter) => fighter.id === playerId
+);
+
+const opponentRosterEntry = roster.find(
+  (fighter) => fighter.id === opponentId
+);
 
   const [character, setCharacter] = useState(() => ({
     ...playerData,
+    image: getCharacterImage(
+    playerId,
+    playerRosterEntry?.image ?? playerData.image
+  ),
      id: "player",
     attacks: playerData.attacks.map((attack) => ({ ...attack })),
     health: playerData.health,
@@ -108,6 +133,10 @@ function App() {
 
   const [opponent, setOpponent] = useState(() => ({
     ...opponentData,
+    image: getCharacterImage(
+    opponentId,
+    opponentRosterEntry?.image ?? opponentData.image
+  ),
     id: "opponent",
     attacks: opponentData.attacks.map((attack) => ({ ...attack })),
     health: opponentData.health,

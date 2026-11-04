@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { getCharacterImage } from "../SkinManager.js";
 import Toga from "../All_Character_Stats/TogaStats.js";
 import TogaImage from "/workspaces/Game-Design/src/assets/img/Toga.png";
 import { Kenpachi } from "../All_Character_Stats/KempachiStats.js";
@@ -197,7 +198,10 @@ function FighterStats({ fighter }) {
     <div className={`roster-fighter-info ${fighter.color}`}>
       <div className="roster-fighter-layout">
         <div className="roster-fighter-portrait">
-          <img src={fighter.image} alt={stats.name} />
+          <img
+            src={getCharacterImage(fighter.id, fighter.image)}
+            alt={stats.name}
+          />
         </div>
 
         <div className="roster-fighter-details">
@@ -659,23 +663,23 @@ function CharacterSelection() {
       </section>
 
       {phase === "player" ? (
-          <button className="confirm-fighter-button" onClick={confirmSelection}>
-            {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
-            <span>▶</span>
-          </button>
-        ) : (
-          <button
-            className="confirm-fighter-button"
-            onClick={startBattle}
-            disabled={
-              phase !== "ready" ||
-              selectedIndices.length !== requiredFighters ||
-              cpuIndices.length !== cpuFighterCount
-            }
-          >
-            {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
-          </button>
-        )}
+        <button className="confirm-fighter-button" onClick={confirmSelection}>
+          {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
+          <span>▶</span>
+        </button>
+      ) : (
+        <button
+          className="confirm-fighter-button"
+          onClick={startBattle}
+          disabled={
+            phase !== "ready" ||
+            selectedIndices.length !== requiredFighters ||
+            cpuIndices.length !== cpuFighterCount
+          }
+        >
+          {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
+        </button>
+      )}
 
       <section className="roster-section">
         <div className="roster-title-row">
@@ -746,7 +750,10 @@ function CharacterSelection() {
                 )}
 
                 <span className="roster-portrait">
-                  <img src={fighter.image} alt={fighter.data.name} />
+                  <img
+                    src={getCharacterImage(fighter.id, fighter.image)}
+                    alt={fighter.data.name}
+                  />
 
                   {!fighterUnlocked && (
                     <span className="fighter-lock-overlay">

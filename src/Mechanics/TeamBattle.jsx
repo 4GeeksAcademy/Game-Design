@@ -6,7 +6,7 @@ import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup"
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives";
 import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
-
+import { getCharacterImage } from "./SkinManager.js";
 import { resetAttacks } from "./Turns.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
@@ -32,7 +32,7 @@ function createBattleFighter(id) {
   return {
     ...data,
     id: selected.id,
-    image: selected.image ?? data.image,
+    image: getCharacterImage(selected.id, selected.image ?? data.image),
     health: data.health,
     maximumHealth: data.maximumHealth ?? data.health,
     mana: data.mana,
@@ -1340,56 +1340,58 @@ export default function TeamBattle() {
         return;
       }
 
-     // Clone both teams first so temporary effects can find their targets.
-const allFighters = [...teams.player, ...teams.opponent].map((fighter) => ({
-  ...fighter,
-  attacks: fighter.attacks.map((attack) => ({
-    ...attack,
-    buff: attack.buff ? { ...attack.buff } : attack.buff,
-    debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-    activeEffects: attack.activeEffects
-      ? [...attack.activeEffects]
-      : [],
-  })),
-}));
+      // Clone both teams first so temporary effects can find their targets.
+      const allFighters = [...teams.player, ...teams.opponent].map(
+        (fighter) => ({
+          ...fighter,
+          attacks: fighter.attacks.map((attack) => ({
+            ...attack,
+            buff: attack.buff ? { ...attack.buff } : attack.buff,
+            debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+            activeEffects: attack.activeEffects
+              ? [...attack.activeEffects]
+              : [],
+          })),
+        }),
+      );
 
-// Reset attack cooldowns and reverse expired effects.
-allFighters.forEach((fighter) => {
-  fighter.attacks = resetAttacks(fighter.attacks, allFighters);
-});
+      // Reset attack cooldowns and reverse expired effects.
+      allFighters.forEach((fighter) => {
+        fighter.attacks = resetAttacks(fighter.attacks, allFighters);
+      });
 
-// Restore each fighter's normal round resources.
-const resetFighters = (fighters) =>
-  fighters.map((fighter) => ({
-    ...fighter,
+      // Restore each fighter's normal round resources.
+      const resetFighters = (fighters) =>
+        fighters.map((fighter) => ({
+          ...fighter,
 
-    mana:
-      fighter.health > 0
-        ? Math.min(
-            fighter.maximumMana ?? fighter.mana,
-            fighter.mana + (fighter.manaRegen ?? 0),
-          )
-        : fighter.mana,
+          mana:
+            fighter.health > 0
+              ? Math.min(
+                  fighter.maximumMana ?? fighter.mana,
+                  fighter.mana + (fighter.manaRegen ?? 0),
+                )
+              : fighter.mana,
 
-    cooldown:
-      fighter.health > 0
-        ? Math.min(
-            fighter.maximumCooldown ?? fighter.cooldown ?? 0,
-            (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
-          )
-        : fighter.cooldown,
+          cooldown:
+            fighter.health > 0
+              ? Math.min(
+                  fighter.maximumCooldown ?? fighter.cooldown ?? 0,
+                  (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
+                )
+              : fighter.cooldown,
 
-    turnFinished: false,
-    blocked: false,
-    attacks: fighter.attacks,
-  }));
+          turnFinished: false,
+          blocked: false,
+          attacks: fighter.attacks,
+        }));
 
-const playerCount = teams.player.length;
+      const playerCount = teams.player.length;
 
-setTeams({
-  player: resetFighters(allFighters.slice(0, playerCount)),
-  opponent: resetFighters(allFighters.slice(playerCount)),
-});
+      setTeams({
+        player: resetFighters(allFighters.slice(0, playerCount)),
+        opponent: resetFighters(allFighters.slice(playerCount)),
+      });
       setRoundTargets({});
       setCpuQueueReady(false);
       setCpuTargets({});
