@@ -436,7 +436,7 @@
 }
 
 .inventory-skin-card.skin-locked .inventory-skin-image > img {
-  filter: grayscale(1) brightness(0.35) blur(2px);
+  filter: grayscale(1) brightness(0.35) blur(5px);
   transform: scale(1.04);
 }
 
