@@ -306,11 +306,14 @@ function attackCharacter(
       ? {}
       : applyEffects(ATK.buff, attacker);
 
-  // Debuffs must never affect a defender who successfully blocks.
-  const debuffsApplied = blocked
-    ? {}
-    : applyEffects(ATK.debuff, defender, -1);
+// By default, debuffs can still affect a defender who blocks.
+// Set debuffRequiresHit to make the debuff require a successful hit.
+const debuffNotAppliedReason =
+  ATK.debuffRequiresHit && blocked ? "blocked" : null;
 
+const debuffsApplied = debuffNotAppliedReason
+  ? {}
+  : applyEffects(ATK.debuff, defender, -1);
   let damageReceived = 0;
 
   if (ATK.damage > 0 && defender.health > 0) {
@@ -329,6 +332,7 @@ function attackCharacter(
     buffsApplied,
     debuffsApplied,
     buffNotAppliedReason,
+    debuffNotAppliedReason,
     action: ATK.buff || ATK.debuff ? "effect" : "attack",
   };
 }
@@ -395,9 +399,13 @@ function evadeAttack(ATK, attacker, defender) {
       : applyEffects(ATK.buff, attacker);
 
   // An evaded attack cannot apply debuffs.
-  const debuffsApplied = evaded
-    ? {}
-    : applyEffects(ATK.debuff, defender, -1);
+ // A successful evade prevents debuffs.
+const debuffNotAppliedReason = evaded ? "evaded" : null;
+
+const debuffsApplied = evaded
+  ? {}
+  : applyEffects(ATK.debuff, defender, -1);
+
 
   let damageReceived = 0;
 
@@ -417,6 +425,7 @@ function evadeAttack(ATK, attacker, defender) {
     buffsApplied,
     debuffsApplied,
     buffNotAppliedReason,
+    debuffNotAppliedReason,
     action: evaded ? "evade" : "attack",
   };
 }

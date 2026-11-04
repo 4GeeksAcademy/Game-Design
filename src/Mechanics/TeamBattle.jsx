@@ -1564,6 +1564,7 @@ useEffect(() => {
         currentAttacker,
         currentDefender,
         defense,
+        { blocked: true },
       );
     } else if (choice === "evade") {
       result = evadeAttack(currentAttack, currentAttacker, currentDefender);
@@ -1574,6 +1575,7 @@ useEffect(() => {
         currentAttacker,
         currentDefender,
         0,
+        { blocked: true },
       );
     }
 
@@ -1900,6 +1902,7 @@ useEffect(() => {
           currentAttacker,
           currentDefender,
           defense,
+          { blocked: true },
         );
       } else if (choice === "evade") {
         result = evadeAttack(attack, currentAttacker, currentDefender);
