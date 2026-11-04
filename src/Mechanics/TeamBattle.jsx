@@ -1340,47 +1340,56 @@ export default function TeamBattle() {
         return;
       }
 
-      const resetFighters = (fighters) =>
-        fighters.map((fighter) => ({
-          ...fighter,
+     // Clone both teams first so temporary effects can find their targets.
+const allFighters = [...teams.player, ...teams.opponent].map((fighter) => ({
+  ...fighter,
+  attacks: fighter.attacks.map((attack) => ({
+    ...attack,
+    buff: attack.buff ? { ...attack.buff } : attack.buff,
+    debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+    activeEffects: attack.activeEffects
+      ? [...attack.activeEffects]
+      : [],
+  })),
+}));
 
-          mana:
-            fighter.health > 0
-              ? Math.min(
-                  fighter.maximumMana ?? fighter.mana,
-                  fighter.mana + (fighter.manaRegen ?? 0),
-                )
-              : fighter.mana,
+// Reset attack cooldowns and reverse expired effects.
+allFighters.forEach((fighter) => {
+  fighter.attacks = resetAttacks(fighter.attacks, allFighters);
+});
 
-          // Restore cooldown based on this fighter's recovery stat.
-          cooldown:
-            fighter.health > 0
-              ? Math.min(
-                  fighter.maximumCooldown ?? fighter.cooldown ?? 0,
-                  (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
-                )
-              : fighter.cooldown,
+// Restore each fighter's normal round resources.
+const resetFighters = (fighters) =>
+  fighters.map((fighter) => ({
+    ...fighter,
 
-          turnFinished: false,
-          blocked: false,
+    mana:
+      fighter.health > 0
+        ? Math.min(
+            fighter.maximumMana ?? fighter.mana,
+            fighter.mana + (fighter.manaRegen ?? 0),
+          )
+        : fighter.mana,
 
-          attacks: resetAttacks(
-            fighter.attacks.map((attack) => ({
-              ...attack,
-              buff: attack.buff ? { ...attack.buff } : attack.buff,
-              debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-              activeEffects: attack.activeEffects
-                ? [...attack.activeEffects]
-                : [],
-            })),
-            [...updatedPlayers, ...updatedOpponents],
-          ),
-        }));
+    cooldown:
+      fighter.health > 0
+        ? Math.min(
+            fighter.maximumCooldown ?? fighter.cooldown ?? 0,
+            (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
+          )
+        : fighter.cooldown,
 
-      setTeams({
-        player: resetFighters(teams.player),
-        opponent: resetFighters(teams.opponent),
-      });
+    turnFinished: false,
+    blocked: false,
+    attacks: fighter.attacks,
+  }));
+
+const playerCount = teams.player.length;
+
+setTeams({
+  player: resetFighters(allFighters.slice(0, playerCount)),
+  opponent: resetFighters(allFighters.slice(playerCount)),
+});
       setRoundTargets({});
       setCpuQueueReady(false);
       setCpuTargets({});

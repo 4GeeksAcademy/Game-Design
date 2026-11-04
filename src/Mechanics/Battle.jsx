@@ -95,6 +95,7 @@ function App() {
 
   const [character, setCharacter] = useState(() => ({
     ...playerData,
+     id: "player",
     attacks: playerData.attacks.map((attack) => ({ ...attack })),
     health: playerData.health,
     maximumHealth: playerData.health,
@@ -107,6 +108,7 @@ function App() {
 
   const [opponent, setOpponent] = useState(() => ({
     ...opponentData,
+    id: "opponent",
     attacks: opponentData.attacks.map((attack) => ({ ...attack })),
     health: opponentData.health,
     maximumHealth: opponentData.health,
