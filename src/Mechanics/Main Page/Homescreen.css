@@ -237,6 +237,9 @@
 .home-menu-buttons > .arcade-button:nth-child(5) {
   animation-delay: 0.54s;
 }
+.home-menu-buttons > .arcade-button:nth-child(5) {
+  animation-delay: 0.63s;
+}
 
 .arcade-button {
   position: relative;

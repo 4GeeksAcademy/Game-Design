@@ -365,10 +365,15 @@ function Homescreen() {
           SETTINGS
         </button>
 
-        
-
         <button className="arcade-button" onClick={() => openMenu("howToPlay")}>
           HOW TO PLAY
+        </button>
+
+        <button
+          className="arcade-button"
+          onClick={() => navigate("/inventory")}
+        >
+          INVENTORY <span>🎒</span>
         </button>
 
         <button
@@ -377,7 +382,6 @@ function Homescreen() {
         >
           ACHIEVEMENTS <span>🏅</span>
         </button>
-
       </div>
     </>
   );

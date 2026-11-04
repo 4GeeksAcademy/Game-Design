@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 
 // Import components from Mechanics folder
 import Achievements from "../Mechanics/Main Page/Achievements.jsx";
+import Inventory from "../Mechanics/Main Page/Inventory.jsx";
 import Battle from "../Mechanics/Battle.jsx";
 import TeamBattle from "../Mechanics/TeamBattle.jsx";
 import Character from "../Mechanics/Character.jsx";
@@ -36,6 +37,7 @@ export const AppRoutes = () => {
        <Route path="/story-reward" element={<StoryRewardScreen />} />
       <Route path="/story-cutscene" element={<StoryLevel1 />} />
       <Route path="/achievements" element={<Achievements />} />
+      <Route path="/inventory" element={<Inventory />} />
       <Route path="*" element={<h1>404 Not Found</h1>} />
      
     </Routes>
