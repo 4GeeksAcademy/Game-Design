@@ -82,7 +82,7 @@ function AttackOptions({
 }) {
   const openingTurnAttackLimitReached =
     openingTurnActive &&
-    character.attacks.filter((attack) => attack.state === false).length >= 3;
+    character.attacks.filter((attack) => attack.state === false).length >= 4;
   const handleAttack = useCallback(
     (index) => {
       const attack = character.attacks[index];

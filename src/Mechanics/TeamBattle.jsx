@@ -904,8 +904,8 @@ export default function TeamBattle() {
       (move) => move.state === false,
     ).length;
 
-    if (roundNumber === 1 && attacksUsedThisTurn >= 3) {
-      addLog(`${attacker.name} has reached the 3-attack opening limit.`);
+    if (roundNumber === 1 && attacksUsedThisTurn >= 4) {
+      addLog(`${attacker.name} has reached the 4-attack opening limit.`);
       return;
     }
 
@@ -978,7 +978,7 @@ const hasUsableAttack = attacker.attacks.some(
 const cpuMustFinish =
   !hasUsableAttack ||
   (difficulty === "Easy" && attacksUsedAfter >= 1) ||
-  (roundNumber === 1 && attacksUsedAfter >= 3);
+  (roundNumber === 1 && attacksUsedAfter >= 4);
 
 // Save the updated resources and attacks on the actual team fighter.
 const playersAfter = updatedPlayers.map((fighter) => {
@@ -1310,7 +1310,7 @@ return (
       (attack) => attack.state === false,
     ).length;
 
-    if (roundNumber === 1 && attacksUsedThisTurn >= 3) {
+    if (roundNumber === 1 && attacksUsedThisTurn >= 4) {
       finishPlayerTurn(ally.id);
       return;
     }

@@ -2,7 +2,7 @@ import { attackCharacter, evadeAttack } from "./Health.js";
 import { chooseNormalAttack, scoreAttack } from "./AI_NormalDifficulty.js";
 
 const MAX_ROUNDS = 100;
-const OPENING_TURN_ATTACK_LIMIT = 3;
+const OPENING_TURN_ATTACK_LIMIT = 4;
 const MAX_ATTACKS_PER_TURN = {
   Easy: 1,
   Normal: 6,
