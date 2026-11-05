@@ -5,7 +5,12 @@ import { roster } from "./Main Page/CharacterSelection";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup";
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives";
-import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
+import {
+  attackCharacter,
+  evadeAttack,
+  canUseAttack,
+  applyHeal,
+} from "./Health.js";
 import { getCharacterImage } from "./SkinManager.js";
 import { resetAttacks } from "./Turns.js";
 import VictoryScreen from "./VictoryScreen.jsx";
@@ -303,7 +308,7 @@ export default function TeamBattle() {
   } = location.state ?? {};
   const isStory1v2 =
     isStoryMode && playerTeamIds.length === 1 && opponentTeamIds.length === 2;
-
+  const [pendingHealSelection, setPendingHealSelection] = useState(null);
   const resolveLocalCoopDefenseRef = useRef(() => {});
   const [isIntroFadingOut, setIsIntroFadingOut] = useState(false);
   const [playerAttackPopup, setPlayerAttackPopup] = useState(null);

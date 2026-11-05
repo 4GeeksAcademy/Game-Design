@@ -8,7 +8,7 @@ const STORAGE_KEY = "fighters-arena-daily-objectives";
 
 const DAILY_OBJECTIVE_POOL = [
   {
-    id: "complete-3-battles",
+    id: "complete-20-battles",
     title: "Enter the Arena",
     description: "Complete 20 battles.",
     type: "battle",

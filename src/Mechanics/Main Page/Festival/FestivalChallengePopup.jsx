@@ -24,9 +24,9 @@ function FestivalChallengePopup() {
     );
 
     window.addEventListener(
-  "festivalDailyObjectiveCompleted",
-  handleChallengeCompleted
-);
+      "festivalDailyObjectiveCompleted",
+      handleChallengeCompleted,
+    );
 
     return () => {
       window.removeEventListener(
@@ -35,9 +35,9 @@ function FestivalChallengePopup() {
       );
 
       window.removeEventListener(
-  "festivalDailyObjectiveCompleted",
-  handleChallengeCompleted
-);
+        "festivalDailyObjectiveCompleted",
+        handleChallengeCompleted,
+      );
     };
   }, []);
 
@@ -66,10 +66,10 @@ function FestivalChallengePopup() {
 
   return (
     <div
-  className={`festival-completion-container ${
-    isExiting ? "festival-popup-exit" : ""
-  }`}
->
+      className={`festival-completion-container ${
+        isExiting ? "festival-popup-exit" : ""
+      }`}
+    >
       <div className="festival-completion-popup">
         <div className="festival-completion-icon">
           {activeChallenge.icon || "🏆"}

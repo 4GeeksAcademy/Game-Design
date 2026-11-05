@@ -232,6 +232,54 @@ function applyEffects(effects, character, direction = 1) {
   return applied;
 }
 
+function applyHeal(attack, recipient) {
+  const heal = attack?.heal;
+
+  if (!heal || !recipient || recipient.health <= 0) {
+    return {
+      healed: 0,
+      buffsApplied: {},
+    };
+  }
+
+  const previousHealth = recipient.health;
+
+  // Main HP restoration
+  applyEffects(
+    { health: Math.max(0, Number(heal.amount) || 0) },
+    recipient
+  );
+
+  // Additional immediate resource restoration
+  const instantEffects = {};
+  const temporaryEffects = {};
+
+  const instantStats = ["health", "mana", "cooldown"];
+
+  Object.entries(heal.buff ?? {}).forEach(([stat, amount]) => {
+    if (typeof amount !== "number" || amount === 0) return;
+
+    if (instantStats.includes(stat)) {
+      instantEffects[stat] = amount;
+    } else {
+      temporaryEffects[stat] = amount;
+    }
+  });
+
+  applyEffects(instantEffects, recipient);
+
+  // Apply stat buffs to the teammate
+  const buffsApplied = applyEffects(temporaryEffects, recipient);
+
+  // Reuse the existing temporary-effect expiration system
+  recordTemporaryEffects(attack, recipient, buffsApplied);
+
+  return {
+    healed: recipient.health - previousHealth,
+    buffsApplied,
+  };
+}
+
 function canUseAttack(attack) {
   if (!attack || attack.state !== true) return false;
 
@@ -470,6 +518,7 @@ export {
   currentHealth,
   evadeAttack,
   applyEffects,
+  applyHeal,
   consumeAttack,
   canUseAttack,
 };
