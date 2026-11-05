@@ -1,7 +1,7 @@
 const CURRENCY_KEY = "fightersArenaCoins";
 const UNLOCKED_KEY = "fightersArenaUnlockedCharacters";
 
-const STARTER_CHARACTERS = ["mina", "kirishima"];
+
 
 export function getCoins() {
   const savedCoins = Number(localStorage.getItem(CURRENCY_KEY));
@@ -47,14 +47,14 @@ export function getUnlockedCharacters() {
       const parsed = JSON.parse(saved);
 
       if (Array.isArray(parsed)) {
-        return [...new Set([...STARTER_CHARACTERS, ...parsed])];
+        return [...new Set(parsed)];
       }
     }
   } catch (error) {
     console.error("Could not load character unlocks:", error);
   }
 
-  return [...STARTER_CHARACTERS];
+  return [];
 }
 
 export function unlockCharacter(characterId) {

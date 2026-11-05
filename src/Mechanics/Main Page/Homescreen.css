@@ -831,3 +831,130 @@
   }
 }
 
+/* FIRST-TIME STARTER SELECTION */
+
+.starter-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.starter-modal {
+  width: min(100%, 600px);
+  padding: 32px 24px;
+  text-align: center;
+  background: #15151d;
+  border: 2px solid #13d5ff;
+  border-radius: 14px;
+  box-shadow: 0 0 30px rgba(19, 213, 255, 0.2);
+}
+
+.starter-modal .menu-description {
+  margin-bottom: 25px;
+}
+
+.starter-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.starter-choice {
+  min-height: 135px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 10px;
+  color: white;
+  background: #242430;
+  border: 2px solid #484854;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.starter-choice:hover {
+  border-color: #13d5ff;
+  transform: translateY(-3px);
+}
+
+.starter-choice.selected {
+  border-color: #13d5ff;
+  background: rgba(19, 213, 255, 0.12);
+  box-shadow: 0 0 18px rgba(19, 213, 255, 0.2);
+}
+
+.starter-choice-name {
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.starter-choice-status {
+  color: #13d5ff;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.starter-selected-check {
+  color: #13d5ff;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.starter-confirm-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.starter-modal-note {
+  margin-top: 18px;
+  color: #aaa;
+  font-size: 0.75rem;
+}
+
+/* LOCKED 2V2 OPTION */
+
+.choice-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+  transform: none;
+}
+
+.choice-button:disabled:hover {
+  transform: none;
+  border-color: inherit;
+}
+
+@media (max-width: 480px) {
+  .starter-modal {
+    padding: 24px 16px;
+  }
+
+  .starter-choice-grid {
+    gap: 8px;
+  }
+
+  .starter-choice-name {
+    font-size: 1.1rem;
+  }
+}
+
+.starter-choice-image {
+  width: 90px;
+  height: 110px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 6px;
+}

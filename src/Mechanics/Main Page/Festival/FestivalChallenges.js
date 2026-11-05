@@ -37,6 +37,16 @@ const CHALLENGE_POOL = [
     category: "OFFENSE",
   },
   {
+    id: "damage-1000",
+    title: "Devastating Force",
+    description: "Deal 1,000 damage across battles.",
+    type: "damage",
+    target: 1000,
+    points: 25,
+    icon: "💥",
+    category: "OFFENSE",
+  },
+  {
     id: "attacks-5",
     title: "Attack Starter",
     description: "Use 5 attacks during combat.",
@@ -57,6 +67,16 @@ const CHALLENGE_POOL = [
     category: "COMBAT",
   },
   {
+    id: "attacks-50",
+    title: "Punching Maniac!",
+    description: "Use 50 attacks during combat.",
+    type: "attack",
+    target: 50,
+    points: 55,
+    icon: "🔥",
+    category: "COMBAT",
+  },
+  {
     id: "defense-3",
     title: "Quick Defense",
     description: "Successfully block or evade 3 attacks.",
@@ -67,12 +87,12 @@ const CHALLENGE_POOL = [
     category: "DEFENSE",
   },
   {
-    id: "defense-5",
+    id: "defense-100",
     title: "Untouchable",
-    description: "Successfully block or evade 5 attacks.",
+    description: "Successfully block or evade 100 attacks.",
     type: "defense",
-    target: 5,
-    points: 15,
+    target: 100,
+    points: 70,
     icon: "💨",
     category: "DEFENSE",
   },
@@ -93,6 +113,16 @@ const CHALLENGE_POOL = [
     type: "victory",
     target: 2,
     points: 25,
+    icon: "👑",
+    category: "VICTORY",
+  },
+  {
+    id: "victory-10",
+    title: "Unbeatable",
+    description: "Win 10 battles.",
+    type: "victory",
+    target: 10,
+    points: 70,
     icon: "👑",
     category: "VICTORY",
   },
@@ -130,10 +160,7 @@ const createNewRotation = () => {
   for (let i = shuffled.length - 1; i > 0; i--) {
     const randomIndex = Math.floor(Math.random() * (i + 1));
 
-    [shuffled[i], shuffled[randomIndex]] = [
-      shuffled[randomIndex],
-      shuffled[i],
-    ];
+    [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
   }
 
   const selectedChallenges = shuffled
@@ -197,54 +224,49 @@ export const recordFestivalEvent = (eventType, amount = 1) => {
 
   const eventAmount = Number(amount);
 
-  if (
-    !Number.isFinite(eventAmount) ||
-    eventAmount <= 0
-  ) {
+  if (!Number.isFinite(eventAmount) || eventAmount <= 0) {
     return currentRotation;
   }
 
-let pointsEarned = 0;
-const newlyCompleted = [];
+  let pointsEarned = 0;
+  const newlyCompleted = [];
 
-const updatedChallenges = currentRotation.challenges.map((challenge) => {
-      if (challenge.completed) {
-        return challenge;
-      }
+  const updatedChallenges = currentRotation.challenges.map((challenge) => {
+    if (challenge.completed) {
+      return challenge;
+    }
 
-      const matchesEvent =
-        challenge.type === eventType ||
-        (challenge.type === "defense" &&
-          ["block", "evade"].includes(eventType));
+    const matchesEvent =
+      challenge.type === eventType ||
+      (challenge.type === "defense" && ["block", "evade"].includes(eventType));
 
-      if (!matchesEvent) {
-        return challenge;
-      }
+    if (!matchesEvent) {
+      return challenge;
+    }
 
-      const progress = Math.min(
-        challenge.target,
-        challenge.progress + eventAmount,
-      );
+    const progress = Math.min(
+      challenge.target,
+      challenge.progress + eventAmount,
+    );
 
-     const completed = progress >= challenge.target;
+    const completed = progress >= challenge.target;
 
-if (completed) {
-  pointsEarned += challenge.points;
+    if (completed) {
+      pointsEarned += challenge.points;
 
-  newlyCompleted.push({
-    ...challenge,
-    progress,
-    completed: true,
-  });
-}
-
-      return {
+      newlyCompleted.push({
         ...challenge,
         progress,
-        completed,
-      };
-    },
-  );
+        completed: true,
+      });
+    }
+
+    return {
+      ...challenge,
+      progress,
+      completed,
+    };
+  });
 
   const updatedRotation = {
     ...currentRotation,
@@ -255,17 +277,17 @@ if (completed) {
   // This prevents the same completed challenge from awarding twice.
   const saved = saveRotation(updatedRotation);
 
-if (saved && pointsEarned > 0) {
-  addFestivalPoints(pointsEarned);
+  if (saved && pointsEarned > 0) {
+    addFestivalPoints(pointsEarned);
 
-  newlyCompleted.forEach((challenge) => {
-    window.dispatchEvent(
-      new CustomEvent("festivalChallengeCompleted", {
-        detail: challenge,
-      })
-    );
-  });
-}
+    newlyCompleted.forEach((challenge) => {
+      window.dispatchEvent(
+        new CustomEvent("festivalChallengeCompleted", {
+          detail: challenge,
+        }),
+      );
+    });
+  }
 
-return updatedRotation;
+  return updatedRotation;
 };

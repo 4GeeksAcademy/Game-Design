@@ -3,6 +3,8 @@ import GokuImage from "../../../assets/img/Goku.jpeg";
 import KenpachiImage from "../../../assets/img/Kenpachi.png";
 import TogaImage from "../../../assets/img/Toga.png";
 import HinataImage from "../../../assets/img/Hinata.png";
+import { getOwnedSkins, unlockSkin } from "../../SkinManager";
+import { skins } from "../../Skins";
 import { useNavigate } from "react-router-dom";
 import { getDailyObjectives } from "./FestivalDailyObjectives";
 import FESTIVAL_REWARDS from "./FestivalRewards";
@@ -13,7 +15,7 @@ import {
   claimFestivalReward,
   FESTIVAL_TOTAL_POINTS,
   FESTIVAL_TOTAL_TIERS,
-  FESTIVAL_POINTS_PER_TIER,
+  FESTIVAL_TIER_REQUIREMENTS,
 } from "./FestivalProgress";
 import { getRotatingChallenges } from "./FestivalChallenges";
 import {
@@ -36,7 +38,7 @@ const ELITE_PASS_COST = 15000;
 // Each tier has a free and an elite reward placeholder.
 const tiers = Array.from({ length: FESTIVAL_TOTAL_TIERS }, (_, index) => ({
   number: index + 1,
-  points: (index + 1) * FESTIVAL_POINTS_PER_TIER,
+  points: FESTIVAL_TIER_REQUIREMENTS[index],
 }));
 
 const formatChallengeTime = (milliseconds) => {
@@ -255,7 +257,27 @@ function Festival() {
       return reward.name;
     }
 
+    if (reward.type === "skin") {
+      return `🎨 ${reward.name}`;
+    }
+
     return "UNKNOWN REWARD";
+  };
+
+  const getRewardRarity = (reward) => {
+    if (!reward) return null;
+
+    if (reward.type === "skin") {
+      const skin = skins.find((item) => item.id === reward.skinId);
+
+      return skin?.rarity ?? null;
+    }
+
+    if (reward.type === "character") {
+      return reward.rarity ?? null;
+    }
+
+    return null;
   };
 
   const claimReward = (tierNumber, rewardTrack) => {
@@ -266,7 +288,7 @@ function Festival() {
     // Always check the latest saved progress.
     const currentProgress = getFestivalProgress();
 
-    const requiredPoints = tierNumber * FESTIVAL_POINTS_PER_TIER;
+    const requiredPoints = FESTIVAL_TIER_REQUIREMENTS[tierNumber - 1];
 
     // Check tier access.
     if (currentProgress.points < requiredPoints) return;
@@ -285,10 +307,16 @@ function Festival() {
     if (claimedRewards.includes(tierNumber)) return;
 
     // Prevent duplicate character unlocks.
+    // Prevent claiming characters already owned.
     if (
       reward.type === "character" &&
       getUnlockedCharacters().includes(reward.characterId)
     ) {
+      return;
+    }
+
+    // Prevent claiming skins already owned.
+    if (reward.type === "skin" && getOwnedSkins().includes(reward.skinId)) {
       return;
     }
 
@@ -319,6 +347,19 @@ function Festival() {
         description: "NEW CHARACTER UNLOCKED!",
         image: FESTIVAL_CHARACTER_IMAGES[reward.characterId],
       });
+    } else if (reward.type === "skin") {
+      const unlocked = unlockSkin(reward.skinId);
+
+      if (!unlocked) return;
+
+      const skinData = skins.find((skin) => skin.id === reward.skinId);
+
+      setRewardPopup({
+        type: "skin",
+        title: reward.name.toUpperCase(),
+        description: "EXCLUSIVE SKIN UNLOCKED!",
+        image: skinData?.image,
+      });
     }
   };
   return (
@@ -331,12 +372,12 @@ function Festival() {
         >
           <div
             className={`festival-reward-popup ${
-              rewardPopup.type === "character"
+              rewardPopup.type === "character" || rewardPopup.type === "skin"
                 ? "character-reward-popup"
                 : "coin-reward-popup"
             }`}
           >
-            {rewardPopup.type === "character" ? (
+            {rewardPopup.type === "character" || rewardPopup.type === "skin" ? (
               <img
                 className="reward-popup-character-image"
                 src={rewardPopup.image}
@@ -386,7 +427,7 @@ function Festival() {
         <div className="festival-status">
           <span>PERMANENT FESTIVAL</span>
           <span>15 TIERS</span>
-          <span>600 TOTAL POINTS</span>
+          <span>{FESTIVAL_TOTAL_POINTS.toLocaleString()} TOTAL POINTS</span>
         </div>
       </section>
 
@@ -470,16 +511,21 @@ function Festival() {
                     className={`festival-reward-slot ${
                       unlocked ? "reward-unlocked" : ""
                     } ${
-                      reward?.type === "character"
+                      reward?.type === "character" || reward?.type === "skin"
                         ? "character-reward-slot"
                         : ""
                     }`}
                     key={tier.number}
                   >
-                    {reward?.type === "character" ? (
+                    {reward?.type === "character" || reward?.type === "skin" ? (
                       <img
                         className="reward-character-image"
-                        src={FESTIVAL_CHARACTER_IMAGES[reward.characterId]}
+                        src={
+                          reward.type === "skin"
+                            ? skins.find((skin) => skin.id === reward.skinId)
+                                ?.image
+                            : FESTIVAL_CHARACTER_IMAGES[reward.characterId]
+                        }
                         alt={reward.name}
                       />
                     ) : (
@@ -489,6 +535,16 @@ function Festival() {
                     <span className="reward-name">
                       {getRewardDisplay(reward)}
                     </span>
+
+                    {getRewardRarity(reward) && (
+                      <span
+                        className={`reward-rarity rarity-${getRewardRarity(
+                          reward,
+                        ).toLowerCase()}`}
+                      >
+                        {getRewardRarity(reward).toUpperCase()}
+                      </span>
+                    )}
 
                     <span className="reward-status">
                       {claimed ? "CLAIMED ✓" : unlocked ? "UNLOCKED" : "LOCKED"}
@@ -538,16 +594,21 @@ function Festival() {
                     className={`festival-reward-slot ${
                       unlocked ? "reward-unlocked" : ""
                     } ${
-                      reward?.type === "character"
+                      reward?.type === "character" || reward?.type === "skin"
                         ? "character-reward-slot"
                         : ""
                     }`}
                     key={tier.number}
                   >
-                    {reward?.type === "character" ? (
+                    {reward?.type === "character" || reward?.type === "skin" ? (
                       <img
                         className="reward-character-image"
-                        src={FESTIVAL_CHARACTER_IMAGES[reward.characterId]}
+                        src={
+                          reward.type === "skin"
+                            ? skins.find((skin) => skin.id === reward.skinId)
+                                ?.image
+                            : FESTIVAL_CHARACTER_IMAGES[reward.characterId]
+                        }
                         alt={reward.name}
                       />
                     ) : (
@@ -557,6 +618,16 @@ function Festival() {
                     <span className="reward-name">
                       {getRewardDisplay(reward)}
                     </span>
+
+                    {getRewardRarity(reward) && (
+                      <span
+                        className={`reward-rarity rarity-${getRewardRarity(
+                          reward,
+                        ).toLowerCase()}`}
+                      >
+                        {getRewardRarity(reward).toUpperCase()}
+                      </span>
+                    )}
 
                     <span className="reward-status">
                       {claimed

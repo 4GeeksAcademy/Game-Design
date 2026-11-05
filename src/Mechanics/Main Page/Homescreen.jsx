@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import mina from "../All_Character_Stats/Mina_AshidoStats.js";
+import Kirishima from "../All_Character_Stats/KirishimaStats.js";
 import { useNavigate } from "react-router-dom";
-import { getCoins } from "../Currency";
+import { getCoins, getUnlockedCharacters, unlockCharacter } from "../Currency";
 import {
   ATTACK_SLOT_COUNT,
   DEFAULT_KEYBINDS,
@@ -21,7 +23,17 @@ function Homescreen() {
   const menu = menuHistory[menuHistory.length - 1];
   const [teamSize, setTeamSize] = useState("1v1");
   const [difficulty, setDifficulty] = useState("Normal");
+  const [unlockedCharacters, setUnlockedCharacters] = useState(() =>
+    getUnlockedCharacters(),
+  );
 
+  const [selectedStarter, setSelectedStarter] = useState("");
+
+  const [showStarterPopup, setShowStarterPopup] = useState(
+    () => getUnlockedCharacters().length === 0,
+  );
+
+  const canPlay2v2 = unlockedCharacters.length >= 2;
   const [keybinds, setKeybinds] = useState(() => loadKeybinds());
   const [listeningFor, setListeningFor] = useState(null);
   const [keybindMessage, setKeybindMessage] = useState("");
@@ -97,6 +109,11 @@ function Homescreen() {
   };
 
   const startBattle = () => {
+    if (teamSize === "2v2" && !canPlay2v2) {
+      setTeamSize("1v1");
+      return;
+    }
+
     navigate("/character-select", {
       state: {
         gameMode: "quick",
@@ -120,6 +137,36 @@ function Homescreen() {
       window.removeEventListener("coinsUpdated", updateCoins);
     };
   }, []);
+
+  useEffect(() => {
+    const updateUnlockedCharacters = () => {
+      setUnlockedCharacters(getUnlockedCharacters());
+    };
+
+    window.addEventListener("unlocksUpdated", updateUnlockedCharacters);
+
+    return () => {
+      window.removeEventListener("unlocksUpdated", updateUnlockedCharacters);
+    };
+  }, []);
+
+  const confirmStarterSelection = () => {
+    if (!selectedStarter) return;
+
+    const unlocked = getUnlockedCharacters();
+
+    if (unlocked.length > 0) {
+      setUnlockedCharacters(unlocked);
+      setShowStarterPopup(false);
+      return;
+    }
+
+    unlockCharacter(selectedStarter);
+
+    setUnlockedCharacters(getUnlockedCharacters());
+    setShowStarterPopup(false);
+    setSelectedStarter("");
+  };
 
   const renderSettings = () => {
     const players = [
@@ -467,19 +514,32 @@ function Homescreen() {
         </button>
 
         <button
-          className={`choice-button ${teamSize === "2v2" ? "selected" : ""}`}
+          className={`choice-button ${
+            teamSize === "2v2" ? "selected" : ""
+          } ${!canPlay2v2 ? "locked-choice" : ""}`}
+          disabled={!canPlay2v2}
+          title={
+            !canPlay2v2
+              ? "Unlock at least two characters to play 2v2."
+              : "Choose 2v2 Team Battle"
+          }
           onClick={() => setTeamSize("2v2")}
         >
           <strong>2v2</strong>
-          <span>TEAM BATTLE</span>
+          <span>{canPlay2v2 ? "TEAM BATTLE" : "🔒 OWN 2 FIGHTERS"}</span>
         </button>
       </div>
 
       <button
         className="arcade-button primary-button continue-button"
-        onClick={() =>
-          openMenu(teamSize === "2v2" ? "teamControl" : "difficulty")
-        }
+        onClick={() => {
+          if (teamSize === "2v2" && !canPlay2v2) {
+            setTeamSize("1v1");
+            return;
+          }
+
+          openMenu(teamSize === "2v2" ? "teamControl" : "difficulty");
+        }}
       >
         CONTINUE <span>▶</span>
       </button>
@@ -591,7 +651,82 @@ function Homescreen() {
       <section className="home-content" key={menu}>
         {renderMenu()}
       </section>
+      {showStarterPopup && (
+        <div className="starter-modal-overlay">
+          <div
+            className="starter-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="starter-modal-title"
+          >
+            <p className="home-eyebrow">WELCOME TO FIGHTER'S ARENA</p>
 
+            <h2 id="starter-modal-title" className="menu-title">
+              CHOOSE YOUR FIRST FIGHTER
+            </h2>
+
+            <p className="menu-description">
+              Select ONE fighter to unlock for free. Your other option will
+              remain available in the Character Shop.
+            </p>
+
+            <div className="starter-choice-grid">
+              <button
+                type="button"
+                className={`starter-choice ${
+                  selectedStarter === "mina" ? "selected" : ""
+                }`}
+                onClick={() => setSelectedStarter("mina")}
+                aria-pressed={selectedStarter === "mina"}
+              >
+                <span className="starter-choice-name">MINA</span>
+                <span className="starter-choice-status">FREE STARTER</span>
+                <img
+                  src={mina.image}
+                  alt="Mina"
+                  className="starter-choice-image"
+                />
+                {selectedStarter === "mina" && (
+                  <span className="starter-selected-check">✓ SELECTED</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className={`starter-choice ${
+                  selectedStarter === "kirishima" ? "selected" : ""
+                }`}
+                onClick={() => setSelectedStarter("kirishima")}
+                aria-pressed={selectedStarter === "kirishima"}
+              >
+                <span className="starter-choice-name">KIRISHIMA</span>
+                <span className="starter-choice-status">FREE STARTER</span>
+                <img
+                  src={Kirishima.image}
+                  alt="Kirishima"
+                  className="starter-choice-image"
+                />
+                {selectedStarter === "kirishima" && (
+                  <span className="starter-selected-check">✓ SELECTED</span>
+                )}
+              </button>
+            </div>
+
+            <button
+              type="button"
+              className="arcade-button primary-button starter-confirm-button"
+              disabled={!selectedStarter}
+              onClick={confirmStarterSelection}
+            >
+              CONFIRM FIGHTER <span>▶</span>
+            </button>
+
+            <p className="starter-modal-note">
+              Choose carefully! Your free starter selection is permanent.
+            </p>
+          </div>
+        </div>
+      )}
       <footer className="home-footer">
         <span>INSERT COIN? NAH. JUST FIGHT.</span>
         <span>FIGHTER'S ARENA © 2026</span>

@@ -1,4 +1,3 @@
-
 const FESTIVAL_REWARDS = {
   1: {
     free: { type: "coins", amount: 100 },
@@ -30,7 +29,12 @@ const FESTIVAL_REWARDS = {
   },
   8: {
     free: { type: "character", characterId: "hinata", name: "Hinata" },
-    elite: { type: "coins", amount: 800 },
+    elite: {
+      type: "skin",
+      skinId: "toga-mischievous-medic",
+      characterId: "toga",
+      name: "Mischievous Medic",
+    },
   },
   9: {
     free: { type: "coins", amount: 450 },
@@ -38,11 +42,11 @@ const FESTIVAL_REWARDS = {
   },
   10: {
     free: { type: "coins", amount: 500 },
-    elite: { type: "character", characterId: "goku", name: "Goku" },
+    elite: { type: "coins", amount: 1100 },
   },
   11: {
     free: { type: "coins", amount: 550 },
-    elite: { type: "coins", amount: 1000 },
+    elite: { type: "character", characterId: "goku", name: "Goku" },
   },
   12: {
     free: { type: "coins", amount: 600 },
@@ -57,8 +61,17 @@ const FESTIVAL_REWARDS = {
     elite: { type: "coins", amount: 1300 },
   },
   15: {
-    free: { type: "coins", amount: 750 },
-    elite: { type: "character", characterId: "kenpachi", name: "Kenpachi Zaraki" },
+    free: { type: "character",
+      characterId: "kenpachi",
+      name: "Kenpachi Zaraki",
+    },
+    elite: {
+      type: "skin",
+      skinId: "goku-elegant-drip",
+      characterId: "goku",
+      name: "Elegant Drip",
+    },
+      
   },
 };
 

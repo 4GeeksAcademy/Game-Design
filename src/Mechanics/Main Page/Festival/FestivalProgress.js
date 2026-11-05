@@ -2,10 +2,31 @@
 // FESTIVAL CONFIGURATION
 // ==========================================
 
-export const FESTIVAL_TOTAL_POINTS = 600;
+// ==========================================
+// FESTIVAL CONFIGURATION
+// ==========================================
+
+export const FESTIVAL_TOTAL_POINTS = 1500;
 export const FESTIVAL_TOTAL_TIERS = 15;
-export const FESTIVAL_POINTS_PER_TIER =
-  FESTIVAL_TOTAL_POINTS / FESTIVAL_TOTAL_TIERS;
+
+// Points required to unlock each tier.
+export const FESTIVAL_TIER_REQUIREMENTS = [
+  50,
+  100,
+  160,
+  230,
+  310,
+  400,
+  450,
+  650,
+  730,
+  900,
+  1050,
+  1150,
+  1270,
+  1355,
+  1500,
+];
 
 // Give this festival its own ID.
 // A future festival can have a completely separate progress record.
@@ -125,8 +146,16 @@ export const addFestivalPoints = (amount) => {
 // ==========================================
 
 export const isFestivalTierUnlocked = (tierNumber, points) => {
+  if (
+    !Number.isInteger(tierNumber) ||
+    tierNumber < 1 ||
+    tierNumber > FESTIVAL_TOTAL_TIERS
+  ) {
+    return false;
+  }
+
   const requiredPoints =
-    tierNumber * FESTIVAL_POINTS_PER_TIER;
+    FESTIVAL_TIER_REQUIREMENTS[tierNumber - 1];
 
   return points >= requiredPoints;
 };

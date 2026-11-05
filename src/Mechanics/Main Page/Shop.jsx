@@ -24,20 +24,20 @@ import {
 import "./Shop.css";
 
 const fighters = [
-  { id: "mina", data: mina, cost: 0, unlockable: false },
-  { id: "rockLee", data: rockLee, cost: 0, unlockable: false },
+  { id: "mina", data: mina, cost: 2500, unlockable: true },
+  { id: "rockLee", data: rockLee, cost: 5000, unlockable: false },
 
-  { id: "usopp", data: Usopp, cost: 250, unlockable: true },
-  { id: "chad", data: Chad, cost: 350, unlockable: true },
-  { id: "picolo", data: Picolo, cost: 400, unlockable: true },
-  { id: "tenten", data: TenTen, cost: 300, unlockable: true },
-  { id: "kirishima", data: Kirishima, cost: 350, unlockable: true },
-  { id: "ochaco", data: Ochaco, cost: 300, unlockable: true },
+  { id: "usopp", data: Usopp, cost: 1000, unlockable: true },
+  { id: "chad", data: Chad, cost: 3500, unlockable: true },
+  { id: "picolo", data: Picolo, cost: 4000, unlockable: true },
+  { id: "tenten", data: TenTen, cost: 3000, unlockable: true },
+  { id: "kirishima", data: Kirishima, cost: 3500, unlockable: true },
+  { id: "ochaco", data: Ochaco, cost: 3000, unlockable: true },
 
-  { id: "luffy", data: Luffy, cost: 500, unlockable: true },
-  { id: "ichigo", data: Ichigo, cost: 500, unlockable: true },
-  { id: "naruto", data: Naruto, cost: 500, unlockable: true },
-  { id: "yoruichi", data: Yoruichi, cost: 450, unlockable: true },
+  { id: "luffy", data: Luffy, cost: 5000, unlockable: true },
+  { id: "ichigo", data: Ichigo, cost: 5000, unlockable: true },
+  { id: "naruto", data: Naruto, cost: 5000, unlockable: true },
+  { id: "yoruichi", data: Yoruichi, cost: 4500, unlockable: true },
 ];
 
 function Shop() {
@@ -98,7 +98,7 @@ function Shop() {
       </header>
 
       <section className="shop-heading">
-        <p>FIGHTERS ARENA MARKETPLACE</p>
+        <p>THE MARKETPLACE</p>
         <h1>CHARACTER SHOP</h1>
         <span>Earn coins in battle. Unlock your next fighter.</span>
       </section>
