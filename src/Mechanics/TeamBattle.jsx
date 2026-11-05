@@ -18,12 +18,12 @@ import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
-import { aiDefendOrEvade } from "./AI.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import useKeybinds from "./Main Page/useKeybinds.js";
 import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
+import { aiChooseAttack, aiChooseHealTarget, aiDefendOrEvade } from "./AI.js";
 import {
-  chooseNormalAttack,
+  chooseNormalTeamAction,
   normalDefendOrEvade,
 } from "./AI_NormalDifficulty.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
@@ -701,33 +701,23 @@ export default function TeamBattle() {
 
     const targetsForRound = { ...roundTargets };
 
-    // const playersWithTargets = teams.player.map((player) => {
-    //   if (player.isCpuTeammate) {
-    //     return {
-    //       ...player,
-    //       turnFinished: player.health <= 0 || livingOpponents.length === 0,
-    //     };
-    //   }
-
-    //   return {
-    //     ...player,
-    //     turnFinished:
-    //       player.health <= 0 ||
-    //       !livingOpponents.some(
-    //         (opponent) => targetsForRound[player.id] === opponent.id,
-    //         setRoundTargets(targetsForRound)
-    //       ),
-    //   };
-    // });
-
     const playersWithTargets = teams.player.map((player) => {
       const hasTarget = livingOpponents.some(
         (opponent) => targetsForRound[player.id] === opponent.id,
       );
 
+      const hasUsableHeal =
+        player.isCpuTeammate &&
+        player.attacks.some(
+          (attack) =>
+            attack.heal &&
+            canUseAttack(attack) &&
+            player.mana >= (attack.cost ?? 0),
+        );
+
       return {
         ...player,
-        turnFinished: player.health <= 0 || !hasTarget,
+        turnFinished: player.health <= 0 || (!hasTarget && !hasUsableHeal),
       };
     });
 
@@ -813,18 +803,17 @@ export default function TeamBattle() {
       });
     }
   };
-const confirmHealTarget = (targetId) => {
-  if (!pendingHealSelection) return;
+  const confirmHealTarget = (targetId) => {
+    if (!pendingHealSelection) return;
 
-  const { fighterId, attackIndex } = pendingHealSelection;
+    const { fighterId, attackIndex } = pendingHealSelection;
 
-  // Close the teammate-selection interface.
-  setPendingHealSelection(null);
+    // Close the teammate-selection interface.
+    setPendingHealSelection(null);
 
-  // Pass the selected teammate into the healing logic.
-  useAttack(fighterId, attackIndex, null, targetId);
-};
-
+    // Pass the selected teammate into the healing logic.
+    useAttack(fighterId, attackIndex, null, targetId);
+  };
 
   const useAttack = (
     fighterId,
@@ -953,42 +942,78 @@ const confirmHealTarget = (targetId) => {
       }
 
       // Pay the mana cost once, regardless of recipient count.
-      attacker.mana -= attack.cost ?? 0;
+attacker.mana -= attack.cost ?? 0;
 
-      // Apply healing and buffs to each recipient.
-      recipients.forEach((recipient) => {
-        const result = applyHeal(attack, recipient);
+// Apply healing and buffs to each recipient.
+recipients.forEach((recipient) => {
+  const result = applyHeal(attack, recipient);
 
-        addLog(
-          `💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`,
-          "buff",
-        );
+  addLog(
+    `💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`,
+    "buff",
+  );
 
-        describeEffects(result.buffsApplied, recipient.name, "buff").forEach(
-          (message) => addLog(message, "buff"),
-        );
-      });
+  describeEffects(result.buffsApplied, recipient.name, "buff").forEach(
+    (message) => addLog(message, "buff"),
+  );
+});
 
-      // Consume the attack once, not once per teammate.
-      consumeAttack(attack);
+// Consume the healing attack exactly once.
+consumeAttack(attack);
+setAttacksUsed((value) => value + 1);
 
-      setAttacksUsed((value) => value + 1);
+// Determine whether the CPU teammate can act again.
+const isCpuAttacker = attacker.isCpuTeammate;
 
-      setTeams({
-        player: updatedPlayers,
-        opponent: updatedOpponents,
-      });
+const attacksUsedAfter = attacker.attacks.filter(
+  (move) => move.state === false,
+).length;
 
-      if (
-        updatedPlayers.every(
-          (fighter) => fighter.health <= 0 || fighter.turnFinished,
-        )
-      ) {
-        setPhase("cpu-fighting");
-        addLog("Your team is finished. The CPU is preparing its attacks.");
-      }
+const hasUsableAttack = attacker.attacks.some(
+  (move) =>
+    canUseAttack(move) &&
+    attacker.mana >= (move.cost ?? 0),
+);
 
-      return;
+const cpuMustFinish =
+  !hasUsableAttack ||
+  (difficulty === "Easy" && attacksUsedAfter >= 1) ||
+  (roundNumber === 1 && attacksUsedAfter >= 3);
+
+// Save the updated resources and attacks on the actual team fighter.
+const playersAfter = updatedPlayers.map((fighter) => {
+  if (fighter.id !== attacker.id) return fighter;
+
+  return {
+    ...fighter,
+    attacks: attacker.attacks,
+    mana: attacker.mana,
+    health: attacker.health,
+    turnFinished: isCpuAttacker ? cpuMustFinish : fighter.turnFinished,
+  };
+});
+
+setTeams({
+  player: playersAfter,
+  opponent: updatedOpponents,
+});
+
+// Release the CPU teammate's pending action so Normal can continue
+// if it still has usable attacks.
+if (isCpuAttacker) {
+  setPendingAllyAttack(null);
+}
+
+if (
+  playersAfter.every(
+    (fighter) => fighter.health <= 0 || fighter.turnFinished,
+  )
+) {
+  setPhase("cpu-fighting");
+  addLog("Your team is finished. The CPU is preparing its attacks.");
+}
+
+return;
     }
 
     // Normal attacks still require an enemy target.
@@ -1230,9 +1255,21 @@ const confirmHealTarget = (targetId) => {
         (opponent) => opponent.id === targetId && opponent.health > 0,
       );
 
-      return (player.health <= 0 || !targetAlive) && !player.turnFinished
-        ? { ...player, turnFinished: true }
-        : player;
+      const hasUsableHeal =
+  player.isCpuTeammate &&
+  player.attacks.some(
+    (attack) =>
+      attack.heal &&
+      canUseAttack(attack) &&
+      player.mana >= (attack.cost ?? 0),
+  );
+
+return (
+  (player.health <= 0 || (!targetAlive && !hasUsableHeal)) &&
+  !player.turnFinished
+)
+  ? { ...player, turnFinished: true }
+  : player;
     });
 
     const changed = playersAfter.some(
@@ -1264,18 +1301,15 @@ const confirmHealTarget = (targetId) => {
     if (!ally || ally.turnFinished) return;
 
     const targetId = roundTargets[ally.id];
+
     const target = teams.opponent.find(
       (fighter) => fighter.id === targetId && fighter.health > 0,
     );
 
-    if (!target) {
-      finishPlayerTurn(ally.id);
-      return;
-    }
-
     const attacksUsedThisTurn = ally.attacks.filter(
       (attack) => attack.state === false,
     ).length;
+
     if (roundNumber === 1 && attacksUsedThisTurn >= 3) {
       finishPlayerTurn(ally.id);
       return;
@@ -1286,12 +1320,40 @@ const confirmHealTarget = (targetId) => {
       return;
     }
 
-    const selectedAttack =
-      difficulty === "Easy"
-        ? ally.attacks.find(
-            (attack) => canUseAttack(attack) && ally.mana >= (attack.cost ?? 0),
-          )
-        : chooseNormalAttack(ally);
+    let selectedAttack = null;
+    let healTargetId = null;
+
+    if (difficulty === "Easy") {
+      // If there is no opponent, Easy can only choose a healing attack.
+      const availableAttacks = target
+        ? ally.attacks
+        : ally.attacks.filter((attack) => attack.heal);
+
+      selectedAttack = aiChooseAttack({
+        ...ally,
+        attacks: availableAttacks,
+      });
+
+      // Easy randomly chooses a living teammate for selected healing.
+      if (selectedAttack?.heal?.target === "selected") {
+        const healTarget = aiChooseHealTarget(ally, teams.player);
+        healTargetId = healTarget?.id ?? null;
+      }
+    } else {
+      // Normal evaluates healing value and chooses the best recipient.
+      // Without an opponent, it considers healing attacks only.
+      const fighterToEvaluate = target
+        ? ally
+        : {
+            ...ally,
+            attacks: ally.attacks.filter((attack) => attack.heal),
+          };
+
+      const action = chooseNormalTeamAction(fighterToEvaluate, teams.player);
+
+      selectedAttack = action?.attack ?? null;
+      healTargetId = action?.healTargetId ?? null;
+    }
 
     const attackIndex = selectedAttack
       ? ally.attacks.indexOf(selectedAttack)
@@ -1302,13 +1364,26 @@ const confirmHealTarget = (targetId) => {
       return;
     }
 
-    setDefenseOutcome(null);
+    // Ordinary attacks still require an assigned living opponent.
+    if (!selectedAttack.heal && !target) {
+      finishPlayerTurn(ally.id);
+      return;
+    }
 
+    // A selected-target heal must have a valid living teammate.
+    if (selectedAttack.heal?.target === "selected" && !healTargetId) {
+      finishPlayerTurn(ally.id);
+      return;
+    }
+
+    setDefenseOutcome(null);
     setAllyAttackOutcome(null);
+
     setPendingAllyAttack({
       fighterId: ally.id,
-      targetId: target.id,
+      targetId: target?.id ?? null,
       attackIndex,
+      healTargetId,
     });
   };
 
@@ -1322,6 +1397,7 @@ const confirmHealTarget = (targetId) => {
         attackToRun.fighterId,
         attackToRun.attackIndex,
         attackToRun.targetId,
+        attackToRun.healTargetId,
       );
     }, 2000);
 
@@ -2660,7 +2736,6 @@ const confirmHealTarget = (targetId) => {
         </div>
       )}
 
-
       {pendingHealSelection &&
         (() => {
           const healer = teams.player.find(
@@ -2670,12 +2745,10 @@ const confirmHealTarget = (targetId) => {
           if (!healer) return null;
 
           const availableTeammates = teams.player.filter(
-            (fighter) =>
-              fighter.id !== healer.id && fighter.health > 0,
+            (fighter) => fighter.id !== healer.id && fighter.health > 0,
           );
 
-          const attack =
-            healer.attacks[pendingHealSelection.attackIndex];
+          const attack = healer.attacks[pendingHealSelection.attackIndex];
 
           return (
             <div className="target-modal-backdrop">
@@ -2685,8 +2758,7 @@ const confirmHealTarget = (targetId) => {
                 <h2>Choose a teammate to heal</h2>
 
                 <p>
-                  {healer.name} is preparing{" "}
-                  <strong>{attack?.name}</strong>.
+                  {healer.name} is preparing <strong>{attack?.name}</strong>.
                   Select a living teammate to receive the healing.
                 </p>
 
@@ -2697,9 +2769,7 @@ const confirmHealTarget = (targetId) => {
                         key={teammate.id}
                         type="button"
                         className="target-choice-button"
-                        onClick={() =>
-                          confirmHealTarget(teammate.id)
-                        }
+                        onClick={() => confirmHealTarget(teammate.id)}
                       >
                         {teammate.image && (
                           <img
@@ -2732,7 +2802,6 @@ const confirmHealTarget = (targetId) => {
             </div>
           );
         })()}
-
 
       <section className="battlefield">
         {isStoryMode && (
