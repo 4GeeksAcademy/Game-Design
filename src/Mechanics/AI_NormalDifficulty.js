@@ -163,6 +163,105 @@ function chooseNormalAttack(fighter) {
   return getNormalAttackPriority(usableAttacks)[0] ?? null;
 }
 
+function getEffectiveHeal(attack, fighter) {
+  if (!attack?.heal || !fighter || fighter.health <= 0) return 0;
+
+  const maximumHealth = fighter.maximumHealth ?? fighter.health;
+  const missingHealth = Math.max(0, maximumHealth - fighter.health);
+
+  const healingAmount =
+    (attack.heal.amount ?? 0) +
+    (attack.heal.buff?.health ?? 0);
+
+  return Math.min(missingHealth, healingAmount);
+}
+
+function chooseNormalTeamAction(fighter, teammates) {
+  if (!fighter || !Array.isArray(fighter.attacks)) return null;
+  if (!Array.isArray(teammates)) return null;
+
+  const usableAttacks = fighter.attacks.filter(
+    (attack) =>
+      canUseAttack(attack) &&
+      fighter.mana >= (attack.cost ?? 0),
+  );
+
+  if (usableAttacks.length === 0) return null;
+
+  // Start by considering ordinary attacks.
+  let bestAction = {
+    attack: getNormalAttackPriority(
+      usableAttacks.filter((attack) => !attack.heal),
+    )[0] ?? null,
+    healTargetId: null,
+    score: -Infinity,
+  };
+
+  if (bestAction.attack) {
+    bestAction.score = scoreAttack(bestAction.attack);
+  }
+
+  // Now evaluate healing attacks.
+  const healingAttacks = usableAttacks.filter(
+    (attack) => attack.heal,
+  );
+
+  for (const attack of healingAttacks) {
+    let healValue = 0;
+    let healTargetId = null;
+
+    if (attack.heal.target === "selected") {
+      const possibleTargets = teammates.filter(
+        (ally) =>
+          ally.id !== fighter.id &&
+          ally.health > 0,
+      );
+
+      // Find the teammate who would benefit the most.
+      for (const ally of possibleTargets) {
+        const effectiveHeal = getEffectiveHeal(attack, ally);
+
+        if (effectiveHeal > healValue) {
+          healValue = effectiveHeal;
+          healTargetId = ally.id;
+        }
+      }
+    } else if (attack.heal.target === "all") {
+      // Add up the useful healing across all living teammates,
+      // including the healer.
+      healValue = teammates
+        .filter((ally) => ally.health > 0)
+        .reduce(
+          (total, ally) =>
+            total + getEffectiveHeal(attack, ally),
+          0,
+        );
+    }
+
+    // Healing must provide an actual benefit to be considered.
+    if (healValue <= 0) continue;
+
+    const healingScore =
+      healValue * 1.5 -
+      (attack.cost ?? 0) * 0.6;
+
+    if (healingScore > bestAction.score) {
+      bestAction = {
+        attack,
+        healTargetId,
+        score: healingScore,
+      };
+    }
+  }
+
+  if (!bestAction.attack) return null;
+
+  return {
+    attack: bestAction.attack,
+    healTargetId: bestAction.healTargetId,
+  };
+}
+
 function createNormalAIController({
   getAI,
   getPlayer,
@@ -327,6 +426,7 @@ export {
   getNormalAttackPriority,
   aiChooseNormalAttacks,
   chooseNormalAttack,
+  chooseNormalTeamAction,
   createNormalAIController,
   normalDefendOrEvade,
 };

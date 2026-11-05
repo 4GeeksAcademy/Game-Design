@@ -8,10 +8,6 @@ const attacklist = {
       uses: 1,
       turnCooldown: 5,
       buffRequiresHit: true,
-      heal: {
-        amount: 45,
-        target: "ally", // target: "allAllies",
-      },
       sacrifice: {
         health: 25,
       },

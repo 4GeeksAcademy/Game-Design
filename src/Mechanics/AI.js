@@ -16,6 +16,28 @@ function aiChooseAttack(ai) {
   return randomAttack;
 }
 
+
+function aiChooseHealTarget(ai, teammates) {
+  if (!ai || !Array.isArray(teammates)) return null;
+
+  // Easy AI doesn't evaluate health percentages.
+  // It simply chooses a random living teammate.
+  const availableTeammates = teammates.filter(
+    (fighter) =>
+      fighter.id !== ai.id &&
+      fighter.health > 0
+  );
+
+  if (availableTeammates.length === 0) return null;
+
+  const randomIndex = Math.floor(
+    Math.random() * availableTeammates.length
+  );
+
+  return availableTeammates[randomIndex];
+}
+
+
 // AI randomly chooses to defend or evade.
 
 // function aiDefendOrEvade(attack, attacker, defender) {
@@ -153,4 +175,10 @@ function aiDefendOrEvade(attack, attacker, defender) {
   return result;
 }
 
-export { aiChooseAttack, aiTurn, aiFinishTurn, aiDefendOrEvade };
+export {
+  aiChooseAttack,
+  aiChooseHealTarget,
+  aiTurn,
+  aiFinishTurn,
+  aiDefendOrEvade,
+};
