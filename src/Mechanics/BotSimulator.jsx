@@ -118,6 +118,8 @@ async function runStartingOrderSeries(
       },
     );
 
+    
+
     totalRounds += result.rounds;
 
     const outcome = getOneVsOneOutcome(result);
@@ -250,6 +252,7 @@ function createMatchupStats(fighters) {
   return stats;
 }
 
+
 function recordHeadToHead(matchupStats, fighter, opponent, outcome) {
   const fighterStats = matchupStats[fighter.id];
 
@@ -263,8 +266,17 @@ function recordHeadToHead(matchupStats, fighter, opponent, outcome) {
     };
   }
 
-  fighterStats.opponents[opponent.id][outcome]++;
+  const counterKey = {
+    win: "wins",
+    loss: "losses",
+    draw: "draws",
+  }[outcome];
+
+  if (!counterKey) return;
+
+  fighterStats.opponents[opponent.id][counterKey]++;
 }
+
 
 function createMatchupRankings(matchupStats) {
   return Object.values(matchupStats).map((fighter) => {
@@ -841,6 +853,10 @@ function BotSimulator() {
                 difficultyTwo: order.secondDifficulty,
               },
             );
+
+
+
+
 
             recordFighterBattle(
               fighterStats,
