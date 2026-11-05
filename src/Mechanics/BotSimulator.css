@@ -481,3 +481,92 @@
   font-size: 0.85rem;
   margin-left: 8px;
 }
+
+.simulation-progress {
+  width: 100%;
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid rgba(19, 213, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.simulation-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.simulation-progress-header strong {
+  color: #13d5ff;
+}
+
+.simulation-progress-track {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #252525;
+}
+
+.simulation-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #087bff, #13d5ff);
+  box-shadow: 0 0 12px rgba(19, 213, 255, 0.55);
+  transition: width 0.2s ease;
+}
+
+.simulation-progress p {
+  margin: 9px 0 0;
+  color: #aaa;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.simulation-progress {
+  width: 100%;
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid rgba(19, 213, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.simulation-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: #13d5ff;
+  font-weight: bold;
+}
+
+.simulation-progress-track {
+  width: 100%;
+  height: 13px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #252525;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.simulation-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #087da8, #13d5ff);
+  box-shadow: 0 0 12px rgba(19, 213, 255, 0.55);
+  transition: width 0.2s ease;
+}
+
+.simulation-progress p {
+  margin: 10px 0 0;
+  color: #aaa;
+  font-size: 0.85rem;
+  text-align: center;
+}

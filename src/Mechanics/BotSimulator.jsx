@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -25,7 +24,10 @@ function getTeamName(team) {
 }
 
 function getTeamKey(team) {
-  return team.map((fighter) => fighter.id).sort().join("+");
+  return team
+    .map((fighter) => fighter.id)
+    .sort()
+    .join("+");
 }
 
 function getTeamMaximumHealth(team) {
@@ -44,12 +46,13 @@ function chooseRandom(candidates) {
 // EXISTING 1v1 SIMULATION HELPERS
 // -----------------------------------------------------------------------------
 
-function runStartingOrderSeries(
+async function runStartingOrderSeries(
   firstFighter,
   secondFighter,
   requestedCount,
   firstDifficulty,
   secondDifficulty,
+  onProgress,
 ) {
   let firstWins = 0;
   let secondWins = 0;
@@ -93,6 +96,11 @@ function runStartingOrderSeries(
       selectedFighterOne: firstFighter,
       selectedFighterTwo: secondFighter,
     };
+    onProgress?.();
+
+    if ((i + 1) % 5 === 0 || i === requestedCount - 1) {
+      await yieldToBrowser();
+    }
   }
 
   return {
@@ -274,12 +282,13 @@ function createFighterLeaderboard(fighterStats, availableFighters) {
 // NEW 2v2 SIMULATION HELPERS
 // -----------------------------------------------------------------------------
 
-function runTeamStartingOrderSeries(
+async function runTeamStartingOrderSeries(
   firstTeam,
   secondTeam,
   requestedCount,
   firstDifficulty,
   secondDifficulty,
+  onProgress,
 ) {
   let firstWins = 0;
   let secondWins = 0;
@@ -332,6 +341,11 @@ function runTeamStartingOrderSeries(
       selectedTeamOne: firstTeam,
       selectedTeamTwo: secondTeam,
     };
+    onProgress?.();
+
+    if ((i + 1) % 5 === 0 || i === requestedCount - 1) {
+      await yieldToBrowser();
+    }
   }
 
   return {
@@ -357,7 +371,9 @@ function runTeamStartingOrderSeries(
       firstWins > 0 ? (firstWinnerRoundsTotal / firstWins).toFixed(1) : "N/A",
 
     secondAverageRoundsToWin:
-      secondWins > 0 ? (secondWinnerRoundsTotal / secondWins).toFixed(1) : "N/A",
+      secondWins > 0
+        ? (secondWinnerRoundsTotal / secondWins).toFixed(1)
+        : "N/A",
 
     lastResult,
   };
@@ -422,8 +438,7 @@ function recordTeamBattle(teamStats, team, result, position) {
 function createTeamLeaderboard(teamStats) {
   return Object.values(teamStats)
     .map((team) => {
-      const winRate =
-        team.battles > 0 ? (team.wins / team.battles) * 100 : 0;
+      const winRate = team.battles > 0 ? (team.wins / team.battles) * 100 : 0;
 
       const firstWinRate =
         team.startsFirstBattles > 0
@@ -508,9 +523,7 @@ function createTeamLeaderboard(teamStats) {
 function BotSimulator() {
   const navigate = useNavigate();
 
-  const [unlockedIds, setUnlockedIds] = useState(() =>
-    getUnlockedCharacters(),
-  );
+  const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
 
   const [battleType, setBattleType] = useState("1v1");
   const [mode, setMode] = useState("custom");
@@ -524,6 +537,16 @@ function BotSimulator() {
   const [difficultyOne, setDifficultyOne] = useState("Easy");
   const [difficultyTwo, setDifficultyTwo] = useState("Easy");
   const [simulationCount, setSimulationCount] = useState("100");
+
+  const [progress, setProgress] = useState({
+    completed: 0,
+    total: 0,
+  });
+
+  const progressPercentage =
+    progress.total > 0
+      ? Math.round((progress.completed / progress.total) * 100)
+      : 0;
 
   const [results, setResults] = useState(null);
   const [running, setRunning] = useState(false);
@@ -570,7 +593,7 @@ function BotSimulator() {
     return team;
   }
 
-  function runCustomSimulations(requestedCount) {
+  async function runCustomSimulations(requestedCount, onProgress) {
     const fighterOne = chooseFighter(fighterOneId);
     const fighterTwo = chooseFighter(
       fighterTwoId,
@@ -582,27 +605,27 @@ function BotSimulator() {
       return;
     }
 
-    const fighterOneStarts = runStartingOrderSeries(
+    const fighterOneStarts = await runStartingOrderSeries(
       fighterOne,
       fighterTwo,
       requestedCount,
       difficultyOne,
       difficultyTwo,
+      onProgress,
     );
 
-    const fighterTwoStarts = runStartingOrderSeries(
+    const fighterTwoStarts = await runStartingOrderSeries(
       fighterTwo,
       fighterOne,
       requestedCount,
       difficultyTwo,
       difficultyOne,
+      onProgress,
     );
 
-    const botOneWins =
-      fighterOneStarts.firstWins + fighterTwoStarts.secondWins;
+    const botOneWins = fighterOneStarts.firstWins + fighterTwoStarts.secondWins;
 
-    const botTwoWins =
-      fighterOneStarts.secondWins + fighterTwoStarts.firstWins;
+    const botTwoWins = fighterOneStarts.secondWins + fighterTwoStarts.firstWins;
 
     const draws = fighterOneStarts.draws + fighterTwoStarts.draws;
     const completed = fighterOneStarts.completed + fighterTwoStarts.completed;
@@ -627,7 +650,7 @@ function BotSimulator() {
     });
   }
 
-  function runAllMatchups(requestedCount) {
+  async function runAllMatchups(requestedCount, onProgress) {
     const fighterStats = {};
 
     for (const fighter of availableFighters) {
@@ -689,6 +712,13 @@ function BotSimulator() {
             );
 
             totalBattles++;
+
+            onProgress?.();
+
+            if (totalBattles % 5 === 0) {
+              await yieldToBrowser();
+            }
+
             totalRounds += result.rounds;
 
             lastResult = {
@@ -704,19 +734,18 @@ function BotSimulator() {
     setResults({
       type: "all",
       battleType: "1v1",
-      leaderboard: createFighterLeaderboard(
-        fighterStats,
-        availableFighters,
-      ),
+      leaderboard: createFighterLeaderboard(fighterStats, availableFighters),
       totalBattles,
       matchupCount,
       averageRounds:
         totalBattles > 0 ? (totalRounds / totalBattles).toFixed(1) : "0.0",
       lastResult,
     });
+    await yieldToBrowser();
   }
+  
 
-  function runCustomTeamSimulations(requestedCount) {
+  async function runCustomTeamSimulations(requestedCount, onProgress) {
     const teamOne = resolveTeam(teamOneIds);
     const teamTwo = resolveTeam(
       teamTwoIds,
@@ -728,27 +757,27 @@ function BotSimulator() {
       return;
     }
 
-    const firstTeamStarts = runTeamStartingOrderSeries(
+    const firstTeamStarts = await runTeamStartingOrderSeries(
       teamOne,
       teamTwo,
       requestedCount,
       difficultyOne,
       difficultyTwo,
+      onProgress,
     );
 
-    const secondTeamStarts = runTeamStartingOrderSeries(
+    const secondTeamStarts = await runTeamStartingOrderSeries(
       teamTwo,
       teamOne,
       requestedCount,
       difficultyTwo,
       difficultyOne,
+      onProgress,
     );
 
-    const teamOneWins =
-      firstTeamStarts.firstWins + secondTeamStarts.secondWins;
+    const teamOneWins = firstTeamStarts.firstWins + secondTeamStarts.secondWins;
 
-    const teamTwoWins =
-      firstTeamStarts.secondWins + secondTeamStarts.firstWins;
+    const teamTwoWins = firstTeamStarts.secondWins + secondTeamStarts.firstWins;
 
     const draws = firstTeamStarts.draws + secondTeamStarts.draws;
     const completed = firstTeamStarts.completed + secondTeamStarts.completed;
@@ -773,7 +802,7 @@ function BotSimulator() {
     });
   }
 
-  function runAllTeamMatchups(requestedCount) {
+  async function runAllTeamMatchups(requestedCount, onProgress) {
     const allTeams = [];
 
     // Build every unique two-fighter combination.
@@ -837,6 +866,13 @@ function BotSimulator() {
             recordTeamBattle(teamStats, order.second, result, "second");
 
             totalBattles++;
+
+            onProgress?.();
+
+            if (totalBattles % 5 === 0) {
+              await yieldToBrowser();
+            }
+
             totalRounds += result.rounds;
 
             lastResult = {
@@ -860,9 +896,10 @@ function BotSimulator() {
         totalBattles > 0 ? (totalRounds / totalBattles).toFixed(1) : "0.0",
       lastResult,
     });
+    await yieldToBrowser();
   }
 
-  function runSimulations() {
+  async function runSimulations() {
     const minimumFighters = battleType === "2v2" ? 4 : 2;
 
     if (availableFighters.length < minimumFighters) {
@@ -879,21 +916,68 @@ function BotSimulator() {
       Math.max(1, Number(simulationCount) || 1),
     );
 
+    // Calculate exactly how many battles this operation will run.
+    const fighterCount = availableFighters.length;
+    const uniqueMatchups = (fighterCount * (fighterCount - 1)) / 2;
+
+    let totalBattles;
+
+    if (mode === "custom") {
+      // Two starting positions, each tested requestedCount times.
+      totalBattles = requestedCount * 2;
+    } else if (battleType === "1v1") {
+      totalBattles = uniqueMatchups * 2 * requestedCount;
+    } else {
+      // Every possible two-fighter team.
+      const teamCount = uniqueMatchups;
+
+      // Every unique team-versus-team matchup.
+      const teamMatchups = (teamCount * (teamCount - 1)) / 2;
+
+      totalBattles = teamMatchups * 2 * requestedCount;
+    }
+
     setRunning(true);
     setResults(null);
+    setProgress({
+      completed: 0,
+      total: totalBattles,
+    });
+
+    let completedBattles = 0;
+
+    const handleProgress = () => {
+      completedBattles++;
+
+      setProgress({
+        completed: completedBattles,
+        total: totalBattles,
+      });
+    };
 
     try {
+      // Give React time to display the progress bar before calculation.
+      await yieldToBrowser();
+
       if (battleType === "1v1") {
         if (mode === "all") {
-          runAllMatchups(requestedCount);
+          await runAllMatchups(requestedCount, handleProgress);
         } else {
-          runCustomSimulations(requestedCount);
+          await runCustomSimulations(requestedCount, handleProgress);
         }
-      } else if (mode === "all") {
-        runAllTeamMatchups(requestedCount);
       } else {
-        runCustomTeamSimulations(requestedCount);
+        if (mode === "all") {
+          await runAllTeamMatchups(requestedCount, handleProgress);
+        } else {
+          await runCustomTeamSimulations(requestedCount, handleProgress);
+        }
       }
+
+      // Ensure the progress indicator finishes at exactly 100%.
+      setProgress({
+        completed: totalBattles,
+        total: totalBattles,
+      });
     } catch (error) {
       console.error("Simulation failed:", error);
       alert("The simulation encountered an error. Check the console.");
@@ -924,7 +1008,7 @@ function BotSimulator() {
               ? getTeamName(result.selectedTeamOne)
               : result.winner === "Team 2" && isTeamBattle
                 ? getTeamName(result.selectedTeamTwo)
-                : result.winner ?? "Draw"}
+                : (result.winner ?? "Draw")}
           </strong>
         </p>
 
@@ -1087,9 +1171,7 @@ function BotSimulator() {
           <h1>BOT VS BOT</h1>
         </div>
 
-        <button onClick={() => navigate("/watch-mode")}>
-          ▶ WATCH BATTLE
-        </button>
+        <button onClick={() => navigate("/watch-mode")}>▶ WATCH BATTLE</button>
       </header>
 
       <section className="simulator-setup">
@@ -1209,8 +1291,8 @@ function BotSimulator() {
             <h3>EVERY UNLOCKED FIGHTER</h3>
 
             <p>
-              The simulator tests each unique pair of unlocked fighters in
-              both starting positions.
+              The simulator tests each unique pair of unlocked fighters in both
+              starting positions.
             </p>
 
             <p>
@@ -1232,8 +1314,8 @@ function BotSimulator() {
             <h3>EVERY TWO-FIGHTER TEAM</h3>
 
             <p>
-              The simulator creates every unique pair of unlocked fighters,
-              then tests each team against every other team in both starting
+              The simulator creates every unique pair of unlocked fighters, then
+              tests each team against every other team in both starting
               positions.
             </p>
 
@@ -1279,12 +1361,38 @@ function BotSimulator() {
           className="run-simulation-button"
           onClick={runSimulations}
           disabled={
-            running ||
-            availableFighters.length < (battleType === "2v2" ? 4 : 2)
+            running || availableFighters.length < (battleType === "2v2" ? 4 : 2)
           }
         >
           {running ? "SIMULATING..." : "RUN SIMULATION"}
         </button>
+
+        {running && (
+          <div className="simulation-progress">
+            <div className="simulation-progress-header">
+              <span>CALCULATING MATCHUPS...</span>
+              <strong>{progressPercentage}%</strong>
+            </div>
+
+            <div
+              className="simulation-progress-track"
+              role="progressbar"
+              aria-valuenow={progressPercentage}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                className="simulation-progress-fill"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+
+            <p>
+              {progress.completed.toLocaleString()} /{" "}
+              {progress.total.toLocaleString()} battles completed
+            </p>
+          </div>
+        )}
       </section>
 
       {results && results.type === "custom" && (
@@ -1305,9 +1413,11 @@ function BotSimulator() {
 
           {results.battleType === "1v1" && (
             <p>
-              <strong>Bot 1:</strong> {getFighterName(results.selectedFighterOne)}
+              <strong>Bot 1:</strong>{" "}
+              {getFighterName(results.selectedFighterOne)}
               {" vs "}
-              <strong>Bot 2:</strong> {getFighterName(results.selectedFighterTwo)}
+              <strong>Bot 2:</strong>{" "}
+              {getFighterName(results.selectedFighterTwo)}
             </p>
           )}
 
@@ -1317,12 +1427,16 @@ function BotSimulator() {
 
           <div className="simulation-stat-grid">
             <div>
-              <span>{results.battleType === "2v2" ? "TEAM 1 WINS" : "BOT 1 WINS"}</span>
+              <span>
+                {results.battleType === "2v2" ? "TEAM 1 WINS" : "BOT 1 WINS"}
+              </span>
               <strong>{results.botOneWins}</strong>
             </div>
 
             <div>
-              <span>{results.battleType === "2v2" ? "TEAM 2 WINS" : "BOT 2 WINS"}</span>
+              <span>
+                {results.battleType === "2v2" ? "TEAM 2 WINS" : "BOT 2 WINS"}
+              </span>
               <strong>{results.botTwoWins}</strong>
             </div>
 
@@ -1395,7 +1509,9 @@ function BotSimulator() {
                       {test.secondAverageHealthAfterWins}
                       {test.secondAverageHealthAfterWins !== "N/A" ? " HP" : ""}
                     </p>
-                    <p>Average rounds to win: {test.secondAverageRoundsToWin}</p>
+                    <p>
+                      Average rounds to win: {test.secondAverageRoundsToWin}
+                    </p>
                   </div>
                 );
               })}
@@ -1499,10 +1615,10 @@ function BotSimulator() {
           </div>
 
           <p className="simulation-warning">
-            Overall score combines win rate (60%), starting-position
-            performance (20%), health remaining after wins (10%), and speed
-            of victory (10%). Results depend on the selected AI difficulties
-            and are not a definitive measure of character or team balance.
+            Overall score combines win rate (60%), starting-position performance
+            (20%), health remaining after wins (10%), and speed of victory
+            (10%). Results depend on the selected AI difficulties and are not a
+            definitive measure of character or team balance.
           </p>
 
           {renderLastBattle(results.lastResult)}
@@ -1510,6 +1626,10 @@ function BotSimulator() {
       )}
     </main>
   );
+}
+
+function yieldToBrowser() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 export default BotSimulator;

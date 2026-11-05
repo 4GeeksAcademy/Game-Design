@@ -53,3 +53,16 @@ localStorage.removeItem("fightersArenaOwnedSkins");
 
   location.reload();
 })();
+
+// unlock all characters
+localStorage.setItem(
+  "fightersArenaUnlockedCharacters",
+  JSON.stringify([
+    "mina", "rockLee", "usopp", "chad",
+    "picolo", "tenten", "kirishima", "ochaco",
+    "luffy", "ichigo", "naruto", "yoruichi",
+    "goku", "toga", "kenpachi", "hinata"
+  ])
+);
+
+window.dispatchEvent(new Event("unlocksUpdated"));
