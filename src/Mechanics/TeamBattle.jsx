@@ -64,6 +64,20 @@ function createBattleFighter(id) {
           cooldownRemaining <= 0,
         buff: attack.buff ? { ...attack.buff } : attack.buff,
         debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+
+        heal: attack.heal
+          ? {
+              ...attack.heal,
+              buff: attack.heal.buff
+                ? { ...attack.heal.buff }
+                : attack.heal.buff,
+            }
+          : attack.heal,
+
+        activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+          ...effect,
+          effects: { ...effect.effects },
+        })),
       };
     }),
     turnFinished: false,
@@ -799,6 +813,18 @@ export default function TeamBattle() {
       });
     }
   };
+const confirmHealTarget = (targetId) => {
+  if (!pendingHealSelection) return;
+
+  const { fighterId, attackIndex } = pendingHealSelection;
+
+  // Close the teammate-selection interface.
+  setPendingHealSelection(null);
+
+  // Pass the selected teammate into the healing logic.
+  useAttack(fighterId, attackIndex, null, targetId);
+};
+
 
   const useAttack = (
     fighterId,
@@ -815,24 +841,24 @@ export default function TeamBattle() {
           ? { ...fighter.defense }
           : fighter.defense,
       attacks: (fighter.attacks ?? []).map((attack) => ({
-  ...attack,
-  buff: attack.buff ? { ...attack.buff } : attack.buff,
-  debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+        ...attack,
+        buff: attack.buff ? { ...attack.buff } : attack.buff,
+        debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
 
-  heal: attack.heal
-    ? {
-        ...attack.heal,
-        buff: attack.heal.buff
-          ? { ...attack.heal.buff }
-          : attack.heal.buff,
-      }
-    : attack.heal,
+        heal: attack.heal
+          ? {
+              ...attack.heal,
+              buff: attack.heal.buff
+                ? { ...attack.heal.buff }
+                : attack.heal.buff,
+            }
+          : attack.heal,
 
-  activeEffects: (attack.activeEffects ?? []).map((effect) => ({
-    ...effect,
-    effects: { ...effect.effects },
-  })),
-})),
+        activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+          ...effect,
+          effects: { ...effect.effects },
+        })),
+      })),
     }));
 
     const updatedOpponents = teams.opponent.map((fighter) => ({
@@ -869,15 +895,9 @@ export default function TeamBattle() {
       (fighter) => fighter.id === targetId,
     );
 
-    if (
-      !attacker ||
-      attacker.health <= 0 ||
-      attacker.turnFinished
-    ) {
+    if (!attacker || attacker.health <= 0 || attacker.turnFinished) {
       return;
     }
-
-    
 
     const attack = attacker.attacks[attackIndex];
 
@@ -901,91 +921,83 @@ export default function TeamBattle() {
     }
 
     // ==========================================
-// TEAM HEALING ATTACK
-// ==========================================
+    // TEAM HEALING ATTACK
+    // ==========================================
 
-if (attack.heal) {
-  let recipients = [];
+    if (attack.heal) {
+      let recipients = [];
 
-  if (attack.heal.target === "all") {
-    // Heal every living teammate, including the caster.
-    recipients = updatedPlayers.filter(
-      (fighter) => fighter.health > 0
-    );
-  } else if (attack.heal.target === "selected") {
-    // Heal only the selected living teammate.
-    const target = updatedPlayers.find(
-      (fighter) => fighter.id === healTargetId
-    );
+      if (attack.heal.target === "all") {
+        // Heal every living teammate, including the caster.
+        recipients = updatedPlayers.filter((fighter) => fighter.health > 0);
+      } else if (attack.heal.target === "selected") {
+        // Heal only the selected living teammate.
+        const target = updatedPlayers.find(
+          (fighter) => fighter.id === healTargetId,
+        );
 
-    if (
-      !target ||
-      target.id === attacker.id ||
-      target.health <= 0
-    ) {
-      addLog("Choose a living teammate to heal.");
+        if (!target || target.id === attacker.id || target.health <= 0) {
+          addLog("Choose a living teammate to heal.");
+          return;
+        }
+
+        recipients = [target];
+      } else {
+        addLog("This healing attack has an invalid target type.");
+        return;
+      }
+
+      if (recipients.length === 0) {
+        addLog("There are no available teammates to heal.");
+        return;
+      }
+
+      // Pay the mana cost once, regardless of recipient count.
+      attacker.mana -= attack.cost ?? 0;
+
+      // Apply healing and buffs to each recipient.
+      recipients.forEach((recipient) => {
+        const result = applyHeal(attack, recipient);
+
+        addLog(
+          `💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`,
+          "buff",
+        );
+
+        describeEffects(result.buffsApplied, recipient.name, "buff").forEach(
+          (message) => addLog(message, "buff"),
+        );
+      });
+
+      // Consume the attack once, not once per teammate.
+      consumeAttack(attack);
+
+      setAttacksUsed((value) => value + 1);
+
+      setTeams({
+        player: updatedPlayers,
+        opponent: updatedOpponents,
+      });
+
+      if (
+        updatedPlayers.every(
+          (fighter) => fighter.health <= 0 || fighter.turnFinished,
+        )
+      ) {
+        setPhase("cpu-fighting");
+        addLog("Your team is finished. The CPU is preparing its attacks.");
+      }
+
       return;
     }
 
-    recipients = [target];
-  } else {
-    addLog("This healing attack has an invalid target type.");
-    return;
-  }
+    // Normal attacks still require an enemy target.
+    if (!defender) return;
 
-  if (recipients.length === 0) {
-    addLog("There are no available teammates to heal.");
-    return;
-  }
-
-  // Pay the mana cost once, regardless of recipient count.
-  attacker.mana -= attack.cost ?? 0;
-
-  // Apply healing and buffs to each recipient.
-  recipients.forEach((recipient) => {
-    const result = applyHeal(attack, recipient);
-
-    addLog(
-      `💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`,
-      "buff"
-    );
-
-    describeEffects(
-      result.buffsApplied,
-      recipient.name,
-      "buff"
-    ).forEach((message) => addLog(message, "buff"));
-  });
-
-  // Consume the attack once, not once per teammate.
-  consumeAttack(attack);
-
-  setAttacksUsed((value) => value + 1);
-
-  setTeams({
-    player: updatedPlayers,
-    opponent: updatedOpponents,
-  });
-
-  if (
-    updatedPlayers.every(
-      (fighter) => fighter.health <= 0 || fighter.turnFinished
-    )
-  ) {
-    setPhase("cpu-fighting");
-    addLog("Your team is finished. The CPU is preparing its attacks.");
-  }
-
-  return;
-}
-
-// Normal attacks still require an enemy target.
-if (!defender) return;
-
-if (defender.health <= 0) {
-  addLog("That opponent has already been defeated.");
-  return;
-}
+    if (defender.health <= 0) {
+      addLog("That opponent has already been defeated.");
+      return;
+    }
 
     const healthBefore = defender.health;
 
@@ -2647,6 +2659,80 @@ if (defender.health <= 0) {
           </section>
         </div>
       )}
+
+
+      {pendingHealSelection &&
+        (() => {
+          const healer = teams.player.find(
+            (fighter) => fighter.id === pendingHealSelection.fighterId,
+          );
+
+          if (!healer) return null;
+
+          const availableTeammates = teams.player.filter(
+            (fighter) =>
+              fighter.id !== healer.id && fighter.health > 0,
+          );
+
+          const attack =
+            healer.attacks[pendingHealSelection.attackIndex];
+
+          return (
+            <div className="target-modal-backdrop">
+              <section className="target-modal">
+                <p className="eyebrow">TEAM HEALING</p>
+
+                <h2>Choose a teammate to heal</h2>
+
+                <p>
+                  {healer.name} is preparing{" "}
+                  <strong>{attack?.name}</strong>.
+                  Select a living teammate to receive the healing.
+                </p>
+
+                {availableTeammates.length > 0 ? (
+                  <div className="target-choice-group">
+                    {availableTeammates.map((teammate) => (
+                      <button
+                        key={teammate.id}
+                        type="button"
+                        className="target-choice-button"
+                        onClick={() =>
+                          confirmHealTarget(teammate.id)
+                        }
+                      >
+                        {teammate.image && (
+                          <img
+                            src={teammate.image}
+                            alt=""
+                            className="heal-target-portrait"
+                          />
+                        )}
+
+                        {teammate.name}
+                        <span>
+                          {Math.max(0, teammate.health)} /{" "}
+                          {teammate.maximumHealth} HP
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No living teammates are available to heal.</p>
+                )}
+
+                <button
+                  type="button"
+                  className="confirm-target-button"
+                  onClick={() => setPendingHealSelection(null)}
+                >
+                  Cancel
+                </button>
+              </section>
+            </div>
+          );
+        })()}
+
 
       <section className="battlefield">
         {isStoryMode && (

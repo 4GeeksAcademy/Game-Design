@@ -83,6 +83,48 @@ const mina = {
       debuff: { health: 5, defense: 10, agility: 10, cooldown: 1, recovery: 1 },
       state: true,
     },
+    {
+  name: "Divine Restoration",
+  damage: 0,
+  speed: 0,
+  cost: 60,
+  state: true,
+
+  heal: {
+    amount: 25,
+    target: "all",
+
+    buff: {
+      defense: 5,
+      agility: 3,
+      mana: 15,
+      manaRegen: 2,
+      cooldown: 1,
+      recovery: 1
+    }
+  }
+},
+{
+  name: "Healing Pulse",
+  damage: 0,
+  speed: 0,
+  cost: 35,
+  state: true,
+
+  heal: {
+    amount: 45,
+    target: "selected",
+
+    buff: {
+      defense: 10,
+      agility: 5,
+      mana: 20,
+      manaRegen: 3,
+      cooldown: 1,
+      recovery: 2
+    }
+  }
+}
   ],
 };
 

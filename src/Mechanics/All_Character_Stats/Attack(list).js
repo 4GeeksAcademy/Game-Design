@@ -40,6 +40,21 @@ const attacklist = {
         maximumHealth: 50,
         maximumMana: 50,
       },
+      heal: {
+    amount: 45,
+    target: "selected", // or "all"
+
+    buff: {
+      defense: 10,
+      agility: 5,
+      mana: 20,
+      manaRegen: 3,
+      cooldown: 1,
+      recovery: 2
+    }
+  }
+  
     },
+    
   ],
 };
