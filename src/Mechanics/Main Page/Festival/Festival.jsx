@@ -33,7 +33,7 @@ const FESTIVAL_CHARACTER_IMAGES = {
   toga: TogaImage,
   hinata: HinataImage,
 };
-const ELITE_PASS_COST = 15000;
+const ELITE_PASS_COST = 100000;
 
 // Each tier has a free and an elite reward placeholder.
 const tiers = Array.from({ length: FESTIVAL_TOTAL_TIERS }, (_, index) => ({
