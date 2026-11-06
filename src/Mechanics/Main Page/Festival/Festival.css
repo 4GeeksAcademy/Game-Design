@@ -245,7 +245,7 @@
 
 .festival-tier-row {
   display: grid;
-  grid-template-columns: 115px repeat(15, minmax(200px, 1fr));
+  grid-template-columns: 115px repeat(var(--festival-tier-count, 15), minmax(200px, 1fr));
   gap: 6px;
   margin-bottom: 10px;
 }
@@ -286,7 +286,7 @@
 
 .festival-reward-row {
   display: grid;
-  grid-template-columns: 115px repeat(15, minmax(200px, 1fr));
+  grid-template-columns: 115px repeat(var(--festival-tier-count, 15), minmax(200px, 1fr));
   gap: 6px;
 }
 

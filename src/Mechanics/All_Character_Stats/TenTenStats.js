@@ -95,7 +95,7 @@ const TenTen = {
 
     {
       name: "Bashosen: Scroll Of Fire",
-      image: Attack7,
+      image: Attack6,
 
       damage: 70,
       speed: 40,
@@ -111,7 +111,7 @@ const TenTen = {
 
     {
       name: "Bashōsen: Coil of Wind",
-      // image: ChainSickleImage,
+      image: Attack7,
       description:
         "Attacks with a chained sickle, dealing damage and weakening the opponent's defense.",
       damage: 70,

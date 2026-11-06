@@ -5,7 +5,7 @@ import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Hakuda
 import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Shunko:_Lightning_Release.png";
 import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Raijin_Senkei.png";
 import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Afterimage_Strike.png";
-import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Raiju_Senkei.png"
+import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Raiju_Senkei.png";
 const Yoruichi = {
   name: "Yoruichi Shihōin",
   image: YoruichiArenaImage,
@@ -32,13 +32,13 @@ const Yoruichi = {
       image: Attack1,
       damage: 18,
       cost: 5,
-      speed: 90,
+      speed: 80,
       state: true,
-
+      buffRequiresHit: true,
       buff: {
         agility: 7,
         mana: 10,
-        manaRegen: 2,
+        manaRegen: 3,
       },
     },
 
@@ -49,10 +49,11 @@ const Yoruichi = {
       cost: 9,
       speed: 70,
       state: true,
+      buffRequiresHit: true,
       buff: {
         agility: 7,
         mana: 4,
-        manaRegen: 1,
+        manaRegen: 3,
         cooldown: 1,
       },
     },
@@ -64,7 +65,7 @@ const Yoruichi = {
       cost: 13,
       speed: 80,
       state: true,
-
+      buffRequiresHit: true,
       buff: {
         agility: 7,
         defense: 3,
@@ -113,6 +114,8 @@ const Yoruichi = {
       cost: 30,
       speed: 38,
       state: true,
+      turnCooldown: 3,
+      uses: 3,
 
       buff: {
         recovery: 1,

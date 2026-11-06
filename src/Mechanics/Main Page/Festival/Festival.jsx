@@ -426,7 +426,7 @@ function Festival() {
 
         <div className="festival-status">
           <span>PERMANENT FESTIVAL</span>
-          <span>15 TIERS</span>
+          <span>{FESTIVAL_TOTAL_TIERS} TIERS</span>
           <span>{FESTIVAL_TOTAL_POINTS.toLocaleString()} TOTAL POINTS</span>
         </div>
       </section>
@@ -464,11 +464,14 @@ function Festival() {
             <h3>FESTIVAL REWARD TRACK</h3>
           </div>
 
-          <span className="festival-tier-count">15 TIERS</span>
+          <span className="festival-tier-count">{FESTIVAL_TOTAL_TIERS} TIERS</span>
         </div>
 
         <div className="festival-track-container">
-          <div className="festival-track">
+          <div
+            className="festival-track"
+            style={{ "--festival-tier-count": FESTIVAL_TOTAL_TIERS }}
+          >
             {/* TIER NUMBERS */}
             <div className="festival-tier-row">
               {tiers.map((tier) => {
@@ -660,7 +663,7 @@ function Festival() {
         </div>
 
         <p className="festival-track-hint">
-          ← SCROLL HORIZONTALLY TO VIEW ALL 15 TIERS →
+          ← SCROLL HORIZONTALLY TO VIEW ALL {FESTIVAL_TOTAL_TIERS} TIERS →
         </p>
 
         {/* ELITE PASS INFORMATION */}
@@ -678,7 +681,7 @@ function Festival() {
               <p>
                 {festivalProgress.elitePassOwned
                   ? "You have unlocked the exclusive Elite reward track."
-                  : "Unlock access to all 15 exclusive Elite rewards."}
+                  : `Unlock access to all ${FESTIVAL_TOTAL_TIERS} exclusive Elite rewards.`}
               </p>
 
               <strong className="festival-coin-balance">

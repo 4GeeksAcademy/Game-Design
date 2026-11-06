@@ -31,6 +31,7 @@ const Ochaco = {
       speed: 45,
       cost: 7,
       state: true,
+      turnCooldown: 1,
       debuff: {
         agility: 20,
         defense: 20,
@@ -45,6 +46,7 @@ const Ochaco = {
       speed: 45,
       cost: 7,
       state: true,
+      turnCooldown: 2,
       debuff: {
         health: 5,
         defense: 8,
@@ -74,6 +76,7 @@ const Ochaco = {
       damage: 55,
       speed: 40,
       cost: 15,
+      uses: 2,
       state: true,
       debuff: {
         agility: 10,

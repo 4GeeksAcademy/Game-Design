@@ -58,6 +58,7 @@ const Naruto = {
       image: Attack3,
       damage: 65,
       speed: 40,
+      turnCooldown: 3,
       cost: 40,
       state: true,
       debuff: {
@@ -72,6 +73,7 @@ const Naruto = {
       damage: 0,
       speed: 0,
       cost: 60,
+      turnCooldown: 5,
       state: true,
       buff: {
         agility: 10,
@@ -84,6 +86,7 @@ const Naruto = {
       name: "Tailed Beast Bomb Rasenshuriken",
       image: Attack5,
       damage: 95,
+      uses: 1,
       speed: 50,
       cost: 70,
       state: true,

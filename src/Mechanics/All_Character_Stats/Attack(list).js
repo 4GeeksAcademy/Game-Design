@@ -7,6 +7,7 @@ const attacklist = {
       cost: 10,
       uses: 1,
       turnCooldown: 5,
+      debuffRequiresHit: true,
       buffRequiresHit: true,
       sacrifice: {
         health: 25,

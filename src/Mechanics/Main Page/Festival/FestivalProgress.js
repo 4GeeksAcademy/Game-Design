@@ -6,26 +6,31 @@
 // FESTIVAL CONFIGURATION
 // ==========================================
 
-export const FESTIVAL_TOTAL_POINTS = 3000;
-export const FESTIVAL_TOTAL_TIERS = 15;
+export const FESTIVAL_TOTAL_POINTS = 50000;
+export const FESTIVAL_TOTAL_TIERS = 20;
 
 // Points required to unlock each tier.
 export const FESTIVAL_TIER_REQUIREMENTS = [
-  50,
-  100,
-  160,
-  250,
-  340,
-  430,
-  550,
-  750,
-  930,
-  1100,
-  1350,
-  1550,
-  2070,
-  2550,
-  3000,
+  50,    // 1
+  100,   // 2
+  160,   // 3
+  250,   // 4
+  340,   // 5
+  430,   // 6
+  550,   // 7
+  750,   // 8
+  930,   // 9
+  1100,  // 10
+  1350,  // 11
+  1550,  // 12
+  2070,  // 13
+  2550,  // 14
+  3000,  // 15
+  5000,  // 16
+  7500,  // 17
+  14000, // 18
+  25000, // 19
+  50000, // 20
 ];
 
 // Give this festival its own ID.
@@ -65,19 +70,12 @@ export const getFestivalProgress = () => {
       ...parsed,
       points: Math.max(
         0,
-        Math.min(
-          FESTIVAL_TOTAL_POINTS,
-          Number(parsed.points) || 0
-        )
+        Math.min(FESTIVAL_TOTAL_POINTS, Number(parsed.points) || 0),
       ),
-      claimedFreeRewards: Array.isArray(
-        parsed.claimedFreeRewards
-      )
+      claimedFreeRewards: Array.isArray(parsed.claimedFreeRewards)
         ? parsed.claimedFreeRewards
         : [],
-      claimedEliteRewards: Array.isArray(
-        parsed.claimedEliteRewards
-      )
+      claimedEliteRewards: Array.isArray(parsed.claimedEliteRewards)
         ? parsed.claimedEliteRewards
         : [],
     };
@@ -98,16 +96,13 @@ export const saveFestivalProgress = (progress) => {
       ...progress,
     };
 
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(safeProgress)
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(safeProgress));
 
     // Notify Festival components that progress changed.
     window.dispatchEvent(
       new CustomEvent("festivalProgressUpdated", {
         detail: safeProgress,
-      })
+      }),
     );
 
     return safeProgress;
@@ -134,7 +129,7 @@ export const addFestivalPoints = (amount) => {
     ...currentProgress,
     points: Math.min(
       FESTIVAL_TOTAL_POINTS,
-      currentProgress.points + pointsToAdd
+      currentProgress.points + pointsToAdd,
     ),
   };
 
@@ -154,12 +149,10 @@ export const isFestivalTierUnlocked = (tierNumber, points) => {
     return false;
   }
 
-  const requiredPoints =
-    FESTIVAL_TIER_REQUIREMENTS[tierNumber - 1];
+  const requiredPoints = FESTIVAL_TIER_REQUIREMENTS[tierNumber - 1];
 
   return points >= requiredPoints;
 };
-
 
 export const claimFestivalReward = (tierNumber, rewardTrack) => {
   if (
@@ -174,9 +167,7 @@ export const claimFestivalReward = (tierNumber, rewardTrack) => {
   const progress = getFestivalProgress();
 
   const claimedKey =
-    rewardTrack === "free"
-      ? "claimedFreeRewards"
-      : "claimedEliteRewards";
+    rewardTrack === "free" ? "claimedFreeRewards" : "claimedEliteRewards";
 
   if (progress[claimedKey].includes(tierNumber)) {
     return false;

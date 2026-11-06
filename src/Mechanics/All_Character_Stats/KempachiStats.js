@@ -38,6 +38,10 @@ const Kenpachi = {
       speed: 35,
       cost: 20,
       state: true,
+      debuffRequiresHit: true,
+      debuff: {
+        health: 20,
+      }
     },
 
     // 2. Head-On Assault
@@ -70,7 +74,7 @@ const Kenpachi = {
       state: true,
       buff: {
         agility: 20,
-        manaRegen: 5,
+        manaRegen: 15,
       },
     },
 
@@ -90,6 +94,15 @@ const Kenpachi = {
       speed: 15,
       cost: 120,
       state: true,
+      turnCooldown: 2,
+      buff: {
+        mana: 30,
+        agility: 11,
+        cooldown: 1,
+        maximumCooldown: 1,
+        manaRegen: 20,
+        maximumMana: 50,
+      },
       debuff: {
         defense: 5,
         agility: 5,

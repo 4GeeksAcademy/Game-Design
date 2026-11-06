@@ -46,11 +46,12 @@ const Picolo = {
       damage: 0,
       speed: 0,
       cost: 10,
+      turnCooldown: 3,
       state: true,
       buff: {
         defense: 10,
         agility: 5,
-        mana: 30,
+        mana: 70,
       },
     },
 
@@ -111,9 +112,10 @@ const Picolo = {
     {
       id: "masenko",
       name: "Masenko",
+      uses: 1,
       image: Attack7,
-      damage: 25,
-      speed: 70,
+      damage: 60,
+      speed: 90,
       cost: 27,
       state: true,
     },

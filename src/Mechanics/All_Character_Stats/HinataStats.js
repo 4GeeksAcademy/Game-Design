@@ -36,7 +36,7 @@ const Hinata = {
         {
             name: "Gentle Fist",
             damage: 19,
-            speed: 4,
+            speed: 44,
             cost: 8,
             state: true,
         },
@@ -45,7 +45,7 @@ const Hinata = {
         {
             name: "Palm Rotation Strike",
             damage: 21,
-            speed: 3,
+            speed: 33,
             cost: 10,
             state: true,
         },
@@ -54,7 +54,7 @@ const Hinata = {
         {
             name: "Twin Lion Fists",
             damage: 25,
-            speed: 4,
+            speed: 32,
             cost: 13,
             state: true,
         },
@@ -63,7 +63,7 @@ const Hinata = {
         {
             name: "Thirty-Two Palms",
             damage: 23,
-            speed: 3,
+            speed: 44,
             cost: 11,
             state: true,
         },
@@ -72,7 +72,7 @@ const Hinata = {
         {
             name: "Protective Eight Trigrams",
             damage: 20,
-            speed: 3,
+            speed: 27,
             cost: 9,
             state: true,
         },
@@ -81,7 +81,7 @@ const Hinata = {
         {
             name: "Sixty-Four Palms",
             damage: 29,
-            speed: 5,
+            speed: 30,
             cost: 17,
             state: true,
         },

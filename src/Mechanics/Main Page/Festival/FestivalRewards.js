@@ -61,6 +61,36 @@ const FESTIVAL_REWARDS = {
     elite: { type: "coins", amount: 1300 },
   },
   15: {
+    free: { type: "coins", amount: 5000 },
+    elite: { type: "coins", amount: 20000 },
+  },
+  16: {
+    free: { type: "coins", amount: 1000 },
+    elite: { type: "coins", amount: 4000 },
+  },
+  17: {
+    free: { type: "coins", amount: 2000 },
+    elite: { type: "coins", amount: 4000 },
+  },
+  18: {
+    free: {
+      type: "skin",
+      skinId: "hinata-blushing-bride",
+      characterId: "hinata",
+      name: "Blushing Bride",
+    },
+    elite: {
+      type: "skin",
+      skinId: "naruto-seventh-hokage",
+      characterId: "naruto",
+      name: "Seventh Hokage",
+    },
+  },
+  19: {
+    free: { type: "coins", amount: 3500 },
+    elite: { type: "coins", amount: 10000 },
+  },
+  20: {
     free: { type: "character",
       characterId: "kenpachi",
       name: "Kenpachi Zaraki",
@@ -71,7 +101,6 @@ const FESTIVAL_REWARDS = {
       characterId: "goku",
       name: "Elegant Drip",
     },
-      
   },
 };
 

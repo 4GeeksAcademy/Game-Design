@@ -26,11 +26,20 @@ image: GokuImage,
 
   agility: 28,
 
-  cooldown: 0,
-  maximumCooldown: 0,
-  recovery: 0,
+  cooldown: 4,
+  maximumCooldown: 4,
+  recovery: 2,
 
   attacks: [
+
+    {
+      name: "One Inch Punch",
+      damage: 58,
+      speed: 10,
+      cost: 5,
+      state: true,
+    },
+    
     {
       name: "Kamehameha",
       image: Attack1,
@@ -54,25 +63,26 @@ image: GokuImage,
       state: true,
     },
     {
-      name: "Super Kamehameha",
+      name: "Dragon Fist",
       damage: 82,
       speed: 27,
-      cost: 35,
-      state: true,
-    },
-    {
-      name: "Spirit Bomb",
-      damage: 90,
-      speed: 25,
       cost: 45,
       state: true,
     },
+    
+    
+
     {
-      name: "Dragon Fist",
-      damage: 88,
-      speed: 29,
-      cost: 42,
+      name: "Spirit Bomb",
+      damage: 110,
+      speed: 20,
+      cost: 130,
       state: true,
+      debuff: {
+        Cooldown: 2,
+        maximumCooldown: 1,
+        manaRegen: 7,
+      }
     },
   ],
 };

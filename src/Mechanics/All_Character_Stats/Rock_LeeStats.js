@@ -36,6 +36,8 @@ const rockLee = {
       damage: 0,
       speed: 0,
       cost: 40,
+      uses: 1,
+      turnCooldown: 5,
       buff: {
         agility: 5,
         mana: 50,
@@ -53,6 +55,7 @@ const rockLee = {
       damage: 15,
       speed: 45,
       cost: 5,
+    buffRequiresHit: true,
       buff: {
         agility: 5,
         mana: 15,
@@ -108,8 +111,9 @@ const rockLee = {
       name: "Ultra Wind Wave",
       image: Attack6,
       uses: 2,
-      damage: 70,
-      speed: 70,
+      turnCooldown: 5,
+      damage: 140,
+      speed: 90,
       cost: 50,
       buff: {
         agility: 10,
