@@ -1602,3 +1602,29 @@
     height: 125px;
   }
 }
+
+.secret-fighter-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  text-align: center;
+  background: linear-gradient(145deg, #172333, #080d16);
+  border: 1px solid rgba(19, 213, 255, 0.35);
+  color: #13d5ff;
+}
+
+.secret-fighter-placeholder span {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.secret-fighter-placeholder strong {
+  font-size: 14px;
+  font-weight: 900;
+}

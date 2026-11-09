@@ -1,199 +1,565 @@
 
+/* =========================================
+   FIGHTER'S ARENA — CHARACTER MARKETPLACE
+========================================= */
+
 .shop-screen {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
-  padding: 24px;
+  padding: 28px clamp(16px, 4vw, 54px) 36px;
+  overflow: hidden;
   color: #f1f5ff;
-  background:
-    radial-gradient(ellipse at top, #172440 0%, transparent 55%),
-    #080d1c;
   font-family: Arial, Helvetica, sans-serif;
+
+  background:
+    radial-gradient(
+      ellipse at 50% -15%,
+      rgba(19, 213, 255, 0.15),
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse at 100% 55%,
+      rgba(255, 49, 89, 0.07),
+      transparent 38%
+    ),
+    #080d18;
 }
+
+.shop-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.16;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 38px 38px;
+
+  mask-image: linear-gradient(
+    to bottom,
+    black,
+    transparent 85%
+  );
+}
+
+/* HEADER */
 
 .shop-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  justify-content: space-between;
   flex-wrap: wrap;
-  margin-bottom: 40px;
+  gap: 16px;
+  max-width: 1450px;
+  margin: 0 auto 48px;
 }
 
 .shop-back-button {
-  padding: 11px 16px;
-  color: #f1f5ff;
-  background: #121d32;
-  border: 1px solid #344661;
-  font-weight: 800;
+  position: relative;
+  padding: 12px 18px;
+  color: #dce7fa;
+  background: rgba(17, 28, 47, 0.92);
+  border: 1px solid #354760;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: 0.22s ease;
 }
 
 .shop-back-button:hover {
-  border-color: #13d5ff;
   color: #13d5ff;
+  border-color: #13d5ff;
+  background: rgba(19, 213, 255, 0.08);
+  box-shadow: 0 0 18px rgba(19, 213, 255, 0.12);
+  transform: translateY(-2px);
 }
 
 .shop-balance {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 11px 16px;
+  gap: 10px;
+  padding: 11px 17px;
   color: #36e6a0;
-  background: rgba(54, 230, 160, 0.08);
-  border: 1px solid rgba(54, 230, 160, 0.5);
+  background: linear-gradient(
+    135deg,
+    rgba(54, 230, 160, 0.13),
+    rgba(54, 230, 160, 0.035)
+  );
+  border: 1px solid rgba(54, 230, 160, 0.4);
+  border-radius: 3px;
+  font-size: 12px;
   font-weight: 900;
+  letter-spacing: 1px;
+  box-shadow: inset 0 0 16px rgba(54, 230, 160, 0.035);
 }
 
 .shop-balance span {
-  font-size: 20px;
+  font-size: 23px;
+  text-shadow: 0 0 12px rgba(54, 230, 160, 0.45);
 }
 
+/* STORE TITLE */
+
 .shop-heading {
-  margin-bottom: 30px;
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto 42px;
   text-align: center;
 }
 
 .shop-heading > p {
+  display: inline-block;
+  margin: 0;
+  padding: 8px 13px;
   color: #13d5ff;
-  font-size: 12px;
+  background: rgba(19, 213, 255, 0.07);
+  border: 1px solid rgba(19, 213, 255, 0.25);
+  font-size: 10px;
   font-weight: 900;
   letter-spacing: 3px;
 }
 
 .shop-heading h1 {
-  margin: 10px 0;
-  font-size: clamp(30px, 5vw, 52px);
+  margin: 17px 0 12px;
+  font-size: clamp(36px, 5.5vw, 66px);
   font-weight: 1000;
   font-style: italic;
-  letter-spacing: 1px;
+  line-height: 0.98;
+  letter-spacing: -1.5px;
+  text-transform: uppercase;
+
+  background: linear-gradient(
+    180deg,
+    #ffffff 10%,
+    #c6d8ed 65%,
+    #7185a4 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.4));
 }
 
 .shop-heading > span {
+  display: block;
   color: #aab7ce;
+  font-size: 14px;
+  line-height: 1.7;
 }
+
+/* PURCHASE FEEDBACK */
 
 .shop-message {
   max-width: 700px;
-  margin: 0 auto 24px;
-  padding: 12px;
-  color: #36e6a0;
+  margin: 0 auto 28px;
+  padding: 14px 18px;
+  color: #75ffc4;
   background: rgba(54, 230, 160, 0.08);
-  border: 1px solid rgba(54, 230, 160, 0.35);
+  border: 1px solid rgba(54, 230, 160, 0.38);
+  border-left: 3px solid #36e6a0;
+  font-size: 13px;
+  font-weight: 700;
   text-align: center;
+  animation: shop-message-in 0.25s ease-out;
 }
+
+@keyframes shop-message-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* CHARACTER GRID */
 
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 20px;
-  max-width: 1250px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 1450px;
   margin: 0 auto;
 }
 
+/* FIGHTER CARD */
+
 .shop-card {
+  position: relative;
+  min-width: 0;
   overflow: hidden;
-  background: #101a2d;
-  border: 1px solid #293953;
+  background: linear-gradient(
+    160deg,
+    #152238 0%,
+    #0d1627 62%,
+    #0a1120 100%
+  );
+  border: 1px solid #293a54;
+  border-radius: 5px;
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
   transition:
-    transform 0.2s ease,
-    border-color 0.2s ease;
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.shop-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: 3px;
+  background: #13d5ff;
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .shop-card:hover {
-  transform: translateY(-4px);
-  border-color: #13d5ff;
+  transform: translateY(-7px);
+  border-color: rgba(19, 213, 255, 0.85);
+  box-shadow:
+    0 15px 32px rgba(0, 0, 0, 0.38),
+    0 0 22px rgba(19, 213, 255, 0.08);
+}
+
+.shop-card:hover::before {
+  opacity: 1;
 }
 
 .shop-card-unlocked {
-  border-color: rgba(54, 230, 160, 0.45);
+  border-color: rgba(54, 230, 160, 0.38);
 }
+
+.shop-card-unlocked::before {
+  background: #36e6a0;
+  opacity: 0.7;
+}
+
+.shop-card-unlocked:hover {
+  border-color: #36e6a0;
+  box-shadow:
+    0 15px 32px rgba(0, 0, 0, 0.38),
+    0 0 20px rgba(54, 230, 160, 0.08);
+}
+
+/* CHARACTER ART */
 
 .shop-portrait {
   position: relative;
-  height: 240px;
+  height: clamp(225px, 25vw, 310px);
   overflow: hidden;
-  background: #0a1120;
+  background:
+    radial-gradient(
+      ellipse at 50% 40%,
+      rgba(47, 78, 119, 0.25),
+      transparent 68%
+    ),
+    #0a1120;
+  border-bottom: 1px solid rgba(122, 148, 184, 0.15);
+}
+
+.shop-portrait::after {
+  content: "";
+  position: absolute;
+  inset: 35% 0 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(8, 13, 24, 0.22) 45%,
+    rgba(8, 13, 24, 0.65)
+  );
 }
 
 .shop-portrait img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  object-position: center;
+  object-position: center bottom;
+  padding: 8px 5px 0;
+  transition: transform 0.4s ease;
 }
+
+.shop-card:hover .shop-portrait img {
+  transform: scale(1.055);
+}
+
+/* LOCK INDICATOR */
+
+/* CENTERED LOCK EMBLEM */
 
 .shop-lock {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  background: rgba(8, 13, 28, 0.9);
-  border: 1px solid #ff3159;
-  border-radius: 50%;
-  font-size: 18px;
+  top: 50%;
+  left: 50%;
+  z-index: 4;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+
+  color: #ff3159;
+  pointer-events: none;
+
+  transform: translate(-50%, -50%);
 }
 
+/* CUSTOM SVG PADLOCK */
+
+.shop-lock-icon {
+  display: block;
+  width: 58px;
+  height: 65px;
+  overflow: visible;
+
+  filter:
+    drop-shadow(0 0 4px rgba(255, 49, 89, 0.95))
+    drop-shadow(0 0 13px rgba(255, 49, 89, 0.5));
+
+  transition: transform 0.25s ease;
+}
+
+/* DIAGONAL LOCKED RIBBON */
+
+.shop-lock-ribbon {
+  display: block;
+  padding: 5px 17px;
+
+  color: #ffffff;
+  background: linear-gradient(
+    110deg,
+    #a80c32,
+    #ff3159 55%,
+    #d71943
+  );
+
+  border: 1px solid #ff829a;
+
+  font-size: 11px;
+  font-weight: 1000;
+  line-height: 1.2;
+  letter-spacing: 2px;
+  text-align: center;
+
+  box-shadow:
+    0 0 12px rgba(255, 49, 89, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+  transform: rotate(-10deg);
+}
+
+/* SUBTLE HOVER RESPONSE */
+
+.shop-card:hover .shop-lock-icon {
+  transform: scale(1.08);
+}
+
+.shop-card:hover .shop-lock-ribbon {
+  box-shadow:
+    0 0 18px rgba(255, 49, 89, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+
+/* CARD DETAILS */
+
 .shop-card-info {
-  padding: 16px;
+  position: relative;
+  padding: 18px 17px 17px;
 }
 
 .shop-card-info h2 {
-  margin: 0 0 8px;
-  font-size: 19px;
+  overflow: hidden;
+  margin: 0 0 10px;
+  color: #f4f7ff;
+  font-size: clamp(16px, 1.4vw, 20px);
   font-weight: 900;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shop-card-info p {
+  display: flex;
+  align-items: center;
   min-height: 18px;
-  color: #36e6a0;
-  font-size: 12px;
+  margin: 0 0 17px;
+  color: #ffbd69;
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: 1px;
 }
 
+.shop-card-unlocked .shop-card-info p {
+  color: #36e6a0;
+}
+
+/* PURCHASE BUTTON */
+
 .shop-purchase-button {
   width: 100%;
-  padding: 12px 8px;
-  color: #080d1c;
-  background: #36e6a0;
-  border: 0;
+  min-height: 44px;
+  padding: 12px 9px;
+  color: #07111b;
+  background: linear-gradient(110deg, #13d5ff, #76eaff);
+  border: 1px solid #13d5ff;
+  border-radius: 3px;
   font-size: 11px;
   font-weight: 1000;
+  letter-spacing: 0.8px;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .shop-purchase-button:hover:not(:disabled) {
-  background: #76ffc6;
-  box-shadow: 0 0 16px rgba(54, 230, 160, 0.25);
+  background: linear-gradient(110deg, #65e8ff, #b3f5ff);
+  box-shadow: 0 0 20px rgba(19, 213, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+.shop-purchase-button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .shop-purchase-button:disabled {
   color: #36e6a0;
-  background: rgba(54, 230, 160, 0.08);
-  border: 1px solid rgba(54, 230, 160, 0.35);
+  background: rgba(54, 230, 160, 0.07);
+  border: 1px solid rgba(54, 230, 160, 0.28);
   cursor: default;
 }
+
+/* RETURN BUTTON */
 
 .shop-footer {
   display: flex;
   justify-content: center;
-  margin: 35px 0 10px;
+  margin: 46px 0 10px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(122, 148, 184, 0.15);
 }
 
-@media (max-width: 480px) {
-  .shop-screen {
-    padding: 16px;
-  }
+.shop-footer .shop-back-button {
+  min-width: 235px;
+  padding: 15px 22px;
+}
 
-  .shop-header {
-    margin-bottom: 30px;
+/* TABLETS */
+
+@media (max-width: 1050px) {
+  .shop-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 19px;
   }
 
   .shop-portrait {
-    height: 220px;
+    height: clamp(215px, 29vw, 275px);
+  }
+
+  .shop-card-info {
+    padding: 15px 13px;
+  }
+}
+
+@media (max-width: 720px) {
+  .shop-screen {
+    padding: 20px 16px 28px;
+  }
+
+  .shop-header {
+    margin-bottom: 38px;
+  }
+
+  .shop-heading {
+    margin-bottom: 30px;
+  }
+
+  .shop-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .shop-portrait {
+    height: clamp(190px, 48vw, 270px);
+  }
+
+  .shop-card-info h2 {
+    font-size: 16px;
+  }
+
+  .shop-purchase-button {
+    min-height: 42px;
+    font-size: 10px;
+  }
+}
+
+/* SMALL PHONES */
+
+@media (max-width: 380px) {
+  .shop-screen {
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+
+  .shop-grid {
+    gap: 10px;
+  }
+
+  .shop-portrait {
+    height: 180px;
+  }
+
+  .shop-card-info {
+    padding: 13px 10px;
+  }
+
+  .shop-card-info h2 {
+    font-size: 14px;
+  }
+
+  .shop-card-info p {
+    font-size: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .shop-purchase-button {
+    padding-right: 4px;
+    padding-left: 4px;
+    font-size: 9px;
+  }
+
+  .shop-balance {
+    padding: 10px 12px;
+  }
+}
+
+/* ACCESSIBILITY */
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-card,
+  .shop-portrait img,
+  .shop-back-button,
+  .shop-purchase-button {
+    transition: none;
+  }
+
+  .shop-message {
+    animation: none;
   }
 }

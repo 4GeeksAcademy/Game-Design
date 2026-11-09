@@ -1,10 +1,12 @@
 import TenTenArenaImage from "../../assets/img/Tenten.jpg";
 
-import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
-import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
-import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
-import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
+import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Kunai Throw.jpg";
+import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Jidanda.png";
+import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Explosive Tags.png";
+import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Segmented Iron Dome.png";
+import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Twin Rising Dragons.png";
+import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Bashosen: Scroll Of Fire.png";
+import Attack7 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Bashōsen: Coil of Wind.png";
 
 const TenTen = {
   name: "Tenten",
@@ -24,26 +26,10 @@ const TenTen = {
   },
 
   attacks: [
-
-     {
-      id: "tenten-sealing-scroll",
-      name: "Sealing Scroll",
-      // image: SealingScrollImage,
-      description:
-        "Uses her scroll techniques to recover chakra and prepare for another attack.",
-      damage: 0,
-      speed: 0,
-      cost: 0,
-      state: true,
-      buff: {
-        mana: 20,
-      },
-    },
-
     {
       id: "tenten-kunai-throw",
       name: "Kunai Throw",
-      // image: KunaiThrowImage,
+      image: Attack1,
       description: "Throws a kunai at the opponent with quick precision.",
       damage: 15,
       speed: 40,
@@ -52,11 +38,9 @@ const TenTen = {
     },
 
     {
-      id: "tenten-weapon-barrage",
-      name: "Weapon Barrage",
-      // image: WeaponBarrageImage,
-      description:
-        "Launches a rapid barrage of shuriken and kunai at the opponent.",
+      name: "Unsealing Jutsu - Jidanda",
+
+      image: Attack2,
       damage: 30,
       speed: 45,
       cost: 10,
@@ -69,7 +53,7 @@ const TenTen = {
     {
       id: "tenten-explosive-tags",
       name: "Explosive Tags",
-      // image: ExplosiveTagsImage,
+      image: Attack3,
       description:
         "Throws explosive tags that damage the opponent and reduce their agility.",
       damage: 25,
@@ -83,30 +67,24 @@ const TenTen = {
     },
 
     {
-      id: "tenten-chain-sickle",
-      name: "Chain Sickle",
-      // image: ChainSickleImage,
-      description:
-        "Attacks with a chained sickle, dealing damage and weakening the opponent's defense.",
-      damage: 20,
-      speed: 25,
-      cost: 15,
+      name: "Unsealing Technique: Segmented Iron Dome",
+      image: Attack4,
+      damage: 0,
+      speed: 0,
+      cost: 30,
       state: true,
-      debuff: {
-        health: 3,
-        defense: 5,
-        mana: 10,
+      buff: {
+        defense: 20,
       },
     },
 
     {
-      id: "tenten-twin-rising-dragons",
       name: "Twin Rising Dragons",
-      // image: TwinRisingDragonsImage,
+      image: Attack5,
       description:
         "Uses her scrolls to unleash a large wave of weapons against the opponent.",
-      damage: 55,
-      speed: 50,
+      damage: 42,
+      speed: 30,
       cost: 25,
       state: true,
       debuff: {
@@ -115,22 +93,36 @@ const TenTen = {
       },
     },
 
-   
-
     {
-      id: "tenten-dragon-weapons",
-      name: "Dragon Weapons",
-      // image: DragonWeaponsImage,
-      description:
-        "Unleashes a powerful storm of weapons, dealing heavy damage and reducing the opponent's agility.",
-      damage: 60,
-      speed: 70,
-      cost: 40,
+      name: "Bashosen: Scroll Of Fire",
+      image: Attack6,
+
+      damage: 70,
+      speed: 40,
+      cost: 45,
       state: true,
       debuff: {
-        agility: 15,
-        cooldown: 1,
+        health: 10,
+        defense: 3,
+        mana: 20,
         maximumCooldown: 1,
+      },
+    },
+
+    {
+      name: "Bashōsen: Coil of Wind",
+      image: Attack7,
+      description:
+        "Attacks with a chained sickle, dealing damage and weakening the opponent's defense.",
+      damage: 70,
+      speed: 41,
+      cost: 45,
+      state: true,
+      debuff: {
+        health: 3,
+        defense: 7,
+        manaRegen: 7,
+        cooldown: 1,
       },
     },
   ],

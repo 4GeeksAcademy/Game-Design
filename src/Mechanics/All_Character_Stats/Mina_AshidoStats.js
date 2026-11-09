@@ -1,21 +1,5 @@
-import { acidShot, acidBomb, acidRain, acidStorm } from "./Attack(list)";
 
-// const mina = {
-//     name: "Mina Ashido",
 
-//     health: 100,
-
-//     maximumMana: 50,
-
-//     regenMana: 5,
-
-//     attacks: [
-//         acidShot,
-//         acidBomb,
-//         acidRain,
-//         acidStorm
-//     ]
-// };
 import minaArenaImage from "../../assets/img/MinaAshidoArena.jpg";
 
 const mina = {
@@ -42,6 +26,7 @@ const mina = {
       speed: 40,
       cost: 12,
       state: true,
+      
       buff: {
         mana: 20,
       },
@@ -71,6 +56,8 @@ const mina = {
       damage: 40,
       speed: 10,
       cost: 40,
+      
+      buffRequiresHit: true,
       buff: {
         defense: 6,
       },

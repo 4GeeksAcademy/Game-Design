@@ -56,6 +56,7 @@ const Usopp = {
     damage: 60,
     speed: 50,
     cost: 20,
+    debuffRequiresHit: true,
     state: true,
     debuff: {
       defense: 10,

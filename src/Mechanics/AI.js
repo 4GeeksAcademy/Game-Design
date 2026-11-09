@@ -1,9 +1,9 @@
-import { attackCharacter, evadeAttack } from "./Health.js";
+import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
 
 function aiChooseAttack(ai) {
   let availableAttacks = ai.attacks.filter((attack) => {
-    return attack.state === true && ai.mana >= attack.cost;
-  });
+  return canUseAttack(attack) && ai.mana >= (attack.cost ?? 0);
+});
 
   if (availableAttacks.length === 0) {
     console.log("AI has no available attacks!");
@@ -15,6 +15,28 @@ function aiChooseAttack(ai) {
 
   return randomAttack;
 }
+
+
+function aiChooseHealTarget(ai, teammates) {
+  if (!ai || !Array.isArray(teammates)) return null;
+
+  // Easy AI doesn't evaluate health percentages.
+  // It simply chooses a random living teammate.
+  const availableTeammates = teammates.filter(
+    (fighter) =>
+      fighter.id !== ai.id &&
+      fighter.health > 0
+  );
+
+  if (availableTeammates.length === 0) return null;
+
+  const randomIndex = Math.floor(
+    Math.random() * availableTeammates.length
+  );
+
+  return availableTeammates[randomIndex];
+}
+
 
 // AI randomly chooses to defend or evade.
 
@@ -126,6 +148,7 @@ function aiDefendOrEvade(attack, attacker, defender) {
         attacker,
         defender,
         defender.defense.amount,
+         { blocked: true },
       );
 
       if (result) {
@@ -137,7 +160,7 @@ function aiDefendOrEvade(attack, attacker, defender) {
       result = evadeAttack(attack, attacker, defender);
 
       if (result) {
-        defender.cooldown -= 1;
+        
         result.action = result.evaded ? "evade" : "attack";
       }
     }
@@ -152,4 +175,10 @@ function aiDefendOrEvade(attack, attacker, defender) {
   return result;
 }
 
-export { aiChooseAttack, aiTurn, aiFinishTurn, aiDefendOrEvade };
+export {
+  aiChooseAttack,
+  aiChooseHealTarget,
+  aiTurn,
+  aiFinishTurn,
+  aiDefendOrEvade,
+};

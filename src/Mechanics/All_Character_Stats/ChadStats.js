@@ -72,6 +72,7 @@ const Chad = {
     image: LaMuerte,
     damage: 125,
     speed: 30,
+    turnCooldown: 3,
     cost: 45,
     state: true,
     buff: {

@@ -1,11 +1,17 @@
 import Opponent from "./Opponent.jsx";
-import { useLocation } from "react-router-dom";
+import { roster } from "./Main Page/CharacterSelection.jsx";
+import { getCharacterImage } from "./SkinManager.js";
+import { useLocation, useNavigate } from "react-router-dom";
+import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
+import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives";
+import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
+import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
 import mina from "./All_Character_Stats/Mina_AshidoStats.js";
 import rockLee from "./All_Character_Stats/Rock_LeeStats.js";
 import Usopp from "./All_Character_Stats/UsoppStats.js";
@@ -18,10 +24,15 @@ import Luffy from "./All_Character_Stats/LuffyStats.js";
 import Ichigo from "./All_Character_Stats/IchigoStats.js";
 import Naruto from "./All_Character_Stats/NarutoStats.js";
 import Yoruichi from "./All_Character_Stats/YoruichiStats.js";
+import Goku from "./All_Character_Stats/GokuStats.js";
+import Toga from "./All_Character_Stats/TogaStats.js";
+import { Kenpachi } from "./All_Character_Stats/KempachiStats.js";
+import Hinata from "./All_Character_Stats/HinataStats.js";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
+import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
@@ -55,6 +66,9 @@ function RoundIntroHealthBar({ fighter }) {
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const levelConfig = location.state ?? {};
+  const isStoryMode = levelConfig.gameMode === "story";
 
   const fighterData = {
     mina: mina,
@@ -69,16 +83,44 @@ function App() {
     ichigo: Ichigo,
     naruto: Naruto,
     yoruichi: Yoruichi,
+    goku: Goku,
+    toga: Toga,
+    kenpachi: Kenpachi,
+    hinata: Hinata,
   };
 
-  const playerData = fighterData[location.state?.playerId] ?? mina;
+  // Resolve the selected fighter IDs, including safe fallbacks.
+const requestedPlayerId = location.state?.playerId;
+const playerId = fighterData[requestedPlayerId]
+  ? requestedPlayerId
+  : "mina";
 
-  const opponentData =
-    fighterData[location.state?.opponentId] ??
-    (playerData === mina ? rockLee : mina);
+const requestedOpponentId = location.state?.opponentId;
+const opponentId = fighterData[requestedOpponentId]
+  ? requestedOpponentId
+  : playerId === "mina"
+    ? "rockLee"
+    : "mina";
+
+const playerData = fighterData[playerId];
+const opponentData = fighterData[opponentId];
+
+// Find the original roster artwork for each fighter.
+const playerRosterEntry = roster.find(
+  (fighter) => fighter.id === playerId
+);
+
+const opponentRosterEntry = roster.find(
+  (fighter) => fighter.id === opponentId
+);
 
   const [character, setCharacter] = useState(() => ({
     ...playerData,
+    image: getCharacterImage(
+    playerId,
+    playerRosterEntry?.image ?? playerData.image
+  ),
+     id: "player",
     attacks: playerData.attacks.map((attack) => ({ ...attack })),
     health: playerData.health,
     maximumHealth: playerData.health,
@@ -91,6 +133,11 @@ function App() {
 
   const [opponent, setOpponent] = useState(() => ({
     ...opponentData,
+    image: getCharacterImage(
+    opponentId,
+    opponentRosterEntry?.image ?? opponentData.image
+  ),
+    id: "opponent",
     attacks: opponentData.attacks.map((attack) => ({ ...attack })),
     health: opponentData.health,
     maximumHealth: opponentData.health,
@@ -103,23 +150,40 @@ function App() {
 
   const [damageDealt, setDamageDealt] = useState(0);
   const lastRewardedDamage = useRef(0);
+
   const aiControllerRef = useRef(null);
 
   useEffect(() => {
     const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
 
-    // Update the tracker before awarding the coins.
+    // Update the tracker before recording rewards.
     lastRewardedDamage.current = damageDealt;
 
     if (damageSinceLastUpdate > 0) {
+      // Preserve the existing coin reward system.
       addCoins(Math.floor(damageSinceLastUpdate));
+
+      // Update Festival damage challenges.
+      recordFestivalEvent("damage", damageSinceLastUpdate);
+      recordDailyObjectiveEvent("damage", damageSinceLastUpdate);
     }
   }, [damageDealt]);
 
   const [attacksUsed, setAttacksUsed] = useState(0);
+  const lastRecordedAttacks = useRef(0);
+
+  useEffect(() => {
+    const newAttacks = attacksUsed - lastRecordedAttacks.current;
+
+    lastRecordedAttacks.current = attacksUsed;
+
+    if (newAttacks > 0) {
+      recordFestivalEvent("attack", newAttacks);
+    }
+  }, [attacksUsed]);
   const [defenseTimeLeft, setDefenseTimeLeft] = useState(10);
   const [currentTurn, setCurrentTurn] = useState("intro");
-
+  const [showIncomingAttack, setShowIncomingAttack] = useState(false);
   const [roundNumber, setRoundNumber] = useState(1);
   const [showRoundIntro, setShowRoundIntro] = useState(true);
 
@@ -139,6 +203,24 @@ function App() {
   const characterRef = useRef(character);
   const opponentRef = useRef(opponent);
   const knockoutRef = useRef(knockout);
+  const festivalBattleRecorded = useRef(false);
+
+  useEffect(() => {
+    if (!knockout || festivalBattleRecorded.current) return;
+
+    // Prevent the same match from being counted twice.
+    festivalBattleRecorded.current = true;
+
+    // Every completed match counts, including defeats.
+    recordFestivalEvent("battle", 1);
+    recordDailyObjectiveEvent("battle", 1);
+
+    // Only victories count toward victory challenges.
+    if (knockout.defeatedTeam === "opponent") {
+      recordFestivalEvent("victory", 1);
+      recordDailyObjectiveEvent("victory", 1);
+    }
+  }, [knockout]);
 
   useEffect(() => {
     characterRef.current = character;
@@ -179,72 +261,71 @@ function App() {
     }
   }, [character, opponent, knockout]);
 
- // Show the individual K.O. cutscene, then the final results cards.
-useEffect(() => {
-  if (!knockout) return;
+  // Show the individual K.O. cutscene, then the final results cards.
+  useEffect(() => {
+    if (!knockout) return;
 
-  setShowFinishOverlay(false);
-  setIsFinishFadingOut(false);
-  setShowResults(false);
+    setShowFinishOverlay(false);
+    setIsFinishFadingOut(false);
+    setShowResults(false);
 
-  // Let the individual K.O. cutscene play first.
-  const finishTimer = setTimeout(() => {
-    setShowFinishOverlay(true);
-  }, 2600);
+    // Let the individual K.O. cutscene play first.
+    const finishTimer = setTimeout(() => {
+      setShowFinishOverlay(true);
+    }, 2600);
 
-  // Fade the final cards out before showing the original result screen.
-  const fadeTimer = setTimeout(() => {
-    setIsFinishFadingOut(true);
-  }, 5000);
+    // Fade the final cards out before showing the original result screen.
+    const fadeTimer = setTimeout(() => {
+      setIsFinishFadingOut(true);
+    }, 5000);
 
-  const resultsTimer = setTimeout(() => {
-    setShowResults(true);
-  }, 5600);
+    const resultsTimer = setTimeout(() => {
+      setShowResults(true);
+    }, 5600);
 
-  return () => {
-    clearTimeout(finishTimer);
-    clearTimeout(fadeTimer);
-    clearTimeout(resultsTimer);
-  };
-}, [knockout]);
+    return () => {
+      clearTimeout(finishTimer);
+      clearTimeout(fadeTimer);
+      clearTimeout(resultsTimer);
+    };
+  }, [knockout]);
 
+  // Detect a knockout only once and save the fighters for the animations.
+  useEffect(() => {
+    if (knockout) return;
 
- // Detect a knockout only once and save the fighters for the animations.
-useEffect(() => {
-  if (knockout) return;
-
-  if (character.health <= 0) {
-    setKnockout({
-      defeated: character.name,
-      winner: opponent.name,
-      defeatedImage: character.image,
-      winnerImage: opponent.image,
-      winnerHealth: Math.max(0, opponent.health),
-      winnerMaximumHealth: opponent.maximumHealth,
-      defeatedTeam: "player",
-    });
-  } else if (opponent.health <= 0) {
-    setKnockout({
-      defeated: opponent.name,
-      winner: character.name,
-      defeatedImage: opponent.image,
-      winnerImage: character.image,
-      winnerHealth: Math.max(0, character.health),
-      winnerMaximumHealth: character.maximumHealth,
-      defeatedTeam: "opponent",
-    });
-  }
-}, [
-  character.health,
-  opponent.health,
-  character.name,
-  opponent.name,
-  character.image,
-  opponent.image,
-  character.maximumHealth,
-  opponent.maximumHealth,
-  knockout,
-]);
+    if (character.health <= 0) {
+      setKnockout({
+        defeated: character.name,
+        winner: opponent.name,
+        defeatedImage: character.image,
+        winnerImage: opponent.image,
+        winnerHealth: Math.max(0, opponent.health),
+        winnerMaximumHealth: opponent.maximumHealth,
+        defeatedTeam: "player",
+      });
+    } else if (opponent.health <= 0) {
+      setKnockout({
+        defeated: opponent.name,
+        winner: character.name,
+        defeatedImage: opponent.image,
+        winnerImage: character.image,
+        winnerHealth: Math.max(0, character.health),
+        winnerMaximumHealth: character.maximumHealth,
+        defeatedTeam: "opponent",
+      });
+    }
+  }, [
+    character.health,
+    opponent.health,
+    character.name,
+    opponent.name,
+    character.image,
+    opponent.image,
+    character.maximumHealth,
+    opponent.maximumHealth,
+    knockout,
+  ]);
 
   useEffect(() => {
     if (knockout || character.health <= 0 || opponent.health <= 0) {
@@ -323,28 +404,28 @@ useEffect(() => {
   }, [currentTurn]);
 
   // Display the round announcement before allowing combat.
-useEffect(() => {
-  if (!showRoundIntro) return;
+  useEffect(() => {
+    if (!showRoundIntro) return;
 
-  setIsRoundIntroFadingOut(false);
-
-  // Begin fading after the intro has been visible.
-  const fadeTimer = setTimeout(() => {
-    setIsRoundIntroFadingOut(true);
-  }, 1800);
-
-  // Remove the overlay after its fade-out transition.
-  const finishTimer = setTimeout(() => {
-    setShowRoundIntro(false);
     setIsRoundIntroFadingOut(false);
-    setCurrentTurn("player");
-  }, 2400);
 
-  return () => {
-    clearTimeout(fadeTimer);
-    clearTimeout(finishTimer);
-  };
-}, [showRoundIntro]);
+    // Begin fading after the intro has been visible.
+    const fadeTimer = setTimeout(() => {
+      setIsRoundIntroFadingOut(true);
+    }, 1800);
+
+    // Remove the overlay after its fade-out transition.
+    const finishTimer = setTimeout(() => {
+      setShowRoundIntro(false);
+      setIsRoundIntroFadingOut(false);
+      setCurrentTurn("player");
+    }, 2400);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(finishTimer);
+    };
+  }, [showRoundIntro]);
 
   // Countdown for the player's defensive window.
   useEffect(() => {
@@ -393,8 +474,6 @@ useEffect(() => {
     setCombatLog((log) => [...log, message]);
   }
 
-
-
   const resolveIncomingAttack = useCallback(
     (choice) => {
       if (!aiAttack || defenseTimeLeft <= 0) return;
@@ -414,6 +493,12 @@ useEffect(() => {
             : attackCharacter(aiAttack, opponent, character);
 
       if (!result) return;
+      // Record successful defensive actions for Festival challenges.
+      if (choice === "defend") {
+        recordFestivalEvent("block", 1);
+      } else if (choice === "evade" && result.evaded) {
+        recordFestivalEvent("evade", 1);
+      }
 
       if (choice === "defend" || choice === "evade") {
         result.defender.cooldown -= 1;
@@ -485,183 +570,202 @@ useEffect(() => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [aiAttack, defenseTimeLeft, character.cooldown, resolveIncomingAttack]);
 
+  useEffect(() => {
+    if (!aiAttack) {
+      setShowIncomingAttack(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setShowIncomingAttack(true);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [aiAttack]);
+
   return (
     <div className="container-fluid mt-3" id="gameContainer">
+      <FestivalChallengePopup />
       {/* Full-screen round intro with both fighters and their health. */}
-{showRoundIntro && !knockout && (
-  <div
-    id="roundIntroOverlay"
-    className={isRoundIntroFadingOut ? "is-fading-out" : ""}
-    role="status"
-    aria-live="polite"
-  >
-    <div id="roundIntroContent" className="battle-intro-enhanced">
-      <span id="roundIntroEyebrow">FIGHTER'S ARENA</span>
+      {showRoundIntro && !knockout && (
+        <div
+          id="roundIntroOverlay"
+          className={isRoundIntroFadingOut ? "is-fading-out" : ""}
+          role="status"
+          aria-live="polite"
+        >
+          <div id="roundIntroContent" className="battle-intro-enhanced">
+            <span id="roundIntroEyebrow">FIGHTER'S ARENA</span>
 
-      <h1 key={roundNumber}>ROUND {roundNumber}</h1>
+            <h1 key={roundNumber}>ROUND {roundNumber}</h1>
 
-      <div className="battle-intro-matchup">
-        <div className="battle-intro-fighter battle-intro-opponent">
-          <span className="battle-intro-label">CPU OPPONENT</span>
+            <div className="battle-intro-matchup">
+              <div className="battle-intro-fighter battle-intro-opponent">
+                <span className="battle-intro-label">CPU OPPONENT</span>
 
-          {opponent.image && (
-            <img src={opponent.image} alt={opponent.name} />
-          )}
+                {opponent.image && (
+                  <img src={opponent.image} alt={opponent.name} />
+                )}
 
-          <strong>{opponent.name}</strong>
+                <strong>{opponent.name}</strong>
 
-          <RoundIntroHealthBar fighter={opponent} />
+                <RoundIntroHealthBar fighter={opponent} />
 
-          <span className="battle-intro-hp">
-            HP {Math.max(0, opponent.health)} / {opponent.maximumHealth}
-          </span>
+                <span className="battle-intro-hp">
+                  HP {Math.max(0, opponent.health)} / {opponent.maximumHealth}
+                </span>
+              </div>
+
+              <div className="battle-intro-vs">VS</div>
+
+              <div className="battle-intro-fighter battle-intro-player">
+                <span className="battle-intro-label">PLAYER</span>
+
+                {character.image && (
+                  <img src={character.image} alt={character.name} />
+                )}
+
+                <strong>{character.name}</strong>
+
+                <RoundIntroHealthBar fighter={character} />
+
+                <span className="battle-intro-hp">
+                  HP {Math.max(0, character.health)} / {character.maximumHealth}
+                </span>
+              </div>
+            </div>
+
+            <div id="roundIntroLine" />
+
+            <p>GET READY</p>
+          </div>
         </div>
-
-        <div className="battle-intro-vs">VS</div>
-
-        <div className="battle-intro-fighter battle-intro-player">
-          <span className="battle-intro-label">PLAYER</span>
-
-          {character.image && (
-            <img src={character.image} alt={character.name} />
-          )}
-
-          <strong>{character.name}</strong>
-
-          <RoundIntroHealthBar fighter={character} />
-
-          <span className="battle-intro-hp">
-            HP {Math.max(0, character.health)} / {character.maximumHealth}
-          </span>
-        </div>
-      </div>
-
-      <div id="roundIntroLine" />
-
-      <p>GET READY</p>
-    </div>
-  </div>
-)}
-
-{/* Individual K.O. cutscene. */}
-{knockout && !showFinishOverlay && !showResults && (
-  <div
-    className={`battle-ko-overlay ko-${knockout.defeatedTeam} ${
-      isFinishFadingOut ? "is-fading-out" : ""
-    }`}
-    role="alert"
-    aria-live="assertive"
-  >
-    <div className="battle-ko-flash" />
-
-    <div className="battle-ko-content">
-      <p className="battle-ko-eyebrow">FIGHTER DEFEATED</p>
-
-      {knockout.defeatedImage && (
-        <img
-          className="battle-ko-portrait"
-          src={knockout.defeatedImage}
-          alt={knockout.defeated}
-        />
       )}
 
-      <h1 className="battle-ko-title">K.O.!</h1>
+      {/* Individual K.O. cutscene. */}
+      {knockout && !showFinishOverlay && !showResults && (
+        <div
+          className={`battle-ko-overlay ko-${knockout.defeatedTeam} ${
+            isFinishFadingOut ? "is-fading-out" : ""
+          }`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="battle-ko-flash" />
 
-      <p className="battle-ko-name">{knockout.defeated}</p>
+          <div className="battle-ko-content">
+            <p className="battle-ko-eyebrow">FIGHTER DEFEATED</p>
 
-      <p className="battle-ko-subtitle">
-        {knockout.defeatedTeam === "opponent"
-          ? "OPPONENT DOWN"
-          : "PLAYER DOWN"}
-      </p>
-    </div>
-  </div>
-)}
+            {knockout.defeatedImage && (
+              <img
+                className="battle-ko-portrait"
+                src={knockout.defeatedImage}
+                alt={knockout.defeated}
+              />
+            )}
 
-{/* Final winner-versus-defeated cards. */}
-{knockout && showFinishOverlay && !showResults && (
-  <div
-    className={`battle-finish-overlay ${
-      knockout.defeatedTeam === "player"
-        ? "finish-defeat"
-        : "finish-victory"
-    } ${isFinishFadingOut ? "is-fading-out" : ""}`}
-    role="alert"
-    aria-live="assertive"
-  >
-    <div className="battle-finish-flash" />
+            <h1 className="battle-ko-title">K.O.!</h1>
 
-    <p className="battle-finish-eyebrow">FIGHTER'S ARENA</p>
+            <p className="battle-ko-name">{knockout.defeated}</p>
 
-    <h1 className="battle-finish-title">
-      {knockout.defeatedTeam === "player" ? "DEFEAT" : "VICTORY"}
-    </h1>
-
-    <p className="battle-finish-message">
-      {knockout.winner} WINS THE MATCH
-    </p>
-
-    <div className="battle-finish-versus">
-      <div className="battle-finish-side defeated-side">
-        <h2>DEFEATED</h2>
-
-        <div className="battle-finish-card">
-          {knockout.defeatedImage && (
-            <img src={knockout.defeatedImage} alt="" />
-          )}
-
-          <strong>{knockout.defeated}</strong>
-          <span>K.O.</span>
+            <p className="battle-ko-subtitle">
+              {knockout.defeatedTeam === "opponent"
+                ? "OPPONENT DOWN"
+                : "PLAYER DOWN"}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="battle-finish-vs">VS</div>
+      {/* Final winner-versus-defeated cards. */}
+      {knockout && showFinishOverlay && !showResults && (
+        <div
+          className={`battle-finish-overlay ${
+            knockout.defeatedTeam === "player"
+              ? "finish-defeat"
+              : "finish-victory"
+          } ${isFinishFadingOut ? "is-fading-out" : ""}`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="battle-finish-flash" />
 
-      <div className="battle-finish-side winning-side">
-        <h2>WINNER</h2>
+          <p className="battle-finish-eyebrow">FIGHTER'S ARENA</p>
 
-        <div className="battle-finish-card">
-          {knockout.winnerImage && (
-            <img src={knockout.winnerImage} alt="" />
-          )}
+          <h1 className="battle-finish-title">
+            {knockout.defeatedTeam === "player" ? "DEFEAT" : "VICTORY"}
+          </h1>
 
-          <strong>{knockout.winner}</strong>
-          <span>{knockout.winnerHealth} HP</span>
+          <p className="battle-finish-message">
+            {knockout.winner} WINS THE MATCH
+          </p>
+
+          <div className="battle-finish-versus">
+            <div className="battle-finish-side defeated-side">
+              <h2>DEFEATED</h2>
+
+              <div className="battle-finish-card">
+                {knockout.defeatedImage && (
+                  <img src={knockout.defeatedImage} alt="" />
+                )}
+
+                <strong>{knockout.defeated}</strong>
+                <span>K.O.</span>
+              </div>
+            </div>
+
+            <div className="battle-finish-vs">VS</div>
+
+            <div className="battle-finish-side winning-side">
+              <h2>WINNER</h2>
+
+              <div className="battle-finish-card">
+                {knockout.winnerImage && (
+                  <img src={knockout.winnerImage} alt="" />
+                )}
+
+                <strong>{knockout.winner}</strong>
+                <span>{knockout.winnerHealth} HP</span>
+              </div>
+            </div>
+          </div>
+
+          <p className="battle-finish-footer">MATCH COMPLETE</p>
         </div>
-      </div>
-    </div>
+      )}
 
-    <p className="battle-finish-footer">MATCH COMPLETE</p>
-  </div>
-)}
-
-      {knockout && !showResults ? null : character.health <= 0 ? (
+      {isStoryMode && knockout && showResults ? (
+        <StoryResultsScreen
+          won={knockout.defeatedTeam === "opponent"}
+          playerName={character.name}
+          opponentName={opponent.name}
+          damageDealt={damageDealt}
+          attacksUsed={attacksUsed}
+          levelConfig={levelConfig}
+        />
+      ) : knockout && !showResults ? null : !isStoryMode &&
+        character.health <= 0 ? (
         <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
-      ) : opponent.health <= 0 ? (
+      ) : !isStoryMode && opponent.health <= 0 ? (
         <div id="victorySection">
           <VictoryScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
         </div>
-      ) : (
+      ) : knockout ? null : (
         <>
           {/* Fighters and combat log share one layout. */}
           <div id="battleLayout">
-            <div id="battleArena">
-              <div
-                id="opponentSection"
-                className={aiAttack ? "opponent-is-attacking" : ""}
-              >
-                <Opponent opponent={opponent} setOpponent={setOpponent} />
-              </div>
-
-              {/* Opponent's attack and defensive choices. */}
-              {aiAttack && (
-                <div id="aiAttackSection" key={aiAttack.id ?? aiAttack.name}>
+           {/* Opponent's attack and defensive choices. */}
+              {aiAttack && showIncomingAttack && (
+                <div
+                  id="aiAttackSection"
+                  className="incoming-attack-card"
+                  key={aiAttack.id ?? aiAttack.name}
+                >
                   {/*
       The key helps React remount the card when the attack changes.
       This retriggers its entrance animation for queued attacks.
     */}
-
-                  <div id="aiAttackCard">
+<div id="aiAttackCard">
                     <div id="aiAttackHeader">
                       <span>⚠ INCOMING ATTACK</span>
                       <span className="attack-warning-dot" />
@@ -692,7 +796,11 @@ useEffect(() => {
 
                     <div id="aiAttackInfo">
                       <h5 id="aiAttackName">{aiAttack.name}</h5>
-
+                      {aiAttack.image && (
+                        <div className="incoming-attack-image">
+                          <img src={aiAttack.image} alt={aiAttack.name} />
+                        </div>
+                      )}
                       <div id="aiAttackStats">
                         {/* Damage threat */}
                         <div
@@ -732,91 +840,66 @@ useEffect(() => {
                         </div>
                       </div>
                     </div>
+
+                    <div id="defensiveActions">
+                      <button
+                        id="defendButton"
+                        disabled={
+                          character.cooldown <= 0 || defenseTimeLeft <= 0
+                        }
+                        onClick={() => resolveIncomingAttack("defend")}
+                      >
+                        <span id="defendButtonIcon">🛡</span>
+                        <span>DEFEND</span>
+                      </button>
+
+                      <button
+                        id="evadeButton"
+                        disabled={defenseTimeLeft <= 0}
+                        onClick={() => resolveIncomingAttack("evade")}
+                      >
+                        <span id="evadeButtonIcon">💨</span>
+                        <span>EVADE</span>
+                      </button>
+
+                      <button
+                        id="takeDamageButton"
+                        type="button"
+                        disabled={!aiAttack || defenseTimeLeft <= 0}
+                        onClick={() => resolveIncomingAttack("take-damage")}
+                      >
+                        <span>💥</span>
+                        <span>TAKE FULL DAMAGE</span>
+                      </button>
+                    </div>
                   </div>
-
-                  <div id="defensiveActions">
-                    <button
-                      id="defendButton"
-                      disabled={character.cooldown <= 0 || defenseTimeLeft <= 0}
-                      // onClick={() => {
-                      //   const result = attackCharacter(
-                      //     aiAttack,
-                      //     opponent,
-                      //     character,
-                      //     character.defense.amount,
-                      //   );
-
-                      //   if (result) {
-                      //     character.cooldown -= 1;
-                      //     character.blocked = true;
-
-                      //     showCombatMessage("🛡️ BLOCKED!", "blocked");
-
-                      //     setOpponent({ ...result.attacker });
-                      //     setCharacter({ ...result.defender });
-
-                      //     if (aiControllerRef.current) {
-                      //       aiControllerRef.current.respondToDefense();
-                      //     } else {
-                      //       setAiAttack(null);
-                      //     }
-                      //   }
-                      // }}
-                      onClick={() => resolveIncomingAttack("defend")}
-                    >
-                      <span id="defendButtonIcon">🛡</span>
-                      <span>DEFEND</span>
-                    </button>
-
-                    <button
-                      id="evadeButton"
-                      disabled={defenseTimeLeft <= 0}
-                      // onClick={() => {
-                      //   const result = evadeAttack(
-                      //     aiAttack,
-                      //     opponent,
-                      //     character,
-                      //   );
-
-                      //   if (result) {
-                      //     character.cooldown -= 1;
-                      //     character.blocked = true;
-
-                      //     showCombatMessage(
-                      //       result.evaded
-                      //         ? "💨 EVADED!"
-                      //         : "💥 FAILED TO EVADE!",
-                      //       result.evaded ? "evaded" : "hit",
-                      //     );
-
-                      //     setOpponent({ ...result.attacker });
-                      //     setCharacter({ ...result.defender });
-
-                      //     if (aiControllerRef.current) {
-                      //       aiControllerRef.current.respondToDefense();
-                      //     } else {
-                      //       setAiAttack(null);
-                      //     }
-                      //   }
-                      // }}
-                      onClick={() => resolveIncomingAttack("evade")}
-                    >
-                      <span id="evadeButtonIcon">💨</span>
-                      <span>EVADE</span>
-                    </button>
-
-                    <button
-                      id="takeDamageButton"
-                      type="button"
-                      disabled={!aiAttack || defenseTimeLeft <= 0}
-                      onClick={() => resolveIncomingAttack("take-damage")}
-                    >
-                      <span>💥</span>
-                      <span>TAKE FULL DAMAGE</span>
-                    </button>
-                  </div>
+                  
                 </div>
               )}
+            <div id="battleArena">
+
+            
+              {/* Story background behind both fighters. */}
+              {isStoryMode && (
+                <div
+                  className="story-battle-background"
+                  style={{
+                    backgroundImage: `url("${storyBackgrounds.arena}")`,
+                  }}
+                  aria-hidden="true"
+                />
+              )}
+
+              <div
+                id="opponentSection"
+                className={aiAttack ? "opponent-is-attacking" : ""}
+              >
+                <Opponent opponent={opponent} setOpponent={setOpponent} />
+              </div>
+
+              
+
+             
 
               <div id="characterSection">
                 <Character

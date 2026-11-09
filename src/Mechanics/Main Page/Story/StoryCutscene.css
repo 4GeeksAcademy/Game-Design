@@ -1,0 +1,805 @@
+
+.story-cutscene {
+  --vn-accent: #13d5ff;
+  --vn-panel: rgba(9, 17, 34, 0.88);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 500px;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #f6f8ff;
+  background: #080f20;
+  font-family: inherit;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.vn-header {
+  position: relative;
+  z-index: 10;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 4%;
+  background: #080f20ed;
+  border-bottom: 1px solid #ffffff18;
+}
+
+.vn-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.vn-logo-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 30px;
+  color: var(--vn-accent);
+  border: 2px solid var(--vn-accent);
+  transform: skew(-8deg);
+}
+
+.vn-chapter {
+  color: #9eafc8;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.vn-skip {
+  padding: 8px 12px;
+  color: #d9e8fa;
+  background: transparent;
+  border: 1px solid #8296b555;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.vn-skip:hover {
+  color: var(--vn-accent);
+  border-color: var(--vn-accent);
+}
+
+/* =========================
+   SCENE AND BACKGROUNDS
+========================= */
+
+.vn-scene {
+  position: relative;
+  isolation: isolate;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #142844;
+  background-image:
+    radial-gradient(ellipse at 50% 85%, #28517b 0%, transparent 60%),
+    linear-gradient(145deg, #182b49, #0a1225 80%);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.vn-scene.vn-bg-opening {
+  background-image:
+    linear-gradient(0deg, #080f2066, transparent 70%),
+    radial-gradient(ellipse at 50% 50%, #1c4770, transparent 65%),
+    linear-gradient(135deg, #182f50, #080f20);
+}
+
+.vn-scene.vn-bg-arena {
+  background-image:
+    linear-gradient(rgba(8, 15, 32, 0.2), rgba(8, 15, 32, 0.45)),
+    url("../../../assets/img/Arena.jpg");
+
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/*
+  Optional image backgrounds:
+  Put these files in public/StoryBackgrounds/.
+  Then uncomment the corresponding background-image rule.
+*/
+
+/*
+.vn-scene.vn-bg-arena {
+  background-image:
+    linear-gradient(0deg, #080f2070, transparent 70%),
+    url("/StoryBackgrounds/arena.jpg");
+}
+
+.vn-scene.vn-bg-opening {
+  background-image:
+    linear-gradient(0deg, #080f2070, transparent 70%),
+    url("/StoryBackgrounds/opening.jpg");
+}
+*/
+
+.vn-atmosphere {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background:
+    linear-gradient(0deg, #080f2070, transparent 40%),
+    linear-gradient(90deg, #07102030, transparent 50%, #07102030);
+  pointer-events: none;
+}
+
+.vn-scene-caption {
+  position: absolute;
+  z-index: 1;
+  top: 20px;
+  left: 4%;
+  padding: 7px 11px;
+  color: #c6d9f0;
+  background: #080f2077;
+  border-left: 2px solid var(--vn-accent);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+.vn-click-hint {
+  position: absolute;
+  z-index: 1;
+  right: 4%;
+  bottom: 20px;
+  color: #ffffff75;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
+/* =========================
+   CHARACTER POSITIONING
+========================= */
+
+.vn-character {
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+
+  height: min(76%, 650px);
+  width: min(40%, 420px);
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  pointer-events: none;
+  transform-origin: center bottom;
+
+  /* Smooth movement and zoom */
+  transition:
+    left 750ms cubic-bezier(.22, .8, .25, 1),
+    right 750ms cubic-bezier(.22, .8, .25, 1),
+    scale 750ms cubic-bezier(.22, .8, .25, 1);
+    
+
+  scale: var(--vn-zoom, 1);
+}
+
+/* LEFT: character stays on the left side. */
+.vn-position-left {
+  left: 0%;
+  right: auto;
+  transform: none;
+  transform-origin: left bottom;
+}
+
+/* CENTER: character is centered using its own width. */
+.vn-position-center {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  transform-origin: center bottom;
+}
+
+/* RIGHT: character stays on the right side. */
+.vn-position-right {
+  left: auto;
+  right: 0%;
+  transform: none;
+  transform-origin: right bottom;
+}
+
+.vn-character img {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 12px 18px #0005);
+  user-select: none;
+}
+
+/* Character animations.
+   The translate property preserves the positioning transform. */
+
+.vn-motion-enter {
+  animation: vn-enter 500ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.vn-motion-fade {
+  animation: vn-fade 400ms ease both;
+}
+
+.vn-motion-bounce {
+  animation: vn-bounce 450ms ease both;
+}
+
+@keyframes vn-enter {
+  from {
+    opacity: 0;
+    translate: 70px 0;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes vn-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vn-bounce {
+  0% {
+    opacity: 0;
+    translate: 0 20px;
+  }
+
+  60% {
+    opacity: 1;
+    translate: 0 -10px;
+  }
+
+  100% {
+    translate: 0 0;
+  }
+}
+
+
+
+/* =========================
+   OVERLAID DIALOGUE
+========================= */
+
+.vn-dialogue-area {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding: 0 4% 16px;
+  box-sizing: border-box;
+
+  background: linear-gradient(
+    180deg,
+    transparent,
+    #080f2040 10%,
+    #080f20b8 100%
+  );
+
+  cursor: pointer;
+}
+
+.vn-dialogue-panel {
+  position: relative;
+  width: 100%;
+  min-height: 145px;
+  box-sizing: border-box;
+  padding: 28px 24px 18px;
+
+  background: var(--vn-panel);
+  border: 1px solid #8ba5c64a;
+  border-top: 2px solid var(--vn-accent);
+  border-radius: 5px;
+
+  box-shadow: 0 12px 40px #0006;
+  backdrop-filter: blur(10px);
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.vn-transitioning .vn-dialogue-panel {
+  opacity: 0.45;
+  transform: translateY(5px);
+}
+
+.vn-nameplate {
+  position: absolute;
+  top: -18px;
+  left: 22px;
+  min-width: 110px;
+  padding: 9px 18px;
+
+  color: #071020;
+  background: var(--vn-accent);
+  clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+
+  font-size: 0.78rem;
+  font-weight: 1000;
+  letter-spacing: 1px;
+}
+
+.vn-dialogue-text {
+  min-height: 52px;
+  margin: 0 0 12px;
+  color: #f3f6ff;
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.vn-text-cursor {
+  display: inline-block;
+  margin-left: 3px;
+  color: var(--vn-accent);
+  animation: vn-cursor-blink 650ms steps(2, start) infinite;
+}
+
+@keyframes vn-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.vn-next-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-left: auto;
+  padding: 10px 16px;
+
+  color: #f4f8ff;
+  background: #132b43;
+  border: 1px solid #13d5ff77;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  cursor: pointer;
+
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    border-color 160ms ease;
+}
+
+.vn-next-button span {
+  color: var(--vn-accent);
+}
+
+.vn-next-button:hover {
+  transform: translateY(-2px);
+  background: #1a405e;
+  border-color: var(--vn-accent);
+}
+
+/* Story progress */
+
+.vn-progress {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+
+  color: #aabbd2;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.vn-progress-track {
+  flex: 1;
+  height: 3px;
+  overflow: hidden;
+  background: #ffffff1b;
+}
+
+.vn-progress-fill {
+  height: 100%;
+  background: var(--vn-accent);
+  box-shadow: 0 0 10px #13d5ff66;
+  transition: width 250ms ease;
+}
+
+/* =========================
+   RESPONSIVE LAYOUT
+========================= */
+
+@media (max-width: 600px) {
+  .story-cutscene {
+    min-height: 480px;
+  }
+
+  .vn-header {
+    gap: 8px;
+    padding: 10px 3%;
+  }
+
+  .vn-logo {
+    gap: 6px;
+    font-size: 0.65rem;
+  }
+
+  .vn-logo-mark {
+    width: 27px;
+    height: 25px;
+  }
+
+  .vn-chapter {
+    font-size: 0.52rem;
+    text-align: center;
+  }
+
+  .vn-skip {
+    padding: 7px;
+    font-size: 0.6rem;
+  }
+
+  .vn-scene {
+    min-height: 0;
+  }
+
+
+  .vn-dialogue-area {
+    padding: 0 3% 10px;
+  }
+
+  .vn-dialogue-panel {
+    min-height: 135px;
+    padding: 27px 15px 14px;
+  }
+
+  .vn-dialogue-text {
+    min-height: 60px;
+    font-size: 0.9rem;
+  }
+
+  .vn-click-hint {
+    font-size: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vn-character,
+  .vn-character img,
+  .vn-dialogue-text,
+  .vn-text-cursor {
+    animation: none !important;
+  }
+
+  .vn-progress-fill,
+  .vn-dialogue-panel,
+  .vn-next-button {
+    transition: none !important;
+  }
+}
+
+
+/* Two independent layers allow real image crossfading. */
+.vn-background-layers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.vn-background-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 700ms ease-in-out;
+}
+
+
+.vn-background-old {
+  opacity: 1;
+  z-index: 0;
+}
+
+.vn-background-current {
+  opacity: 1;
+  z-index: 1;
+  animation: vnBackgroundEntrance 700ms ease-in-out both;
+}
+
+@keyframes vnBackgroundEntrance {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vn-background-current {
+    animation: none;
+  }
+}
+
+.vn-character-rocklee-pushups {
+  z-index: 5;
+}
+/* =========================
+   ROCK LEE PUSH-UP POSES
+========================= */
+
+.vn-character-rocklee-pushups {
+  height: min(58%, 500px);
+
+  /* Raise Lee above the dialogue box */
+  bottom: 190px;
+
+  /* Put Lee above the dialogue layer */
+  z-index: 6;
+
+  pointer-events: none;
+}
+
+/* Dialogue stays below the special character sprite */
+.vn-dialogue-area {
+  z-index: 5;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .vn-character-rocklee-pushups {
+    height: 48%;
+    bottom: 205px;
+  }
+}
+
+/* =========================
+   CHARACTER EXPRESSION ANIMATIONS
+========================= */
+
+/* Default idle: subtle breathing for every character. */
+.vn-character img {
+  transform-origin: center bottom;
+  animation: vn-idle 4s ease-in-out infinite;
+}
+
+/* Neutral: calm breathing. */
+.vn-expression-neutral img {
+  animation: vn-idle 4s ease-in-out infinite;
+}
+
+/* Happy: gentle, friendly bounce. */
+.vn-expression-happy img {
+  filter: drop-shadow(0 0 16px #ffd16666);
+  animation: vn-happy 2.2s ease-in-out infinite;
+}
+
+/* Excited: more energetic movement. */
+.vn-expression-excited img {
+  filter: drop-shadow(0 0 20px #13d5ff88);
+  animation: vn-excited 1.3s ease-in-out infinite;
+}
+
+/* Angry: brief bursts of shaking, with pauses. */
+.vn-expression-angry img {
+  animation: vn-angry 2.6s ease-in-out infinite;
+}
+
+/* Determined: subtle forward movement. */
+.vn-expression-determined img {
+  filter: drop-shadow(0 10px 14px #ff315966);
+  animation: vn-determined 3s ease-in-out infinite;
+}
+
+/* Serious: almost still, with restrained breathing. */
+.vn-expression-serious img {
+  animation: vn-serious 5s ease-in-out infinite;
+}
+
+/* Tenten: understanding / relating with a small nod. */
+.vn-expression-relate img {
+  animation: vn-relate 3s ease-in-out infinite;
+}
+
+/* Tenten: facepalm with a slight head-and-body dip. */
+.vn-expression-facepalm img {
+  animation: vn-facepalm 3.5s ease-in-out infinite;
+}
+
+/* Tenten: exasperated head tilt. */
+.vn-expression-exasperated img {
+  animation: vn-exasperated 3s ease-in-out infinite;
+}
+
+/* Rock Lee: alternating push-up poses. */
+.vn-expression-pushups1 img {
+  animation: vn-pushup-up 1.2s ease-in-out infinite;
+}
+
+.vn-expression-pushups2 img {
+  animation: vn-pushup-down 1.2s ease-in-out infinite;
+}
+
+
+/* =========================
+   ANIMATION KEYFRAMES
+========================= */
+
+@keyframes vn-idle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes vn-happy {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+@keyframes vn-excited {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+
+  25% {
+    transform: translateY(-8px) scale(1.015);
+  }
+
+  50% {
+    transform: translateY(0) scale(1);
+  }
+
+  75% {
+    transform: translateY(-5px) scale(1.01);
+  }
+}
+
+@keyframes vn-angry {
+  0%, 75%, 100% {
+    transform: translateX(0);
+  }
+
+  78% {
+    transform: translateX(-4px);
+  }
+
+  81% {
+    transform: translateX(4px);
+  }
+
+  84% {
+    transform: translateX(-3px);
+  }
+
+  87% {
+    transform: translateX(3px);
+  }
+
+  90% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes vn-determined {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-3px) scale(1.01);
+  }
+}
+
+@keyframes vn-serious {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes vn-relate {
+  0%, 100% {
+    transform: rotate(0);
+  }
+
+  35% {
+    transform: rotate(-0.8deg) translateY(-2px);
+  }
+
+  65% {
+    transform: rotate(0.5deg) translateY(0);
+  }
+}
+
+@keyframes vn-facepalm {
+  0%, 100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(3px) rotate(1deg);
+  }
+}
+
+@keyframes vn-exasperated {
+  0%, 100% {
+    transform: rotate(0);
+  }
+
+  40% {
+    transform: rotate(-2deg);
+  }
+
+  70% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes vn-pushup-up {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes vn-pushup-down {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+

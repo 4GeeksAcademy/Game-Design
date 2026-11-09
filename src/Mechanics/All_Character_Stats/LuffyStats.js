@@ -30,7 +30,12 @@ const Luffy = {
       image: null,
       damage: 0,
       speed: 0,
-      cost: 10,
+      cost: 15,
+      turnCooldown: 5,
+      uses: 2,
+       sacrifice: {
+        health: 5,
+      },
       state: true,
       buff: {
         agility: 10,

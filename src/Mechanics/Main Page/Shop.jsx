@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -25,18 +24,20 @@ import {
 import "./Shop.css";
 
 const fighters = [
-  { id: "mina", data: mina, cost: 0 },
-  { id: "rockLee", data: rockLee, cost: 0 },
-  { id: "usopp", data: Usopp, cost: 250 },
-  { id: "chad", data: Chad, cost: 350 },
-  { id: "picolo", data: Picolo, cost: 400 },
-  { id: "tenten", data: TenTen, cost: 300 },
-  { id: "kirishima", data: Kirishima, cost: 350 },
-  { id: "ochaco", data: Ochaco, cost: 300 },
-  { id: "luffy", data: Luffy, cost: 500 },
-  { id: "ichigo", data: Ichigo, cost: 500 },
-  { id: "naruto", data: Naruto, cost: 500 },
-  { id: "yoruichi", data: Yoruichi, cost: 450 },
+  { id: "mina", data: mina, cost: 2500, unlockable: true },
+  { id: "rockLee", data: rockLee, cost: 5000, unlockable: false },
+
+  { id: "usopp", data: Usopp, cost: 1000, unlockable: true },
+  { id: "chad", data: Chad, cost: 3500, unlockable: true },
+  { id: "picolo", data: Picolo, cost: 4000, unlockable: true },
+  { id: "tenten", data: TenTen, cost: 3000, unlockable: true },
+  { id: "kirishima", data: Kirishima, cost: 3500, unlockable: true },
+  { id: "ochaco", data: Ochaco, cost: 3000, unlockable: true },
+
+  { id: "luffy", data: Luffy, cost: 5000, unlockable: true },
+  { id: "ichigo", data: Ichigo, cost: 5000, unlockable: true },
+  { id: "naruto", data: Naruto, cost: 5000, unlockable: true },
+  { id: "yoruichi", data: Yoruichi, cost: 4500, unlockable: true },
 ];
 
 function Shop() {
@@ -48,8 +49,7 @@ function Shop() {
 
   useEffect(() => {
     const updateCoins = () => setCoins(getCoins());
-    const updateUnlocks = () =>
-      setUnlocked(getUnlockedCharacters());
+    const updateUnlocks = () => setUnlocked(getUnlockedCharacters());
 
     window.addEventListener("coinsUpdated", updateCoins);
     window.addEventListener("unlocksUpdated", updateUnlocks);
@@ -87,10 +87,7 @@ function Shop() {
   return (
     <main className="shop-screen">
       <header className="shop-header">
-        <button
-          className="shop-back-button"
-          onClick={() => navigate("/")}
-        >
+        <button className="shop-back-button" onClick={() => navigate("/")}>
           ← MAIN MENU
         </button>
 
@@ -101,7 +98,7 @@ function Shop() {
       </header>
 
       <section className="shop-heading">
-        <p>FIGHTERS ARENA MARKETPLACE</p>
+        <p>THE MARKETPLACE</p>
         <h1>CHARACTER SHOP</h1>
         <span>Earn coins in battle. Unlock your next fighter.</span>
       </section>
@@ -113,63 +110,102 @@ function Shop() {
       )}
 
       <section className="shop-grid">
-        {fighters.map((fighter) => {
-          const isUnlocked = unlocked.includes(fighter.id);
-          const cost =
-            fighter.data.availability?.cost ?? fighter.cost;
+        {fighters
+          .filter((fighter) => fighter.unlockable)
+          .map((fighter) => {
+            const isUnlocked = unlocked.includes(fighter.id);
+            const cost = fighter.data.availability?.cost ?? fighter.cost;
 
-          return (
-            <article
-              className={`shop-card ${isUnlocked ? "shop-card-unlocked" : ""}`}
-              key={fighter.id}
-            >
-              <div className="shop-portrait">
-                <img
-                  src={fighter.data.image}
-                  alt={fighter.data.name}
-                  loading="lazy"
-                />
+            return (
+              <article
+                className={`shop-card ${isUnlocked ? "shop-card-unlocked" : ""}`}
+                key={fighter.id}
+              >
+                <div className="shop-portrait">
+                  <img
+                    src={fighter.data.image}
+                    alt={fighter.data.name}
+                    loading="lazy"
+                  />
 
-                {!isUnlocked && (
-                  <span className="shop-lock">🔒</span>
-                )}
-              </div>
+                  {!isUnlocked && (
+                    <div
+                      className="shop-lock"
+                      aria-label={`${fighter.data.name} is locked`}
+                    >
+                      <svg
+                        className="shop-lock-icon"
+                        viewBox="0 0 32 36"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        {/* Lock shackle */}
+                        <path
+                          d="M9 15V10C9 5.5 12 3 16 3C20 3 23 5.5 23 10V15"
+                          stroke="currentColor"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                        />
 
-              <div className="shop-card-info">
-                <h2>{fighter.data.name}</h2>
+                        {/* Main lock body */}
+                        <rect
+                          x="4"
+                          y="13"
+                          width="24"
+                          height="20"
+                          rx="3"
+                          fill="#190711"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                        />
 
-                <p>
-                  {isUnlocked
-                    ? "AVAILABLE TO PLAY"
-                    : `${cost.toLocaleString()} COINS`}
-                </p>
+                        {/* Keyhole */}
+                        <circle cx="16" cy="21" r="2.5" fill="currentColor" />
+                        <path
+                          d="M16 23V27"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
 
-                <button
-                  className={`shop-purchase-button ${
-                    isUnlocked ? "purchased" : ""
-                  }`}
-                  disabled={isUnlocked}
-                  onClick={() => purchaseCharacter(fighter)}
-                >
-                  {isUnlocked ? "UNLOCKED ✓" : "UNLOCK FIGHTER"}
-                </button>
-              </div>
-            </article>
-          );
-        })}
+                      <span className="shop-lock-ribbon">LOCKED</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="shop-card-info">
+                  <h2>{fighter.data.name}</h2>
+
+                  <p>
+                    {isUnlocked
+                      ? "AVAILABLE TO PLAY"
+                      : `${cost.toLocaleString()} COINS`}
+                  </p>
+
+                  <button
+                    className={`shop-purchase-button ${
+                      isUnlocked ? "purchased" : ""
+                    }`}
+                    disabled={isUnlocked}
+                    onClick={() => purchaseCharacter(fighter)}
+                  >
+                    {isUnlocked ? "UNLOCKED ✓" : "UNLOCK FIGHTER"}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
       </section>
 
       <footer className="shop-footer">
-        <button
-          className="shop-back-button"
-          onClick={() => navigate("/character-select")}
-        >
-          GO TO CHARACTER SELECT →
+        <button className="shop-back-button" onClick={() => navigate(-1)}>
+          ← BACK TO PREVIOUS SCREEN
         </button>
       </footer>
     </main>
   );
 }
-
 
 export default Shop;

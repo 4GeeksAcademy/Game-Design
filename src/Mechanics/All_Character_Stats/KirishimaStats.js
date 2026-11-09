@@ -34,9 +34,10 @@ const Kirishima = {
       damage: 0,
       speed: 0,
       cost: 5,
+      turnCooldown: 4,
       state: true,
       buff: {
-        defense: 4,
+        defense: 40,
         maximumCooldown: 1,
         cooldown: 1,
       },
@@ -101,11 +102,12 @@ const Kirishima = {
     {
       name: "Red Riot Unbreakable",
       damage: 0,
-      speed: 5,
-      cost: 30,
+      speed: 0,
+      cost: 50,
       state: true,
+      uses: 1,
       buff: {
-        defense: 30,
+        defense: 50,
         agility: 5,
         maximumCooldown: 5,
         cooldown: 5,  
@@ -113,9 +115,9 @@ const Kirishima = {
     },
     {
       name: "Red Riot: Unbreakable Smash",
-      damage: 55,
-      speed: 20,
-      cost: 33,
+      damage: 61,
+      speed: 23,
+      cost: 53,
       state: true,
       buff: {
         defense: 12,

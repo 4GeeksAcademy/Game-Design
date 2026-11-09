@@ -1,13 +1,20 @@
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-  root: './src',
-  base: "/Game-Design/",
+import { defineConfig } from "vite";
+
+export default defineConfig(({ command }) => ({
+  root: "./src",
+
+  // GitHub Pages needs the repository path.
+  // Local development should use the website root.
+  base: command === "build" ? "/Game-Design/" : "/",
+
   build: {
-    // Specify the output directory for the build. This path is relative to your project root.
-    outDir: '../dist',
+    outDir: "../dist",
   },
+
   server: {
+    host: "0.0.0.0",
     port: 3000,
+    strictPort: true,
   },
-});
+}));
