@@ -1,4 +1,4 @@
-import HinataImage from "/workspaces/Game-Design/src/assets/img/Hinata.png";
+import HinataImage from "../../assets/img/Hinata.png";
 
 import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
 import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";

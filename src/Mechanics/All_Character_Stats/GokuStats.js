@@ -1,6 +1,6 @@
-import GokuImage from "/workspaces/Game-Design/src/assets/img/Goku.jpeg";
+import GokuImage from "../../assets/img/Goku.jpeg";
 
-import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/GokuKamekameha.jpeg";
+import Attack1 from "../../assets/img/Attack_IMAGES/GokuKamekameha.jpeg";
 import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
 import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
 import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";

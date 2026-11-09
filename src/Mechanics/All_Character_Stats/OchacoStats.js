@@ -1,10 +1,10 @@
 import OchacoArenaImage from "../../assets/img/Ochaco.png";
 
-import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Zero Gravity.jpeg";
-import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Release!.png";
-import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Gunhead Martial Arts.jpeg";
-import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Meteor Fafrotskies.jpeg";
-import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Zero Gravity: Floating Combo.jpeg";
+import Attack1 from "../../assets/img/Attack_IMAGES/Zero Gravity.jpeg";
+import Attack2 from "../../assets/img/Attack_IMAGES/Release!.png";
+import Attack3 from "../../assets/img/Attack_IMAGES/Gunhead Martial Arts.jpeg";
+import Attack4 from "../../assets/img/Attack_IMAGES/Meteor Fafrotskies.jpeg";
+import Attack5 from "../../assets/img/Attack_IMAGES/Zero Gravity: Floating Combo.jpeg";
 
 const Ochaco = {
   name: "Ochaco Uraraka",

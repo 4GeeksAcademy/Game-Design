@@ -1,7 +1,7 @@
 import TogaMedicSkin from "../assets/Skins/Mischievous Anime Medic with Syringe.png";
-import GokuElegantSkin from "/workspaces/Game-Design/src/assets/Skins/Elegant Drip Goku.jpeg";
-import HinataWeddingSkin from "/workspaces/Game-Design/src/assets/Skins/Hinata’s Enchanted Bridal Portrait.png"
-import NarutoHokageSkin from "/workspaces/Game-Design/src/assets/Skins/Naruto’s Hokage Sunset Charge.png"
+import GokuElegantSkin from "../assets/Skins/Elegant Drip Goku.jpeg";
+import HinataWeddingSkin from "../assets/Skins/Hinata’s Enchanted Bridal Portrait.png"
+import NarutoHokageSkin from "../assets/Skins/Naruto’s Hokage Sunset Charge.png"
 
 
 

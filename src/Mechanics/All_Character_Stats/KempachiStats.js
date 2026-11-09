@@ -1,4 +1,4 @@
-import KenpachiImage from "/workspaces/Game-Design/src/assets/img/Kenpachi.png";
+import KenpachiImage from "../../assets/img/Kenpachi.png";
 
 import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
 import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";

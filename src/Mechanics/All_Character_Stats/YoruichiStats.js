@@ -1,11 +1,11 @@
 import YoruichiArenaImage from "../../assets/img/Yoruichi.png";
 
-import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Shunpo_Strike.png";
-import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Hakuda_Combo.png";
-import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Shunko:_Lightning_Release.png";
-import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Raijin_Senkei.png";
-import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Afterimage_Strike.png";
-import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Raiju_Senkei.png";
+import Attack1 from "../../assets/img/Attack_IMAGES/Shunpo_Strike.png";
+import Attack2 from "../../assets/img/Attack_IMAGES/Hakuda_Combo.png";
+import Attack3 from "../../assets/img/Attack_IMAGES/Shunko:_Lightning_Release.png";
+import Attack4 from "../../assets/img/Attack_IMAGES/Raijin_Senkei.png";
+import Attack5 from "../../assets/img/Attack_IMAGES/Afterimage_Strike.png";
+import Attack6 from "../../assets/img/Attack_IMAGES/Raiju_Senkei.png";
 const Yoruichi = {
   name: "Yoruichi Shihōin",
   image: YoruichiArenaImage,

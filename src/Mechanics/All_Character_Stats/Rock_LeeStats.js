@@ -1,11 +1,11 @@
 import RockLeeArena from "../../assets/img/RockLeeArena.jpg";
 
-import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Hidden Lotus Awakening.png"
-import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Rapid Fists.jpeg"
-import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Leaf Hurricane.jpeg"
+import Attack1 from "../../assets/img/Attack_IMAGES/Hidden Lotus Awakening.png"
+import Attack2 from "../../assets/img/Attack_IMAGES/Rapid Fists.jpeg"
+import Attack3 from "../../assets/img/Attack_IMAGES/Leaf Hurricane.jpeg"
 // import Attack4 from ""
-import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Barrier Breaker Kick.jpeg"
-import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Ultra Wind Wave.png"
+import Attack5 from "../../assets/img/Attack_IMAGES/Barrier Breaker Kick.jpeg"
+import Attack6 from "../../assets/img/Attack_IMAGES/Ultra Wind Wave.png"
 
 
 

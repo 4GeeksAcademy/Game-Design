@@ -1,11 +1,11 @@
-import TogaImage from "/workspaces/Game-Design/src/assets/img/Toga.png";
+import TogaImage from "../../assets/img/Toga.png";
 
-import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Jagged_Spinning_Knife.jpg";
-import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Sting Dance.jpg";
-import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Blood Sucker.png";
-import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Close-Quarters Knife Combo.jpeg";
-import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Crimson Scythe.png";
-import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Deadly Waltz.png";
+import Attack1 from "../../assets/img/Attack_IMAGES/Jagged_Spinning_Knife.jpg";
+import Attack2 from "../../assets/img/Attack_IMAGES/Sting Dance.jpg";
+import Attack3 from "../../assets/img/Attack_IMAGES/Blood Sucker.png";
+import Attack4 from "../../assets/img/Attack_IMAGES/Close-Quarters Knife Combo.jpeg";
+import Attack5 from "../../assets/img/Attack_IMAGES/Crimson Scythe.png";
+import Attack6 from "../../assets/img/Attack_IMAGES/Deadly Waltz.png";
 
 const Toga = {
   name: "Himiko Toga",
