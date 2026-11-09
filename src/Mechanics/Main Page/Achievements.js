@@ -1,5 +1,5 @@
 
-import RockLeeArena from "/workspaces/Game-Design/src/assets/img/RockLeeArena.jpg";
+import RockLeeArena from "../../assets/img/RockLeeArena.jpg";
 
 const ACHIEVEMENTS_KEY = "fightersArenaAchievements";
 

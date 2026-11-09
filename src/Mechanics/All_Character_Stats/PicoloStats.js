@@ -1,12 +1,12 @@
 import PicoloArenaImage from "../../assets/img/picolo.jpg";
 
-import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Namekian Regeneration.jpeg";
-import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Ki Control.png";
-import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Light Grenade.png";
-import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Hellzone Grenade.png";
+import Attack1 from "../../assets/img/Attack_IMAGES/Namekian Regeneration.jpeg";
+import Attack2 from "../../assets/img/Attack_IMAGES/Ki Control.png";
+import Attack3 from "../../assets/img/Attack_IMAGES/Light Grenade.png";
+import Attack4 from "../../assets/img/Attack_IMAGES/Hellzone Grenade.png";
 import Attack5 from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
-import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Special Beam Cannon.png"
-import Attack7 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Masenko.jpg"
+import Attack6 from "../../assets/img/Attack_IMAGES/Special Beam Cannon.png"
+import Attack7 from "../../assets/img/Attack_IMAGES/Masenko.jpg"
 
 const Picolo = {
   name: "Piccolo",

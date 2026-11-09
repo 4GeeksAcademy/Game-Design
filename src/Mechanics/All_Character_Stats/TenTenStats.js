@@ -1,12 +1,12 @@
 import TenTenArenaImage from "../../assets/img/Tenten.jpg";
 
-import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Kunai Throw.jpg";
-import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Jidanda.png";
-import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Explosive Tags.png";
-import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Segmented Iron Dome.png";
-import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Twin Rising Dragons.png";
-import Attack6 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Bashosen: Scroll Of Fire.png";
-import Attack7 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Bashōsen: Coil of Wind.png";
+import Attack1 from "../../assets/img/Attack_IMAGES/Kunai Throw.jpg";
+import Attack2 from "../../assets/img/Attack_IMAGES/Jidanda.png";
+import Attack3 from "../../assets/img/Attack_IMAGES/Explosive Tags.png";
+import Attack4 from "../../assets/img/Attack_IMAGES/Segmented Iron Dome.png";
+import Attack5 from "../../assets/img/Attack_IMAGES/Twin Rising Dragons.png";
+import Attack6 from "../../assets/img/Attack_IMAGES/Bashosen: Scroll Of Fire.png";
+import Attack7 from "../../assets/img/Attack_IMAGES/Bashōsen: Coil of Wind.png";
 
 const TenTen = {
   name: "Tenten",

@@ -1,17 +1,17 @@
-import rockLeeNeutral from "/workspaces/Game-Design/src/assets/CharacterExpressions/RockLee/neutral.png";
-import rockLeeHappy from "/workspaces/Game-Design/src/assets/CharacterExpressions/RockLee/happy.png";
-import rockleeDetermined from "/workspaces/Game-Design/src/assets/CharacterExpressions/RockLee/Excited.png";
-import rockLeeAngry from "/workspaces/Game-Design/src/assets/CharacterExpressions/RockLee/Angry.png";
-import rockleeExcited from "/workspaces/Game-Design/src/assets/CharacterExpressions/RockLee/Excited.png";
-import rockleePushUps1 from "/workspaces/Game-Design/src/assets/CharacterExpressions/RockLee/PushupsUP.png";
-import rockleePushUps2 from "/workspaces/Game-Design/src/assets/CharacterExpressions/RockLee/PushupsDOWN.png";
-import rockleeSerious from "/workspaces/Game-Design/src/assets/CharacterExpressions/RockLee/Serious.png";
-import tentenNeutral from "/workspaces/Game-Design/src/assets/CharacterExpressions/TenTen/Neutral.png";
-import tentenHappy from "/workspaces/Game-Design/src/assets/CharacterExpressions/TenTen/Happy.png";
-import tentenAngry from "/workspaces/Game-Design/src/assets/CharacterExpressions/TenTen/Angry.png";
-import tentenRelate from "/workspaces/Game-Design/src/assets/CharacterExpressions/TenTen/Relate.png";
-import tentenExasperated from "/workspaces/Game-Design/src/assets/CharacterExpressions/TenTen/Exasperated.png";
-import tentenFacepalm from "/workspaces/Game-Design/src/assets/CharacterExpressions/TenTen/Facepalm.png";
+import rockLeeNeutral from "../../../assets/CharacterExpressions/RockLee/neutral.png";
+import rockLeeHappy from "../../../assets/CharacterExpressions/RockLee/happy.png";
+import rockleeDetermined from "../../../assets/CharacterExpressions/RockLee/Excited.png";
+import rockLeeAngry from "../../../assets/CharacterExpressions/RockLee/Angry.png";
+import rockleeExcited from "../../../assets/CharacterExpressions/RockLee/Excited.png";
+import rockleePushUps1 from "../../../assets/CharacterExpressions/RockLee/PushupsUP.png";
+import rockleePushUps2 from "../../../assets/CharacterExpressions/RockLee/PushupsDOWN.png";
+import rockleeSerious from "../../../assets/CharacterExpressions/RockLee/Serious.png";
+import tentenNeutral from "../../../assets/CharacterExpressions/TenTen/Neutral.png";
+import tentenHappy from "../../../assets/CharacterExpressions/TenTen/Happy.png";
+import tentenAngry from "../../../assets/CharacterExpressions/TenTen/Angry.png";
+import tentenRelate from "../../../assets/CharacterExpressions/TenTen/Relate.png";
+import tentenExasperated from "../../../assets/CharacterExpressions/TenTen/Exasperated.png";
+import tentenFacepalm from "../../../assets/CharacterExpressions/TenTen/Facepalm.png";
 
 
 

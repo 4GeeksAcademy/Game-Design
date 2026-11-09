@@ -1,10 +1,10 @@
 import NarutoArenaImage from "../../assets/img/Naruto.png";
 
-import Attack1 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Rasengan.jpeg";
-import Attack2 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Multiple Shadow Clone Jutsu.png";
-import Attack3 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Wind Style: Rasenshuriken.jpeg";
-import Attack4 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/NarutoSageMode.webp";
-import Attack5 from "/workspaces/Game-Design/src/assets/img/Attack_IMAGES/Tailed Beast Bomb Rasenshuriken.jpeg";
+import Attack1 from "../../assets/img/Attack_IMAGES/Rasengan.jpeg";
+import Attack2 from "../../assets/img/Attack_IMAGES/Multiple Shadow Clone Jutsu.png";
+import Attack3 from "../../assets/img/Attack_IMAGES/Wind Style: Rasenshuriken.jpeg";
+import Attack4 from "../../assets/img/Attack_IMAGES/NarutoSageMode.webp";
+import Attack5 from "../../assets/img/Attack_IMAGES/Tailed Beast Bomb Rasenshuriken.jpeg";
 
 const Naruto = {
   name: "Naruto Uzumaki",
