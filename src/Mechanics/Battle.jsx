@@ -498,9 +498,13 @@ function App() {
       }
 
       if (choice === "defend" || choice === "evade") {
-        result.defender.cooldown -= 1;
-        result.defender.blocked = true;
-      }
+  result.defender.cooldown = Math.max(
+    0,
+    (result.defender.cooldown ?? 0) - 1,
+  );
+
+  result.defender.blocked = true;
+}
 
       setOpponent({ ...result.attacker });
       setCharacter({ ...result.defender });

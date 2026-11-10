@@ -1875,6 +1875,15 @@ export default function TeamBattle() {
       Object.assign(currentAttacker, result.attacker ?? {});
       Object.assign(currentDefender, result.defender ?? {});
     }
+
+    if (result && (choice === "defend" || choice === "evade")) {
+      currentDefender.cooldown = Math.max(
+        0,
+        (currentDefender.cooldown ?? 0) - 1,
+      );
+
+      currentDefender.blocked = true;
+    }
     // Record successful defensive actions.
     if (result) {
       if (choice === "defend") {
@@ -2219,10 +2228,13 @@ export default function TeamBattle() {
         addLog("The defensive action could not be completed.");
       } else {
         // Record successful defensive actions.
-        if (choice === "defend") {
-          recordFestivalEvent("block", 1);
-        } else if (choice === "evade" && result.evaded) {
-          recordFestivalEvent("evade", 1);
+        if (choice === "defend" || choice === "evade") {
+          currentDefender.cooldown = Math.max(
+            0,
+            (currentDefender.cooldown ?? 0) - 1,
+          );
+
+          currentDefender.blocked = true;
         }
         if (choice === "defend") {
           currentDefender.cooldown = Math.max(

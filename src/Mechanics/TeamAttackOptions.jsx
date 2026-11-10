@@ -1,5 +1,7 @@
 
+
 import React from "react";
+import { getModifiedAttackStat } from "./Modifiers.js";
 import { canUseAttack } from "./Health.js";
 
 function getTeamAttackCardType(attack) {
@@ -85,7 +87,25 @@ export default function TeamAttackOptions({
 
       <div className="team-attack-grid">
         {fighter.attacks.map((attack, index) => {
-          const hasEnoughMana = fighter.mana >= (attack.cost ?? 0);
+
+          const modifiedDamage = getModifiedAttackStat(
+  attack,
+  fighter,
+  "damage",
+);
+
+const modifiedSpeed = getModifiedAttackStat(
+  attack,
+  fighter,
+  "speed",
+);
+
+const modifiedCost = getModifiedAttackStat(
+  attack,
+  fighter,
+  "cost",
+);
+          const hasEnoughMana = fighter.mana >= modifiedCost;
           const attackAvailable = canUseAttack(attack);
 
           const usable =
@@ -135,7 +155,7 @@ export default function TeamAttackOptions({
 
                 <div className="team-attack-cost">
                   <span>
-                    COST: {attack.cost ?? 0} MANA
+                    COST: {modifiedCost} MANA
                   </span>
 
                   {Number.isInteger(attack.uses) && (

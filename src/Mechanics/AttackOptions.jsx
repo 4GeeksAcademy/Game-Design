@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from "react";
 import { aiDefendOrEvade } from "./AI.js";
+import { getModifiedAttackStat } from "./Modifiers.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import { canUseAttack } from "./Health.js";
 import "./BattleUI.css";
@@ -126,16 +127,14 @@ function AttackOptions({
       }
 
       if (result.buffNotAppliedReason) {
-  const reason =
-    result.buffNotAppliedReason === "evaded"
-      ? "evaded"
-      : "blocked";
+        const reason =
+          result.buffNotAppliedReason === "evaded" ? "evaded" : "blocked";
 
-  showCombatMessage(
-    `BUFF NOT APPLIED — ATTACK WAS ${reason.toUpperCase()}!`,
-    "blocked",
-  );
-}
+        showCombatMessage(
+          `BUFF NOT APPLIED — ATTACK WAS ${reason.toUpperCase()}!`,
+          "blocked",
+        );
+      }
 
       Object.entries(result.buffsApplied ?? {}).forEach(([stat, amount]) => {
         if (typeof amount === "number" && amount !== 0) {
@@ -200,6 +199,23 @@ function AttackOptions({
     openingTurnAttackLimitReached,
   ]);
 
+  const modifiedDamage = getModifiedAttackStat(
+  attack,
+  character,
+  "damage",
+);
+
+const modifiedSpeed = getModifiedAttackStat(
+  attack,
+  character,
+  "speed",
+);
+
+const modifiedCost = getModifiedAttackStat(
+  attack,
+  character,
+  "cost",
+);
   return (
     <div
       id="attackSection"
@@ -221,8 +237,10 @@ function AttackOptions({
                   id={`attackCard${index}`}
                   type="button"
                   className={`card text-start p-3 attack-card ${getAttackCardType(attack)} ${
-  Number(attack.sacrifice?.health) > 0 ? "attack-sacrifice" : ""
-} ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}`}
+                    Number(attack.sacrifice?.health) > 0
+                      ? "attack-sacrifice"
+                      : ""
+                  } ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}`}
                   style={{ minWidth: "200px" }}
                   disabled={
                     currentTurn !== "player" ||
@@ -245,20 +263,22 @@ function AttackOptions({
 
                   <div id={`attackStats${index}`} className="attack-stats">
                     <span className="attack-damage">
-                      DAMAGE: {attack.damage ?? 0}
+                      DAMAGE: {modifiedDamage}
                     </span>
+
+                    <span className="attack-speed">SPEED: {modifiedSpeed}</span>
                   </div>
 
                   <div className="attack-cost">
                     <span className="attack-mana-cost">
-                      COST: {attack.cost} MANA
+                     COST: {modifiedCost} MANA
                     </span>
 
                     {Number(attack.sacrifice?.health) > 0 && (
-  <span className="attack-sacrifice-cost">
-    HEALTH SACRIFICE: {attack.sacrifice.health}
-  </span>
-)}
+                      <span className="attack-sacrifice-cost">
+                        HEALTH SACRIFICE: {attack.sacrifice.health}
+                      </span>
+                    )}
 
                     {Number.isInteger(attack.uses) && (
                       <span className="attack-availability-info">

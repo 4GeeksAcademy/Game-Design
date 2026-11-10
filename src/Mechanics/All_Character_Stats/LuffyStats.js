@@ -24,7 +24,6 @@ const Luffy = {
   },
 
   attacks: [
-
     {
       name: "Second Gear",
       image: null,
@@ -33,14 +32,54 @@ const Luffy = {
       cost: 15,
       turnCooldown: 5,
       uses: 2,
-       sacrifice: {
+      sacrifice: {
         health: 5,
       },
       state: true,
       buff: {
         agility: 10,
         mana: 50,
-      }
+      },
+    },
+    {
+      id: "luffy-third-gear",
+      name: "Third Gear",
+      damage: 0,
+      speed: 0,
+      cost: 30,
+      state: true,
+
+      duration: 5,
+
+      attackModifiers: {
+        targetAttackIds: null,
+        stats: {
+          damage: {
+            multiplier: 1.5,
+          },
+          speed: {
+            multiplier: 0.75,
+          },
+          cost: {
+            multiplier: 1.3,
+          },
+        },
+      },
+
+      characterModifiers: {
+        agility: {
+          multiplier: 0.7,
+        },
+        defense: {
+          multiplier: 1.15,
+        },
+        manaRegen: {
+          multiplier: 0.8,
+        },
+        recovery: {
+          multiplier: 0.75,
+        },
+      },
     },
 
     {
@@ -80,6 +119,5 @@ const Luffy = {
     },
   ],
 };
-
 
 export default Luffy;
