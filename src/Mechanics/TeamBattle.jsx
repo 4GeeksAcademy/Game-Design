@@ -12,7 +12,7 @@ import {
   applyHeal,
   consumeAttack,
 } from "./Health.js";
-import { getModifiedCharacterStat } from "./Modifiers.js";
+import { getModifiedCharacterStat, tickSelfModifiers } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
 import { resetAttacks } from "./Turns.js";
 import VictoryScreen from "./VictoryScreen.jsx";
@@ -1604,16 +1604,17 @@ export default function TeamBattle() {
           mana:
             fighter.health > 0
               ? Math.min(
-                  fighter.maximumMana ?? fighter.mana,
-                  fighter.mana + (fighter.manaRegen ?? 0),
+                  getModifiedCharacterStat(fighter, "maximumMana"),
+                  fighter.mana + getModifiedCharacterStat(fighter, "manaRegen"),
                 )
               : fighter.mana,
 
           cooldown:
             fighter.health > 0
               ? Math.min(
-                  fighter.maximumCooldown ?? fighter.cooldown ?? 0,
-                  (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
+                  getModifiedCharacterStat(fighter, "maximumCooldown"),
+                  (fighter.cooldown ?? 0) +
+                    getModifiedCharacterStat(fighter, "recovery"),
                 )
               : fighter.cooldown,
 
