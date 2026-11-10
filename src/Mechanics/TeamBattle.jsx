@@ -1580,6 +1580,9 @@ export default function TeamBattle() {
       const allFighters = [...teams.player, ...teams.opponent].map(
         (fighter) => ({
           ...fighter,
+          activeModifiers: (fighter.activeModifiers ?? []).map((modifier) => ({
+            ...modifier,
+          })),
           attacks: fighter.attacks.map((attack) => ({
             ...attack,
             buff: attack.buff ? { ...attack.buff } : attack.buff,
@@ -1598,30 +1601,41 @@ export default function TeamBattle() {
 
       // Restore each fighter's normal round resources.
       const resetFighters = (fighters) =>
-        fighters.map((fighter) => ({
-          ...fighter,
+  fighters.map((fighter) => {
+    const updatedFighter = {
+      ...fighter,
 
-          mana:
-            fighter.health > 0
-              ? Math.min(
-                  getModifiedCharacterStat(fighter, "maximumMana"),
-                  fighter.mana + getModifiedCharacterStat(fighter, "manaRegen"),
-                )
-              : fighter.mana,
+      mana:
+        fighter.health > 0
+          ? Math.min(
+              getModifiedCharacterStat(fighter, "maximumMana"),
+              fighter.mana + getModifiedCharacterStat(fighter, "manaRegen"),
+            )
+          : fighter.mana,
 
-          cooldown:
-            fighter.health > 0
-              ? Math.min(
-                  getModifiedCharacterStat(fighter, "maximumCooldown"),
-                  (fighter.cooldown ?? 0) +
-                    getModifiedCharacterStat(fighter, "recovery"),
-                )
-              : fighter.cooldown,
+      cooldown:
+        fighter.health > 0
+          ? Math.min(
+              fighter.maximumCooldown == null
+                ? (fighter.cooldown ?? 0)
+                : getModifiedCharacterStat(fighter, "maximumCooldown"),
+              (fighter.cooldown ?? 0) +
+                (fighter.recovery == null
+                  ? 1
+                  : getModifiedCharacterStat(fighter, "recovery")),
+            )
+          : fighter.cooldown,
 
-          turnFinished: false,
-          blocked: false,
-          attacks: fighter.attacks,
-        }));
+      turnFinished: false,
+      blocked: false,
+      attacks: fighter.attacks,
+    };
+
+    // Expire one duration only after this round's recovery is complete.
+    tickSelfModifiers(updatedFighter);
+
+    return updatedFighter;
+  });
 
       const playerCount = teams.player.length;
 
