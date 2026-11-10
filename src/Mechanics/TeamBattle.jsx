@@ -905,7 +905,13 @@ export default function TeamBattle() {
       return;
     }
 
-    if (attacker.mana < (attack.cost ?? 0)) {
+    const modifiedCost = getModifiedAttackStat(
+  attack,
+  attacker,
+  "cost",
+);
+
+if (attacker.mana < modifiedCost) {
       addLog(`${attacker.name} does not have enough mana.`);
       return;
     }
@@ -1113,6 +1119,7 @@ export default function TeamBattle() {
           attacks: attacker.attacks,
           mana: attacker.mana,
           health: attacker.health,
+          activeModifiers: attacker.activeModifiers ?? [],
           turnFinished:
             !hasUsableAttack ||
             (difficulty === "Easy" && attacksUsedThisTurn >= 1),
