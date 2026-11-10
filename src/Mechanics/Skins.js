@@ -2,7 +2,7 @@ import TogaMedicSkin from "../assets/Skins/Mischievous Anime Medic with Syringe.
 import GokuElegantSkin from "../assets/Skins/Elegant Drip Goku.jpeg";
 import HinataWeddingSkin from "../assets/Skins/Hinata’s Enchanted Bridal Portrait.png"
 import NarutoHokageSkin from "../assets/Skins/Naruto’s Hokage Sunset Charge.png"
-
+import UsoppGangstaSkin from "../assets/Skins/Usopp in a Golden Graffiti Alley.png"
 
 
 
@@ -52,5 +52,14 @@ export const skins = [
   rarity: "mythic",
   unlockSource: "festival",
   description: "The Seventh Hokage. Naruto stands as the protector of the Hidden Leaf, wearing his iconic white flame-trimmed cloak.",
+},
+{
+  id: "usopp-gangsta-pirate",
+  characterId: "usopp",
+  name: "The Gangsta Snippaaa",
+  image: UsoppGangstaSkin,
+  rarity: "epic",
+  unlockSource: "festival",
+  description: "Usopp isn't just sniping from the bushes anymore; he's rolling up to Sabaody Archipelago or Egghead Island looking like a true grand-line menace",
 },
 ];

@@ -57,8 +57,13 @@ const FESTIVAL_REWARDS = {
     elite: { type: "coins", amount: 1200 },
   },
   14: {
-    free: { type: "coins", amount: 700 },
-    elite: { type: "coins", amount: 1300 },
+    free: {
+      type: "skin",
+      skinId: "usopp-gangsta-pirate",
+      characterId: "usopp",
+      name: "The Gangsta Snippaaa",
+    },
+    elite: { type: "coins", amount: 5300 },
   },
   15: {
     free: { type: "coins", amount: 5000 },
