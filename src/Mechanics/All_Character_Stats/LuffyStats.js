@@ -48,41 +48,43 @@ const Luffy = {
       speed: 0,
       cost: 30,
       state: true,
-
-      duration: 1,
+      uses: 4,
+      turnCooldown: 3,
+      duration: 3,
 
       attackModifiers: {
         targetAttackIds: null,
         stats: {
           damage: {
-            multiplier: 1.5,
+            multiplier: 1.8, 
           },
           speed: {
             multiplier: 0.75,
           },
           cost: {
             multiplier: 1.3,
+
+            
           },
         },
       },
 
       characterModifiers: {
         agility: {
-          multiplier: 0.7,
+          multiplier: 0.6,
         },
         defense: {
           multiplier: 1.15,
+          amount: 10,
         },
         manaRegen: {
           multiplier: 0.8,
-        },
-        recovery: {
-          multiplier: 0.75,
         },
       },
     },
 
     {
+      id: "Gum-Gum Pistol",
       name: "Gum-Gum Pistol",
       image: null,
       damage: 35,
@@ -91,6 +93,7 @@ const Luffy = {
       state: true,
     },
     {
+      id: "Gum-Gum Gatling",
       name: "Gum-Gum Gatling",
       image: null,
       damage: 52,
@@ -99,6 +102,7 @@ const Luffy = {
       state: true,
     },
     {
+      id: "Gum-Gum Bazooka",
       name: "Gum-Gum Bazooka",
       image: null,
       damage: 70,
@@ -107,6 +111,7 @@ const Luffy = {
       state: true,
     },
     {
+      id: "Gum-Gum Red Hawk",
       name: "Gum-Gum Red Hawk",
       image: null,
       damage: 80,

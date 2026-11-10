@@ -473,9 +473,9 @@ function evadeAttack(ATK, attacker, defender) {
 
   const hasCooldown = defenderCooldown > 0;
 
-  // if (hasCooldown) {
-  //   defender.cooldown = defenderCooldown - 1;
-  // }
+  if (hasCooldown) {
+    defender.cooldown = defenderCooldown - 1;
+  }
 
   const usableAgility = hasCooldown ? defenderAgility : 0;
   const manaNeeded = Math.max(0, attackSpeed - usableAgility);

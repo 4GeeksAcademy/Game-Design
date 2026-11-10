@@ -85,10 +85,10 @@ const Naruto = {
     {
       name: "Tailed Beast Bomb Rasenshuriken",
       image: Attack5,
-      damage: 95,
+      damage: 135,
       uses: 1,
       speed: 50,
-      cost: 70,
+      cost: 117,
       state: true,
     },
   ],

@@ -3746,41 +3746,64 @@ body {
   box-shadow: inset 0 0 12px rgb(255 255 255 / 3%);
 }
 
-/* Speed threat colors */
+
+/* =========================================
+   SPEED THREAT COLORS — 1v1
+========================================= */
 
 .speed-easy {
-  border-color: #4e9a6c;
+  color: #65e6a3;
+  background: linear-gradient(145deg, #123d2a, #10251e);
+  border-color: #38bd77;
+  box-shadow: 0 0 8px rgb(56 189 119 / 15%);
 }
 
 .speed-avoidable {
-  border-color: #38bd77;
+  color: #9be66b;
+  background: linear-gradient(145deg, #253d1b, #182716);
+  border-color: #78d64b;
+  box-shadow: 0 0 8px rgb(120 214 75 / 15%);
 }
 
 .speed-challenging {
+  color: #ffe16b;
+  background: linear-gradient(145deg, #493b12, #29220f);
   border-color: #e7c52f;
+  box-shadow: 0 0 9px rgb(231 197 47 / 16%);
 }
 
 .speed-fast {
+  color: #ffad5c;
+  background: linear-gradient(145deg, #512b16, #291b13);
   border-color: #ff8138;
+  box-shadow: 0 0 9px rgb(255 129 56 / 18%);
 }
 
 .speed-very-fast {
+  color: #ff7888;
+  background: linear-gradient(145deg, #511b2a, #2b111b);
   border-color: #ed414e;
+  box-shadow: 0 0 10px rgb(237 65 78 / 20%);
 }
 
 .speed-unavoidable {
-  border-color: #a91d39;
-  box-shadow: inset 0 0 12px rgb(255 0 55 / 10%);
+  color: #ff526e;
+  background: linear-gradient(145deg, #480c1c, #210811);
+  border-color: #ff3159;
+  box-shadow:
+    0 0 12px rgb(255 49 89 / 25%),
+    inset 0 0 12px rgb(255 49 89 / 8%);
 }
 
 .speed-guaranteed {
-  color: #fff;
-  background: #050505;
+  color: #ffffff;
+  background: linear-gradient(145deg, #3b1022, #090509);
   border-color: #ff3159;
   box-shadow:
-    0 0 10px rgb(255 49 89 / 18%),
-    inset 0 0 12px rgb(255 49 89 / 8%);
+    0 0 15px rgb(255 49 89 / 35%),
+    inset 0 0 15px rgb(255 49 89 / 12%);
 }
+
 
 /* Mana cost remains neutral */
 
@@ -3790,6 +3813,27 @@ body {
 
 .attack-cost-badge strong {
   color: #bfc7ff;
+}
+
+.attack-speed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 9px;
+
+  color: #13d5ff;
+  background: linear-gradient(145deg, #102d3a, #101923);
+  border: 1px solid #13d5ff;
+  border-radius: 6px;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+
+  text-shadow: 0 0 7px rgb(19 213 255 / 45%);
+  box-shadow: 0 0 8px rgb(19 213 255 / 15%);
 }
 
 /* =========================================

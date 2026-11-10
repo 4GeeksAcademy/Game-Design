@@ -1567,14 +1567,94 @@ battlefield > .local-coop-incoming {
 .threat-life-threatening { color: #ff4f70; }
 .threat-death { color: #e9d5ff; }
 
-/* Speed threat colors */
-.speed-easy { color: #65e6a3; }
-.speed-avoidable { color: #9be66b; }
-.speed-challenging { color: #f4d35e; }
-.speed-fast { color: #ffad5c; }
-.speed-very-fast { color: #ff765e; }
-.speed-unavoidable { color: #ff4f70; }
-.speed-guaranteed { color: #e9d5ff; }
+
+/* =========================================
+   SPEED THREAT COLORS — TEAM BATTLE
+========================================= */
+
+.incoming-threats .speed-easy,
+.incoming-threats .speed-avoidable,
+.incoming-threats .speed-challenging,
+.incoming-threats .speed-fast,
+.incoming-threats .speed-very-fast,
+.incoming-threats .speed-unavoidable,
+.incoming-threats .speed-guaranteed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  text-shadow: 0 0 7px currentColor;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.incoming-threats .speed-easy {
+  color: #65e6a3;
+  background: rgb(56 189 119 / 12%);
+}
+
+.incoming-threats .speed-avoidable {
+  color: #9be66b;
+  background: rgb(120 214 75 / 12%);
+}
+
+.incoming-threats .speed-challenging {
+  color: #ffe16b;
+  background: rgb(231 197 47 / 12%);
+}
+
+.incoming-threats .speed-fast {
+  color: #ffad5c;
+  background: rgb(255 129 56 / 12%);
+}
+
+.incoming-threats .speed-very-fast {
+  color: #ff7888;
+  background: rgb(237 65 78 / 14%);
+}
+
+.incoming-threats .speed-unavoidable {
+  color: #ff526e;
+  background: rgb(255 49 89 / 15%);
+  box-shadow: 0 0 8px rgb(255 49 89 / 15%);
+}
+
+.incoming-threats .speed-guaranteed {
+  color: #ffffff;
+  background: rgb(255 49 89 / 20%);
+  border-color: #ff3159;
+  box-shadow: 0 0 10px rgb(255 49 89 / 25%);
+}
+
+
+.team-attack-speed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 9px;
+
+  color: #13d5ff;
+  background: linear-gradient(145deg, #102d3a, #101923);
+  border: 1px solid #13d5ff;
+  border-radius: 6px;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+
+  text-shadow: 0 0 7px rgb(19 213 255 / 45%);
+  box-shadow: 0 0 8px rgb(19 213 255 / 15%);
+}
+
 
 .incoming-attack-image {
   display: block;
