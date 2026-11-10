@@ -39,6 +39,9 @@ function createBattleFighter(id) {
   return {
     ...data,
     id: selected.id,
+    activeModifiers: (data.activeModifiers ?? []).map((modifier) => ({
+      ...modifier,
+    })),
     image: getCharacterImage(selected.id, selected.image ?? data.image),
     health: data.health,
     maximumHealth: data.maximumHealth ?? data.health,
@@ -1601,41 +1604,42 @@ export default function TeamBattle() {
 
       // Restore each fighter's normal round resources.
       const resetFighters = (fighters) =>
-  fighters.map((fighter) => {
-    const updatedFighter = {
-      ...fighter,
+        fighters.map((fighter) => {
+          const updatedFighter = {
+            ...fighter,
 
-      mana:
-        fighter.health > 0
-          ? Math.min(
-              getModifiedCharacterStat(fighter, "maximumMana"),
-              fighter.mana + getModifiedCharacterStat(fighter, "manaRegen"),
-            )
-          : fighter.mana,
+            mana:
+              fighter.health > 0
+                ? Math.min(
+                    getModifiedCharacterStat(fighter, "maximumMana"),
+                    fighter.mana +
+                      getModifiedCharacterStat(fighter, "manaRegen"),
+                  )
+                : fighter.mana,
 
-      cooldown:
-        fighter.health > 0
-          ? Math.min(
-              fighter.maximumCooldown == null
-                ? (fighter.cooldown ?? 0)
-                : getModifiedCharacterStat(fighter, "maximumCooldown"),
-              (fighter.cooldown ?? 0) +
-                (fighter.recovery == null
-                  ? 1
-                  : getModifiedCharacterStat(fighter, "recovery")),
-            )
-          : fighter.cooldown,
+            cooldown:
+              fighter.health > 0
+                ? Math.min(
+                    fighter.maximumCooldown == null
+                      ? (fighter.cooldown ?? 0)
+                      : getModifiedCharacterStat(fighter, "maximumCooldown"),
+                    (fighter.cooldown ?? 0) +
+                      (fighter.recovery == null
+                        ? 1
+                        : getModifiedCharacterStat(fighter, "recovery")),
+                  )
+                : fighter.cooldown,
 
-      turnFinished: false,
-      blocked: false,
-      attacks: fighter.attacks,
-    };
+            turnFinished: false,
+            blocked: false,
+            attacks: fighter.attacks,
+          };
 
-    // Expire one duration only after this round's recovery is complete.
-    tickSelfModifiers(updatedFighter);
+          // Expire one duration only after this round's recovery is complete.
+          tickSelfModifiers(updatedFighter);
 
-    return updatedFighter;
-  });
+          return updatedFighter;
+        });
 
       const playerCount = teams.player.length;
 
@@ -1959,37 +1963,49 @@ export default function TeamBattle() {
         }
 
         const resetFighters = (fighters) =>
-          fighters.map((fighter) => ({
-            ...fighter,
+          fighters.map((fighter) => {
+            const updatedFighter = {
+              ...fighter,
 
-            mana:
-              fighter.health > 0
-                ? Math.min(
-                    fighter.maximumMana ?? fighter.mana,
-                    fighter.mana + (fighter.manaRegen ?? 0),
-                  )
-                : fighter.mana,
+              mana:
+                fighter.health > 0
+                  ? Math.min(
+                      getModifiedCharacterStat(fighter, "maximumMana"),
+                      fighter.mana +
+                        getModifiedCharacterStat(fighter, "manaRegen"),
+                    )
+                  : fighter.mana,
 
-            // Restore cooldown based on this fighter's recovery stat.
-            cooldown:
-              fighter.health > 0
-                ? Math.min(
-                    fighter.maximumCooldown ?? fighter.cooldown ?? 0,
-                    (fighter.cooldown ?? 0) + (fighter.recovery ?? 1),
-                  )
-                : fighter.cooldown,
+              cooldown:
+                fighter.health > 0
+                  ? Math.min(
+                      fighter.maximumCooldown == null
+                        ? (fighter.cooldown ?? 0)
+                        : getModifiedCharacterStat(fighter, "maximumCooldown"),
+                      (fighter.cooldown ?? 0) +
+                        (fighter.recovery == null
+                          ? 1
+                          : getModifiedCharacterStat(fighter, "recovery")),
+                    )
+                  : fighter.cooldown,
 
-            turnFinished: false,
-            blocked: false,
+              turnFinished: false,
+              blocked: false,
 
-            attacks: resetAttacks(
-              fighter.attacks.map((attack) => ({
-                ...attack,
-                buff: attack.buff ? { ...attack.buff } : attack.buff,
-                debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-              })),
-            ),
-          }));
+              attacks: resetAttacks(
+                fighter.attacks.map((attack) => ({
+                  ...attack,
+                  buff: attack.buff ? { ...attack.buff } : attack.buff,
+                  debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+                })),
+              ),
+            };
+
+            // Tick modifiers after this round's resource recovery.
+            tickSelfModifiers(updatedFighter);
+
+            return updatedFighter;
+          });
 
         setTeams({
           player: resetFighters(updatedPlayers),
