@@ -199,23 +199,6 @@ function AttackOptions({
     openingTurnAttackLimitReached,
   ]);
 
-  const modifiedDamage = getModifiedAttackStat(
-  attack,
-  character,
-  "damage",
-);
-
-const modifiedSpeed = getModifiedAttackStat(
-  attack,
-  character,
-  "speed",
-);
-
-const modifiedCost = getModifiedAttackStat(
-  attack,
-  character,
-  "cost",
-);
   return (
     <div
       id="attackSection"
@@ -231,75 +214,97 @@ const modifiedCost = getModifiedAttackStat(
             id="attackList"
             className="d-flex flex-row flex-nowrap gap-3 overflow-x-auto pb-2"
           >
-            {character.attacks.map((attack, index) => (
-              <div className="attack-card-wrapper" key={attack.name}>
-                <button
-                  id={`attackCard${index}`}
-                  type="button"
-                  className={`card text-start p-3 attack-card ${getAttackCardType(attack)} ${
-                    Number(attack.sacrifice?.health) > 0
-                      ? "attack-sacrifice"
-                      : ""
-                  } ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}`}
-                  style={{ minWidth: "200px" }}
-                  disabled={
-                    currentTurn !== "player" ||
-                    !isAttackAvailable(attack) ||
-                    openingTurnAttackLimitReached
-                  }
-                  onClick={() => handleAttack(index)}
-                >
-                  <img
-                    id={`attackImage${index}`}
-                    src={attack.image}
-                    className="card-img-top attack-image"
-                    alt={attack.name}
-                    loading="lazy"
-                  />
+            {character.attacks.map((attack, index) => {
+              const modifiedDamage = getModifiedAttackStat(
+                attack,
+                character,
+                "damage",
+              );
 
-                  <h5 id={`attackName${index}`} className="text-center">
-                    {attack.name}
-                  </h5>
+              const modifiedSpeed = getModifiedAttackStat(
+                attack,
+                character,
+                "speed",
+              );
 
-                  <div id={`attackStats${index}`} className="attack-stats">
-                    <span className="attack-damage">
-                      DAMAGE: {modifiedDamage}
-                    </span>
+              const modifiedCost = getModifiedAttackStat(
+                attack,
+                character,
+                "cost",
+              );
 
-                    <span className="attack-speed">SPEED: {modifiedSpeed}</span>
-                  </div>
+              return (
+                <div className="attack-card-wrapper" key={attack.name}>
+                  <button
+                    id={`attackCard${index}`}
+                    type="button"
+                    className={`card text-start p-3 attack-card ${getAttackCardType(attack)} ${
+                      Number(attack.sacrifice?.health) > 0
+                        ? "attack-sacrifice"
+                        : ""
+                    } ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}`}
+                    style={{ minWidth: "200px" }}
+                    disabled={
+                      currentTurn !== "player" ||
+                      !isAttackAvailable(attack) ||
+                      openingTurnAttackLimitReached
+                    }
+                    onClick={() => handleAttack(index)}
+                  >
+                    <img
+                      id={`attackImage${index}`}
+                      src={attack.image}
+                      className="card-img-top attack-image"
+                      alt={attack.name}
+                      loading="lazy"
+                    />
 
-                  <div className="attack-cost">
-                    <span className="attack-mana-cost">
-                     COST: {modifiedCost} MANA
-                    </span>
+                    <h5 id={`attackName${index}`} className="text-center">
+                      {attack.name}
+                    </h5>
 
-                    {Number(attack.sacrifice?.health) > 0 && (
-                      <span className="attack-sacrifice-cost">
-                        HEALTH SACRIFICE: {attack.sacrifice.health}
+                    <div id={`attackStats${index}`} className="attack-stats">
+                      <span className="attack-damage">
+                        DAMAGE: {modifiedDamage}
                       </span>
-                    )}
 
-                    {Number.isInteger(attack.uses) && (
-                      <span className="attack-availability-info">
-                        USES: {attack.remainingUses ?? attack.uses}/
-                        {attack.uses}
+                      <span className="attack-speed">
+                        SPEED: {modifiedSpeed}
                       </span>
-                    )}
+                    </div>
 
-                    {Number(attack.turnCooldown) > 0 && (
-                      <span className="attack-availability-info">
-                        {(attack.cooldownRemaining ?? 0) > 0
-                          ? `COOLDOWN: ${attack.cooldownRemaining} ROUNDS`
-                          : "COOLDOWN: READY"}
+                    <div className="attack-cost">
+                      <span className="attack-mana-cost">
+                        COST: {modifiedCost} MANA
                       </span>
-                    )}
-                  </div>
-                </button>
 
-                <AttackEffects attack={attack} />
-              </div>
-            ))}
+                      {Number(attack.sacrifice?.health) > 0 && (
+                        <span className="attack-sacrifice-cost">
+                          HEALTH SACRIFICE: {attack.sacrifice.health}
+                        </span>
+                      )}
+
+                      {Number.isInteger(attack.uses) && (
+                        <span className="attack-availability-info">
+                          USES: {attack.remainingUses ?? attack.uses}/
+                          {attack.uses}
+                        </span>
+                      )}
+
+                      {Number(attack.turnCooldown) > 0 && (
+                        <span className="attack-availability-info">
+                          {(attack.cooldownRemaining ?? 0) > 0
+                            ? `COOLDOWN: ${attack.cooldownRemaining} ROUNDS`
+                            : "COOLDOWN: READY"}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+
+                  <AttackEffects attack={attack} />
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

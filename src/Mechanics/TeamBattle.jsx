@@ -829,6 +829,9 @@ export default function TeamBattle() {
 
     const updatedPlayers = teams.player.map((fighter) => ({
       ...fighter,
+      activeModifiers: (fighter.activeModifiers ?? []).map((modifier) => ({
+  ...modifier,
+})),
       defense:
         typeof fighter.defense === "object" && fighter.defense
           ? { ...fighter.defense }
@@ -856,6 +859,9 @@ export default function TeamBattle() {
 
     const updatedOpponents = teams.opponent.map((fighter) => ({
       ...fighter,
+      activeModifiers: (fighter.activeModifiers ?? []).map((modifier) => ({
+  ...modifier,
+})),
       defense:
         typeof fighter.defense === "object" && fighter.defense
           ? { ...fighter.defense }
@@ -991,6 +997,7 @@ export default function TeamBattle() {
           attacks: attacker.attacks,
           mana: attacker.mana,
           health: attacker.health,
+          activeModifiers: attacker.activeModifiers ?? [],
           turnFinished: isCpuAttacker ? cpuMustFinish : fighter.turnFinished,
         };
       });
@@ -1119,6 +1126,7 @@ export default function TeamBattle() {
           attacks: attacker.attacks,
           mana: attacker.mana,
           health: attacker.health,
+          activeModifiers: attacker.activeModifiers ?? [],
         };
       }
 
@@ -2236,13 +2244,7 @@ export default function TeamBattle() {
 
           currentDefender.blocked = true;
         }
-        if (choice === "defend") {
-          currentDefender.cooldown = Math.max(
-            0,
-            (currentDefender.cooldown ?? 0) - 1,
-          );
-          currentDefender.blocked = true;
-        } else if (choice === "evade") {
+        else if (choice === "evade") {
           currentDefender.blocked = true;
         }
 

@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { getModifiedAttackStat } from "./Modifiers.js";
 import { canUseAttack } from "./Health.js";
@@ -87,37 +85,24 @@ export default function TeamAttackOptions({
 
       <div className="team-attack-grid">
         {fighter.attacks.map((attack, index) => {
-
           const modifiedDamage = getModifiedAttackStat(
-  attack,
-  fighter,
-  "damage",
-);
+            attack,
+            fighter,
+            "damage",
+          );
 
-const modifiedSpeed = getModifiedAttackStat(
-  attack,
-  fighter,
-  "speed",
-);
+          const modifiedSpeed = getModifiedAttackStat(attack, fighter, "speed");
 
-const modifiedCost = getModifiedAttackStat(
-  attack,
-  fighter,
-  "cost",
-);
+          const modifiedCost = getModifiedAttackStat(attack, fighter, "cost");
           const hasEnoughMana = fighter.mana >= modifiedCost;
           const attackAvailable = canUseAttack(attack);
 
-          const usable =
-            canUseAttacks && attackAvailable && hasEnoughMana;
+          const usable = canUseAttacks && attackAvailable && hasEnoughMana;
 
           const isSacrifice = Number(attack.sacrifice?.health) > 0;
 
           return (
-            <div
-              className="team-attack-wrapper"
-              key={`${fighter.id}-${index}`}
-            >
+            <div className="team-attack-wrapper" key={`${fighter.id}-${index}`}>
               <button
                 type="button"
                 className={`team-attack-card ${getTeamAttackCardType(
@@ -140,28 +125,25 @@ const modifiedCost = getModifiedAttackStat(
                     loading="lazy"
                   />
                 ) : (
-                  <div className="team-attack-image-placeholder">
-                    NO IMAGE
-                  </div>
+                  <div className="team-attack-image-placeholder">NO IMAGE</div>
                 )}
 
-                <strong className="team-attack-name">
-                  {attack.name}
-                </strong>
+                <strong className="team-attack-name">{attack.name}</strong>
 
                 <span className="team-attack-damage">
-                  DAMAGE: {attack.damage ?? 0}
+                  DAMAGE: {modifiedDamage}
+                </span>
+
+                <span className="team-attack-speed">
+                  SPEED: {modifiedSpeed}
                 </span>
 
                 <div className="team-attack-cost">
-                  <span>
-                    COST: {modifiedCost} MANA
-                  </span>
+                  <span>COST: {modifiedCost} MANA</span>
 
                   {Number.isInteger(attack.uses) && (
                     <span className="team-attack-availability">
-                      USES: {attack.remainingUses ?? attack.uses}/
-                      {attack.uses}
+                      USES: {attack.remainingUses ?? attack.uses}/{attack.uses}
                     </span>
                   )}
 
