@@ -1,17 +1,35 @@
 import { applyEffects } from "./Health.js";
+import { getModifiedCharacterStat } from "./Modifiers.js";
 
 let turns = 1;
 
 function regenerateMana(character) {
+  const manaRegen =
+    character.manaRegen == null
+      ? 0
+      : getModifiedCharacterStat(character, "manaRegen");
+
+  const maximumMana =
+    character.maximumMana == null
+      ? character.mana
+      : getModifiedCharacterStat(character, "maximumMana");
+
   character.mana = Math.min(
-    character.maximumMana,
-    character.mana + character.manaRegen,
+    maximumMana,
+    character.mana + manaRegen,
   );
 }
 
 function recoverCooldown(character) {
-  const recovery = character.recovery ?? 1;
-  const maximumCooldown = character.maximumCooldown ?? 3;
+  const recovery =
+    character.recovery == null
+      ? 1
+      : getModifiedCharacterStat(character, "recovery");
+
+  const maximumCooldown =
+    character.maximumCooldown == null
+      ? 3
+      : getModifiedCharacterStat(character, "maximumCooldown");
 
   character.cooldown = Math.min(
     maximumCooldown,

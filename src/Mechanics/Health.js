@@ -1,4 +1,9 @@
 import React from "react";
+import {
+  getModifiedAttackStat,
+  getModifiedCharacterStat,
+  activateSelfModifiers,
+} from "./Modifiers.js";
 
 // function attackCharacter(ATK, attacker, defender, defense = 0) {
 //   if (!ATK || !attacker || !defender) {
@@ -245,10 +250,7 @@ function applyHeal(attack, recipient) {
   const previousHealth = recipient.health;
 
   // Main HP restoration
-  applyEffects(
-    { health: Math.max(0, Number(heal.amount) || 0) },
-    recipient
-  );
+  applyEffects({ health: Math.max(0, Number(heal.amount) || 0) }, recipient);
 
   // Additional immediate resource restoration
   const instantEffects = {};
@@ -327,7 +329,9 @@ function recordTemporaryEffects(attack, target, effects) {
   }
 
   const appliedEffects = Object.fromEntries(
-    Object.entries(effects).filter(([, amount]) => amount !== 0),
+    Object.entries(effects).filter(
+      ([stat, amount]) => stat !== "health" && stat !== "mana" && amount !== 0,
+    ),
   );
 
   if (Object.keys(appliedEffects).length === 0) return;
@@ -343,7 +347,9 @@ function recordTemporaryEffects(attack, target, effects) {
 function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
   if (!ATK || !attacker || !defender) return null;
 
-  if (attacker.mana < (ATK.cost ?? 0)) {
+  const attackCost = getModifiedAttackStat(ATK, attacker, "cost");
+
+  if (attacker.mana < attackCost) {
     console.log("Not enough mana!");
     return null;
   }
@@ -365,7 +371,7 @@ function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
   const blocked = options.blocked === true;
 
   // Pay both costs when the attack is activated.
-  attacker.mana -= ATK.cost ?? 0;
+  attacker.mana -= attackCost ?? 0;
   attacker.health -= sacrificeHealth;
 
   // A conditional buff only activates when the attack isn't blocked.
@@ -377,6 +383,7 @@ function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
     : applyEffects(ATK.buff, attacker);
 
   recordTemporaryEffects(ATK, attacker, buffsApplied);
+  activateSelfModifiers(attacker, ATK);
 
   // By default, debuffs can still affect a defender who blocks.
   // Set debuffRequiresHit to make the debuff require a successful hit.
@@ -389,8 +396,10 @@ function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
   let damageReceived = 0;
   recordTemporaryEffects(ATK, defender, debuffsApplied);
 
-  if (ATK.damage > 0 && defender.health > 0) {
-    damageReceived = Math.max(0, ATK.damage - defense);
+  const attackDamage = getModifiedAttackStat(ATK, attacker, "damage");
+
+  if (attackDamage > 0 && defender.health > 0) {
+    damageReceived = Math.max(0, attackDamage - defense);
     defender.health = Math.max(0, defender.health - damageReceived);
   }
 
@@ -434,12 +443,15 @@ function evadeAttack(ATK, attacker, defender) {
     return null;
   }
 
-  const attackCost = Number(ATK.cost) || 0;
-  const attackSpeed = Number(ATK.speed) || 0;
+  const attackCost = getModifiedAttackStat(ATK, attacker, "cost");
+  const attackSpeed = getModifiedAttackStat(ATK, attacker, "speed");
+  const attackDamage = getModifiedAttackStat(ATK, attacker, "damage");
+
   const attackerMana = Number(attacker.mana) || 0;
   const defenderMana = Number(defender.mana) || 0;
-  const defenderAgility = Number(defender.agility) || 0;
-  const defenderCooldown = Number(defender.cooldown) || 0;
+
+  const defenderAgility = getModifiedCharacterStat(defender, "agility");
+  const defenderCooldown = getModifiedCharacterStat(defender, "cooldown");
 
   if (attackerMana < attackCost) {
     console.log("Not enough attacker mana!");
@@ -481,6 +493,7 @@ function evadeAttack(ATK, attacker, defender) {
     : applyEffects(ATK.buff, attacker);
 
   recordTemporaryEffects(ATK, attacker, buffsApplied);
+  activateSelfModifiers(attacker, ATK);
 
   // An evaded attack cannot apply debuffs.
   // A successful evade prevents debuffs.
@@ -491,8 +504,8 @@ function evadeAttack(ATK, attacker, defender) {
 
   let damageReceived = 0;
 
-  if (!evaded && ATK.damage > 0 && defender.health > 0) {
-    damageReceived = Math.max(0, Number(ATK.damage) || 0);
+  if (!evaded && attackDamage > 0 && defender.health > 0) {
+    damageReceived = attackDamage;
     defender.health = Math.max(0, defender.health - damageReceived);
   }
 

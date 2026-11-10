@@ -1,4 +1,5 @@
 import Opponent from "./Opponent.jsx";
+import { getModifiedCharacterStat } from "./Modifiers.js";
 import { roster } from "./Main Page/CharacterSelection.jsx";
 import { getCharacterImage } from "./SkinManager.js";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -90,37 +91,33 @@ function App() {
   };
 
   // Resolve the selected fighter IDs, including safe fallbacks.
-const requestedPlayerId = location.state?.playerId;
-const playerId = fighterData[requestedPlayerId]
-  ? requestedPlayerId
-  : "mina";
+  const requestedPlayerId = location.state?.playerId;
+  const playerId = fighterData[requestedPlayerId] ? requestedPlayerId : "mina";
 
-const requestedOpponentId = location.state?.opponentId;
-const opponentId = fighterData[requestedOpponentId]
-  ? requestedOpponentId
-  : playerId === "mina"
-    ? "rockLee"
-    : "mina";
+  const requestedOpponentId = location.state?.opponentId;
+  const opponentId = fighterData[requestedOpponentId]
+    ? requestedOpponentId
+    : playerId === "mina"
+      ? "rockLee"
+      : "mina";
 
-const playerData = fighterData[playerId];
-const opponentData = fighterData[opponentId];
+  const playerData = fighterData[playerId];
+  const opponentData = fighterData[opponentId];
 
-// Find the original roster artwork for each fighter.
-const playerRosterEntry = roster.find(
-  (fighter) => fighter.id === playerId
-);
+  // Find the original roster artwork for each fighter.
+  const playerRosterEntry = roster.find((fighter) => fighter.id === playerId);
 
-const opponentRosterEntry = roster.find(
-  (fighter) => fighter.id === opponentId
-);
+  const opponentRosterEntry = roster.find(
+    (fighter) => fighter.id === opponentId,
+  );
 
   const [character, setCharacter] = useState(() => ({
     ...playerData,
     image: getCharacterImage(
-    playerId,
-    playerRosterEntry?.image ?? playerData.image
-  ),
-     id: "player",
+      playerId,
+      playerRosterEntry?.image ?? playerData.image,
+    ),
+    id: "player",
     attacks: playerData.attacks.map((attack) => ({ ...attack })),
     health: playerData.health,
     maximumHealth: playerData.health,
@@ -134,9 +131,9 @@ const opponentRosterEntry = roster.find(
   const [opponent, setOpponent] = useState(() => ({
     ...opponentData,
     image: getCharacterImage(
-    opponentId,
-    opponentRosterEntry?.image ?? opponentData.image
-  ),
+      opponentId,
+      opponentRosterEntry?.image ?? opponentData.image,
+    ),
     id: "opponent",
     attacks: opponentData.attacks.map((attack) => ({ ...attack })),
     health: opponentData.health,
@@ -486,7 +483,7 @@ const opponentRosterEntry = roster.find(
               aiAttack,
               opponent,
               character,
-              character.defense.amount,
+              getModifiedCharacterStat(character, "defense"),
             )
           : choice === "evade"
             ? evadeAttack(aiAttack, opponent, character)
@@ -754,131 +751,126 @@ const opponentRosterEntry = roster.find(
         <>
           {/* Fighters and combat log share one layout. */}
           <div id="battleLayout">
-           {/* Opponent's attack and defensive choices. */}
-              {aiAttack && showIncomingAttack && (
-                <div
-                  id="aiAttackSection"
-                  className="incoming-attack-card"
-                  key={aiAttack.id ?? aiAttack.name}
-                >
-                  {/*
+            {/* Opponent's attack and defensive choices. */}
+            {aiAttack && showIncomingAttack && (
+              <div
+                id="aiAttackSection"
+                className="incoming-attack-card"
+                key={aiAttack.id ?? aiAttack.name}
+              >
+                {/*
       The key helps React remount the card when the attack changes.
       This retriggers its entrance animation for queued attacks.
     */}
-<div id="aiAttackCard">
-                    <div id="aiAttackHeader">
-                      <span>⚠ INCOMING ATTACK</span>
-                      <span className="attack-warning-dot" />
+                <div id="aiAttackCard">
+                  <div id="aiAttackHeader">
+                    <span>⚠ INCOMING ATTACK</span>
+                    <span className="attack-warning-dot" />
+                  </div>
+
+                  <div
+                    id="defenseTimer"
+                    className={
+                      defenseTimeLeft <= 3
+                        ? "timer-critical"
+                        : defenseTimeLeft <= 5
+                          ? "timer-warning"
+                          : ""
+                    }
+                  >
+                    <div id="defenseTimerText">
+                      <span>DEFENSE WINDOW</span>
+                      <strong>{defenseTimeLeft}s</strong>
                     </div>
 
-                    <div
-                      id="defenseTimer"
-                      className={
-                        defenseTimeLeft <= 3
-                          ? "timer-critical"
-                          : defenseTimeLeft <= 5
-                            ? "timer-warning"
-                            : ""
-                      }
-                    >
-                      <div id="defenseTimerText">
-                        <span>DEFENSE WINDOW</span>
-                        <strong>{defenseTimeLeft}s</strong>
-                      </div>
-
-                      <div id="defenseTimerTrack">
-                        <div
-                          id="defenseTimerFill"
-                          style={{ width: `${defenseTimeLeft * 10}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div id="aiAttackInfo">
-                      <h5 id="aiAttackName">{aiAttack.name}</h5>
-                      {aiAttack.image && (
-                        <div className="incoming-attack-image">
-                          <img src={aiAttack.image} alt={aiAttack.name} />
-                        </div>
-                      )}
-                      <div id="aiAttackStats">
-                        {/* Damage threat */}
-                        <div
-                          className={`attack-threat-badge ${
-                            getDamageThreat(aiAttack.damage).className
-                          }`}
-                        >
-                          <span className="threat-label">DAMAGE</span>
-
-                          <strong>{aiAttack.damage}</strong>
-
-                          <span className="threat-rating">
-                            {getDamageThreat(aiAttack.damage).label}
-                          </span>
-                        </div>
-
-                        {/* Speed threat */}
-                        <div
-                          className={`attack-threat-badge ${
-                            getSpeedThreat(aiAttack.speed).className
-                          }`}
-                        >
-                          <span className="threat-label">SPEED</span>
-
-                          <strong>{aiAttack.speed}</strong>
-
-                          <span className="threat-rating">
-                            {getSpeedThreat(aiAttack.speed).label}
-                          </span>
-                        </div>
-
-                        {/* Mana cost */}
-                        <div className="attack-cost-badge">
-                          <span className="threat-label">MANA COST</span>
-
-                          <strong>◆ {aiAttack.cost}</strong>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div id="defensiveActions">
-                      <button
-                        id="defendButton"
-                        disabled={
-                          character.cooldown <= 0 || defenseTimeLeft <= 0
-                        }
-                        onClick={() => resolveIncomingAttack("defend")}
-                      >
-                        <span id="defendButtonIcon">🛡</span>
-                        <span>DEFEND</span>
-                      </button>
-
-                      <button
-                        id="evadeButton"
-                        disabled={defenseTimeLeft <= 0}
-                        onClick={() => resolveIncomingAttack("evade")}
-                      >
-                        <span id="evadeButtonIcon">💨</span>
-                        <span>EVADE</span>
-                      </button>
-
-                      <button
-                        id="takeDamageButton"
-                        type="button"
-                        disabled={!aiAttack || defenseTimeLeft <= 0}
-                        onClick={() => resolveIncomingAttack("take-damage")}
-                      >
-                        <span>💥</span>
-                        <span>TAKE FULL DAMAGE</span>
-                      </button>
+                    <div id="defenseTimerTrack">
+                      <div
+                        id="defenseTimerFill"
+                        style={{ width: `${defenseTimeLeft * 10}%` }}
+                      />
                     </div>
                   </div>
-                  
-                </div>
-              )}
-            <div id="battleArena">
 
-            
+                  <div id="aiAttackInfo">
+                    <h5 id="aiAttackName">{aiAttack.name}</h5>
+                    {aiAttack.image && (
+                      <div className="incoming-attack-image">
+                        <img src={aiAttack.image} alt={aiAttack.name} />
+                      </div>
+                    )}
+                    <div id="aiAttackStats">
+                      {/* Damage threat */}
+                      <div
+                        className={`attack-threat-badge ${
+                          getDamageThreat(aiAttack.damage).className
+                        }`}
+                      >
+                        <span className="threat-label">DAMAGE</span>
+
+                        <strong>{aiAttack.damage}</strong>
+
+                        <span className="threat-rating">
+                          {getDamageThreat(aiAttack.damage).label}
+                        </span>
+                      </div>
+
+                      {/* Speed threat */}
+                      <div
+                        className={`attack-threat-badge ${
+                          getSpeedThreat(aiAttack.speed).className
+                        }`}
+                      >
+                        <span className="threat-label">SPEED</span>
+
+                        <strong>{aiAttack.speed}</strong>
+
+                        <span className="threat-rating">
+                          {getSpeedThreat(aiAttack.speed).label}
+                        </span>
+                      </div>
+
+                      {/* Mana cost */}
+                      <div className="attack-cost-badge">
+                        <span className="threat-label">MANA COST</span>
+
+                        <strong>◆ {aiAttack.cost}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="defensiveActions">
+                    <button
+                      id="defendButton"
+                      disabled={character.cooldown <= 0 || defenseTimeLeft <= 0}
+                      onClick={() => resolveIncomingAttack("defend")}
+                    >
+                      <span id="defendButtonIcon">🛡</span>
+                      <span>DEFEND</span>
+                    </button>
+
+                    <button
+                      id="evadeButton"
+                      disabled={defenseTimeLeft <= 0}
+                      onClick={() => resolveIncomingAttack("evade")}
+                    >
+                      <span id="evadeButtonIcon">💨</span>
+                      <span>EVADE</span>
+                    </button>
+
+                    <button
+                      id="takeDamageButton"
+                      type="button"
+                      disabled={!aiAttack || defenseTimeLeft <= 0}
+                      onClick={() => resolveIncomingAttack("take-damage")}
+                    >
+                      <span>💥</span>
+                      <span>TAKE FULL DAMAGE</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div id="battleArena">
               {/* Story background behind both fighters. */}
               {isStoryMode && (
                 <div
@@ -896,10 +888,6 @@ const opponentRosterEntry = roster.find(
               >
                 <Opponent opponent={opponent} setOpponent={setOpponent} />
               </div>
-
-              
-
-             
 
               <div id="characterSection">
                 <Character

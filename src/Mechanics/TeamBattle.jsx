@@ -12,6 +12,7 @@ import {
   applyHeal,
   consumeAttack,
 } from "./Health.js";
+import { getModifiedCharacterStat } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
 import { resetAttacks } from "./Turns.js";
 import VictoryScreen from "./VictoryScreen.jsx";
@@ -942,78 +943,76 @@ export default function TeamBattle() {
       }
 
       // Pay the mana cost once, regardless of recipient count.
-attacker.mana -= attack.cost ?? 0;
+      attacker.mana -= attack.cost ?? 0;
 
-// Apply healing and buffs to each recipient.
-recipients.forEach((recipient) => {
-  const result = applyHeal(attack, recipient);
+      // Apply healing and buffs to each recipient.
+      recipients.forEach((recipient) => {
+        const result = applyHeal(attack, recipient);
 
-  addLog(
-    `💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`,
-    "buff",
-  );
+        addLog(
+          `💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`,
+          "buff",
+        );
 
-  describeEffects(result.buffsApplied, recipient.name, "buff").forEach(
-    (message) => addLog(message, "buff"),
-  );
-});
+        describeEffects(result.buffsApplied, recipient.name, "buff").forEach(
+          (message) => addLog(message, "buff"),
+        );
+      });
 
-// Consume the healing attack exactly once.
-consumeAttack(attack);
-setAttacksUsed((value) => value + 1);
+      // Consume the healing attack exactly once.
+      consumeAttack(attack);
+      setAttacksUsed((value) => value + 1);
 
-// Determine whether the CPU teammate can act again.
-const isCpuAttacker = attacker.isCpuTeammate;
+      // Determine whether the CPU teammate can act again.
+      const isCpuAttacker = attacker.isCpuTeammate;
 
-const attacksUsedAfter = attacker.attacks.filter(
-  (move) => move.state === false,
-).length;
+      const attacksUsedAfter = attacker.attacks.filter(
+        (move) => move.state === false,
+      ).length;
 
-const hasUsableAttack = attacker.attacks.some(
-  (move) =>
-    canUseAttack(move) &&
-    attacker.mana >= (move.cost ?? 0),
-);
+      const hasUsableAttack = attacker.attacks.some(
+        (move) => canUseAttack(move) && attacker.mana >= (move.cost ?? 0),
+      );
 
-const cpuMustFinish =
-  !hasUsableAttack ||
-  (difficulty === "Easy" && attacksUsedAfter >= 1) ||
-  (roundNumber === 1 && attacksUsedAfter >= 4);
+      const cpuMustFinish =
+        !hasUsableAttack ||
+        (difficulty === "Easy" && attacksUsedAfter >= 1) ||
+        (roundNumber === 1 && attacksUsedAfter >= 4);
 
-// Save the updated resources and attacks on the actual team fighter.
-const playersAfter = updatedPlayers.map((fighter) => {
-  if (fighter.id !== attacker.id) return fighter;
+      // Save the updated resources and attacks on the actual team fighter.
+      const playersAfter = updatedPlayers.map((fighter) => {
+        if (fighter.id !== attacker.id) return fighter;
 
-  return {
-    ...fighter,
-    attacks: attacker.attacks,
-    mana: attacker.mana,
-    health: attacker.health,
-    turnFinished: isCpuAttacker ? cpuMustFinish : fighter.turnFinished,
-  };
-});
+        return {
+          ...fighter,
+          attacks: attacker.attacks,
+          mana: attacker.mana,
+          health: attacker.health,
+          turnFinished: isCpuAttacker ? cpuMustFinish : fighter.turnFinished,
+        };
+      });
 
-setTeams({
-  player: playersAfter,
-  opponent: updatedOpponents,
-});
+      setTeams({
+        player: playersAfter,
+        opponent: updatedOpponents,
+      });
 
-// Release the CPU teammate's pending action so Normal can continue
-// if it still has usable attacks.
-if (isCpuAttacker) {
-  setPendingAllyAttack(null);
-}
+      // Release the CPU teammate's pending action so Normal can continue
+      // if it still has usable attacks.
+      if (isCpuAttacker) {
+        setPendingAllyAttack(null);
+      }
 
-if (
-  playersAfter.every(
-    (fighter) => fighter.health <= 0 || fighter.turnFinished,
-  )
-) {
-  setPhase("cpu-fighting");
-  addLog("Your team is finished. The CPU is preparing its attacks.");
-}
+      if (
+        playersAfter.every(
+          (fighter) => fighter.health <= 0 || fighter.turnFinished,
+        )
+      ) {
+        setPhase("cpu-fighting");
+        addLog("Your team is finished. The CPU is preparing its attacks.");
+      }
 
-return;
+      return;
     }
 
     // Normal attacks still require an enemy target.
@@ -1256,20 +1255,18 @@ return;
       );
 
       const hasUsableHeal =
-  player.isCpuTeammate &&
-  player.attacks.some(
-    (attack) =>
-      attack.heal &&
-      canUseAttack(attack) &&
-      player.mana >= (attack.cost ?? 0),
-  );
+        player.isCpuTeammate &&
+        player.attacks.some(
+          (attack) =>
+            attack.heal &&
+            canUseAttack(attack) &&
+            player.mana >= (attack.cost ?? 0),
+        );
 
-return (
-  (player.health <= 0 || (!targetAlive && !hasUsableHeal)) &&
-  !player.turnFinished
-)
-  ? { ...player, turnFinished: true }
-  : player;
+      return (player.health <= 0 || (!targetAlive && !hasUsableHeal)) &&
+        !player.turnFinished
+        ? { ...player, turnFinished: true }
+        : player;
     });
 
     const changed = playersAfter.some(
@@ -1833,10 +1830,7 @@ return (
     let result;
 
     if (choice === "defend") {
-      const defense =
-        typeof currentDefender.defense === "object"
-          ? (currentDefender.defense?.amount ?? 0)
-          : (currentDefender.defense ?? 0);
+      const defense = getModifiedCharacterStat(currentDefender, "defense");
 
       result = attackCharacter(
         currentAttack,
@@ -2172,10 +2166,7 @@ return (
       let result;
 
       if (choice === "defend") {
-        const defense =
-          typeof currentDefender.defense === "object"
-            ? (currentDefender.defense?.amount ?? 0)
-            : (currentDefender.defense ?? 0);
+        const defense = getModifiedCharacterStat(currentDefender, "defense");
 
         result = attackCharacter(
           attack,
