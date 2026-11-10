@@ -49,7 +49,7 @@ const Luffy = {
       cost: 30,
       state: true,
 
-      duration: 5,
+      duration: 1,
 
       attackModifiers: {
         targetAttackIds: null,

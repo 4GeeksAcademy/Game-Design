@@ -49,7 +49,7 @@ function getModifiedAttackStat(attack, character, stat) {
     value = applyStatModifier(value, statModifier);
   });
 
-  return Math.max(0, value);
+  return Math.round(Math.max(0, value));
 }
 
 function getModifiedCharacterStat(character, stat) {
@@ -68,7 +68,7 @@ function getModifiedCharacterStat(character, stat) {
     value = applyStatModifier(value, statModifier);
   });
 
-  return Math.max(0, value);
+  return Math.round(Math.max(0, value));
 }
 
 function activateSelfModifiers(character, attack) {

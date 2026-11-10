@@ -12,7 +12,11 @@ import {
   applyHeal,
   consumeAttack,
 } from "./Health.js";
-import { getModifiedCharacterStat, tickSelfModifiers } from "./Modifiers.js";
+import {
+  getModifiedAttackStat,
+  getModifiedCharacterStat,
+  tickSelfModifiers,
+} from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
 import { resetAttacks } from "./Turns.js";
 import VictoryScreen from "./VictoryScreen.jsx";
@@ -830,8 +834,8 @@ export default function TeamBattle() {
     const updatedPlayers = teams.player.map((fighter) => ({
       ...fighter,
       activeModifiers: (fighter.activeModifiers ?? []).map((modifier) => ({
-  ...modifier,
-})),
+        ...modifier,
+      })),
       defense:
         typeof fighter.defense === "object" && fighter.defense
           ? { ...fighter.defense }
@@ -860,8 +864,8 @@ export default function TeamBattle() {
     const updatedOpponents = teams.opponent.map((fighter) => ({
       ...fighter,
       activeModifiers: (fighter.activeModifiers ?? []).map((modifier) => ({
-  ...modifier,
-})),
+        ...modifier,
+      })),
       defense:
         typeof fighter.defense === "object" && fighter.defense
           ? { ...fighter.defense }
@@ -905,13 +909,9 @@ export default function TeamBattle() {
       return;
     }
 
-    const modifiedCost = getModifiedAttackStat(
-  attack,
-  attacker,
-  "cost",
-);
+    const modifiedCost = getModifiedAttackStat(attack, attacker, "cost");
 
-if (attacker.mana < modifiedCost) {
+    if (attacker.mana < modifiedCost) {
       addLog(`${attacker.name} does not have enough mana.`);
       return;
     }
@@ -1634,14 +1634,16 @@ if (attacker.mana < modifiedCost) {
 
             cooldown:
               fighter.health > 0
-                ? Math.min(
-                    fighter.maximumCooldown == null
-                      ? (fighter.cooldown ?? 0)
-                      : getModifiedCharacterStat(fighter, "maximumCooldown"),
-                    (fighter.cooldown ?? 0) +
-                      (fighter.recovery == null
-                        ? 1
-                        : getModifiedCharacterStat(fighter, "recovery")),
+                ? Math.round(
+                    Math.min(
+                      fighter.maximumCooldown == null
+                        ? (fighter.cooldown ?? 0)
+                        : getModifiedCharacterStat(fighter, "maximumCooldown"),
+                      (fighter.cooldown ?? 0) +
+                        (fighter.recovery == null
+                          ? 1
+                          : getModifiedCharacterStat(fighter, "recovery")),
+                    ),
                   )
                 : fighter.cooldown,
 
@@ -2002,14 +2004,19 @@ if (attacker.mana < modifiedCost) {
 
               cooldown:
                 fighter.health > 0
-                  ? Math.min(
-                      fighter.maximumCooldown == null
-                        ? (fighter.cooldown ?? 0)
-                        : getModifiedCharacterStat(fighter, "maximumCooldown"),
-                      (fighter.cooldown ?? 0) +
-                        (fighter.recovery == null
-                          ? 1
-                          : getModifiedCharacterStat(fighter, "recovery")),
+                  ? Math.round(
+                      Math.min(
+                        fighter.maximumCooldown == null
+                          ? (fighter.cooldown ?? 0)
+                          : getModifiedCharacterStat(
+                              fighter,
+                              "maximumCooldown",
+                            ),
+                        (fighter.cooldown ?? 0) +
+                          (fighter.recovery == null
+                            ? 1
+                            : getModifiedCharacterStat(fighter, "recovery")),
+                      ),
                     )
                   : fighter.cooldown,
 
@@ -2250,8 +2257,7 @@ if (attacker.mana < modifiedCost) {
           );
 
           currentDefender.blocked = true;
-        }
-        else if (choice === "evade") {
+        } else if (choice === "evade") {
           currentDefender.blocked = true;
         }
 
