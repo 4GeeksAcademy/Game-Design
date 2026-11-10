@@ -1,5 +1,5 @@
 import { applyEffects } from "./Health.js";
-import { getModifiedCharacterStat } from "./Modifiers.js";
+import { getModifiedCharacterStat, tickSelfModifiers } from "./Modifiers.js";
 
 let turns = 1;
 
@@ -14,10 +14,7 @@ function regenerateMana(character) {
       ? character.mana
       : getModifiedCharacterStat(character, "maximumMana");
 
-  character.mana = Math.min(
-    maximumMana,
-    character.mana + manaRegen,
-  );
+  character.mana = Math.min(maximumMana, character.mana + manaRegen);
 }
 
 function recoverCooldown(character) {
@@ -109,6 +106,11 @@ function turn(playerOne, playerTwo) {
 
     recoverCooldown(playerOne);
     recoverCooldown(playerTwo);
+    
+    // Reduce temporary modifier durations after this round's
+    // regeneration and cooldown recovery have been completed.
+    tickSelfModifiers(playerOne);
+    tickSelfModifiers(playerTwo);
 
     playerOne.turnFinished = false;
     playerTwo.turnFinished = false;
