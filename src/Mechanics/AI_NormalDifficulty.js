@@ -1,21 +1,15 @@
-import {
-  attackCharacter,
-  evadeAttack,
-  canUseAttack,
-} from "./Health.js";
+import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
 
 const MAX_QUEUE_SIZE = 10;
 const ATTACK_TIMEOUT = 10000;
-
-
 
 function normalDefendOrEvade(attack, attacker, defender) {
   if (!attack || !attacker || !defender) return null;
 
   const defense =
     typeof defender.defense === "object"
-      ? defender.defense?.amount ?? 0
-      : defender.defense ?? 0;
+      ? (defender.defense?.amount ?? 0)
+      : (defender.defense ?? 0);
 
   const health = defender.health ?? 0;
   const mana = defender.mana ?? 0;
@@ -28,8 +22,7 @@ function normalDefendOrEvade(attack, attacker, defender) {
   }
 
   const damageAfterBlock = Math.max(0, damage - defense);
-  const blockPreventsKnockout =
-    damage >= health && damageAfterBlock < health;
+  const blockPreventsKnockout = damage >= health && damageAfterBlock < health;
 
   const evadeManaNeeded = Math.max(
     0,
@@ -65,8 +58,7 @@ function normalDefendOrEvade(attack, attacker, defender) {
     if (damage <= trivialDamage) {
       choice = "take-damage";
     } else if (canEvade) {
-      const manaIsAffordable =
-        evadeManaNeeded <= mana * 0.25;
+      const manaIsAffordable = evadeManaNeeded <= mana * 0.25;
 
       // Evade when it prevents meaningful damage at a reasonable
       // mana cost, especially when blocking would leave damage.
@@ -87,12 +79,9 @@ function normalDefendOrEvade(attack, attacker, defender) {
   let result;
 
   if (choice === "defend") {
-    result = attackCharacter(
-      attack,
-      attacker,
-      defender,
-      defense,
-    );
+    result = attackCharacter(attack, attacker, defender, defense, {
+      blocked: true,
+    });
   } else if (choice === "evade") {
     result = evadeAttack(attack, attacker, defender);
   } else {
@@ -105,8 +94,7 @@ function normalDefendOrEvade(attack, attacker, defender) {
     defender.cooldown = Math.max(0, cooldown - 1);
   }
 
-  result.action =
-    choice === "take-damage" ? "take damage" : choice;
+  result.action = choice === "take-damage" ? "take damage" : choice;
 
   return result;
 }
@@ -125,7 +113,6 @@ function scoreAttack(attack) {
   return score;
 }
 
-
 function getNormalAttackPriority(attacks) {
   const damagingAttacks = attacks
     .filter((attack) => (attack.damage ?? 0) > 0)
@@ -141,24 +128,17 @@ function getNormalAttackPriority(attacks) {
 function aiChooseNormalAttacks(ai) {
   if (!ai || !Array.isArray(ai.attacks)) return [];
 
-  const usableAttacks = ai.attacks.filter((attack) =>
-  canUseAttack(attack)
-);
+  const usableAttacks = ai.attacks.filter((attack) => canUseAttack(attack));
 
-  return getNormalAttackPriority(usableAttacks).slice(
-    0,
-    MAX_QUEUE_SIZE
-  );
+  return getNormalAttackPriority(usableAttacks).slice(0, MAX_QUEUE_SIZE);
 }
 
 function chooseNormalAttack(fighter) {
   if (!fighter || !Array.isArray(fighter.attacks)) return null;
 
- const usableAttacks = fighter.attacks.filter(
-  (attack) =>
-    canUseAttack(attack) &&
-    fighter.mana >= (attack.cost ?? 0)
-);
+  const usableAttacks = fighter.attacks.filter(
+    (attack) => canUseAttack(attack) && fighter.mana >= (attack.cost ?? 0),
+  );
 
   return getNormalAttackPriority(usableAttacks)[0] ?? null;
 }
@@ -170,8 +150,7 @@ function getEffectiveHeal(attack, fighter) {
   const missingHealth = Math.max(0, maximumHealth - fighter.health);
 
   const healingAmount =
-    (attack.heal.amount ?? 0) +
-    (attack.heal.buff?.health ?? 0);
+    (attack.heal.amount ?? 0) + (attack.heal.buff?.health ?? 0);
 
   return Math.min(missingHealth, healingAmount);
 }
@@ -181,18 +160,17 @@ function chooseNormalTeamAction(fighter, teammates) {
   if (!Array.isArray(teammates)) return null;
 
   const usableAttacks = fighter.attacks.filter(
-    (attack) =>
-      canUseAttack(attack) &&
-      fighter.mana >= (attack.cost ?? 0),
+    (attack) => canUseAttack(attack) && fighter.mana >= (attack.cost ?? 0),
   );
 
   if (usableAttacks.length === 0) return null;
 
   // Start by considering ordinary attacks.
   let bestAction = {
-    attack: getNormalAttackPriority(
-      usableAttacks.filter((attack) => !attack.heal),
-    )[0] ?? null,
+    attack:
+      getNormalAttackPriority(
+        usableAttacks.filter((attack) => !attack.heal),
+      )[0] ?? null,
     healTargetId: null,
     score: -Infinity,
   };
@@ -202,9 +180,7 @@ function chooseNormalTeamAction(fighter, teammates) {
   }
 
   // Now evaluate healing attacks.
-  const healingAttacks = usableAttacks.filter(
-    (attack) => attack.heal,
-  );
+  const healingAttacks = usableAttacks.filter((attack) => attack.heal);
 
   for (const attack of healingAttacks) {
     let healValue = 0;
@@ -212,9 +188,7 @@ function chooseNormalTeamAction(fighter, teammates) {
 
     if (attack.heal.target === "selected") {
       const possibleTargets = teammates.filter(
-        (ally) =>
-          ally.id !== fighter.id &&
-          ally.health > 0,
+        (ally) => ally.id !== fighter.id && ally.health > 0,
       );
 
       // Find the teammate who would benefit the most.
@@ -231,19 +205,13 @@ function chooseNormalTeamAction(fighter, teammates) {
       // including the healer.
       healValue = teammates
         .filter((ally) => ally.health > 0)
-        .reduce(
-          (total, ally) =>
-            total + getEffectiveHeal(attack, ally),
-          0,
-        );
+        .reduce((total, ally) => total + getEffectiveHeal(attack, ally), 0);
     }
 
     // Healing must provide an actual benefit to be considered.
     if (healValue <= 0) continue;
 
-    const healingScore =
-      healValue * 1.5 -
-      (attack.cost ?? 0) * 0.6;
+    const healingScore = healValue * 1.5 - (attack.cost ?? 0) * 0.6;
 
     if (healingScore > bestAction.score) {
       bestAction = {
@@ -326,11 +294,9 @@ function createNormalAIController({
     const currentAI = readAI();
 
     // Choose the next queued move that is still usable.
-   const index = queue.findIndex(
-  (attack) =>
-    canUseAttack(attack) &&
-    (attack.cost ?? 0) <= currentAI.mana,
-);
+    const index = queue.findIndex(
+      (attack) => canUseAttack(attack) && (attack.cost ?? 0) <= currentAI.mana,
+    );
 
     if (index === -1) {
       finishTurn();

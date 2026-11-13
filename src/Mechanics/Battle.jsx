@@ -484,6 +484,7 @@ function App() {
               opponent,
               character,
               getModifiedCharacterStat(character, "defense"),
+              { blocked: true },
             )
           : choice === "evade"
             ? evadeAttack(aiAttack, opponent, character)
@@ -498,13 +499,13 @@ function App() {
       }
 
       if (choice === "defend" || choice === "evade") {
-  result.defender.cooldown = Math.max(
-    0,
-    (result.defender.cooldown ?? 0) - 1,
-  );
+        result.defender.cooldown = Math.max(
+          0,
+          (result.defender.cooldown ?? 0) - 1,
+        );
 
-  result.defender.blocked = true;
-}
+        result.defender.blocked = true;
+      }
 
       setOpponent({ ...result.attacker });
       setCharacter({ ...result.defender });

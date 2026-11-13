@@ -1884,7 +1884,7 @@ export default function TeamBattle() {
         currentAttacker,
         currentDefender,
         0,
-        { blocked: true },
+        { blocked: false },
       );
     }
 
