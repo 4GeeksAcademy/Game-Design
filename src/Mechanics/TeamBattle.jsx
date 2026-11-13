@@ -1053,12 +1053,16 @@ export default function TeamBattle() {
     // The selected difficulty can control which CPU defense behavior is used.
     // AI.js contains the existing random defend/evade behavior.
 
+    const stunOptions = {
+      fighters: allFighters,
+    };
+
     const result =
       difficulty === "Easy"
-        ? attackCharacter(attack, attacker, defender)
+        ? attackCharacter(attack, attacker, defender, 0, stunOptions)
         : difficulty === "Normal"
-          ? normalDefendOrEvade(attack, attacker, defender)
-          : aiDefendOrEvade(attack, attacker, defender);
+          ? normalDefendOrEvade(attack, attacker, defender, stunOptions)
+          : aiDefendOrEvade(attack, attacker, defender, stunOptions);
 
     if (!result) {
       addLog(`${attack.name} could not be used.`);
@@ -2372,6 +2376,8 @@ export default function TeamBattle() {
             ? { ...fighter, ...(result.attacker ?? {}) }
             : fighter,
         );
+
+        const allFighters = [...updatedPlayers, ...updatedOpponents];
 
         setTeams({ player: updatedPlayers, opponent: updatedOpponents });
         const outcomeText = result.evaded

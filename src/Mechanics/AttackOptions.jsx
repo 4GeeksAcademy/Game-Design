@@ -99,10 +99,14 @@ function AttackOptions({
         return;
       }
 
+      const stunOptions = {
+        fighters: [character, opponent],
+      };
+
       const result =
         difficulty === "Normal"
-          ? normalDefendOrEvade(attack, character, opponent)
-          : aiDefendOrEvade(attack, character, opponent);
+          ? normalDefendOrEvade(attack, character, opponent, stunOptions)
+          : aiDefendOrEvade(attack, character, opponent, stunOptions);
 
       if (!result) {
         showCombatMessage("Not enough mana!", "hit");

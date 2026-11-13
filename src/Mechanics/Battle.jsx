@@ -484,7 +484,9 @@ function App() {
               opponent,
               character,
               getModifiedCharacterStat(character, "defense"),
-              { blocked: true },
+              { blocked: true,
+                 fighters: [opponent, character],
+               },
             )
           : choice === "evade"
             ? evadeAttack(aiAttack, opponent, character)
