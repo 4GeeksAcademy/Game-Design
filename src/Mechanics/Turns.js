@@ -59,7 +59,8 @@ function resetAttacks(attacks, fighters = []) {
     const previousCooldown = cooldownRemaining;
 
     // Cooldown and stun have independent countdowns.
-    // Neither timer decreases during the round it was applied.
+// Cooldown does not decrease during the round it was started.
+// Stun duration includes the round in which it was applied.
     if (!cooldownStartedThisRound && cooldownRemaining > 0) {
       cooldownRemaining -= 1;
     }

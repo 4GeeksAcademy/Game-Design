@@ -86,6 +86,8 @@ const attacklist = {
         // maximumCooldown
         // cooldown
       },
+
+      stunRequiresHit: true,
     },
   ],
 };

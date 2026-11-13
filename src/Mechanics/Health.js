@@ -481,6 +481,18 @@ function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
     defender.health = Math.max(0, defender.health - damageReceived);
   }
 
+  // Apply stun unless the attack requires a successful hit
+  // and the defender successfully blocked it.
+  const stunNotAppliedReason =
+    ATK.stunRequiresHit && blocked ? "blocked" : null;
+
+  const stunnedAttacks = stunNotAppliedReason
+    ? []
+    : applyStun(ATK.stun, attacker, defender, {
+        selectedAttackIds: options.selectedAttackIds ?? [],
+        fighters: options.fighters ?? [attacker, defender],
+      });
+
   consumeAttack(ATK);
 
   if (defender.health <= 0) console.log("Game over");
@@ -493,8 +505,10 @@ function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
     debuffsApplied,
     buffNotAppliedReason,
     debuffNotAppliedReason,
+    stunnedAttacks,
+    stunNotAppliedReason,
     sacrificePaid: sacrificeHealth,
-    action: ATK.buff || ATK.debuff ? "effect" : "attack",
+    action: ATK.buff || ATK.debuff || ATK.stun ? "effect" : "attack",
   };
 }
 
