@@ -1837,25 +1837,28 @@ export default function TeamBattle() {
 
     localCoopResolvedRef.current.add(defenseId);
 
-    const updatedPlayers = teams.player.map((fighter) => ({
+    const cloneFighter = (fighter) => ({
       ...fighter,
       defense:
         typeof fighter.defense === "object" && fighter.defense
           ? { ...fighter.defense }
           : fighter.defense,
-    }));
-    const updatedCPU = teams.opponent.map((fighter) => ({
-      ...fighter,
-      defense:
-        typeof fighter.defense === "object" && fighter.defense
-          ? { ...fighter.defense }
-          : fighter.defense,
-      attacks: fighter.attacks.map((item) => ({
+      attacks: (fighter.attacks ?? []).map((item) => ({
         ...item,
         buff: item.buff ? { ...item.buff } : item.buff,
         debuff: item.debuff ? { ...item.debuff } : item.debuff,
+        activeEffects: (item.activeEffects ?? []).map((effect) => ({
+          ...effect,
+          effects: { ...effect.effects },
+        })),
       })),
-    }));
+    });
+
+    const updatedPlayers = teams.player.map(cloneFighter);
+    const updatedCPU = teams.opponent.map(cloneFighter);
+
+    const allFighters = [...updatedPlayers, ...updatedCPU];
+    const stunOptions = { fighters: allFighters };
 
     const currentDefender = updatedPlayers.find(
       (fighter) => fighter.id === incoming.targetId,
@@ -1873,14 +1876,22 @@ export default function TeamBattle() {
       const defense = getModifiedCharacterStat(currentDefender, "defense");
 
       result = attackCharacter(
-        currentAttack,
+        attack,
         currentAttacker,
         currentDefender,
         defense,
-        { blocked: true },
+        {
+          ...stunOptions,
+          blocked: true,
+        },
       );
     } else if (choice === "evade") {
-      result = evadeAttack(currentAttack, currentAttacker, currentDefender);
+      result = evadeAttack(
+        currentAttack,
+        currentAttacker,
+        currentDefender,
+        stunOptions,
+      );
     } else {
       // Timeout and "take-damage": take the unblocked hit.
       result = attackCharacter(
@@ -1888,7 +1899,10 @@ export default function TeamBattle() {
         currentAttacker,
         currentDefender,
         0,
-        { blocked: false },
+        {
+          ...stunOptions,
+          blocked: false,
+        },
       );
     }
 
@@ -2182,28 +2196,11 @@ export default function TeamBattle() {
         return;
       }
 
-      const updatedPlayers = teams.player.map((fighter) => ({
-        ...fighter,
-        defense:
-          typeof fighter.defense === "object" && fighter.defense
-            ? { ...fighter.defense }
-            : fighter.defense,
-      }));
-
-      const updatedCPU = teams.opponent.map((fighter) => ({
-        ...fighter,
-        defense:
-          typeof fighter.defense === "object" && fighter.defense
-            ? { ...fighter.defense }
-            : fighter.defense,
-        attacks: fighter.attacks.map((attack) => ({
-          ...attack,
-          buff: attack.buff ? { ...attack.buff } : attack.buff,
-          debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-        })),
-      }));
+      const updatedPlayers = teams.player.map(cloneFighter);
+      const updatedCPU = teams.opponent.map(cloneFighter);
 
       const allFighters = [...updatedPlayers, ...updatedCPU];
+      const stunOptions = { fighters: allFighters };
 
       const currentAttacker = updatedCPU.find(
         (fighter) => fighter.id === pendingDefense.cpuId,
@@ -2241,7 +2238,10 @@ export default function TeamBattle() {
           currentAttacker,
           currentDefender,
           defense,
-          { blocked: true },
+          {
+            ...stunOptions,
+            blocked: true,
+          },
         );
       } else if (choice === "evade") {
         result = evadeAttack(attack, currentAttacker, currentDefender);
@@ -2332,12 +2332,36 @@ export default function TeamBattle() {
     if (!defender?.isCpuTeammate) return;
 
     const timer = setTimeout(() => {
-      const currentAttacker = teams.opponent.find(
+      const cloneFighter = (fighter) => ({
+        ...fighter,
+        defense:
+          typeof fighter.defense === "object" && fighter.defense
+            ? { ...fighter.defense }
+            : fighter.defense,
+        attacks: (fighter.attacks ?? []).map((attack) => ({
+          ...attack,
+          buff: attack.buff ? { ...attack.buff } : attack.buff,
+          debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+          activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+            ...effect,
+            effects: { ...effect.effects },
+          })),
+        })),
+      });
+
+      const updatedPlayers = teams.player.map(cloneFighter);
+      const updatedOpponents = teams.opponent.map(cloneFighter);
+
+      const allFighters = [...updatedPlayers, ...updatedOpponents];
+
+      const currentAttacker = updatedOpponents.find(
         (fighter) => fighter.id === pendingDefense.cpuId,
       );
-      const currentDefender = teams.player.find(
+
+      const currentDefender = updatedPlayers.find(
         (fighter) => fighter.id === pendingDefense.targetId,
       );
+
       const incomingAttack =
         currentAttacker?.attacks[pendingDefense.attackIndex];
 
@@ -2346,17 +2370,14 @@ export default function TeamBattle() {
         return;
       }
 
-      // Use the same AI decision function used for normal-difficulty defense.
-      // If it returns a result, apply its updated fighter data below.
       const defenseController =
-        difficulty === "Normal"
-          ? normalDefendOrEvade // It would select normal difficulty,
-          : aiDefendOrEvade; // or else it selects easy mode
+        difficulty === "Normal" ? normalDefendOrEvade : aiDefendOrEvade;
 
       const result = defenseController(
         incomingAttack,
         currentAttacker,
         currentDefender,
+        { fighters: allFighters },
       );
 
       if (result) {
@@ -2365,23 +2386,14 @@ export default function TeamBattle() {
         } else if (result.evaded) {
           recordFestivalEvent("evade", 1);
         }
+
         defenseResolvedRef.current = true;
 
-        const updatedPlayers = teams.player.map((fighter) =>
-          fighter.id === currentDefender.id
-            ? { ...fighter, ...(result.defender ?? {}) }
-            : fighter,
-        );
+        setTeams({
+          player: updatedPlayers,
+          opponent: updatedOpponents,
+        });
 
-        const updatedOpponents = teams.opponent.map((fighter) =>
-          fighter.id === currentAttacker.id
-            ? { ...fighter, ...(result.attacker ?? {}) }
-            : fighter,
-        );
-
-        const allFighters = [...updatedPlayers, ...updatedOpponents];
-
-        setTeams({ player: updatedPlayers, opponent: updatedOpponents });
         const outcomeText = result.evaded
           ? `${currentDefender.name} evaded the attack.`
           : `${currentDefender.name} defended the attack.`;
