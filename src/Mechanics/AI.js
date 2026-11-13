@@ -126,7 +126,7 @@ function aiFinishTurn(ai) {
   ai.turnFinished = true;
 }
 
-function aiDefendOrEvade(attack, attacker, defender) {
+function aiDefendOrEvade(attack, attacker, defender, options = {}) {
   // Attacks that apply effects resolve directly.
   // Pure effect abilities cannot be blocked or evaded.
   // Attacks that also deal damage can still be defended against.
@@ -149,6 +149,10 @@ function aiDefendOrEvade(attack, attacker, defender) {
         defender,
         defender.defense.amount,
          { blocked: true },
+         {
+  ...options,
+  blocked: true,
+}
       );
 
       if (result) {
@@ -157,7 +161,7 @@ function aiDefendOrEvade(attack, attacker, defender) {
         result.action = "defend";
       }
     } else {
-      result = evadeAttack(attack, attacker, defender);
+      result = evadeAttack(attack, attacker, defender, options = {});
 
       if (result) {
         
@@ -165,7 +169,7 @@ function aiDefendOrEvade(attack, attacker, defender) {
       }
     }
   } else {
-    result = attackCharacter(attack, attacker, defender);
+    result = attackCharacter(attack, attacker, defender, options = {});
 
     if (result) {
       result.action = "take damage";

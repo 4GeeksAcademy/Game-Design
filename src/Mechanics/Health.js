@@ -530,7 +530,7 @@ function currentHealth(ATK, character, defense = 0) {
   }
 }
 
-function evadeAttack(ATK, attacker, defender) {
+function evadeAttack(ATK, attacker, defender, options = {}) {
   if (!ATK || !attacker || !defender || !canUseAttack(ATK)) {
     return null;
   }
@@ -601,6 +601,17 @@ function evadeAttack(ATK, attacker, defender) {
     defender.health = Math.max(0, defender.health - damageReceived);
   }
 
+  // A successful evade prevents stun.
+  // A failed evade means the attack connected.
+  const stunNotAppliedReason = evaded ? "evaded" : null;
+
+  const stunnedAttacks = evaded
+    ? []
+    : applyStun(ATK.stun, attacker, defender, {
+        selectedAttackIds: options.selectedAttackIds ?? [],
+        fighters: options.fighters ?? [attacker, defender],
+      });
+
   consumeAttack(ATK);
 
   return {
@@ -611,6 +622,8 @@ function evadeAttack(ATK, attacker, defender) {
     damageReceived,
     buffsApplied,
     debuffsApplied,
+    stunnedAttacks,
+    stunNotAppliedReason,
     buffNotAppliedReason,
     debuffNotAppliedReason,
     sacrificePaid: sacrificeHealth,

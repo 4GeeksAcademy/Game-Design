@@ -3,7 +3,7 @@ import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
 const MAX_QUEUE_SIZE = 10;
 const ATTACK_TIMEOUT = 10000;
 
-function normalDefendOrEvade(attack, attacker, defender) {
+function normalDefendOrEvade(attack, attacker, defender, options = {}) {
   if (!attack || !attacker || !defender) return null;
 
   const defense =
@@ -18,7 +18,7 @@ function normalDefendOrEvade(attack, attacker, defender) {
 
   // Zero-damage moves should resolve without spending defense.
   if (damage === 0 || cooldown <= 0) {
-    return attackCharacter(attack, attacker, defender);
+    return attackCharacter(attack, attacker, defender, 0, options);
   }
 
   const damageAfterBlock = Math.max(0, damage - defense);
@@ -80,12 +80,13 @@ function normalDefendOrEvade(attack, attacker, defender) {
 
   if (choice === "defend") {
     result = attackCharacter(attack, attacker, defender, defense, {
+      ...options,
       blocked: true,
     });
   } else if (choice === "evade") {
-    result = evadeAttack(attack, attacker, defender);
+    result = evadeAttack(attack, attacker, defender, options);
   } else {
-    result = attackCharacter(attack, attacker, defender);
+    result = attackCharacter(attack, attacker, defender, 0, options);
   }
 
   if (!result) return null;
