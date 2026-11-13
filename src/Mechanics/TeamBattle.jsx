@@ -1876,7 +1876,7 @@ export default function TeamBattle() {
       const defense = getModifiedCharacterStat(currentDefender, "defense");
 
       result = attackCharacter(
-        attack,
+        currentAttack,
         currentAttacker,
         currentDefender,
         defense,
@@ -1912,10 +1912,14 @@ export default function TeamBattle() {
     }
 
     if (result && (choice === "defend" || choice === "evade")) {
-      currentDefender.cooldown = Math.max(
-        0,
-        (currentDefender.cooldown ?? 0) - 1,
-      );
+      // Defending consumes one cooldown charge here.
+      // evadeAttack() already handles its own cooldown reduction.
+      if (choice === "defend") {
+        currentDefender.cooldown = Math.max(
+          0,
+          (currentDefender.cooldown ?? 0) - 1,
+        );
+      }
 
       currentDefender.blocked = true;
     }
@@ -2196,6 +2200,23 @@ export default function TeamBattle() {
         return;
       }
 
+      const cloneFighter = (fighter) => ({
+        ...fighter,
+        defense:
+          typeof fighter.defense === "object" && fighter.defense
+            ? { ...fighter.defense }
+            : fighter.defense,
+        attacks: (fighter.attacks ?? []).map((attack) => ({
+          ...attack,
+          buff: attack.buff ? { ...attack.buff } : attack.buff,
+          debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+          activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+            ...effect,
+            effects: { ...effect.effects },
+          })),
+        })),
+      });
+
       const updatedPlayers = teams.player.map(cloneFighter);
       const updatedCPU = teams.opponent.map(cloneFighter);
 
@@ -2244,10 +2265,18 @@ export default function TeamBattle() {
           },
         );
       } else if (choice === "evade") {
-        result = evadeAttack(attack, currentAttacker, currentDefender);
+        result = evadeAttack(
+          attack,
+          currentAttacker,
+          currentDefender,
+          stunOptions,
+        );
       } else {
         // Includes "take-damage" and the 10-second timeout.
-        result = attackCharacter(attack, currentAttacker, currentDefender);
+        result = attackCharacter(attack, currentAttacker, currentDefender, 0, {
+          ...stunOptions,
+          blocked: false,
+        });
       }
 
       defenseResolvedRef.current = true;
@@ -2257,13 +2286,13 @@ export default function TeamBattle() {
       } else {
         // Record successful defensive actions.
         if (choice === "defend" || choice === "evade") {
-          currentDefender.cooldown = Math.max(
-            0,
-            (currentDefender.cooldown ?? 0) - 1,
-          );
+          if (choice === "defend") {
+            currentDefender.cooldown = Math.max(
+              0,
+              (currentDefender.cooldown ?? 0) - 1,
+            );
+          }
 
-          currentDefender.blocked = true;
-        } else if (choice === "evade") {
           currentDefender.blocked = true;
         }
 

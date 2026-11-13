@@ -508,14 +508,16 @@ function App() {
         recordFestivalEvent("evade", 1);
       }
 
-      if (choice === "defend" || choice === "evade") {
-        result.defender.cooldown = Math.max(
-          0,
-          (result.defender.cooldown ?? 0) - 1,
-        );
+     if (choice === "defend" || choice === "evade") {
+  if (choice === "defend") {
+    result.defender.cooldown = Math.max(
+      0,
+      (result.defender.cooldown ?? 0) - 1,
+    );
+  }
 
-        result.defender.blocked = true;
-      }
+  result.defender.blocked = true;
+}
 
       setOpponent({ ...result.attacker });
       setCharacter({ ...result.defender });
