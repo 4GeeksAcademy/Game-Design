@@ -1,7 +1,12 @@
 const FESTIVAL_REWARDS = {
   1: {
-    free: { type: "coins", amount: 100 },
-    elite: { type: "coins", amount: 250 },
+    free: {
+      type: "skin",
+      skinId: "mina-cheerful-maid",
+      characterId: "mina",
+      name: "Cheerful Maid",
+    },
+    elite: { type: "coins", amount: 1000 },
   },
   2: {
     free: { type: "coins", amount: 150 },

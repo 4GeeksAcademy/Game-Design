@@ -8,7 +8,7 @@ import { addFestivalPoints } from "./FestivalProgress";
 // Later, change this to 60 * 60 * 1000 for one hour.
 export const FESTIVAL_CHALLENGE_INTERVAL = 15 * 60 * 1000;
 
-const ACTIVE_CHALLENGE_COUNT = 5;
+const ACTIVE_CHALLENGE_COUNT = 4;
 const STORAGE_KEY = "fighters-arena-rotating-challenges";
 
 // ==========================================

@@ -3,12 +3,7 @@ import GokuElegantSkin from "../assets/Skins/Elegant Drip Goku.jpeg";
 import HinataWeddingSkin from "../assets/Skins/Hinata’s Enchanted Bridal Portrait.png"
 import NarutoHokageSkin from "../assets/Skins/Naruto’s Hokage Sunset Charge.png"
 import UsoppGangstaSkin from "../assets/Skins/Usopp in a Golden Graffiti Alley.png"
-
-
-
-
-
-
+import MinaMaidSkin from "../assets/Skins/Mina Ashido’s Playful Maid Card.png"
 
 
 
@@ -61,5 +56,14 @@ export const skins = [
   rarity: "epic",
   unlockSource: "festival",
   description: "Usopp isn't just sniping from the bushes anymore; he's rolling up to Sabaody Archipelago or Egghead Island looking like a true grand-line menace",
+},
+{
+  id: "mina-cheerful-maid",
+  characterId: "mina",
+  name: "Cheerful Maid",
+  image: MinaMaidSkin,
+  rarity: "common",
+  unlockSource: "festival",
+  description: "A cheerful maid outfit that brings out Mina's playful and energetic personality.",
 },
 ];
