@@ -943,6 +943,7 @@ function App() {
               currentTurn={currentTurn}
               showCombatMessage={showCombatMessage}
               openingTurnActive={roundNumber === 1}
+              difficulty={location.state?.difficulty ?? "Easy"}
             />
           </div>
         </>

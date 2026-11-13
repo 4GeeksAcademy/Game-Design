@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from "react";
 import { aiDefendOrEvade } from "./AI.js";
+import { normalDefendOrEvade } from "./AI_NormalDifficulty.js";
 import { getModifiedAttackStat } from "./Modifiers.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import { canUseAttack } from "./Health.js";
@@ -80,6 +81,7 @@ function AttackOptions({
   currentTurn,
   showCombatMessage,
   openingTurnActive = false,
+  difficulty = "Easy",
 }) {
   const openingTurnAttackLimitReached =
     openingTurnActive &&
@@ -97,7 +99,10 @@ function AttackOptions({
         return;
       }
 
-      const result = aiDefendOrEvade(attack, character, opponent);
+      const result =
+        difficulty === "Normal"
+          ? normalDefendOrEvade(attack, character, opponent)
+          : aiDefendOrEvade(attack, character, opponent);
 
       if (!result) {
         showCombatMessage("Not enough mana!", "hit");
@@ -164,6 +169,7 @@ function AttackOptions({
       setAttacksUsed,
       showCombatMessage,
       openingTurnAttackLimitReached,
+      difficulty,
     ],
   );
 
