@@ -38,8 +38,9 @@ const Kirishima = {
       state: true,
       buff: {
         defense: 40,
-        maximumCooldown: 1,
-        cooldown: 1,
+        maximumCooldown: 3,
+        cooldown: 3,
+        recovery: 2,
       },
     },
 
@@ -50,7 +51,7 @@ const Kirishima = {
       cost: 10,
       state: true,
       buff: {
-        defense: 4,
+        defense: 3,
       },
     },
 
@@ -73,6 +74,7 @@ const Kirishima = {
       state: true,
       buff: {
         defense: 8,
+        cooldown: 1,
       },
     },
     
@@ -83,7 +85,7 @@ const Kirishima = {
       cost: 18,
       state: true,
       buff: {
-        defense: 6,
+        agility: 6,
       },
     },
     {
@@ -115,8 +117,9 @@ const Kirishima = {
     },
     {
       name: "Red Riot: Unbreakable Smash",
-      damage: 61,
-      speed: 23,
+      damage: 81,
+      speed: 53,
+      uses: 1,
       cost: 53,
       state: true,
       buff: {

@@ -282,6 +282,80 @@ function applyHeal(attack, recipient) {
   };
 }
 
+function getEligibleStunTargets(defender) {
+  if (!Array.isArray(defender?.attacks)) return [];
+
+  return defender.attacks.filter(
+    (attack) => attack && (attack.stunned?.remainingRounds ?? 0) <= 0,
+  );
+}
+
+function canApplyStun(stun, defender) {
+  if (!stun || !defender) return false;
+
+  return getEligibleStunTargets(defender).length > 0;
+}
+
+function applyStun(stun, attacker, defender, options = {}) {
+  if (!canApplyStun(stun, defender)) return [];
+
+  const { selectedAttackIds = [], fighters = [attacker, defender] } = options;
+
+  const eligibleAttacks = getEligibleStunTargets(defender);
+
+  let selectedAttacks = [];
+
+  if (stun.type === "all") {
+    selectedAttacks = eligibleAttacks;
+  } else if (stun.type === "random") {
+    const shuffled = [...eligibleAttacks].sort(() => Math.random() - 0.5);
+
+    selectedAttacks = shuffled.slice(0, Math.max(1, Number(stun.amount) || 1));
+  } else if (stun.type === "selected") {
+    selectedAttacks = eligibleAttacks
+      .filter((attack) => selectedAttackIds.includes(attack.id))
+      .slice(0, Math.max(1, Number(stun.amount) || 1));
+  }
+
+  const duration = Math.max(1, Number(stun.duration) || 1);
+  const stunnedNames = [];
+
+  selectedAttacks.forEach((attack) => {
+    // Remove temporary effects that originated from this attack.
+    (attack.activeEffects ?? []).forEach(({ targetId, effects }) => {
+      const affectedFighter = fighters.find(
+        (fighter) => fighter?.id === targetId,
+      );
+
+      if (affectedFighter) {
+        applyEffects(effects, affectedFighter, -1);
+      }
+    });
+
+    // Clear the source attack's temporary-effect records.
+    attack.activeEffects = [];
+
+    // Remove self-modifiers created by the stunned attack.
+    const modifierId = attack.modifierId || attack.id || attack.name;
+
+    defender.activeModifiers = (defender.activeModifiers ?? []).filter(
+      (modifier) =>
+        modifier.id !== modifierId &&
+        modifier.sourceAttackId !== attack.id &&
+        modifier.sourceAttackName !== attack.name,
+    );
+
+    // Apply an independent stun timer to this attack.
+    attack.stunned = {
+      remainingRounds: duration,
+    };
+
+    stunnedNames.push(attack.name);
+  });
+
+  return stunnedNames;
+}
+
 function canUseAttack(attack) {
   if (!attack || attack.state !== true) return false;
 
@@ -292,6 +366,10 @@ function canUseAttack(attack) {
   }
 
   if ((attack.cooldownRemaining ?? 0) > 0) {
+    return false;
+  }
+
+  if ((attack.stunned?.remainingRounds ?? 0) > 0) {
     return false;
   }
 
@@ -534,4 +612,7 @@ export {
   applyHeal,
   consumeAttack,
   canUseAttack,
+  getEligibleStunTargets,
+  canApplyStun,
+  applyStun,
 };
