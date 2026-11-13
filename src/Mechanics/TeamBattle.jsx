@@ -890,7 +890,7 @@ export default function TeamBattle() {
         })),
       })),
     }));
-
+    const allFighters = [...updatedPlayers, ...updatedOpponents];
     const targetId = targetOverrideId ?? roundTargets[fighterId];
 
     const attacker = updatedPlayers.find((fighter) => fighter.id === fighterId);
@@ -2202,6 +2202,8 @@ export default function TeamBattle() {
           debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
         })),
       }));
+
+      const allFighters = [...updatedPlayers, ...updatedCPU];
 
       const currentAttacker = updatedCPU.find(
         (fighter) => fighter.id === pendingDefense.cpuId,

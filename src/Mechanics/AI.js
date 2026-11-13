@@ -2,8 +2,8 @@ import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
 
 function aiChooseAttack(ai) {
   let availableAttacks = ai.attacks.filter((attack) => {
-  return canUseAttack(attack) && ai.mana >= (attack.cost ?? 0);
-});
+    return canUseAttack(attack) && ai.mana >= (attack.cost ?? 0);
+  });
 
   if (availableAttacks.length === 0) {
     console.log("AI has no available attacks!");
@@ -16,27 +16,21 @@ function aiChooseAttack(ai) {
   return randomAttack;
 }
 
-
 function aiChooseHealTarget(ai, teammates) {
   if (!ai || !Array.isArray(teammates)) return null;
 
   // Easy AI doesn't evaluate health percentages.
   // It simply chooses a random living teammate.
   const availableTeammates = teammates.filter(
-    (fighter) =>
-      fighter.id !== ai.id &&
-      fighter.health > 0
+    (fighter) => fighter.id !== ai.id && fighter.health > 0,
   );
 
   if (availableTeammates.length === 0) return null;
 
-  const randomIndex = Math.floor(
-    Math.random() * availableTeammates.length
-  );
+  const randomIndex = Math.floor(Math.random() * availableTeammates.length);
 
   return availableTeammates[randomIndex];
 }
-
 
 // AI randomly chooses to defend or evade.
 
@@ -127,49 +121,44 @@ function aiFinishTurn(ai) {
 }
 
 function aiDefendOrEvade(attack, attacker, defender, options = {}) {
-  // Attacks that apply effects resolve directly.
-  // Pure effect abilities cannot be blocked or evaded.
-  // Attacks that also deal damage can still be defended against.
+  // Pure effect abilities resolve directly.
   if ((attack.buff || attack.debuff) && !(attack.damage > 0)) {
-    return attackCharacter(attack, attacker, defender);
+    return attackCharacter(attack, attacker, defender, 0, options);
   }
 
   let result;
 
   if (defender.cooldown > 0) {
     if (Math.random() < 0.5) {
-      const damageReceived = Math.max(
-        0,
-        attack.damage - defender.defense.amount,
-      );
+      const defense =
+        typeof defender.defense === "object"
+          ? defender.defense?.amount ?? 0
+          : defender.defense ?? 0;
 
-      result = attackCharacter(
-        attack,
-        attacker,
-        defender,
-        defender.defense.amount,
-         { blocked: true },
-         {
-  ...options,
-  blocked: true,
-}
-      );
+      const damageReceived = Math.max(0, attack.damage - defense);
+
+      result = attackCharacter(attack, attacker, defender, defense, {
+        ...options,
+        blocked: true,
+      });
 
       if (result) {
-        defender.cooldown -= 1;
+        result.defender.cooldown = Math.max(
+          0,
+          (result.defender.cooldown ?? 0) - 1,
+        );
         result.damageReceived = damageReceived;
         result.action = "defend";
       }
     } else {
-      result = evadeAttack(attack, attacker, defender, options = {});
+      result = evadeAttack(attack, attacker, defender, options);
 
       if (result) {
-        
         result.action = result.evaded ? "evade" : "attack";
       }
     }
   } else {
-    result = attackCharacter(attack, attacker, defender, options = {});
+    result = attackCharacter(attack, attacker, defender, 0, options);
 
     if (result) {
       result.action = "take damage";

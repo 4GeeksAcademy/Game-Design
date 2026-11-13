@@ -477,6 +477,10 @@ function App() {
 
       if (choice === "defend" && character.cooldown <= 0) return;
 
+      const stunOptions = {
+        fighters: [opponent, character],
+      };
+
       const result =
         choice === "defend"
           ? attackCharacter(
@@ -484,13 +488,17 @@ function App() {
               opponent,
               character,
               getModifiedCharacterStat(character, "defense"),
-              { blocked: true,
-                 fighters: [opponent, character],
-               },
+              {
+                ...stunOptions,
+                blocked: true,
+              },
             )
           : choice === "evade"
-            ? evadeAttack(aiAttack, opponent, character)
-            : attackCharacter(aiAttack, opponent, character);
+            ? evadeAttack(aiAttack, opponent, character, stunOptions)
+            : attackCharacter(aiAttack, opponent, character, 0, {
+                ...stunOptions,
+                blocked: false,
+              });
 
       if (!result) return;
       // Record successful defensive actions for Festival challenges.
