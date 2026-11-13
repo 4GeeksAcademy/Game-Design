@@ -389,9 +389,8 @@ function Homescreen() {
       <p className="home-eyebrow">THE FIGHT STARTS HERE</p>
 
       <h1 className="home-title">
-        <span>YOUR</span>
-        <span className="title-accent">NEXT</span>
-        <span>CHALLENGE</span>
+        <span className="title-accent">MAIN</span>
+        <span>MENU</span>
       </h1>
 
       <p className="home-subtitle">Choose your fighter. Prove your strength.</p>
@@ -634,7 +633,7 @@ function Homescreen() {
       <header className="home-header">
         <div className="game-logo">
           <span className="logo-mark">VS</span>
-          <span className="logo-name">FIGHTER'S ARENA</span>
+          <span className="logo-name">Wild Cards</span>
         </div>
 
         <div className="home-header-right">
@@ -659,7 +658,7 @@ function Homescreen() {
             aria-modal="true"
             aria-labelledby="starter-modal-title"
           >
-            <p className="home-eyebrow">WELCOME TO FIGHTER'S ARENA</p>
+            <p className="home-eyebrow">WELCOME TO WILD CARDS</p>
 
             <h2 id="starter-modal-title" className="menu-title">
               CHOOSE YOUR FIRST FIGHTER
@@ -729,7 +728,7 @@ function Homescreen() {
       )}
       <footer className="home-footer">
         <span>INSERT COIN? NAH. JUST FIGHT.</span>
-        <span>FIGHTER'S ARENA © 2026</span>
+        <span>Wild Cards © 2026</span>
       </footer>
     </main>
   );

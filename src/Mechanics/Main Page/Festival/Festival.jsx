@@ -405,7 +405,7 @@ function Festival() {
       <header className="festival-header">
         <div className="festival-logo">
           <span>VS</span>
-          <h1>FIGHTER'S ARENA</h1>
+          <h1>Wild Cards</h1>
         </div>
 
         <button className="festival-back-button" onClick={() => navigate("/")}>

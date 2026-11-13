@@ -2520,7 +2520,7 @@ export default function TeamBattle() {
         >
           <div className="team-finish-flash" />
 
-          <p className="team-finish-eyebrow">FIGHTER'S ARENA</p>
+          <p className="team-finish-eyebrow">Wild Cards</p>
 
           <h1 className="team-finish-title">TEAM K.O.!</h1>
 
@@ -2619,7 +2619,7 @@ export default function TeamBattle() {
           role="status"
           aria-hidden={isIntroFadingOut}
         >
-          <div className="team-round-intro__eyebrow">FIGHTER'S ARENA</div>
+          <div className="team-round-intro__eyebrow">Wild Cards</div>
 
           <h1 className="team-round-intro__round">ROUND {roundNumber}</h1>
 

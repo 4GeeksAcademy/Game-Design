@@ -47,7 +47,7 @@ localStorage.removeItem("fightersArenaOwnedSkins");
 
   console.clear();
 
-  console.log("🔥 FIGHTER'S ARENA FACTORY RESET COMPLETE!");
+  console.log("🔥 Wild Cards FACTORY RESET COMPLETE!");
   console.log("Coins, characters, skins, Festival, and progression reset.");
   console.log("Restarting game...");
 

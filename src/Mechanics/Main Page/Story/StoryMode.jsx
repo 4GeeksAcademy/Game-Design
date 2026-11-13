@@ -24,7 +24,7 @@ function StoryMode() {
       <p className="story-eyebrow">YOUR LEGEND BEGINS</p>
       <h1 className="story-title">STORY MODE</h1>
       <p className="story-description">
-        Fight your way through the story of Fighter's Arena.
+        Fight your way through the story of Wild Cards.
       </p>
       
 
@@ -159,7 +159,7 @@ function StoryMode() {
       <header className="story-header">
         <div className="story-logo">
           <span className="story-logo-mark">VS</span>
-          <span>FIGHTER'S ARENA</span>
+          <span>Wild Cards</span>
         </div>
         <span className="story-header-label">STORY CAMPAIGN</span>
       </header>
@@ -168,7 +168,7 @@ function StoryMode() {
         {screen === "chapters" ? renderChapters() : renderLevels()}
       </section>
 
-      <footer className="story-footer">FIGHTER'S ARENA © 2026</footer>
+      <footer className="story-footer">Wild Cards © 2026</footer>
     </main>
   );
 }

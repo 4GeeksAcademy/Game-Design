@@ -1404,7 +1404,7 @@ function BotSimulator() {
         <button onClick={() => navigate("/")}>← MAIN MENU</button>
 
         <div>
-          <p>FIGHTER'S ARENA</p>
+          <p>Wild Cards</p>
           <h1>BOT VS BOT</h1>
         </div>
 

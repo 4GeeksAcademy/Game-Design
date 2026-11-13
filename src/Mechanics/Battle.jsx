@@ -596,7 +596,7 @@ function App() {
           aria-live="polite"
         >
           <div id="roundIntroContent" className="battle-intro-enhanced">
-            <span id="roundIntroEyebrow">FIGHTER'S ARENA</span>
+            <span id="roundIntroEyebrow">Wild Cards</span>
 
             <h1 key={roundNumber}>ROUND {roundNumber}</h1>
 
@@ -691,7 +691,7 @@ function App() {
         >
           <div className="battle-finish-flash" />
 
-          <p className="battle-finish-eyebrow">FIGHTER'S ARENA</p>
+          <p className="battle-finish-eyebrow">Wild Cards</p>
 
           <h1 className="battle-finish-title">
             {knockout.defeatedTeam === "player" ? "DEFEAT" : "VICTORY"}

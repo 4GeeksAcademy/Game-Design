@@ -43,7 +43,7 @@ function Achievements() {
       <header className="achievements-header">
         <div className="achievements-logo">
           <span className="logo-mark">VS</span>
-          <span>FIGHTER'S ARENA</span>
+          <span>Wild Cards</span>
         </div>
 
         <button

@@ -311,7 +311,7 @@ function StoryCutscene({
       <header className="vn-header">
         <div className="vn-logo">
           <span className="vn-logo-mark">VS</span>
-          <span>FIGHTER'S ARENA</span>
+          <span>Wild Cards</span>
         </div>
 
         <span className="vn-chapter">
@@ -359,7 +359,7 @@ function StoryCutscene({
           </div>
         ))}
 
-        <div className="vn-scene-caption">FIGHTER'S ARENA</div>
+        <div className="vn-scene-caption">Wild Cards</div>
         <div className="vn-click-hint">CLICK TO CONTINUE</div>
       </section>
 

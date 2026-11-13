@@ -40,7 +40,7 @@ function SkinGallery({
         <h2>SKIN COLLECTION</h2>
 
         <p>
-          Explore every alternate appearance available in Fighter's Arena.
+          Explore every alternate appearance available in Wild Cards.
           Unlock rare costumes, customize your fighters, and build your
           collection.
         </p>
