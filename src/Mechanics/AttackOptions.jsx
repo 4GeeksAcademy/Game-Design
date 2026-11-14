@@ -100,8 +100,9 @@ function AttackOptions({
       }
 
       const stunOptions = {
-        fighters: [character, opponent],
-      };
+  fighters: [character, opponent],
+  selectedAttackIds,
+};
 
       const result =
         difficulty === "Normal"
