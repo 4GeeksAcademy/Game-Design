@@ -134,8 +134,8 @@ const Yoruichi = {
   // STUN CONFIGURATION
   stun: {
     type: "selected", // "selected" | "random" | "all"
-    amount: 2,
-    duration: 2,
+    amount: 6,
+    duration: 5,
   },
 
   // Only apply stun if the attack successfully hits.

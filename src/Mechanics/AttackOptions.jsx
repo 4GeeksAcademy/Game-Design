@@ -8,7 +8,7 @@ import StunTargetSelector from "./StunTargetSelector.jsx";
 import "./BattleUI.css";
 
 function isAttackAvailable(attack) {
-  const [pendingStunAttack, setPendingStunAttack] = useState(null);
+
   return canUseAttack(attack);
 }
 
@@ -85,6 +85,7 @@ function AttackOptions({
   openingTurnActive = false,
   difficulty = "Easy",
 }) {
+  const [pendingStunAttack, setPendingStunAttack] = useState(null);
   const openingTurnAttackLimitReached =
     openingTurnActive &&
     character.attacks.filter((attack) => attack.state === false).length >= 4;
@@ -220,7 +221,7 @@ function AttackOptions({
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (currentTurn !== "player") return;
+  if (currentTurn !== "player" || pendingStunAttack !== null) return;
 
       const key = normalizeKey(event.key);
       const player1Binds = loadKeybinds().player1;
@@ -244,11 +245,12 @@ function AttackOptions({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
-    character.attacks,
-    currentTurn,
-    handleAttack,
-    openingTurnAttackLimitReached,
-  ]);
+  character.attacks,
+  currentTurn,
+  startAttack,
+  openingTurnAttackLimitReached,
+  pendingStunAttack,
+]);
 
   return (
     <>
