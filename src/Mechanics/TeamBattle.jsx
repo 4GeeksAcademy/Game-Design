@@ -164,7 +164,9 @@ function FighterPreview({
     maximum > 0
       ? Math.max(0, Math.min(100, (Number(value) / maximum) * 100))
       : 0;
-
+  const hasStunnedAttacks = fighter.attacks?.some(
+    (attack) => (attack.stunned?.remainingRounds ?? 0) > 0,
+  );
   return (
     <button
       type="button"
@@ -183,7 +185,13 @@ function FighterPreview({
       </div>
 
       {fighter.image && (
-        <img className="fighter-portrait" src={fighter.image} alt="" />
+        <div
+          className={`fighter-portrait-wrapper ${
+            hasStunnedAttacks ? "fighter-stunned" : ""
+          }`}
+        >
+          <img className="fighter-portrait" src={fighter.image} alt="" />
+        </div>
       )}
       {fighter.health <= 0 && (
         <span className="fighter-ko-badge" aria-label="Knocked out">

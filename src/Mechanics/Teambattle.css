@@ -3044,3 +3044,143 @@ battlefield > .local-coop-incoming {
   opacity: 0.75;
   margin-top: 4px;
 }
+
+
+/* =========================================
+   2v2 STUNNED ATTACK CARDS
+========================================= */
+
+.team-attack-card.team-attack-stunned {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 2px solid #38dfff !important;
+  box-shadow:
+    0 0 10px rgba(19, 213, 255, 0.65),
+    inset 0 0 16px rgba(19, 213, 255, 0.18);
+  animation: stun-card-pulse 1.5s infinite ease-in-out;
+}
+
+/* Moving light streak */
+.team-attack-card.team-attack-stunned::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  top: -70%;
+  left: -100%;
+  width: 65%;
+  height: 240%;
+  pointer-events: none;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(19, 213, 255, 0.08),
+    rgba(138, 240, 255, 0.75),
+    rgba(255, 255, 255, 0.95),
+    rgba(19, 213, 255, 0.35),
+    transparent
+  );
+
+  filter: blur(5px);
+  transform: rotate(25deg);
+  animation: stun-light-sweep 2.2s ease-in-out infinite;
+}
+
+/* Stun label and lock */
+.team-stun-overlay {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  background: rgba(2, 13, 27, 0.78);
+  color: #8af0ff;
+  text-align: center;
+  text-shadow: 0 0 10px #13d5ff;
+  pointer-events: none;
+}
+
+.team-stun-overlay strong {
+  font-size: 1.05rem;
+  font-weight: 1000;
+  letter-spacing: 3px;
+}
+
+.team-stun-overlay small {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+/* =========================================
+   2v2 STUNNED FIGHTER PORTRAITS
+========================================= */
+
+.fighter-portrait-wrapper {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.fighter-portrait-wrapper.fighter-stunned {
+  animation: stunned-fighter-shake 0.35s infinite;
+}
+
+.fighter-portrait-wrapper.fighter-stunned img {
+  filter:
+    drop-shadow(0 0 5px #13d5ff)
+    drop-shadow(0 0 14px rgba(19, 213, 255, 0.9));
+
+  animation: stunned-electric-glow 1s ease-in-out infinite alternate;
+}
+
+/* Moving light across the portrait */
+.fighter-portrait-wrapper.fighter-stunned::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+
+  background: linear-gradient(
+    110deg,
+    transparent 25%,
+    rgba(19, 213, 255, 0.1) 40%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(19, 213, 255, 0.35) 58%,
+    transparent 75%
+  );
+
+  background-size: 250% 100%;
+  animation: portrait-lightning-sweep 1.7s linear infinite;
+}
+
+/* Reuse the same animation timing as 1v1 */
+@keyframes portrait-lightning-sweep {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -150% 0;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .team-attack-card.team-attack-stunned,
+  .team-attack-card.team-attack-stunned::after,
+  .fighter-portrait-wrapper.fighter-stunned,
+  .fighter-portrait-wrapper.fighter-stunned img,
+  .fighter-portrait-wrapper.fighter-stunned::after {
+    animation: none !important;
+  }
+}

@@ -5170,3 +5170,185 @@ body {
     animation: none !important;
   }
 }
+
+/* =========================================
+   STUN ELECTRICAL LIGHT EFFECT — ATTACKS
+========================================= */
+
+.attack-card.attack-stunned {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden !important;
+}
+
+/* Moving electrical light streak */
+.attack-card.attack-stunned::after {
+  content: "";
+  position: absolute;
+  z-index: 6;
+  top: -70%;
+  left: -100%;
+  width: 65%;
+  height: 240%;
+  pointer-events: none;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(19, 213, 255, 0.08),
+    rgba(138, 240, 255, 0.75),
+    rgba(255, 255, 255, 0.95),
+    rgba(19, 213, 255, 0.35),
+    transparent
+  );
+
+  filter: blur(5px);
+  transform: rotate(25deg);
+  animation: stun-light-sweep 2.2s ease-in-out infinite;
+}
+
+@keyframes stun-light-sweep {
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  65% {
+    opacity: 0.9;
+  }
+
+  100% {
+    left: 150%;
+    opacity: 0;
+  }
+}
+
+/* Keep the existing label readable above the light */
+.attack-card.attack-stunned .stun-card-overlay {
+  z-index: 7;
+}
+
+
+/* =========================================
+   STUN ELECTRICAL LIGHT EFFECT — PORTRAITS
+========================================= */
+
+#characterPortraitWrapper,
+#opponentPortraitWrapper {
+  position: relative;
+}
+
+#characterPortraitWrapper.fighter-stunned,
+#opponentPortraitWrapper.fighter-stunned {
+  animation: stunned-fighter-shake 0.35s infinite;
+}
+
+#characterPortraitWrapper.fighter-stunned img,
+#opponentPortraitWrapper.fighter-stunned img {
+  filter:
+    drop-shadow(0 0 5px #13d5ff)
+    drop-shadow(0 0 14px rgba(19, 213, 255, 0.9));
+
+  animation: stunned-electric-glow 1s ease-in-out infinite alternate;
+}
+
+/* Moving light across the portrait itself */
+#characterPortraitWrapper.fighter-stunned::after,
+#opponentPortraitWrapper.fighter-stunned::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  width: 112px;
+  height: 100%;
+  pointer-events: none;
+
+  background: linear-gradient(
+    110deg,
+    transparent 25%,
+    rgba(19, 213, 255, 0.1) 40%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(19, 213, 255, 0.35) 58%,
+    transparent 75%
+  );
+
+  background-size: 250% 100%;
+  animation: portrait-lightning-sweep 1.7s linear infinite;
+}
+
+@keyframes portrait-lightning-sweep {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -150% 0;
+  }
+}
+
+@keyframes stunned-electric-glow {
+  from {
+    filter:
+      drop-shadow(0 0 4px #13d5ff)
+      drop-shadow(0 0 8px rgba(19, 213, 255, 0.4));
+  }
+
+  to {
+    filter:
+      drop-shadow(0 0 9px #13d5ff)
+      drop-shadow(0 0 18px rgba(19, 213, 255, 1));
+  }
+}
+
+@keyframes stunned-fighter-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-2px);
+  }
+
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+/* Match the portrait width on smaller screens */
+@media (max-width: 850px) {
+  #characterPortraitWrapper.fighter-stunned::after,
+  #opponentPortraitWrapper.fighter-stunned::after {
+    width: 85px;
+  }
+}
+
+@media (max-width: 600px) {
+  #characterPortraitWrapper.fighter-stunned::after,
+  #opponentPortraitWrapper.fighter-stunned::after {
+    width: 85px;
+  }
+}
+
+@media (max-width: 370px) {
+  #characterPortraitWrapper.fighter-stunned::after,
+  #opponentPortraitWrapper.fighter-stunned::after {
+    width: 75px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attack-card.attack-stunned::after,
+  #characterPortraitWrapper.fighter-stunned,
+  #opponentPortraitWrapper.fighter-stunned,
+  #characterPortraitWrapper.fighter-stunned::after,
+  #opponentPortraitWrapper.fighter-stunned::after,
+  #characterPortraitWrapper.fighter-stunned img,
+  #opponentPortraitWrapper.fighter-stunned img {
+    animation: none !important;
+  }
+}

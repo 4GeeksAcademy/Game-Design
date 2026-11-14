@@ -107,7 +107,11 @@ export default function TeamAttackOptions({
                 type="button"
                 className={`team-attack-card ${getTeamAttackCardType(
                   attack,
-                )} ${isSacrifice ? "team-attack-sacrifice" : ""}`}
+                )} ${isSacrifice ? "team-attack-sacrifice" : ""} ${
+                  (attack.stunned?.remainingRounds ?? 0) > 0
+                    ? "team-attack-stunned"
+                    : ""
+                }`}
                 disabled={!usable}
                 onClick={() => onAttack(fighter.id, index)}
               >
@@ -127,7 +131,15 @@ export default function TeamAttackOptions({
                 ) : (
                   <div className="team-attack-image-placeholder">NO IMAGE</div>
                 )}
-
+                {(attack.stunned?.remainingRounds ?? 0) > 0 && (
+                  <div className="team-stun-overlay">
+                    <span className="stun-lock-icon">🔒</span>
+                    <strong>STUNNED</strong>
+                    <small>
+                      {attack.stunned.remainingRounds} ROUNDS REMAINING
+                    </small>
+                  </div>
+                )}
                 <strong className="team-attack-name">{attack.name}</strong>
 
                 <span className="team-attack-damage">
