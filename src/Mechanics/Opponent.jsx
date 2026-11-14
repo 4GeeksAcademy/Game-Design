@@ -13,21 +13,20 @@ function Opponent({ opponent, setOpponent }) {
 
   const manaPercentage =
     opponent.maximumMana > 0
-      ? Math.min(
-          100,
-          Math.max(0, (opponent.mana / opponent.maximumMana) * 100),
-        )
+      ? Math.min(100, Math.max(0, (opponent.mana / opponent.maximumMana) * 100))
       : 0;
 
+  const hasStunnedAttacks = opponent.attacks.some(
+    (attack) => (attack.stunned?.remainingRounds ?? 0) > 0,
+  );
   return (
     <div id="opponentSection">
       <div id="opponent" className="battle-status-panel">
-        <div id="opponentPortraitWrapper">
-          <img
-            id="opponentImage"
-            src={opponent.image} 
-            alt={opponent.name}
-          />
+        <div
+          id="opponentPortraitWrapper"
+          className={hasStunnedAttacks ? "fighter-stunned" : ""}
+        >
+          <img id="opponentImage" src={opponent.image} alt={opponent.name} />
 
           <div id="opponentSideMeters">
             <div className="verticalMeterGroup">
@@ -105,4 +104,3 @@ function Opponent({ opponent, setOpponent }) {
 }
 
 export default Opponent;
-

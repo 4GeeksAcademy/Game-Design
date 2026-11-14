@@ -8,7 +8,6 @@ import StunTargetSelector from "./StunTargetSelector.jsx";
 import "./BattleUI.css";
 
 function isAttackAvailable(attack) {
-
   return canUseAttack(attack);
 }
 
@@ -221,7 +220,7 @@ function AttackOptions({
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-  if (currentTurn !== "player" || pendingStunAttack !== null) return;
+      if (currentTurn !== "player" || pendingStunAttack !== null) return;
 
       const key = normalizeKey(event.key);
       const player1Binds = loadKeybinds().player1;
@@ -245,12 +244,12 @@ function AttackOptions({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [
-  character.attacks,
-  currentTurn,
-  startAttack,
-  openingTurnAttackLimitReached,
-  pendingStunAttack,
-]);
+    character.attacks,
+    currentTurn,
+    startAttack,
+    openingTurnAttackLimitReached,
+    pendingStunAttack,
+  ]);
 
   return (
     <>
@@ -296,7 +295,8 @@ function AttackOptions({
                         Number(attack.sacrifice?.health) > 0
                           ? "attack-sacrifice"
                           : ""
-                      } ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}`}
+                      } ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}
+${(attack.stunned?.remainingRounds ?? 0) > 0 ? "attack-stunned" : ""}`}
                       style={{ minWidth: "200px" }}
                       disabled={
                         currentTurn !== "player" ||
@@ -312,6 +312,16 @@ function AttackOptions({
                         alt={attack.name}
                         loading="lazy"
                       />
+
+                      {(attack.stunned?.remainingRounds ?? 0) > 0 && (
+                        <div className="stun-card-overlay">
+                          <span className="stun-lock-icon">🔒</span>
+                          <strong>STUNNED</strong>
+                          <small>
+                            {attack.stunned.remainingRounds} ROUNDS REMAINING
+                          </small>
+                        </div>
+                      )}
 
                       <h5 id={`attackName${index}`} className="text-center">
                         {attack.name}

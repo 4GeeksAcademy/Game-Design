@@ -14,14 +14,11 @@ function Character({
     character.maximumHealth > 0
       ? Math.min(
           100,
-          Math.max(
-            0,
-            (character.health / character.maximumHealth) * 100,
-          ),
+          Math.max(0, (character.health / character.maximumHealth) * 100),
         )
       : 0;
 
-      const finishTurn = useCallback(() => {
+  const finishTurn = useCallback(() => {
     if (currentTurn !== "player") return;
 
     setCharacter({
@@ -57,15 +54,18 @@ function Character({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentTurn, finishTurn]);
 
+  const hasStunnedAttacks = character.attacks.some(
+    (attack) => (attack.stunned?.remainingRounds ?? 0) > 0,
+  );
+
   return (
     <div id="characterSection">
       <div id="character" className="battle-status-panel">
-        <div id="characterPortraitWrapper">
-          <img
-            src={character.image}
-            id="characterImage"
-            alt={character.name}
-          />
+        <div
+          id="characterPortraitWrapper"
+          className={hasStunnedAttacks ? "fighter-stunned" : ""}
+        >
+          <img src={character.image} id="characterImage" alt={character.name} />
 
           <div id="characterSideMeters">
             <div className="verticalMeterGroup">
@@ -139,8 +139,7 @@ function Character({
             <div className="compactStat">
               <span>⏳ Cooldown</span>
               <strong>
-                {character.cooldown ?? 0}/
-                {character.maximumCooldown ?? 3}
+                {character.cooldown ?? 0}/{character.maximumCooldown ?? 3}
               </strong>
             </div>
 

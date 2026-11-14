@@ -5038,3 +5038,135 @@ body {
     transition: none;
   }
 }
+
+
+/* =========================================
+   STUNNED ATTACK CARD
+========================================= */
+
+.attack-card.attack-stunned {
+  position: relative;
+  overflow: hidden !important;
+  border: 2px solid #38dfff !important;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(19, 213, 255, 0.22),
+      transparent 75%
+    ),
+    #071525 !important;
+  box-shadow:
+    0 0 10px rgba(19, 213, 255, 0.7),
+    inset 0 0 18px rgba(19, 213, 255, 0.2) !important;
+  animation: stun-card-pulse 1.5s infinite ease-in-out;
+}
+
+.attack-card.attack-stunned:hover {
+  border-color: #8af0ff !important;
+  box-shadow:
+    0 0 18px rgba(19, 213, 255, 0.9),
+    inset 0 0 22px rgba(19, 213, 255, 0.25) !important;
+}
+
+.stun-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: rgba(2, 13, 27, 0.78);
+  color: #8af0ff;
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 0 10px #13d5ff;
+}
+
+.stun-lock-icon {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 0 8px #13d5ff);
+}
+
+.stun-card-overlay strong {
+  font-size: 1.15rem;
+  font-weight: 1000;
+  letter-spacing: 3px;
+}
+
+.stun-card-overlay small {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+/* =========================================
+   STUNNED FIGHTER PORTRAIT
+========================================= */
+
+#characterPortraitWrapper.fighter-stunned,
+#opponentPortraitWrapper.fighter-stunned {
+  position: relative;
+  animation: stunned-fighter-shake 0.35s infinite;
+}
+
+#characterPortraitWrapper.fighter-stunned img,
+#opponentPortraitWrapper.fighter-stunned img {
+  filter:
+    drop-shadow(0 0 5px #13d5ff)
+    drop-shadow(0 0 12px rgba(19, 213, 255, 0.8));
+  animation: stunned-electric-glow 1.2s infinite alternate;
+}
+
+@keyframes stun-card-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(19, 213, 255, 0.45),
+      inset 0 0 12px rgba(19, 213, 255, 0.12);
+  }
+
+  50% {
+    box-shadow:
+      0 0 18px rgba(19, 213, 255, 0.9),
+      inset 0 0 22px rgba(19, 213, 255, 0.28);
+  }
+}
+
+@keyframes stunned-fighter-shake {
+  0%, 100% {
+    transform: translateX(0) rotate(0);
+  }
+
+  25% {
+    transform: translateX(-2px) rotate(-0.5deg);
+  }
+
+  75% {
+    transform: translateX(2px) rotate(0.5deg);
+  }
+}
+
+@keyframes stunned-electric-glow {
+  from {
+    filter:
+      drop-shadow(0 0 4px #13d5ff)
+      drop-shadow(0 0 8px rgba(19, 213, 255, 0.4));
+  }
+
+  to {
+    filter:
+      drop-shadow(0 0 8px #13d5ff)
+      drop-shadow(0 0 17px rgba(19, 213, 255, 0.95));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attack-card.attack-stunned,
+  #characterPortraitWrapper.fighter-stunned,
+  #opponentPortraitWrapper.fighter-stunned,
+  #characterPortraitWrapper.fighter-stunned img,
+  #opponentPortraitWrapper.fighter-stunned img {
+    animation: none !important;
+  }
+}
