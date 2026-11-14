@@ -139,7 +139,7 @@ const Yoruichi = {
   },
 
   // Only apply stun if the attack successfully hits.
-  stunRequiresHit: true,
+  stunRequiresHit: false,
 },
 
   ],

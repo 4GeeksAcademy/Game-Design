@@ -30,7 +30,7 @@ import Toga from "./All_Character_Stats/TogaStats.js";
 import { Kenpachi } from "./All_Character_Stats/KempachiStats.js";
 import Hinata from "./All_Character_Stats/HinataStats.js";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
-import { aiDefendOrEvade, aiTurn } from "./AI.js";
+import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
@@ -477,9 +477,15 @@ function App() {
 
       if (choice === "defend" && character.cooldown <= 0) return;
 
-      const stunOptions = {
-        fighters: [opponent, character],
-      };
+      const selectedAttackIds = aiChooseStunTargets(
+  character,
+  aiAttack.stun,
+);
+
+const stunOptions = {
+  fighters: [opponent, character],
+  selectedAttackIds,
+};
 
       const result =
         choice === "defend"

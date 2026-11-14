@@ -26,7 +26,12 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import useKeybinds from "./Main Page/useKeybinds.js";
 import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
-import { aiChooseAttack, aiChooseHealTarget, aiDefendOrEvade } from "./AI.js";
+import {
+  aiChooseAttack,
+  aiChooseHealTarget,
+  aiDefendOrEvade,
+  aiChooseStunTargets,
+} from "./AI.js";
 import {
   chooseNormalTeamAction,
   normalDefendOrEvade,
@@ -1858,7 +1863,6 @@ export default function TeamBattle() {
     const updatedCPU = teams.opponent.map(cloneFighter);
 
     const allFighters = [...updatedPlayers, ...updatedCPU];
-    const stunOptions = { fighters: allFighters };
 
     const currentDefender = updatedPlayers.find(
       (fighter) => fighter.id === incoming.targetId,
@@ -1867,6 +1871,14 @@ export default function TeamBattle() {
       (fighter) => fighter.id === incoming.cpuId,
     );
     const currentAttack = currentAttacker.attacks[incoming.attackIndex];
+
+    const stunOptions = {
+      fighters: allFighters,
+      selectedAttackIds: aiChooseStunTargets(
+        currentDefender,
+        currentAttack.stun,
+      ),
+    };
 
     const healthBefore = Number(currentDefender.health) || 0;
 
@@ -2221,7 +2233,6 @@ export default function TeamBattle() {
       const updatedCPU = teams.opponent.map(cloneFighter);
 
       const allFighters = [...updatedPlayers, ...updatedCPU];
-      const stunOptions = { fighters: allFighters };
 
       const currentAttacker = updatedCPU.find(
         (fighter) => fighter.id === pendingDefense.cpuId,
@@ -2248,6 +2259,10 @@ export default function TeamBattle() {
         }, 1000);
         return;
       }
+      const stunOptions = {
+        fighters: allFighters,
+        selectedAttackIds: aiChooseStunTargets(currentDefender, attack.stun),
+      };
 
       let result;
 
@@ -2402,11 +2417,19 @@ export default function TeamBattle() {
       const defenseController =
         difficulty === "Normal" ? normalDefendOrEvade : aiDefendOrEvade;
 
+      const stunOptions = {
+        fighters: allFighters,
+        selectedAttackIds: aiChooseStunTargets(
+          currentDefender,
+          incomingAttack.stun,
+        ),
+      };
+
       const result = defenseController(
         incomingAttack,
         currentAttacker,
         currentDefender,
-        { fighters: allFighters },
+        stunOptions,
       );
 
       if (result) {
