@@ -50,9 +50,8 @@ const attacklist = {
           recovery: 2,
         },
       },
-      duration: 1, // this modifies the attackModifiers and characterModifiers where it temporarily increases/decreases the stats for each attack applied. 
-                  // Not to be confused with turnCooldown where it disables the attack after use.
-
+      duration: 1, // this modifies the attackModifiers and characterModifiers where it temporarily increases/decreases the stats for each attack applied.
+      // Not to be confused with turnCooldown where it disables the attack after use.
 
       attackModifiers: {
         targetAttackIds: null, // or attack id
@@ -61,7 +60,7 @@ const attacklist = {
             multiplier: 1.5, // or amount: 25
           },
           speed: {
-            multiplier: 0.75, // you can add amount along with multiplier too for aditional effect 
+            multiplier: 0.75, // you can add amount along with multiplier too for aditional effect
           },
           cost: {
             multiplier: 1.3,
@@ -87,7 +86,15 @@ const attacklist = {
         // cooldown
       },
 
-      stunRequiresHit: true,
+      // STUN CONFIGURATION
+      stun: {
+        type: "selected", // "selected" | "random" | "all"
+        amount: 6, // attacks affected
+        duration: 5, // how long
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: false,
     },
   ],
 };
