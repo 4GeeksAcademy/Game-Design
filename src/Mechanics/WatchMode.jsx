@@ -20,8 +20,8 @@ const SPEEDS = [
   { label: "2×", delay: 150 },
 ];
 
-const PLAYER_COLOR = "#13D5FF";
-const CPU_COLOR = "#FF3159";
+const PLAYER_COLOR = "#c7f464";
+const CPU_COLOR = "#ff825c";
 
 function getFighterName(fighter) {
   return fighter?.data?.name ?? fighter?.name ?? fighter?.id ?? "Fighter";
@@ -129,7 +129,7 @@ function FighterPanel({ fighter, color, side, compact = false }) {
         label="MANA"
         value={stats.mana ?? 0}
         maximum={stats.maximumMana ?? stats.mana ?? 1}
-        color="#8D75FF"
+        color="#b3e66b"
       />
 
       <div className="watch-fighter-stats">

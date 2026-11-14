@@ -11,7 +11,7 @@ body,
 }
 
 body {
-  background: #080d1c;
+  background: #0f1511;
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -19,10 +19,10 @@ body {
   position: relative;
   min-height: 100vh;
   padding: 18px 24px 35px;
-  color: #f1f5ff;
+  color: #f7fff1;
   background:
-    radial-gradient(ellipse at 50% 35%, #17243b 0%, transparent 65%),
-    linear-gradient(180deg, #070a12 0%, #101525 55%, #080b14 100%);
+    radial-gradient(ellipse at 50% 35%, #223027 0%, transparent 65%),
+    linear-gradient(180deg, #0b0e0c 0%, #161f19 55%, #0c100d 100%);
 }
 
 #battleArena {
@@ -53,7 +53,7 @@ body {
    ========================================================= */
 
 .battle-status-panel {
-  --panel-accent: #13d5ff;
+  --panel-accent: #7dff13;
   position: relative;
   isolation: isolate;
   display: grid;
@@ -65,8 +65,8 @@ body {
   max-width: 760px;
   min-width: 0;
   padding: 32px 18px 12px;
-  color: #edf4ff;
-  background: linear-gradient(115deg, #111e35, #07101f 58%, #10182b);
+  color: #f5ffed;
+  background: linear-gradient(115deg, #1d2921, #101612 58%, #19221c);
   border: 2px solid var(--panel-accent);
   border-radius: 0;
   clip-path: polygon(
@@ -110,21 +110,21 @@ body {
 }
 
 #opponent {
-  --panel-accent: #ff304f;
-  background: linear-gradient(115deg, #35101b, #10121d 58%, #210e19);
+  --panel-accent: #ff6030;
+  background: linear-gradient(115deg, #1d2821, #131a15 58%, #141b16);
 }
 
 #character {
-  --panel-accent: #16dfff;
-  background: linear-gradient(115deg, #0b2d42, #10121d 58%, #09243b);
+  --panel-accent: #7fff16;
+  background: linear-gradient(115deg, #202d24, #131a15 58%, #1d2720);
 }
 
 #opponent:hover {
-  filter: drop-shadow(0 0 7px #ff315970) drop-shadow(0 0 19px #ff315935);
+  filter: drop-shadow(0 0 7px #ff613170) drop-shadow(0 0 19px #ff613135);
 }
 
 #character:hover {
-  filter: drop-shadow(0 0 7px #13d5ff70) drop-shadow(0 0 19px #13d5ff35);
+  filter: drop-shadow(0 0 7px #7dff1370) drop-shadow(0 0 19px #7dff1335);
 }
 
 /* Hide redundant panel labels; let info children participate in the grid. */
@@ -163,8 +163,8 @@ body {
   position: absolute;
   top: 4px;
   left: 18px;
-  color: #fff0f3;
-  text-shadow: 0 0 8px #ff315940, 0 0 18px #ff31591a;
+  color: #fff3f0;
+  text-shadow: 0 0 8px #ff613140, 0 0 18px #ff61311a;
 }
 
 #characterName {
@@ -175,8 +175,8 @@ body {
   width: 100%;
   padding: 0 0 8px 4px;
   text-align: left;
-  color: #effcff;
-  text-shadow: 0 0 8px #13d5ff40, 0 0 18px #13d5ff1a;
+  color: #f6ffef;
+  text-shadow: 0 0 8px #7dff1340, 0 0 18px #7dff131a;
 }
 
 #opponentImage,
@@ -190,7 +190,7 @@ body {
   margin: 0;
   object-fit: cover;
   object-position: center;
-  background: #08101e;
+  background: #101612;
   border: 2px solid var(--panel-accent);
   border-radius: 0;
   clip-path: polygon(0 0, 88% 0, 100% 12%, 100% 100%, 0 100%);
@@ -201,23 +201,23 @@ body {
 }
 
 #opponentImage {
-  border-color: #ff3159;
-  box-shadow: 0 0 0 2px #170b17, 0 0 10px #ff31594a;
+  border-color: #ff6131;
+  box-shadow: 0 0 0 2px #0e1410, 0 0 10px #ff61314a;
 }
 
 #characterImage {
-  border-color: #13d5ff;
-  box-shadow: 0 0 0 2px #071523, 0 0 10px #13d5ff4a;
+  border-color: #7dff13;
+  box-shadow: 0 0 0 2px #121814, 0 0 10px #7dff134a;
 }
 
 #opponent:hover #opponentImage {
   filter: brightness(1.08) saturate(1.12);
-  box-shadow: 0 0 0 2px #170b17, 0 0 16px #ff315980;
+  box-shadow: 0 0 0 2px #0e1410, 0 0 16px #ff613180;
 }
 
 #character:hover #characterImage {
   filter: brightness(1.08) saturate(1.12);
-  box-shadow: 0 0 0 2px #071523, 0 0 16px #13d5ff80;
+  box-shadow: 0 0 0 2px #121814, 0 0 16px #7dff1380;
 }
 
 /* =========================================================
@@ -247,7 +247,7 @@ body {
   min-width: 0;
   margin: 0;
   padding: 6px 4px;
-  color: #d9e9ff;
+  color: #eaffd9;
   background: transparent;
   border: 0;
   border-bottom: 1px solid #ffffff20;
@@ -264,13 +264,13 @@ body {
 
 #opponentStats p strong {
   flex-shrink: 0;
-  color: #ffdce3;
+  color: #ffe4dc;
   font-weight: 800;
-  text-shadow: 0 0 7px #ff315925;
+  text-shadow: 0 0 7px #ff613125;
 }
 
 #opponentStats p:hover {
-  background: #ff31590c;
+  background: #ff61310c;
 }
 
 /* =========================================================
@@ -334,7 +334,7 @@ body {
   width: 100%;
   min-width: 22px;
   height: 190px;
-  background: #091321;
+  background: #121814;
   border: 1px solid #ffffff25;
   border-radius: 6px;
 }
@@ -346,21 +346,21 @@ body {
 }
 
 #characterSideMeters .healthMeter {
-  border-color: #ff456650;
+  border-color: #ff704550;
 }
 
 #characterSideMeters .healthMeter .verticalMeterFill {
-  background: linear-gradient(to top, #b91e42, #ff4566);
-  box-shadow: 0 0 10px #ff456650;
+  background: linear-gradient(to top, #b9421e, #ff7045);
+  box-shadow: 0 0 10px #ff704550;
 }
 
 #characterSideMeters .manaMeter {
-  border-color: #13d5ff50;
+  border-color: #7dff1350;
 }
 
 #characterSideMeters .manaMeter .verticalMeterFill {
-  background: linear-gradient(to top, #0874d1, #13d5ff);
-  box-shadow: 0 0 10px #13d5ff50;
+  background: linear-gradient(to top, #62d108, #7dff13);
+  box-shadow: 0 0 10px #7dff1350;
 }
 
 #characterSideMeters .verticalMeter span {
@@ -383,7 +383,7 @@ body {
 }
 
 #characterSideMeters .verticalMeterGroup small {
-  color: #a9c7d9;
+  color: #bee1a1;
   font-size: 9px;
   line-height: 1.2;
   letter-spacing: 0.3px;
@@ -418,7 +418,7 @@ body {
   align-items: center;
   gap: 5px;
   margin-bottom: 7px;
-  color: #f1f5f9;
+  color: #f4faf0;
   font-size: 14px;
   font-weight: 700;
 }
@@ -434,8 +434,8 @@ body {
   width: 100%;
   height: 16px !important;
   overflow: hidden;
-  background-color: #252b3b;
-  border: 1px solid #414b60;
+  background-color: #28382d;
+  border: 1px solid #4c7a27;
   border-radius: 6px;
   box-shadow: inset 0 1px 3px #00000080;
 }
@@ -466,11 +466,11 @@ body {
   gap: 8px;
   min-width: 0;
   padding: 8px 10px;
-  color: #b9cde0;
+  color: #cae7b2;
   font-size: 0.7rem;
-  background: linear-gradient(135deg, #14263a, #0a1423);
-  border: 1px solid #13d5ff45;
-  border-left: 3px solid #13d5ff;
+  background: linear-gradient(135deg, #212d25, #131a15);
+  border: 1px solid #7dff1345;
+  border-left: 3px solid #7dff13;
   border-radius: 4px;
 }
 
@@ -501,15 +501,15 @@ body {
   height: 112px !important;
   padding: 10px;
   color: #fff;
-  background: radial-gradient(circle at 35% 25%, #198fff, #07418c 70%, #06152f);
-  border: 4px solid #45e5ff;
+  background: radial-gradient(circle at 35% 25%, #81ff19, #438c07 70%, #161f19);
+  border: 4px solid #99ff45;
   border-radius: 50%;
-  outline: 2px solid #0879db;
+  outline: 2px solid #67db08;
   outline-offset: 4px;
   box-shadow:
-    0 0 12px #12bfff99,
-    0 0 28px #12bfff30,
-    inset 0 0 15px #50d9ff40;
+    0 0 12px #7dff1299,
+    0 0 28px #7dff1230,
+    inset 0 0 15px #9fff5040;
   font-size: 1rem;
   font-weight: 900;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -518,9 +518,9 @@ body {
 #finishTurnButton:hover:not(:disabled) {
   transform: scale(1.05);
   box-shadow:
-    0 0 15px #12bfff,
-    0 0 32px #12bfff90,
-    inset 0 0 20px #50d9ff88;
+    0 0 15px #7dff12,
+    0 0 32px #7dff1290,
+    inset 0 0 20px #9fff5088;
 }
 
 #finishTurnButton:disabled {
@@ -544,9 +544,9 @@ body {
 
 #attack {
   overflow: hidden;
-  color: #f1f5ff;
-  background: linear-gradient(145deg, #121a2b, #080c16);
-  border: 2px solid #344c72;
+  color: #f7fff1;
+  background: linear-gradient(145deg, #1a231d, #0d110e);
+  border: 2px solid #4f7e28;
   border-radius: 8px;
   box-shadow: 0 8px 25px #00000055;
 }
@@ -554,8 +554,8 @@ body {
 #attackHeader {
   padding: 13px 18px;
   color: #fff;
-  background: linear-gradient(90deg, #243b60, #111827 75%);
-  border-bottom: 2px solid #4b8cff;
+  background: linear-gradient(90deg, #3f6420, #18201b 75%);
+  border-bottom: 2px solid #9cff4b;
   font-size: 1rem;
   font-weight: 800;
   letter-spacing: 3px;
@@ -574,7 +574,7 @@ body {
   gap: 14px !important;
   overflow-x: auto;
   padding: 4px 3px 12px;
-  scrollbar-color: #367cff #101a30;
+  scrollbar-color: #90ff36 #1b251e;
   scrollbar-width: thin;
 }
 
@@ -586,10 +586,10 @@ body {
   min-width: 210px !important;
   padding: 10px;
   overflow: hidden;
-  color: #e8efff !important;
+  color: #f2ffe8 !important;
   text-align: left;
-  background: linear-gradient(160deg, #1b2940, #0b101c) !important;
-  border: 1px solid #465b7c !important;
+  background: linear-gradient(160deg, #26352b, #101712) !important;
+  border: 1px solid #5c932f !important;
   border-radius: 6px !important;
   box-shadow: 0 5px 12px #00000040;
   transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
@@ -597,8 +597,8 @@ body {
 
 [id^="attackButton"]:hover:not(:disabled) {
   transform: translateY(-4px);
-  border-color: #20dfff !important;
-  box-shadow: 0 0 18px #20dfff35;
+  border-color: #84ff20 !important;
+  box-shadow: 0 0 18px #84ff2035;
 }
 
 [id^="attackButton"]:disabled {
@@ -613,14 +613,14 @@ body {
   height: 115px;
   margin: 0 0 12px;
   object-fit: cover;
-  border: 1px solid #536b91;
+  border: 1px solid #6cad37;
   border-radius: 4px;
 }
 
 [id^="attackName"] {
   min-height: 26px;
   margin: 0 0 10px;
-  color: #8cecff;
+  color: #c0ff8c;
   font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.3px;
@@ -635,7 +635,7 @@ body {
 [id^="attackDamage"],
 [id^="attackMana"] {
   margin-bottom: 6px;
-  color: #d5e3ff;
+  color: #e8ffd5;
   font-size: 0.88rem;
 }
 
@@ -645,8 +645,8 @@ body {
   margin-top: auto;
   padding: 10px;
   color: #fff !important;
-  background: linear-gradient(90deg, #087d51, #0ca66b) !important;
-  border: 1px solid #35f0a1 !important;
+  background: linear-gradient(90deg, #4c7d08, #66a60c) !important;
+  border: 1px solid #a2f035 !important;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 800;
@@ -671,17 +671,17 @@ body {
   width: 100%;
   max-width: 320px;
   overflow: hidden;
-  color: #f1f5ff;
-  background: linear-gradient(145deg, #291526, #101020);
-  border: 2px solid #ff496b;
+  color: #f7fff1;
+  background: linear-gradient(145deg, #1a241d, #141c17);
+  border: 2px solid #ff7349;
   border-radius: 8px;
-  box-shadow: 0 0 22px #ff315b25;
+  box-shadow: 0 0 22px #ff613125;
 }
 
 #aiAttackHeader {
   padding: 12px;
   color: #fff;
-  background: linear-gradient(90deg, #a51e3d, #54182b);
+  background: linear-gradient(90deg, #a53e1e, #2d3f33);
   font-weight: 800;
   letter-spacing: 1.5px;
   text-align: center;
@@ -693,12 +693,12 @@ body {
 }
 
 #aiAttackName {
-  color: #ff7892;
+  color: #ff9878;
   font-weight: 800;
 }
 
 #aiAttackStats {
-  color: #d9e3fa;
+  color: #e8fad9;
 }
 
 /* =========================================================
@@ -730,8 +730,8 @@ body {
 }
 
 #evadeButton {
-  background: linear-gradient(135deg, #087d51, #0ca66b);
-  border: 1px solid #35f0a1;
+  background: linear-gradient(135deg, #4c7d08, #66a60c);
+  border: 1px solid #a2f035;
 }
 
 #defendButton:hover:not(:disabled),
@@ -755,7 +755,7 @@ body {
   align-items: center;
   min-height: 70vh;
   padding: 30px 16px;
-  color: #f1f5ff;
+  color: #f7fff1;
 }
 
 #victoryCard {
@@ -765,11 +765,11 @@ body {
   padding: 35px 30px 25px;
   text-align: center;
   background:
-    radial-gradient(ellipse at top, #153d50 0%, transparent 65%),
-    linear-gradient(145deg, #101d35, #080f1e);
-  border: 1px solid #17d8ff;
+    radial-gradient(ellipse at top, #2a3b30 0%, transparent 65%),
+    linear-gradient(145deg, #1d2821, #101612);
+  border: 1px solid #7fff17;
   border-radius: 18px;
-  box-shadow: 0 0 12px #17d8ff30, 0 0 35px #087dce20;
+  box-shadow: 0 0 12px #7fff1730, 0 0 35px #61ce0820;
 }
 
 #victoryIcon {
@@ -780,15 +780,15 @@ body {
   height: 82px;
   margin: 0 auto 15px;
   font-size: 2.8rem;
-  background: #132d49;
-  border: 2px solid #25d9ff;
+  background: #27352c;
+  border: 2px solid #87ff25;
   border-radius: 50%;
-  box-shadow: 0 0 15px #17d8ff45, inset 0 0 15px #17d8ff15;
+  box-shadow: 0 0 15px #7fff1745, inset 0 0 15px #7fff1715;
 }
 
 #victoryEyebrow {
   margin: 0 0 8px;
-  color: #53dfff;
+  color: #a0ff53;
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 4px;
@@ -800,12 +800,12 @@ body {
   font-size: clamp(2.3rem, 7vw, 3.5rem);
   font-weight: 900;
   letter-spacing: 3px;
-  text-shadow: 0 0 10px #16cfff90, 0 0 25px #16cfff40;
+  text-shadow: 0 0 10px #7fff1690, 0 0 25px #7fff1640;
 }
 
 #victoryMessage {
   margin: 10px 0 22px;
-  color: #b8cce9;
+  color: #cee9b8;
   font-size: 1rem;
 }
 
@@ -813,12 +813,12 @@ body {
   width: 100%;
   height: 1px;
   margin: 0 auto 22px;
-  background: linear-gradient(90deg, transparent, #17d8ff, transparent);
+  background: linear-gradient(90deg, transparent, #7fff17, transparent);
 }
 
 #victoryResultsTitle {
   margin: 0 0 15px;
-  color: #d7e7ff;
+  color: #e9ffd7;
   font-size: 1rem;
   font-weight: 800;
   letter-spacing: 2px;
@@ -836,7 +836,7 @@ body {
   gap: 12px;
   padding: 13px 15px;
   text-align: left;
-  background: #0a1528;
+  background: #151d18;
   border: 1px solid #ffffff18;
   border-radius: 10px;
 }
@@ -847,12 +847,12 @@ body {
 
 .victoryStatLabel {
   flex: 1;
-  color: #c7d8f3;
+  color: #dbf3c7;
   font-size: 0.95rem;
 }
 
 .victoryStat strong {
-  color: #53dfff;
+  color: #a0ff53;
   font-size: 1.1rem;
   font-weight: 900;
 }
@@ -867,14 +867,14 @@ body {
 
 #victoryFooter p {
   margin: 0;
-  color: #53dfff;
+  color: #a0ff53;
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 2px;
 }
 
 #victoryFooterIcon {
-  color: #53dfff;
+  color: #a0ff53;
   font-size: 1rem;
 }
 
@@ -897,23 +897,23 @@ body {
   color: #f5f5f5;
   text-align: center;
   background:
-    radial-gradient(ellipse at top, #51202a 0%, transparent 65%),
-    linear-gradient(145deg, #21131c, #0c101d 75%);
-  border: 2px solid #ff4059;
+    radial-gradient(ellipse at top, #5d2514 0%, transparent 65%),
+    linear-gradient(145deg, #161e19, #111813 75%);
+  border: 2px solid #ff6d40;
   border-radius: 18px;
-  box-shadow: 0 0 12px #ff405955, 0 0 35px #ff253522, inset 0 0 25px #ff40590d;
+  box-shadow: 0 0 12px #ff6d4055, 0 0 35px #ff582522, inset 0 0 25px #ff6d400d;
   animation: gameOverAppear 1s ease-out;
 }
 
 #gameOverIcon {
   margin-bottom: 8px;
   font-size: 3.5rem;
-  filter: drop-shadow(0 0 12px #ff4059);
+  filter: drop-shadow(0 0 12px #ff6d40);
 }
 
 #gameOverEyebrow {
   margin-bottom: 8px;
-  color: #ff8292;
+  color: #ff9f82;
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 3px;
@@ -921,15 +921,15 @@ body {
 
 #gameOverTitle {
   margin-bottom: 12px;
-  color: #ff4059;
+  color: #ff6d40;
   font-size: clamp(2.3rem, 7vw, 3.5rem);
   font-weight: 900;
   letter-spacing: 2px;
-  text-shadow: 0 0 18px #ff405966;
+  text-shadow: 0 0 18px #ff6d4066;
 }
 
 #gameOverMessage {
-  color: #d9dce8;
+  color: #dff0d1;
   line-height: 1.6;
 }
 
@@ -937,7 +937,7 @@ body {
   width: 75%;
   height: 2px;
   margin: 24px auto;
-  background: linear-gradient(90deg, transparent, #ff4059, transparent);
+  background: linear-gradient(90deg, transparent, #ff6d40, transparent);
 }
 
 #gameOverResultsTitle {
@@ -962,16 +962,16 @@ body {
   padding: 12px 14px;
   text-align: left;
   background: #ffffff08;
-  border: 1px solid #ff405926;
+  border: 1px solid #ff6d4026;
   border-radius: 8px;
 }
 
 .gameOverStat span {
-  color: #dce3f5;
+  color: #e7f5dc;
 }
 
 .gameOverStat strong {
-  color: #ff8292;
+  color: #ff9f82;
   font-size: 1.1rem;
 }
 
@@ -981,7 +981,7 @@ body {
   align-items: center;
   gap: 12px;
   margin-top: 25px;
-  color: #ff8292;
+  color: #ff9f82;
 }
 
 #gameOverFooter p {
@@ -1018,7 +1018,7 @@ body {
   overflow-wrap: anywhere;
   padding: 18px 28px;
   color: #fff;
-  background: #101525;
+  background: #161f19;
   border: 3px solid #fff;
   border-radius: 10px;
   text-align: center;
@@ -1037,32 +1037,32 @@ body {
 }
 
 .combat-popup.evaded {
-  color: #66f5c4;
-  border-color: #66f5c4;
-  text-shadow: 0 0 12px #66f5c480;
-  box-shadow: 0 0 25px #35e7a455;
+  color: #b9f566;
+  border-color: #b9f566;
+  text-shadow: 0 0 12px #b9f56680;
+  box-shadow: 0 0 25px #9de73555;
 }
 
 .combat-popup.hit,
 .combat-popup.opponent-blocked {
-  color: #ff6278;
-  border-color: #ff4059;
-  text-shadow: 0 0 12px #ff405980;
-  box-shadow: 0 0 25px #ff405955;
+  color: #ff8762;
+  border-color: #ff6d40;
+  text-shadow: 0 0 12px #ff6d4080;
+  box-shadow: 0 0 25px #ff6d4055;
 }
 
 .combat-popup.opponent-evaded {
-  color: #c18aff;
-  border-color: #a855f7;
-  text-shadow: 0 0 12px #a855f780;
-  box-shadow: 0 0 25px #a855f755;
+  color: #bfff8a;
+  border-color: #9ef755;
+  text-shadow: 0 0 12px #9ef75580;
+  box-shadow: 0 0 25px #9ef75555;
 }
 
 .combat-popup.buff {
-  color: #62d9ff;
-  border-color: #00c8ff;
-  text-shadow: 0 0 12px #00c8ff;
-  box-shadow: 0 0 25px #00c8ff66;
+  color: #a9ff62;
+  border-color: #73ff00;
+  text-shadow: 0 0 12px #73ff00;
+  box-shadow: 0 0 25px #73ff0066;
 }
 
 #combatPopup {
@@ -1075,7 +1075,7 @@ body {
   transform: translate(-50%, -50%);
   pointer-events: auto;
   color: #fff;
-  background: #101525;
+  background: #161f19;
   border: 3px solid #fff;
   border-radius: 10px;
   text-align: center;
@@ -1093,32 +1093,32 @@ body {
 }
 
 #combatPopup.evaded {
-  color: #66f5c4;
-  border-color: #66f5c4;
-  text-shadow: 0 0 12px #66f5c480;
-  box-shadow: 0 0 25px #35e7a455;
+  color: #b9f566;
+  border-color: #b9f566;
+  text-shadow: 0 0 12px #b9f56680;
+  box-shadow: 0 0 25px #9de73555;
 }
 
 #combatPopup.hit,
 #combatPopup.opponent-blocked {
-  color: #ff6278;
-  border-color: #ff4059;
-  text-shadow: 0 0 12px #ff405980;
-  box-shadow: 0 0 25px #ff405955;
+  color: #ff8762;
+  border-color: #ff6d40;
+  text-shadow: 0 0 12px #ff6d4080;
+  box-shadow: 0 0 25px #ff6d4055;
 }
 
 #combatPopup.opponent-evaded {
-  color: #c18aff;
-  border-color: #a855f7;
-  text-shadow: 0 0 12px #a855f780;
-  box-shadow: 0 0 25px #a855f755;
+  color: #bfff8a;
+  border-color: #9ef755;
+  text-shadow: 0 0 12px #9ef75580;
+  box-shadow: 0 0 25px #9ef75555;
 }
 
 #combatPopup.buff {
-  color: #62d9ff;
-  border-color: #00c8ff;
-  text-shadow: 0 0 12px #00c8ff;
-  box-shadow: 0 0 25px #00c8ff66;
+  color: #a9ff62;
+  border-color: #73ff00;
+  text-shadow: 0 0 12px #73ff00;
+  box-shadow: 0 0 25px #73ff0066;
 }
 
 @keyframes combatPopupAnimation {
@@ -1143,15 +1143,15 @@ body {
 
 /* Message types */
 .combat-popup.blocked {
-  border: 2px solid #42a5f5;
+  border: 2px solid #93f542;
 }
 
 .combat-popup.evaded {
-  border: 2px solid #4de1a1;
+  border: 2px solid #a3e14d;
 }
 
 .combat-popup.hit {
-  border: 2px solid #ff5263;
+  border: 2px solid #ff7a52;
 }
 
 /* Keep the animation comfortable on smaller screens */
@@ -1580,7 +1580,7 @@ body {
    ========================================================= */
 
 #opponent.battle-status-panel {
-  --panel-accent: #ff304f;
+  --panel-accent: #ff6030;
 
   display: grid;
   grid-template-columns: 190px minmax(0, 1fr);
@@ -1593,22 +1593,22 @@ body {
   /* Restore the red arcade panel effects */
   background: linear-gradient(
     115deg,
-    #35101b,
-    #10121d 58%,
-    #210e19
+    #1d2821,
+    #131a15 58%,
+    #141b16
   );
 
-  border: 2px solid #ff304f;
+  border: 2px solid #ff6030;
   box-shadow: inset 0 0 20px #00000050;
   filter:
-    drop-shadow(0 0 5px #ff304f59)
-    drop-shadow(0 0 14px #ff304f29);
+    drop-shadow(0 0 5px #ff603059)
+    drop-shadow(0 0 14px #ff603029);
   transition: filter 0.25s ease, background 0.25s ease;
 }
 
 /* Preserve the angular inner frame */
 #opponent.battle-status-panel::before {
-  border-color: #ff304f40;
+  border-color: #ff603040;
 }
 
 /* Portrait and meters occupy the same left column as the character */
@@ -1637,21 +1637,21 @@ body {
   margin: 0;
   object-fit: cover;
   object-position: center;
-  background: #08101e;
-  border: 2px solid #ff3159;
+  background: #101612;
+  border: 2px solid #ff6131;
   border-radius: 0;
   clip-path: polygon(0 0, 88% 0, 100% 12%, 100% 100%, 0 100%);
   box-shadow:
-    0 0 0 2px #170b17,
-    0 0 10px #ff31594a;
+    0 0 0 2px #0e1410,
+    0 0 10px #ff61314a;
   transition: filter 0.25s ease, box-shadow 0.25s ease;
 }
 
 #opponent:hover #opponentImage {
   filter: brightness(1.08) saturate(1.12);
   box-shadow:
-    0 0 0 2px #170b17,
-    0 0 16px #ff315980;
+    0 0 0 2px #0e1410,
+    0 0 16px #ff613180;
 }
 
 /* Health and Mana vertical meters */
@@ -1684,7 +1684,7 @@ body {
   width: 100%;
   min-width: 22px;
   height: 190px;
-  background: #091321;
+  background: #121814;
   border: 1px solid #ffffff25;
   border-radius: 6px;
 }
@@ -1696,21 +1696,21 @@ body {
 }
 
 #opponentSideMeters .healthMeter {
-  border-color: #ff456650;
+  border-color: #ff704550;
 }
 
 #opponentSideMeters .healthMeter .verticalMeterFill {
-  background: linear-gradient(to top, #b91e42, #ff4566);
-  box-shadow: 0 0 10px #ff456650;
+  background: linear-gradient(to top, #b9421e, #ff7045);
+  box-shadow: 0 0 10px #ff704550;
 }
 
 #opponentSideMeters .manaMeter {
-  border-color: #13d5ff50;
+  border-color: #7dff1350;
 }
 
 #opponentSideMeters .manaMeter .verticalMeterFill {
-  background: linear-gradient(to top, #0874d1, #13d5ff);
-  box-shadow: 0 0 10px #13d5ff50;
+  background: linear-gradient(to top, #62d108, #7dff13);
+  box-shadow: 0 0 10px #7dff1350;
 }
 
 #opponentSideMeters .verticalMeter span {
@@ -1733,7 +1733,7 @@ body {
 }
 
 #opponentSideMeters .verticalMeterGroup small {
-  color: #a9c7d9;
+  color: #bee1a1;
   font-size: 9px;
   line-height: 1.2;
   letter-spacing: 0.3px;
@@ -1749,8 +1749,8 @@ body {
   z-index: 2;
   width: 36%;
   margin: 0;
-  color: #fff0f3;
-  text-shadow: 0 0 8px #ff315940, 0 0 18px #ff31591a;
+  color: #fff3f0;
+  text-shadow: 0 0 8px #ff613140, 0 0 18px #ff61311a;
 }
 
 /* Defense and Agility bars */
@@ -1783,7 +1783,7 @@ body {
   align-items: center;
   gap: 5px;
   margin-bottom: 7px;
-  color: #f1f5f9;
+  color: #f4faf0;
   font-size: 14px;
   font-weight: 700;
 }
@@ -1799,8 +1799,8 @@ body {
   width: 100%;
   height: 16px !important;
   overflow: hidden;
-  background-color: #252b3b;
-  border: 1px solid #414b60;
+  background-color: #28382d;
+  border: 1px solid #4c7a27;
   border-radius: 6px;
   box-shadow: inset 0 1px 3px #00000080;
 }
@@ -1831,11 +1831,11 @@ body {
   gap: 8px;
   min-width: 0;
   padding: 8px 10px;
-  color: #b9cde0;
+  color: #cae7b2;
   font-size: 0.7rem;
-  background: linear-gradient(135deg, #301521, #0a1423);
-  border: 1px solid #ff304f45;
-  border-left: 3px solid #ff304f;
+  background: linear-gradient(135deg, #1d2821, #131a15);
+  border: 1px solid #ff603045;
+  border-left: 3px solid #ff6030;
   border-radius: 4px;
 }
 
@@ -2025,8 +2025,8 @@ body {
   display: inline-block;
   padding: 4px 8px;
   border-radius: 5px;
-  background: rgba(255, 49, 89, 0.12);
-  color: #ff3159;
+  background: #ff61311f;
+  color: #ff6131;
   font-weight: 700;
 }
 
@@ -2052,11 +2052,11 @@ body {
 }
 
 .buff-heading {
-  color: #198754;
+  color: #598719;
 }
 
 .debuff-heading {
-  color: #ff3159;
+  color: #ff6131;
 }
 
 .attack-effect-list {
@@ -2078,13 +2078,13 @@ body {
 }
 
 .attack-effect.buff {
-  background: rgba(25, 135, 84, 0.14);
-  color: #198754;
+  background: #59871924;
+  color: #598719;
 }
 
 .attack-effect.debuff {
-  background: rgba(255, 49, 89, 0.12);
-  color: #ff3159;
+  background: #ff61311f;
+  color: #ff6131;
 }
 
 /* Attack button includes mana cost */
@@ -2107,21 +2107,21 @@ body {
   cursor: pointer;
 
   /* Restore the dark fighting-game appearance */
-  background: #101b2d;
+  background: #1a231d;
   color: #ffffff;
-  border: 1px solid #13d5ff;
+  border: 1px solid #7dff13;
   border-radius: 12px;
-  box-shadow: 0 0 8px rgba(19, 213, 255, 0.15);
+  box-shadow: 0 0 8px #7dff1326;
   transition:
     box-shadow 0.2s ease,
     border-color 0.2s ease;
 }
 
 .attack-card:hover {
-  background: #101b2d;
+  background: #1a231d;
   color: #ffffff;
-  border-color: #13d5ff;
-  box-shadow: 0 0 16px rgba(19, 213, 255, 0.4);
+  border-color: #7dff13;
+  box-shadow: 0 0 16px #7dff1366;
 }
 
 /* Popup hidden until the card is hovered */
@@ -2139,11 +2139,11 @@ body {
   overflow-y: auto;
 
   padding: 12px;
-  background: #080d1c;
+  background: #0f1511;
   color: #ffffff;
-  border: 1px solid #13d5ff;
+  border: 1px solid #7dff13;
   border-radius: 10px;
-  box-shadow: 0 0 18px rgba(19, 213, 255, 0.35);
+  box-shadow: 0 0 18px #7dff1359;
 
   z-index: 200;
   opacity: 0;
@@ -2199,7 +2199,7 @@ body {
 /* Scrollbar styling */
 .attack-effects-popup {
   scrollbar-width: thin;
-  scrollbar-color: #13d5ff #101b2d;
+  scrollbar-color: #7dff13 #1a231d;
 }
 
 .attack-effects-popup::-webkit-scrollbar {
@@ -2207,7 +2207,7 @@ body {
 }
 
 .attack-effects-popup::-webkit-scrollbar-thumb {
-  background: #13d5ff;
+  background: #7dff13;
   border-radius: 6px;
 }
 
@@ -2231,21 +2231,21 @@ body {
   overflow: visible !important;
   flex-shrink: 0;
   cursor: pointer;
-  background: #101b2d;
+  background: #1a231d;
   color: #ffffff;
-  border: 1px solid #13d5ff;
+  border: 1px solid #7dff13;
   border-radius: 12px;
-  box-shadow: 0 0 8px rgba(19, 213, 255, 0.15);
+  box-shadow: 0 0 8px #7dff1326;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 /* Keep the card dark when hovered or focused */
 .attack-card:hover:not(:disabled),
 .attack-card:focus-visible {
-  background: #101b2d;
+  background: #1a231d;
   color: #ffffff;
-  border-color: #13d5ff;
-  box-shadow: 0 0 16px rgba(19, 213, 255, 0.4);
+  border-color: #7dff13;
+  box-shadow: 0 0 16px #7dff1366;
 }
 
 .attack-card:disabled {
@@ -2255,8 +2255,8 @@ body {
 
 /* Compact, readable mana-cost label */
 .attack-cost-button {
-  background-color: #28a745 !important;
-  border-color: #28a745 !important;
+  background-color: #72a728 !important;
+  border-color: #72a728 !important;
   color: white !important;
   display: block !important;
   width: fit-content !important;
@@ -2332,24 +2332,24 @@ body {
   box-sizing: border-box;
   overflow: hidden;
 
-  color: #f2f5f9;
-  background: linear-gradient(160deg, #151e2c, #0b101b);
-  border: 1px solid #13d5ff80;
+  color: #f5faf1;
+  background: linear-gradient(160deg, #1b261f, #101612);
+  border: 1px solid #7dff1380;
   border-radius: 10px;
 
   box-shadow:
-    0 0 12px #13d5ff15,
+    0 0 12px #7dff1315,
     inset 0 0 12px #00000030;
 }
 
 #battleLayout #combatLogHeader {
   padding: 14px;
-  background: #101b2d;
-  border-bottom: 1px solid #13d5ff50;
+  background: #1a231d;
+  border-bottom: 1px solid #7dff1350;
 }
 
 #battleLayout #combatLogHeader h4 {
-  color: #13d5ff;
+  color: #7dff13;
   font-size: 0.95rem;
   letter-spacing: 1px;
 }
@@ -2365,7 +2365,7 @@ body {
   padding: 8px 12px;
 
   scrollbar-width: thin;
-  scrollbar-color: #13d5ff #101b2d;
+  scrollbar-color: #7dff13 #1a231d;
 }
 
 #battleLayout .combat-log-entry {
@@ -2428,9 +2428,9 @@ body {
 .resultScreenButtons button {
   min-width: 160px;
   padding: 13px 20px;
-  border: 1px solid #13d5ff;
+  border: 1px solid #7dff13;
   border-radius: 5px;
-  background: #102333;
+  background: #1c2720;
   color: #ffffff;
   font-family: inherit;
   font-weight: 800;
@@ -2443,8 +2443,8 @@ body {
 }
 
 .resultScreenButtons button:hover {
-  background: #16415a;
-  box-shadow: 0 0 14px rgba(19, 213, 255, 0.3);
+  background: #2f4135;
+  box-shadow: 0 0 14px #7dff134d;
   transform: translateY(-2px);
 }
 
@@ -2477,8 +2477,8 @@ body {
   justify-content: center;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at center, #1b3158e8 0%, #080d1cf5 65%),
-    #080d1c;
+    radial-gradient(ellipse at center, #36581be8 0%, #0f1511f5 65%),
+    #0f1511;
   animation: roundOverlayFade 2s ease forwards;
   pointer-events: auto;
 }
@@ -2493,11 +2493,11 @@ body {
 #roundIntroEyebrow {
   display: block;
   margin-bottom: 12px;
-  color: #13d5ff;
+  color: #7dff13;
   font-size: clamp(0.9rem, 2vw, 1.3rem);
   font-weight: 900;
   letter-spacing: 0.7em;
-  text-shadow: 0 0 18px #13d5ff80;
+  text-shadow: 0 0 18px #7dff1380;
 }
 
 #roundIntroContent h1 {
@@ -2509,9 +2509,9 @@ body {
   line-height: 1;
   letter-spacing: -0.04em;
   text-shadow:
-    0 0 12px #13d5ff80,
-    0 0 38px #13d5ff45,
-    5px 5px 0 #102d49;
+    0 0 12px #7dff1380,
+    0 0 38px #7dff1345,
+    5px 5px 0 #25342a;
   animation: roundTitleImpact 0.65s cubic-bezier(.16, 1, .3, 1) both;
 }
 
@@ -2522,18 +2522,18 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    #13d5ff,
+    #7dff13,
     #ffffff,
-    #13d5ff,
+    #7dff13,
     transparent
   );
-  box-shadow: 0 0 18px #13d5ff90;
+  box-shadow: 0 0 18px #7dff1390;
   animation: roundLineExpand 0.8s ease both;
 }
 
 #roundIntroContent > p {
   margin: 0;
-  color: #cbdcf3;
+  color: #ddf3cb;
   font-size: clamp(0.8rem, 2vw, 1.1rem);
   font-weight: 900;
   letter-spacing: 0.5em;
@@ -2553,8 +2553,8 @@ body {
   overflow: hidden;
   padding: 20px;
   background:
-    radial-gradient(ellipse at center, #9e1029e8 0%, #430713f5 65%),
-    #24040b;
+    radial-gradient(ellipse at center, #9e3110e8 0%, #1f2b23f5 65%),
+    #111713;
   animation: knockoutScreenFlash 0.65s ease-out both;
 }
 
@@ -2568,7 +2568,7 @@ body {
 #knockoutEyebrow {
   display: block;
   margin-bottom: 12px;
-  color: #ffd7df;
+  color: #ffe0d7;
   font-size: clamp(0.85rem, 2vw, 1.3rem);
   font-weight: 900;
   letter-spacing: 0.55em;
@@ -2584,14 +2584,14 @@ body {
   letter-spacing: -0.06em;
   text-shadow:
     0 0 12px #ffffff80,
-    0 0 35px #ff1b43,
-    8px 8px 0 #590416;
+    0 0 35px #ff501b,
+    8px 8px 0 #27362c;
   animation: knockoutTitleImpact 0.6s cubic-bezier(.16, 1, .3, 1) both;
 }
 
 #knockoutDefeated {
   margin: 28px 0 8px;
-  color: #ffdce2;
+  color: #ffe4dc;
   font-size: clamp(1rem, 3vw, 1.6rem);
   font-weight: 900;
   letter-spacing: 0.15em;
@@ -2604,7 +2604,7 @@ body {
   font-size: clamp(1rem, 3vw, 1.7rem);
   font-weight: 900;
   letter-spacing: 0.12em;
-  text-shadow: 0 0 14px #ffb7c580;
+  text-shadow: 0 0 14px #ffc8b780;
   animation: knockoutWinnerPulse 0.9s ease-in-out 0.5s infinite alternate;
 }
 
@@ -2683,10 +2683,10 @@ body {
   }
   15% {
     opacity: 1;
-    background-color: #ff173b;
+    background-color: #ff4d17;
   }
   35% {
-    background-color: #31030c;
+    background-color: #161e19;
   }
   60%, 100% {
     opacity: 1;
@@ -2749,12 +2749,12 @@ body {
 
 @keyframes opponentAttackPulse {
   0%, 100% {
-    box-shadow: 0 0 22px #ff315b25;
+    box-shadow: 0 0 22px #ff613125;
   }
   50% {
     box-shadow:
-      0 0 20px #ff315b90,
-      0 0 40px #ff315b45;
+      0 0 20px #ff613190,
+      0 0 40px #ff613145;
   }
 }
 
@@ -2829,15 +2829,15 @@ body {
   background:
     radial-gradient(
       ellipse at 20% 50%,
-      rgba(255, 49, 89, 0.22),
+      #ff613138,
       transparent 45%
     ),
     radial-gradient(
       ellipse at 80% 50%,
-      rgba(19, 213, 255, 0.2),
+      #7dff1333,
       transparent 45%
     ),
-    rgba(3, 7, 17, 0.97);
+    #080c09f7;
 
   /* React controls the fade so the overlay is removed at the right time. */
   animation: none;
@@ -2877,13 +2877,13 @@ body {
 }
 
 .battle-intro-opponent {
-  --fighter-glow: rgba(255, 49, 89, 0.55);
-  --fighter-color: #ff3159;
+  --fighter-glow: #ff61318c;
+  --fighter-color: #ff6131;
 }
 
 .battle-intro-player {
-  --fighter-glow: rgba(19, 213, 255, 0.55);
-  --fighter-color: #13d5ff;
+  --fighter-glow: #7dff138c;
+  --fighter-color: #7dff13;
   animation-name: battleIntroFighterInRight;
 }
 
@@ -2915,7 +2915,7 @@ body {
 
 .battle-intro-hp {
   margin-top: 7px;
-  color: #d5deeb;
+  color: #def0d0;
   font-size: clamp(0.65rem, 1.2vw, 0.85rem);
   font-variant-numeric: tabular-nums;
 }
@@ -2927,7 +2927,7 @@ body {
   font-style: italic;
   text-shadow:
     0 0 12px rgba(255, 255, 255, 0.35),
-    0 0 30px rgba(255, 49, 89, 0.2);
+    0 0 30px #ff613133;
   animation: battleIntroVsPulse 1s ease-in-out infinite alternate;
 }
 
@@ -2936,7 +2936,7 @@ body {
   height: 10px;
   margin-top: 10px;
   overflow: hidden;
-  background: #10131c;
+  background: #121a15;
   border: 1px solid #ffffff55;
   border-radius: 999px;
   box-shadow: inset 0 1px 3px #0009;
@@ -2949,8 +2949,8 @@ body {
 }
 
 .battle-intro-healthbar.health-healthy .battle-intro-healthbar-fill {
-  background: #35df83;
-  box-shadow: 0 0 8px #35df8380;
+  background: #98df35;
+  box-shadow: 0 0 8px #98df3580;
 }
 
 .battle-intro-healthbar.health-warning .battle-intro-healthbar-fill {
@@ -2959,13 +2959,13 @@ body {
 }
 
 .battle-intro-healthbar.health-danger .battle-intro-healthbar-fill {
-  background: #ff343f;
-  box-shadow: 0 0 9px #ff343f99;
+  background: #ff6334;
+  box-shadow: 0 0 9px #ff633499;
 }
 
 .battle-intro-healthbar.health-critical .battle-intro-healthbar-fill {
-  background: #690018;
-  box-shadow: 0 0 7px #690018;
+  background: #2c3d32;
+  box-shadow: 0 0 7px #2c3d32;
 }
 
 @keyframes battleIntroFighterIn {
@@ -3001,8 +3001,8 @@ body {
 ========================================= */
 
 .battle-ko-overlay {
-  --ko-color: #13d5ff;
-  --ko-glow: rgba(19, 213, 255, 0.65);
+  --ko-color: #7dff13;
+  --ko-glow: #7dff13a6;
 
   position: fixed;
   inset: 0;
@@ -3015,18 +3015,18 @@ body {
   isolation: isolate;
   color: #fff;
   background:
-    radial-gradient(ellipse at center, #33101b 0%, #100810 48%, #03050b 100%);
+    radial-gradient(ellipse at center, #1c2720 0%, #0a0e0b 48%, #060807 100%);
   animation: battleKoScreenEnter 0.35s ease-out both;
 }
 
 .battle-ko-overlay.ko-opponent {
-  --ko-color: #ff3159;
-  --ko-glow: rgba(255, 49, 89, 0.7);
+  --ko-color: #ff6131;
+  --ko-glow: #ff6131b3;
 }
 
 .battle-ko-overlay.ko-player {
-  --ko-color: #13d5ff;
-  --ko-glow: rgba(19, 213, 255, 0.65);
+  --ko-color: #7dff13;
+  --ko-glow: #7dff13a6;
 }
 
 .battle-ko-flash {
@@ -3078,7 +3078,7 @@ body {
   letter-spacing: -0.07em;
   -webkit-text-stroke: 2px var(--ko-color);
   text-shadow:
-    4px 4px 0 #5d071b,
+    4px 4px 0 #2a3a2f,
     0 0 14px var(--ko-glow),
     0 0 38px var(--ko-glow);
   animation: battleKoTitleImpact 0.55s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -3166,8 +3166,8 @@ body {
 ========================================= */
 
 .battle-finish-overlay {
-  --finish-color: #13d5ff;
-  --finish-glow: #13d5ff88;
+  --finish-color: #7dff13;
+  --finish-glow: #7dff1388;
 
   position: fixed;
   inset: 0;
@@ -3181,13 +3181,13 @@ body {
   color: #fff;
   text-align: center;
   background:
-    radial-gradient(ellipse at center, #222b40 0%, #0a0d17 65%, #020309 100%);
+    radial-gradient(ellipse at center, #29392e 0%, #0e1310 65%, #050605 100%);
   animation: battleFinishEnter 450ms ease-out both;
 }
 
 .battle-finish-overlay.finish-defeat {
-  --finish-color: #ff3159;
-  --finish-glow: #ff315988;
+  --finish-color: #ff6131;
+  --finish-glow: #ff613188;
 }
 
 .battle-finish-flash {
@@ -3227,7 +3227,7 @@ body {
 
 .battle-finish-message {
   margin: 12px 0 24px;
-  color: #e3eaf6;
+  color: #ecf6e3;
   font-size: clamp(0.65rem, 1.7vw, 0.95rem);
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -3261,7 +3261,7 @@ body {
   max-width: 260px;
   margin: 0 auto;
   padding: 10px;
-  background: #111827cc;
+  background: #18201bcc;
   border: 1px solid var(--finish-color);
   border-radius: 10px;
   box-shadow: 0 0 22px var(--finish-glow);
@@ -3298,7 +3298,7 @@ body {
 }
 
 .defeated-side .battle-finish-card span {
-  color: #ff7187;
+  color: #ff9271;
 }
 
 .battle-finish-vs {
@@ -3311,7 +3311,7 @@ body {
 
 .battle-finish-footer {
   margin: 22px 0 0;
-  color: #aab7ca;
+  color: #b6de96;
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.3em;
@@ -3477,14 +3477,14 @@ body {
 @keyframes opponentPanelImpact {
   0%, 100% {
     filter:
-      drop-shadow(0 0 5px #ff304f59)
-      drop-shadow(0 0 14px #ff304f29);
+      drop-shadow(0 0 5px #ff603059)
+      drop-shadow(0 0 14px #ff603029);
   }
 
   45% {
     filter:
-      drop-shadow(0 0 12px #ff304f)
-      drop-shadow(0 0 30px #ff304f99);
+      drop-shadow(0 0 12px #ff6030)
+      drop-shadow(0 0 30px #ff603099);
   }
 }
 
@@ -3577,13 +3577,13 @@ body {
   position: relative;
   overflow: hidden;
   padding: 0;
-  color: #f5f7ff;
-  background: linear-gradient(145deg, #191b27, #0c0d13);
-  border: 1px solid #ff3159;
+  color: #fafff5;
+  background: linear-gradient(145deg, #1b251e, #0d120f);
+  border: 1px solid #ff6131;
   border-radius: 12px;
   box-shadow:
-    0 0 12px rgb(255 49 89 / 18%),
-    inset 0 0 20px rgb(255 49 89 / 5%);
+    0 0 12px #ff61312e,
+    inset 0 0 20px #ff61310d;
 }
 
 #aiAttackHeader {
@@ -3591,9 +3591,9 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  color: #ff8197;
-  background: rgb(255 49 89 / 10%);
-  border-bottom: 1px solid rgb(255 49 89 / 30%);
+  color: #ff9e81;
+  background: #ff61311a;
+  border-bottom: 1px solid #ff61314d;
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 2px;
@@ -3602,9 +3602,9 @@ body {
 .attack-warning-dot {
   width: 8px;
   height: 8px;
-  background: #ff3159;
+  background: #ff6131;
   border-radius: 50%;
-  box-shadow: 0 0 10px #ff3159;
+  box-shadow: 0 0 10px #ff6131;
   animation: warningPulse 0.8s ease-in-out infinite alternate;
 }
 
@@ -3640,8 +3640,8 @@ body {
   gap: 5px;
   padding: 10px 5px;
   color: #fff;
-  background: #151720;
-  border: 2px solid #414453;
+  background: #161f19;
+  border: 2px solid #467024;
   border-radius: 9px;
   text-align: center;
   transition:
@@ -3674,36 +3674,36 @@ body {
 /* Damage threat colors */
 
 .threat-very-safe {
-  background: #123d2a;
-  border-color: #176b43;
+  background: #212e25;
+  border-color: #486b17;
 }
 
 .threat-safe {
-  background: #176b36;
-  border-color: #2acb67;
+  background: #486b17;
+  border-color: #88cb2a;
 }
 
 .threat-moderate {
-  color: #171304;
+  color: #0b100d;
   background: #e7c52f;
   border-color: #ffe66d;
 }
 
 .threat-hazardous {
-  background: #8a3919;
+  background: #8a3319;
   border-color: #ff8138;
-  box-shadow: inset 0 0 12px rgb(255 129 56 / 12%);
+  box-shadow: inset 0 0 12px #ff81381f;
 }
 
 .threat-dangerous {
-  background: #761b29;
-  border-color: #d82c45;
+  background: #782f19;
+  border-color: #d8542c;
 }
 
 .threat-life-threatening {
-  background: #470b17;
-  border-color: #9c1732;
-  box-shadow: inset 0 0 14px rgb(255 0 55 / 12%);
+  background: #223027;
+  border-color: #9c3617;
+  box-shadow: inset 0 0 14px #ff3c001f;
 }
 
 .threat-death {
@@ -3715,11 +3715,11 @@ body {
 /* Speed threat colors */
 
 .speed-easy {
-  border-color: #4e9a6c;
+  border-color: #7dac3c;
 }
 
 .speed-avoidable {
-  border-color: #38bd77;
+  border-color: #86bd38;
 }
 
 .speed-challenging {
@@ -3731,31 +3731,31 @@ body {
 }
 
 .speed-very-fast {
-  border-color: #ed414e;
+  border-color: #ed6941;
 }
 
 .speed-unavoidable {
-  border-color: #a91d39;
-  box-shadow: inset 0 0 12px rgb(255 0 55 / 10%);
+  border-color: #a93e1d;
+  box-shadow: inset 0 0 12px #ff3c001a;
 }
 
 .speed-guaranteed {
   color: #fff;
   background: #050505;
-  border-color: #ff3159;
+  border-color: #ff6131;
   box-shadow:
-    0 0 10px rgb(255 49 89 / 18%),
-    inset 0 0 12px rgb(255 49 89 / 8%);
+    0 0 10px #ff61312e,
+    inset 0 0 12px #ff613114;
 }
 
 /* Mana cost remains neutral */
 
 .attack-cost-badge {
-  border-color: #51536a;
+  border-color: #598e2d;
 }
 
 .attack-cost-badge strong {
-  color: #bfc7ff;
+  color: #dcffbf;
 }
 
 /* =========================================
@@ -3779,8 +3779,8 @@ body {
   gap: 9px;
   padding: 13px 16px;
   color: #fff;
-  background: #171923;
-  border: 1px solid #414453;
+  background: #18221b;
+  border: 1px solid #467024;
   border-radius: 8px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -3792,16 +3792,16 @@ body {
 }
 
 #defendButton:not(:disabled):hover {
-  background: #123d2a;
-  border-color: #2acb67;
-  box-shadow: 0 0 14px rgb(42 203 103 / 20%);
+  background: #212e25;
+  border-color: #88cb2a;
+  box-shadow: 0 0 14px #88cb2a33;
   transform: translateY(-2px);
 }
 
 #evadeButton:hover {
-  background: #102e42;
-  border-color: #13d5ff;
-  box-shadow: 0 0 14px rgb(19 213 255 / 20%);
+  background: #223027;
+  border-color: #7dff13;
+  box-shadow: 0 0 14px #7dff1333;
   transform: translateY(-2px);
 }
 
@@ -3865,9 +3865,9 @@ body {
 #defenseTimer {
   margin: 12px 0;
   padding: 10px 12px;
-  border: 1px solid rgba(19, 213, 255, 0.35);
+  border: 1px solid #7dff1359;
   border-radius: 8px;
-  background: rgba(5, 18, 32, 0.85);
+  background: #101512d9;
   transition: border-color 0.2s ease;
 }
 
@@ -3880,14 +3880,14 @@ body {
 }
 
 #defenseTimerText span {
-  color: #a9c4d6;
+  color: #bce19e;
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 1.5px;
 }
 
 #defenseTimerText strong {
-  color: #13d5ff;
+  color: #7dff13;
   font-size: 1.25rem;
   font-variant-numeric: tabular-nums;
 }
@@ -3902,13 +3902,13 @@ body {
 #defenseTimerFill {
   height: 100%;
   border-radius: inherit;
-  background: #13d5ff;
-  box-shadow: 0 0 10px rgba(19, 213, 255, 0.65);
+  background: #7dff13;
+  box-shadow: 0 0 10px #7dff13a6;
   transition: width 0.9s linear, background 0.2s ease;
 }
 
 #defenseTimer.timer-warning {
-  border-color: rgba(255, 184, 77, 0.7);
+  border-color: #ffb84db3;
 }
 
 #defenseTimer.timer-warning #defenseTimerText strong {
@@ -3917,20 +3917,20 @@ body {
 
 #defenseTimer.timer-warning #defenseTimerFill {
   background: #ffb84d;
-  box-shadow: 0 0 10px rgba(255, 184, 77, 0.5);
+  box-shadow: 0 0 10px #ffb84d80;
 }
 
 #defenseTimer.timer-critical {
-  border-color: rgba(255, 49, 89, 0.85);
+  border-color: #ff6131d9;
 }
 
 #defenseTimer.timer-critical #defenseTimerText strong {
-  color: #ff3159;
+  color: #ff6131;
 }
 
 #defenseTimer.timer-critical #defenseTimerFill {
-  background: #ff3159;
-  box-shadow: 0 0 12px rgba(255, 49, 89, 0.7);
+  background: #ff6131;
+  box-shadow: 0 0 12px #ff6131b3;
 }
 
 
@@ -3952,13 +3952,13 @@ body {
   gap: 0.65rem;
   min-height: 54px;
   padding: 0.8rem 1.2rem;
-  border: 1px solid #ff6b6b;
+  border: 1px solid #ff8e6b;
   border-radius: 12px;
-  background: linear-gradient(135deg, #8f1d2c, #c0392b);
+  background: linear-gradient(135deg, #8f381d, #c24d29);
   color: #fff;
   font-weight: 800;
   letter-spacing: 0.06em;
-  box-shadow: 0 5px 16px rgb(192 57 43 / 30%);
+  box-shadow: 0 5px 16px #c24d294d;
   transition:
     transform 150ms ease,
     filter 150ms ease,
@@ -3968,7 +3968,7 @@ body {
 #takeDamageButton:hover:not(:disabled) {
   transform: translateY(-2px);
   filter: brightness(1.15);
-  box-shadow: 0 8px 20px rgb(192 57 43 / 45%);
+  box-shadow: 0 8px 20px #c24d2973;
 }
 
 #takeDamageButton:active:not(:disabled) {

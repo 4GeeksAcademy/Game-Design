@@ -2,10 +2,10 @@
 .shop-screen {
   min-height: 100vh;
   padding: 24px;
-  color: #f1f5ff;
+  color: #f7fff1;
   background:
-    radial-gradient(ellipse at top, #172440 0%, transparent 55%),
-    #080d1c;
+    radial-gradient(ellipse at top, #253229 0%, transparent 55%),
+    #0f1511;
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -20,17 +20,17 @@
 
 .shop-back-button {
   padding: 11px 16px;
-  color: #f1f5ff;
-  background: #121d32;
-  border: 1px solid #344661;
+  color: #f7fff1;
+  background: #1d2720;
+  border: 1px solid #477124;
   font-weight: 800;
   cursor: pointer;
   transition: 0.2s ease;
 }
 
 .shop-back-button:hover {
-  border-color: #13d5ff;
-  color: #13d5ff;
+  border-color: #7dff13;
+  color: #7dff13;
 }
 
 .shop-balance {
@@ -38,9 +38,9 @@
   align-items: center;
   gap: 9px;
   padding: 11px 16px;
-  color: #36e6a0;
-  background: rgba(54, 230, 160, 0.08);
-  border: 1px solid rgba(54, 230, 160, 0.5);
+  color: #9de636;
+  background: #9de63614;
+  border: 1px solid #9de63680;
   font-weight: 900;
 }
 
@@ -54,7 +54,7 @@
 }
 
 .shop-heading > p {
-  color: #13d5ff;
+  color: #7dff13;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 3px;
@@ -69,16 +69,16 @@
 }
 
 .shop-heading > span {
-  color: #aab7ce;
+  color: #b9df99;
 }
 
 .shop-message {
   max-width: 700px;
   margin: 0 auto 24px;
   padding: 12px;
-  color: #36e6a0;
-  background: rgba(54, 230, 160, 0.08);
-  border: 1px solid rgba(54, 230, 160, 0.35);
+  color: #9de636;
+  background: #9de63614;
+  border: 1px solid #9de63659;
   text-align: center;
 }
 
@@ -92,8 +92,8 @@
 
 .shop-card {
   overflow: hidden;
-  background: #101a2d;
-  border: 1px solid #293953;
+  background: #1a231d;
+  border: 1px solid #3b5e1e;
   transition:
     transform 0.2s ease,
     border-color 0.2s ease;
@@ -101,18 +101,18 @@
 
 .shop-card:hover {
   transform: translateY(-4px);
-  border-color: #13d5ff;
+  border-color: #7dff13;
 }
 
 .shop-card-unlocked {
-  border-color: rgba(54, 230, 160, 0.45);
+  border-color: #9de63673;
 }
 
 .shop-portrait {
   position: relative;
   height: 240px;
   overflow: hidden;
-  background: #0a1120;
+  background: #121814;
 }
 
 .shop-portrait img {
@@ -130,8 +130,8 @@
   place-items: center;
   width: 38px;
   height: 38px;
-  background: rgba(8, 13, 28, 0.9);
-  border: 1px solid #ff3159;
+  background: #0f1511e6;
+  border: 1px solid #ff6131;
   border-radius: 50%;
   font-size: 18px;
 }
@@ -148,7 +148,7 @@
 
 .shop-card-info p {
   min-height: 18px;
-  color: #36e6a0;
+  color: #9de636;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -157,8 +157,8 @@
 .shop-purchase-button {
   width: 100%;
   padding: 12px 8px;
-  color: #080d1c;
-  background: #36e6a0;
+  color: #0f1511;
+  background: #9de636;
   border: 0;
   font-size: 11px;
   font-weight: 1000;
@@ -167,14 +167,14 @@
 }
 
 .shop-purchase-button:hover:not(:disabled) {
-  background: #76ffc6;
-  box-shadow: 0 0 16px rgba(54, 230, 160, 0.25);
+  background: #c6ff76;
+  box-shadow: 0 0 16px #9de63640;
 }
 
 .shop-purchase-button:disabled {
-  color: #36e6a0;
-  background: rgba(54, 230, 160, 0.08);
-  border: 1px solid rgba(54, 230, 160, 0.35);
+  color: #9de636;
+  background: #9de63614;
+  border: 1px solid #9de63659;
   cursor: default;
 }
 

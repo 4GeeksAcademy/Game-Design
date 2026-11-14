@@ -1,5 +1,18 @@
-@import "bootstrap/dist/css/bootstrap.min.css";
+body {
+    background: var(--color-bg);
+    color: var(--color-text);
+}
 
-body{
-    background: white;
+:root {
+    color-scheme: dark;
+    --color-bg: #101512;
+    --color-surface: #191f1b;
+    --color-surface-raised: #232c26;
+    --color-border: #4d6a25;
+    --color-text: #f3f8eb;
+    --color-muted: #b1d382;
+    --color-primary: #c7f464;
+    --color-secondary: #ff825c;
+    --color-positive: #b3e66b;
+    --color-danger: #ff825c;
 }

@@ -1,14 +1,14 @@
 
 .character-select-screen {
-  --select-red: #ff3159;
-  --select-cyan: #13d5ff;
+  --select-red: var(--color-secondary);
+  --select-cyan: var(--color-primary);
 
   min-height: 100vh;
   padding: 24px clamp(16px, 4vw, 55px);
-  color: #f5f7ff;
+  color: #fafff5;
   background:
-    radial-gradient(ellipse at 50% 40%, #1a2945 0%, transparent 65%),
-    #080d1c;
+    radial-gradient(ellipse at 50% 40%, #28372d 0%, transparent 65%),
+    #0f1511;
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -34,9 +34,9 @@
 
 .select-back-button {
   padding: 12px 16px;
-  border: 1px solid #3b4a64;
-  background: #101a2d;
-  color: #e5edff;
+  border: 1px solid #4b7926;
+  background: #1a231d;
+  color: #f1ffe5;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -62,7 +62,7 @@
 
 .select-match-info span {
   padding: 9px 12px;
-  border: 1px solid #31415c;
+  border: 1px solid #436b22;
   color: var(--select-cyan);
   font-size: 10px;
   font-weight: 900;
@@ -87,11 +87,11 @@
   font-size: clamp(30px, 5vw, 48px);
   font-weight: 1000;
   font-style: italic;
-  text-shadow: 3px 3px 0 #6d172c;
+  text-shadow: 3px 3px 0 #6d2b17;
 }
 
 .select-heading > p:last-child {
-  color: #aebbd2;
+  color: #bde19f;
   font-size: 13px;
 }
 
@@ -109,8 +109,8 @@
 .roster-side {
   min-width: 0;
   padding: 18px;
-  border: 1px solid #34415a;
-  background: linear-gradient(145deg, #151e30, #0c1220);
+  border: 1px solid #436c22;
+  background: linear-gradient(145deg, #1d2821, #121a15);
 }
 
 .player-side {
@@ -140,15 +140,15 @@
 }
 
 .player-label {
-  color: #07111e;
+  color: #101512;
   background: var(--select-cyan);
-  box-shadow: 0 0 16px #13d5ff35;
+  box-shadow: 0 0 16px #7dff1335;
 }
 
 .cpu-label {
   color: white;
   background: var(--select-red);
-  box-shadow: 0 0 16px #ff315935;
+  box-shadow: 0 0 16px #ff613135;
 }
 
 .roster-side-heading h2 {
@@ -160,7 +160,7 @@
 
 .roster-side-heading p {
   margin: 0;
-  color: #8e9db6;
+  color: #9dd272;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -174,7 +174,7 @@
   font-size: 29px;
   font-weight: 1000;
   font-style: italic;
-  text-shadow: 0 0 18px #ff315955;
+  text-shadow: 0 0 18px #ff613155;
   transform: skew(-8deg);
 }
 
@@ -215,12 +215,12 @@
   flex-direction: column;
   gap: 6px;
   padding: 10px;
-  border: 1px solid #2b3850;
-  background: #101a2a;
+  border: 1px solid #3a5d1e;
+  background: #18221b;
 }
 
 .roster-stat-list span {
-  color: #96a5bf;
+  color: #a6d67f;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -242,7 +242,7 @@
 .roster-moves p {
   flex-basis: 100%;
   margin: 0 0 3px;
-  color: #aebbd2;
+  color: #bde19f;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 2px;
@@ -250,9 +250,9 @@
 
 .roster-moves span {
   padding: 7px 8px;
-  border: 1px solid #36425a;
-  background: #111b2c;
-  color: #e7edfa;
+  border: 1px solid #446d23;
+  background: #1a231d;
+  color: #f0fae7;
   font-size: 10px;
 }
 
@@ -266,25 +266,25 @@
   justify-content: center;
   gap: 10px;
   text-align: center;
-  background: radial-gradient(ellipse, #ff31590c, transparent 70%);
+  background: radial-gradient(ellipse, #ff61310c, transparent 70%);
 }
 
 .cpu-placeholder > span {
-  color: #ff3159;
+  color: #ff6131;
   font-size: 100px;
   font-weight: 1000;
   line-height: 1;
-  text-shadow: 0 0 25px #ff315930;
+  text-shadow: 0 0 25px #ff613130;
 }
 
 .cpu-placeholder strong {
-  color: #ff718b;
+  color: #ff9271;
   font-size: 10px;
   letter-spacing: 2px;
 }
 
 .cpu-placeholder p {
-  color: #8391a9;
+  color: #91cd5f;
   font-size: 11px;
 }
 
@@ -312,7 +312,7 @@
 }
 
 .roster-title-row > span {
-  color: #8292ac;
+  color: #92cd61;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -325,7 +325,7 @@
 }
 
 .roster-tile {
-  --tile-accent: #53617a;
+  --tile-accent: #619c31;
   position: relative;
   display: flex;
   min-width: 0;
@@ -336,10 +336,10 @@
   gap: 8px;
   padding: 28px 8px 14px;
   overflow: hidden;
-  border: 2px solid #2b3850;
+  border: 2px solid #3a5d1e;
   background:
-    radial-gradient(ellipse at 50% 35%, #26344b, transparent 70%),
-    #101726;
+    radial-gradient(ellipse at 50% 35%, #36561b, transparent 70%),
+    #171f1a;
   color: #fff;
   cursor: pointer;
   transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
@@ -360,12 +360,12 @@
 
 .roster-tile.p1-selected {
   border-color: var(--select-cyan);
-  box-shadow: inset 0 0 22px #13d5ff15, 0 0 14px #13d5ff25;
+  box-shadow: inset 0 0 22px #7dff1315, 0 0 14px #7dff1325;
 }
 
 .roster-tile.cpu-selected {
   border-color: var(--select-red);
-  box-shadow: inset 0 0 22px #ff315915, 0 0 14px #ff315930;
+  box-shadow: inset 0 0 22px #ff613115, 0 0 14px #ff613130;
 }
 
 .roster-tile.p1-selected.cpu-selected {
@@ -391,7 +391,7 @@
 
 .p1-cursor {
   background: var(--select-cyan);
-  color: #06111d;
+  color: #0f1411;
 }
 
 .cpu-cursor {
@@ -411,7 +411,7 @@
   width: 86px;
   height: 86px;
   border: 1px solid color-mix(in srgb, var(--tile-accent) 65%, transparent);
-  background: color-mix(in srgb, var(--tile-accent) 12%, #080d18);
+  background: color-mix(in srgb, var(--tile-accent) 12%, #0d130f);
   color: var(--tile-accent);
   font-size: 60px;
   font-weight: 1000;
@@ -428,7 +428,7 @@
 }
 
 .roster-tile-description {
-  color: #98a7bf;
+  color: #a7d780;
   font-size: 8px;
   font-weight: 900;
   text-align: center;
@@ -445,7 +445,7 @@
 }
 
 .roster-controls p {
-  color: #8f9db4;
+  color: #9dd271;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -454,9 +454,9 @@
 
 .roster-nav-button {
   padding: 11px 13px;
-  border: 1px solid #3b4a64;
-  background: #101a2d;
-  color: #e5edff;
+  border: 1px solid #4b7926;
+  background: #1a231d;
+  color: #f1ffe5;
   font-size: 9px;
   font-weight: 1000;
   letter-spacing: 1px;
@@ -479,12 +479,12 @@
   max-width: 1150px;
   margin-top: 28px;
   padding-top: 20px;
-  border-top: 1px solid #28364c;
+  border-top: 1px solid #37581c;
 }
 
 .select-footer p {
   margin: 0;
-  color: #9eacc4;
+  color: #adda88;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -496,10 +496,10 @@
 
 .confirm-fighter-button {
   padding: 16px 22px;
-  border: 1px solid #ff6c87;
+  border: 1px solid #ff8e6c;
   background: var(--select-red);
   color: white;
-  box-shadow: 4px 4px 0 #79172c;
+  box-shadow: 4px 4px 0 #792e17;
   font-size: 11px;
   font-weight: 1000;
   letter-spacing: 1px;
@@ -513,7 +513,7 @@
 
 .confirm-fighter-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 0 22px #ff315955, 4px 4px 0 #79172c;
+  box-shadow: 0 0 22px #ff613155, 4px 4px 0 #792e17;
 }
 
 .confirm-fighter-button:disabled {
@@ -703,9 +703,9 @@
   width: 100%;
   height: 14px;
   overflow: hidden;
-  border: 1px solid #34445e;
+  border: 1px solid #456f23;
   border-radius: 4px;
-  background: #111a2a;
+  background: #19221c;
   box-shadow: inset 0 1px 4px #0009;
 }
 
@@ -719,13 +719,13 @@
 /* Individual stat colors */
 
 .roster-stat-track.health .roster-stat-fill {
-  background: #ff3159;
-  color: #ff3159;
+  background: #ff6131;
+  color: #ff6131;
 }
 
 .roster-stat-track.mana .roster-stat-fill {
-  background: #13d5ff;
-  color: #13d5ff;
+  background: #7dff13;
+  color: #7dff13;
 }
 
 .roster-stat-track.defense .roster-stat-fill {
@@ -734,8 +734,8 @@
 }
 
 .roster-stat-track.agility .roster-stat-fill {
-  background: #36e6a0;
-  color: #36e6a0;
+  background: #9de636;
+  color: #9de636;
 }
 
 
@@ -757,7 +757,7 @@
   justify-content: center;
   overflow: hidden;
   border-radius: 8px;
-  background: #111a2a;
+  background: #19221c;
 }
 
 .roster-fighter-portrait img {
@@ -840,7 +840,7 @@
   width: 100%;
   aspect-ratio: 2 / 3;
   overflow: hidden;
-  background: #080d1c;
+  background: #0f1511;
 }
 
 .roster-portrait img {
@@ -862,7 +862,7 @@
   gap: 5px;
   width: 100%;
   padding: 12px;
-  background: #101a2d;
+  background: #1a231d;
 }
 
 .roster-tile-info > strong {
@@ -891,7 +891,7 @@
   justify-content: center;
   gap: 8px;
   color: #fff;
-  background: rgba(5, 9, 20, 0.3);
+  background: #0b0e0c4d;
   pointer-events: none;
 }
 
@@ -900,14 +900,14 @@
   place-items: center;
   width: 46px;
   height: 46px;
-  border: 1px solid rgba(255, 49, 89, 0.8);
+  border: 1px solid #ff6131cc;
   border-radius: 50%;
-  background: rgba(8, 13, 28, 0.9);
+  background: #0f1511e6;
   font-size: 22px;
 }
 
 .fighter-lock-overlay strong {
-  color: #ff3159;
+  color: #ff6131;
   font-size: 13px;
   font-weight: 1000;
   letter-spacing: 2px;
@@ -920,7 +920,7 @@
 }
 
 .fighter-unavailable:hover {
-  border-color: #ff3159;
+  border-color: #ff6131;
 }
 
 .roster-tile:disabled {
@@ -995,15 +995,15 @@
 .roster-tile.p1-selected {
   border-color: var(--select-cyan);
   box-shadow:
-    inset 0 0 22px rgba(19, 213, 255, 0.12),
-    0 0 14px rgba(19, 213, 255, 0.25);
+    inset 0 0 22px #7dff131f,
+    0 0 14px #7dff1340;
 }
 
 .roster-tile.p1-selected .roster-tile-info {
   background: linear-gradient(
     135deg,
-    rgba(19, 213, 255, 0.16),
-    #101a2d 75%
+    #7dff1329,
+    #1a231d 75%
   );
 }
 
@@ -1011,8 +1011,8 @@
 .roster-tile.cpu-selected:not(.p1-selected) {
   border-color: var(--select-red);
   box-shadow:
-    inset 0 0 22px rgba(255, 49, 89, 0.12),
-    0 0 14px rgba(255, 49, 89, 0.25);
+    inset 0 0 22px #ff61311f,
+    0 0 14px #ff613140;
 }
 
 /* A stronger card hover without the old hover glitches */
@@ -1045,7 +1045,7 @@
 .select-back-button:hover:not(:disabled),
 .roster-nav-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 0 14px rgba(19, 213, 255, 0.16);
+  box-shadow: 0 0 14px #7dff1329;
 }
 
 .select-back-button:active:not(:disabled),
@@ -1062,8 +1062,8 @@
 .confirm-fighter-button:hover:not(:disabled) {
   filter: brightness(1.12);
   box-shadow:
-    0 0 26px rgba(255, 49, 89, 0.45),
-    4px 4px 0 #79172c;
+    0 0 26px #ff613173,
+    4px 4px 0 #792e17;
 }
 
 /* Keyframes */
@@ -1152,12 +1152,12 @@
 
 @keyframes confirm-button-ready {
   0%, 100% {
-    box-shadow: 4px 4px 0 #79172c;
+    box-shadow: 4px 4px 0 #792e17;
   }
   50% {
     box-shadow:
-      0 0 17px rgba(255, 49, 89, 0.24),
-      4px 4px 0 #79172c;
+      0 0 17px #ff61313d,
+      4px 4px 0 #792e17;
   }
 }
 
@@ -1226,10 +1226,10 @@
 /* Impact animation when the selected fighter changes */
 .roster-tile.p1-selected {
   animation: fighterSelectPop 0.38s cubic-bezier(.16, 1, .3, 1) both;
-  border-color: #13d5ff;
+  border-color: #7dff13;
   box-shadow:
-    0 0 10px rgba(19, 213, 255, 0.65),
-    0 0 25px rgba(19, 213, 255, 0.35);
+    0 0 10px #7dff13a6,
+    0 0 25px #7dff1359;
   z-index: 2;
 }
 
@@ -1471,26 +1471,26 @@
 }
 
 .p2-cursor {
-  background: #13d5ff;
-  color: #07111f;
-  border: 1px solid #13d5ff;
-  box-shadow: 0 0 12px rgb(19 213 255 / 45%);
+  background: #7dff13;
+  color: #101612;
+  border: 1px solid #7dff13;
+  box-shadow: 0 0 12px #7dff1373;
 }
 
 
 /* Highlight the fighter currently browsed with the keyboard */
 .roster-tile.keyboard-highlighted {
-  outline: 3px solid #13d5ff;
+  outline: 3px solid #7dff13;
   outline-offset: 3px;
-  box-shadow: 0 0 14px rgba(19, 213, 255, 0.55);
+  box-shadow: 0 0 14px #7dff138c;
   transform: translateY(-3px);
   z-index: 1;
 }
 
 .roster-tile.keyboard-highlighted {
-  outline: 3px solid #13d5ff;
+  outline: 3px solid #7dff13;
   outline-offset: 3px;
-  box-shadow: 0 0 14px rgba(19, 213, 255, 0.55);
+  box-shadow: 0 0 14px #7dff138c;
   transform: translateY(-3px);
   z-index: 1;
 }
@@ -1511,10 +1511,10 @@
 .roster-team-preview > .roster-fighter-info {
   min-width: 0;
   padding: 12px;
-  border: 1px solid #34415a;
+  border: 1px solid #436c22;
   border-radius: 8px;
   background:
-    linear-gradient(145deg, #182338, #0b1220);
+    linear-gradient(145deg, #222e26, #121914);
 }
 
 /* Smaller portrait so the card has room for its stats. */
@@ -1526,10 +1526,10 @@
 .roster-team-preview .roster-fighter-portrait {
   width: 100%;
   height: 145px;
-  border: 1px solid #34415a;
+  border: 1px solid #436c22;
   border-radius: 6px;
   background:
-    radial-gradient(ellipse, #26364e, #0b1220 75%);
+    radial-gradient(ellipse, #37581c, #121914 75%);
 }
 
 .roster-team-preview .roster-fighter-details h2 {

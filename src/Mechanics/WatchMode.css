@@ -2,10 +2,10 @@
 .watch-page {
   min-height: 100vh;
   padding: 28px;
-  color: #f4f6ff;
+  color: #f9fff4;
   background:
-    radial-gradient(ellipse at 50% 35%, #24213c 0%, transparent 55%),
-    #10111b;
+    radial-gradient(ellipse at 50% 35%, #27362c 0%, transparent 55%),
+    #121914;
 }
 
 .watch-header {
@@ -25,11 +25,11 @@
 }
 
 .watch-header p {
-  color: #a9adc2;
+  color: #b2dc8f;
 }
 
 .watch-eyebrow {
-  color: #13d5ff !important;
+  color: #7dff13 !important;
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.2em;
@@ -40,10 +40,10 @@
   left: 0;
   top: 0;
   padding: 10px 14px;
-  border: 1px solid #44465b;
+  border: 1px solid #4b7926;
   border-radius: 8px;
   color: white;
-  background: #1b1c2b;
+  background: #1d2921;
   cursor: pointer;
 }
 
@@ -54,9 +54,9 @@
   max-width: 1100px;
   margin: 0 auto 22px;
   padding: 22px;
-  border: 1px solid #34364d;
+  border: 1px solid #3d621f;
   border-radius: 16px;
-  background: #181a28;
+  background: #1b251e;
   box-shadow: 0 12px 35px #0003;
 }
 
@@ -79,17 +79,17 @@
 }
 
 .watch-setup-side label {
-  color: #b7bad0;
+  color: #c0e2a5;
   font-size: 0.9rem;
 }
 
 .watch-setup-side select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #44465b;
+  border: 1px solid #4b7926;
   border-radius: 8px;
   color: white;
-  background: #10111b;
+  background: #121914;
 }
 
 .watch-vs {
@@ -112,14 +112,14 @@
 }
 
 .watch-primary-button {
-  background: linear-gradient(135deg, #087ea4, #13d5ff);
-  color: #07121a;
+  background: linear-gradient(135deg, #4ea408, #7dff13);
+  color: #0e1310;
 }
 
 .watch-secondary-button,
 .watch-speed-button {
-  border-color: #44465b;
-  background: #252739;
+  border-color: #4b7926;
+  background: #27372c;
 }
 
 .watch-primary-button:disabled {
@@ -141,7 +141,7 @@
 }
 
 .watch-error {
-  color: #ff8198;
+  color: #ff9e81;
 }
 
 .watch-arena {
@@ -149,8 +149,8 @@
   overflow: hidden;
   min-height: 420px;
   background:
-    radial-gradient(ellipse at 50% 100%, #41405c 0%, transparent 55%),
-    linear-gradient(180deg, #202338, #11131f 70%);
+    radial-gradient(ellipse at 50% 100%, #4a7725 0%, transparent 55%),
+    linear-gradient(180deg, #25332a, #141c17 70%);
 }
 
 .watch-arena::before {
@@ -162,9 +162,9 @@
   background: repeating-linear-gradient(
     100deg,
     transparent 0 55px,
-    #8e91b012 56px 58px
+    #9ad16d12 56px 58px
   );
-  border-top: 1px solid #777b9a40;
+  border-top: 1px solid #82c64b40;
   content: "";
   pointer-events: none;
 }
@@ -175,10 +175,10 @@
   width: fit-content;
   margin: 0 auto 18px;
   padding: 7px 18px;
-  border: 1px solid #696b84;
+  border: 1px solid #70b439;
   border-radius: 20px;
   color: #ffcf5c;
-  background: #11131fdc;
+  background: #141c17dc;
   font-size: 0.8rem;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -250,7 +250,7 @@
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 5px;
-  color: #c3c6d8;
+  color: #cbe7b4;
   font-size: 0.75rem;
   font-weight: 700;
 }
@@ -260,7 +260,7 @@
   overflow: hidden;
   border: 1px solid #ffffff15;
   border-radius: 8px;
-  background: #090a12;
+  background: #0b100d;
 }
 
 .watch-meter-fill {
@@ -275,7 +275,7 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
-  color: #9fa3bb;
+  color: #a9d882;
   font-size: 0.75rem;
   font-weight: 800;
 }
@@ -299,9 +299,9 @@
 .watch-action-banner {
   width: 100%;
   padding: 12px 8px;
-  border: 1px solid #545773;
+  border: 1px solid #5e9730;
   border-radius: 8px;
-  background: #10111beF;
+  background: #121914eF;
   font-size: 0.85rem;
   font-weight: 900;
   overflow-wrap: anywhere;
@@ -313,11 +313,11 @@
 }
 
 .watch-action-evade {
-  border-color: #13d5ff;
+  border-color: #7dff13;
 }
 
 .watch-action-take\ damage {
-  border-color: #ff3159;
+  border-color: #ff6131;
 }
 
 .watch-action-result {
@@ -344,14 +344,14 @@
 
 .watch-speed-controls > span {
   margin-right: 5px;
-  color: #b7bad0;
+  color: #c0e2a5;
   font-size: 0.85rem;
 }
 
 .watch-speed-button.active {
-  border-color: #13d5ff;
-  color: #13d5ff;
-  background: #13d5ff18;
+  border-color: #7dff13;
+  color: #7dff13;
+  background: #7dff1318;
 }
 
 .watch-log-list {
@@ -369,8 +369,8 @@
   gap: 10px;
   padding: 10px;
   border-radius: 7px;
-  background: #222436;
-  color: #d8daea;
+  background: #25332a;
+  color: #dff1d1;
   font-size: 0.85rem;
   line-height: 1.5;
 }
@@ -380,7 +380,7 @@
 }
 
 .watch-log-round {
-  color: #13d5ff;
+  color: #7dff13;
   font-weight: 900;
 }
 
