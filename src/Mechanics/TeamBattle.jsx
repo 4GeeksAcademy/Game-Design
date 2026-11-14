@@ -308,24 +308,32 @@ function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist) {
 
 function assignUniqueCpuTargets(opponents, players) {
   const availablePlayers = players
-    .filter((player) => player.health > 0)
+    .filter((player) => player && player.health > 0)
     .map((player) => player.id);
 
-  // Shuffle living players so the CPU target assignment is random.
+  const livingOpponents = opponents.filter(
+    (opponent) => opponent && opponent.health > 0,
+  );
+
+  const targets = {};
+
+  if (availablePlayers.length === 0) return targets;
+
+  // Shuffle living players for random target distribution.
   for (let i = availablePlayers.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
+
     [availablePlayers[i], availablePlayers[j]] = [
       availablePlayers[j],
       availablePlayers[i],
     ];
   }
 
-  const targets = {};
-  const livingOpponents = opponents.filter((cpu) => cpu.health > 0);
-
   livingOpponents.forEach((cpu, index) => {
-    const targetId = availablePlayers[index];
-    if (targetId) targets[cpu.id] = targetId;
+    // Reuse a target only when there aren't enough living players.
+    const targetId = availablePlayers[index % availablePlayers.length];
+
+    targets[cpu.id] = targetId;
   });
 
   return targets;
@@ -420,6 +428,8 @@ export default function TeamBattle() {
   const [combatPopups, setCombatPopups] = useState([]);
   const popupTimerRef = useRef(null);
   const teammateTargetTimerRef = useRef(null);
+  // Remember which opponents the CPU teammate has faced during this battle.
+const teammateOpponentHistoryRef = useRef(new Map());
   const allyAttackTimerRef = useRef(null);
   const [combatLog, setCombatLog] = useState([
     "Choose your fighters' targets.",
@@ -648,38 +658,92 @@ export default function TeamBattle() {
   }, [showRoundIntro, roundNumber]);
 
   useEffect(() => {
-    if (!isCpuAssist || phase !== "selecting") return;
+  if (!isCpuAssist || phase !== "selecting") return;
 
-    const teammate = teams.player.find((fighter) => fighter.isCpuTeammate);
-    if (!teammate || roundTargets[teammate.id]) return;
+  const teammate = teams.player.find((fighter) => fighter.isCpuTeammate);
 
-    teammateTargetTimerRef.current = setTimeout(() => {
-      const availableOpponent = teams.opponent.find(
-        (opponent) =>
-          opponent.health > 0 &&
-          !Object.entries(roundTargets).some(
-            ([fighterId, opponentId]) =>
-              fighterId !== teammate.id && opponentId === opponent.id,
-          ),
-      );
+  // A defeated teammate must never receive a target.
+  if (
+    !teammate ||
+    teammate.health <= 0 ||
+    roundTargets[teammate.id]
+  ) {
+    return;
+  }
 
-      if (availableOpponent) {
-        setRoundTargets((current) => {
-          // Keep a target the player selected before the timer fired.
-          if (current[teammate.id]) return current;
+  teammateTargetTimerRef.current = setTimeout(() => {
+    const availableOpponents = teams.opponent.filter(
+      (opponent) =>
+        opponent.health > 0 &&
+        !Object.entries(roundTargets).some(
+          ([fighterId, opponentId]) =>
+            fighterId !== teammate.id && opponentId === opponent.id,
+        ),
+    );
 
-          return { ...current, [teammate.id]: availableOpponent.id };
-        });
+    if (availableOpponents.length > 0) {
+      let selectedOpponent;
+
+      if (difficulty === "Easy" || difficulty === "Normal") {
+        const facedOpponents =
+          teammateOpponentHistoryRef.current.get(teammate.id) ?? new Set();
+
+        const opponentsNotFaced = availableOpponents.filter(
+          (opponent) => !facedOpponents.has(opponent.id),
+        );
+
+        // Prefer an opponent the teammate has never faced.
+        const selectionPool =
+          opponentsNotFaced.length > 0
+            ? opponentsNotFaced
+            : availableOpponents;
+
+        selectedOpponent =
+          selectionPool[
+            Math.floor(Math.random() * selectionPool.length)
+          ];
+      } else {
+        // Preserve the existing selection behavior on Hard.
+        selectedOpponent = availableOpponents[0];
       }
 
-      teammateTargetTimerRef.current = null;
-    }, 3000);
+      if (selectedOpponent) {
+        setRoundTargets((current) => {
+          // Don't overwrite a target that was already assigned.
+          if (current[teammate.id]) return current;
 
-    return () => {
-      clearTimeout(teammateTargetTimerRef.current);
-      teammateTargetTimerRef.current = null;
-    };
-  }, [isCpuAssist, phase, teams.player, teams.opponent, roundTargets]);
+          return {
+            ...current,
+            [teammate.id]: selectedOpponent.id,
+          };
+        });
+
+        if (difficulty === "Easy" || difficulty === "Normal") {
+          const history =
+            teammateOpponentHistoryRef.current.get(teammate.id) ??
+            new Set();
+
+          history.add(selectedOpponent.id);
+          teammateOpponentHistoryRef.current.set(teammate.id, history);
+        }
+      }
+    }
+
+    teammateTargetTimerRef.current = null;
+  }, 3000);
+
+  return () => {
+    clearTimeout(teammateTargetTimerRef.current);
+    teammateTargetTimerRef.current = null;
+  };
+}, [
+  isCpuAssist,
+  phase,
+  teams.player,
+  teams.opponent,
+  roundTargets,
+  difficulty,
+]);
 
   const confirmPlayerTargets = () => {
     if (livingOpponents.length === 0) {
@@ -2495,6 +2559,7 @@ export default function TeamBattle() {
     setCombatMessage("Choose your fighters' targets.");
     setPhase("selecting");
     festivalBattleRecorded.current = false;
+    teammateOpponentHistoryRef.current.clear();
   };
 
   const pendingAttacker = pendingDefense

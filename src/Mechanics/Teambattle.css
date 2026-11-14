@@ -3184,3 +3184,75 @@ battlefield > .local-coop-incoming {
     animation: none !important;
   }
 }
+
+
+/* =========================================
+   TEAM BATTLE — ATTACK CARD CONTENT VISIBILITY
+========================================= */
+
+/* Give the bottom battle panels more vertical room */
+.battle-bottom {
+  flex: 0 0 330px;
+  min-height: 0;
+}
+
+/* Slightly reduce the panel height on shorter screens */
+@media (max-height: 800px) {
+  .battle-bottom {
+    flex-basis: 310px;
+  }
+}
+
+/* Allow the attack grid to scroll vertically if necessary */
+.team-attack-grid {
+  min-height: 0;
+  grid-auto-rows: 220px;
+  align-content: start;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+/* Give every attack card enough room for its information */
+.team-attack-wrapper {
+  min-height: 220px;
+  height: 220px;
+}
+
+.team-attack-card {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+/* Prevent important information from shrinking */
+.team-attack-card .team-attack-image,
+.team-attack-card .team-attack-image-placeholder,
+.team-attack-card .team-attack-name,
+.team-attack-card .team-attack-damage,
+.team-attack-card .team-attack-speed,
+.team-attack-card .team-attack-cost {
+  flex-shrink: 0;
+}
+
+/* Make speed information consistently readable */
+.team-attack-card .team-attack-speed {
+  display: block;
+  width: 100%;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Keep mana, uses, cooldown and sacrifice costs visible */
+.team-attack-card .team-attack-cost {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
+/* Preserve the attack panel's layout */
+.player-attack-panel {
+  min-height: 0;
+  overflow: visible;
+}
