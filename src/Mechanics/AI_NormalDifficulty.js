@@ -91,9 +91,9 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
 
   if (!result) return null;
 
-  if (choice === "defend" || choice === "evade") {
-    defender.cooldown = Math.max(0, cooldown - 1);
-  }
+  if (choice === "defend") {
+  defender.cooldown = Math.max(0, cooldown - 1);
+}
 
   result.action = choice === "take-damage" ? "take damage" : choice;
 

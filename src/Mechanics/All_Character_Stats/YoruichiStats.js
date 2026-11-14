@@ -122,6 +122,26 @@ const Yoruichi = {
         cooldown: 1,
       },
     },
+
+{
+  name: "Shunko: Thunderclap Lock",
+  image: Attack6,
+  damage: 20,
+  cost: 18,
+  speed: 65,
+  state: true,
+
+  // STUN CONFIGURATION
+  stun: {
+    type: "all", // "selected" | "random" | "all"
+    amount: 2,
+    duration: 2,
+  },
+
+  // Only apply stun if the attack successfully hits.
+  stunRequiresHit: true,
+},
+
   ],
 };
 
