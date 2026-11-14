@@ -1,12 +1,14 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { aiDefendOrEvade } from "./AI.js";
 import { normalDefendOrEvade } from "./AI_NormalDifficulty.js";
 import { getModifiedAttackStat } from "./Modifiers.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import { canUseAttack } from "./Health.js";
+import StunTargetSelector from "./StunTargetSelector.jsx";
 import "./BattleUI.css";
 
 function isAttackAvailable(attack) {
+  const [pendingStunAttack, setPendingStunAttack] = useState(null);
   return canUseAttack(attack);
 }
 
@@ -87,7 +89,7 @@ function AttackOptions({
     openingTurnActive &&
     character.attacks.filter((attack) => attack.state === false).length >= 4;
   const handleAttack = useCallback(
-    (index) => {
+    (index, selectedAttackIds = []) => {
       const attack = character.attacks[index];
 
       if (
@@ -100,9 +102,9 @@ function AttackOptions({
       }
 
       const stunOptions = {
-  fighters: [character, opponent],
-  selectedAttackIds,
-};
+        fighters: [character, opponent],
+        selectedAttackIds,
+      };
 
       const result =
         difficulty === "Normal"
@@ -178,6 +180,44 @@ function AttackOptions({
     ],
   );
 
+  const startAttack = useCallback(
+    (index) => {
+      const attack = character.attacks[index];
+
+      if (
+        !attack ||
+        currentTurn !== "player" ||
+        !isAttackAvailable(attack) ||
+        openingTurnAttackLimitReached
+      ) {
+        return;
+      }
+
+      // Only selected-type stun attacks need player input.
+      if (attack.stun?.type === "selected") {
+        const eligibleAttacks = (opponent.attacks ?? []).filter(
+          (enemyAttack) => (enemyAttack.stunned?.remainingRounds ?? 0) <= 0,
+        );
+
+        // Don't open an empty selection window.
+        if (eligibleAttacks.length > 0) {
+          setPendingStunAttack(index);
+          return;
+        }
+      }
+
+      // Ordinary attacks and other stun types resolve normally.
+      handleAttack(index);
+    },
+    [
+      character.attacks,
+      opponent.attacks,
+      currentTurn,
+      openingTurnAttackLimitReached,
+      handleAttack,
+    ],
+  );
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (currentTurn !== "player") return;
@@ -198,7 +238,7 @@ function AttackOptions({
       }
 
       event.preventDefault();
-      handleAttack(index);
+      startAttack(index);
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -211,115 +251,130 @@ function AttackOptions({
   ]);
 
   return (
-    <div
-      id="attackSection"
-      className="d-flex justify-content-center w-100 my-3"
-    >
-      <div id="attack" className="card w-100">
-        <div id="attackHeader" className="card-header text-center fw-bold">
-          Attack Options
-        </div>
+    <>
+      <div
+        id="attackSection"
+        className="d-flex justify-content-center w-100 my-3"
+      >
+        <div id="attack" className="card w-100">
+          <div id="attackHeader" className="card-header text-center fw-bold">
+            Attack Options
+          </div>
 
-        <div id="attackBody" className="card-body">
-          <div
-            id="attackList"
-            className="d-flex flex-row flex-nowrap gap-3 overflow-x-auto pb-2"
-          >
-            {character.attacks.map((attack, index) => {
-              const modifiedDamage = getModifiedAttackStat(
-                attack,
-                character,
-                "damage",
-              );
+          <div id="attackBody" className="card-body">
+            <div
+              id="attackList"
+              className="d-flex flex-row flex-nowrap gap-3 overflow-x-auto pb-2"
+            >
+              {character.attacks.map((attack, index) => {
+                const modifiedDamage = getModifiedAttackStat(
+                  attack,
+                  character,
+                  "damage",
+                );
 
-              const modifiedSpeed = getModifiedAttackStat(
-                attack,
-                character,
-                "speed",
-              );
+                const modifiedSpeed = getModifiedAttackStat(
+                  attack,
+                  character,
+                  "speed",
+                );
 
-              const modifiedCost = getModifiedAttackStat(
-                attack,
-                character,
-                "cost",
-              );
+                const modifiedCost = getModifiedAttackStat(
+                  attack,
+                  character,
+                  "cost",
+                );
 
-              return (
-                <div className="attack-card-wrapper" key={attack.name}>
-                  <button
-                    id={`attackCard${index}`}
-                    type="button"
-                    className={`card text-start p-3 attack-card ${getAttackCardType(attack)} ${
-                      Number(attack.sacrifice?.health) > 0
-                        ? "attack-sacrifice"
-                        : ""
-                    } ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}`}
-                    style={{ minWidth: "200px" }}
-                    disabled={
-                      currentTurn !== "player" ||
-                      !isAttackAvailable(attack) ||
-                      openingTurnAttackLimitReached
-                    }
-                    onClick={() => handleAttack(index)}
-                  >
-                    <img
-                      id={`attackImage${index}`}
-                      src={attack.image}
-                      className="card-img-top attack-image"
-                      alt={attack.name}
-                      loading="lazy"
-                    />
+                return (
+                  <div className="attack-card-wrapper" key={attack.name}>
+                    <button
+                      id={`attackCard${index}`}
+                      type="button"
+                      className={`card text-start p-3 attack-card ${getAttackCardType(attack)} ${
+                        Number(attack.sacrifice?.health) > 0
+                          ? "attack-sacrifice"
+                          : ""
+                      } ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}`}
+                      style={{ minWidth: "200px" }}
+                      disabled={
+                        currentTurn !== "player" ||
+                        !isAttackAvailable(attack) ||
+                        openingTurnAttackLimitReached
+                      }
+                      onClick={() => startAttack(index)}
+                    >
+                      <img
+                        id={`attackImage${index}`}
+                        src={attack.image}
+                        className="card-img-top attack-image"
+                        alt={attack.name}
+                        loading="lazy"
+                      />
 
-                    <h5 id={`attackName${index}`} className="text-center">
-                      {attack.name}
-                    </h5>
+                      <h5 id={`attackName${index}`} className="text-center">
+                        {attack.name}
+                      </h5>
 
-                    <div id={`attackStats${index}`} className="attack-stats">
-                      <span className="attack-damage">
-                        DAMAGE: {modifiedDamage}
-                      </span>
-
-                      <span className="attack-speed">
-                        SPEED: {modifiedSpeed}
-                      </span>
-                    </div>
-
-                    <div className="attack-cost">
-                      <span className="attack-mana-cost">
-                        COST: {modifiedCost} MANA
-                      </span>
-
-                      {Number(attack.sacrifice?.health) > 0 && (
-                        <span className="attack-sacrifice-cost">
-                          HEALTH SACRIFICE: {attack.sacrifice.health}
+                      <div id={`attackStats${index}`} className="attack-stats">
+                        <span className="attack-damage">
+                          DAMAGE: {modifiedDamage}
                         </span>
-                      )}
 
-                      {Number.isInteger(attack.uses) && (
-                        <span className="attack-availability-info">
-                          USES: {attack.remainingUses ?? attack.uses}/
-                          {attack.uses}
+                        <span className="attack-speed">
+                          SPEED: {modifiedSpeed}
                         </span>
-                      )}
+                      </div>
 
-                      {Number(attack.turnCooldown) > 0 && (
-                        <span className="attack-availability-info">
-                          {(attack.cooldownRemaining ?? 0) > 0
-                            ? `COOLDOWN: ${attack.cooldownRemaining} ROUNDS`
-                            : "COOLDOWN: READY"}
+                      <div className="attack-cost">
+                        <span className="attack-mana-cost">
+                          COST: {modifiedCost} MANA
                         </span>
-                      )}
-                    </div>
-                  </button>
 
-                  <AttackEffects attack={attack} />
-                </div>
-              );
-            })}
+                        {Number(attack.sacrifice?.health) > 0 && (
+                          <span className="attack-sacrifice-cost">
+                            HEALTH SACRIFICE: {attack.sacrifice.health}
+                          </span>
+                        )}
+
+                        {Number.isInteger(attack.uses) && (
+                          <span className="attack-availability-info">
+                            USES: {attack.remainingUses ?? attack.uses}/
+                            {attack.uses}
+                          </span>
+                        )}
+
+                        {Number(attack.turnCooldown) > 0 && (
+                          <span className="attack-availability-info">
+                            {(attack.cooldownRemaining ?? 0) > 0
+                              ? `COOLDOWN: ${attack.cooldownRemaining} ROUNDS`
+                              : "COOLDOWN: READY"}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+
+                    <AttackEffects attack={attack} />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      {pendingStunAttack !== null && (
+        <StunTargetSelector
+          fighter={opponent}
+          amount={character.attacks[pendingStunAttack]?.stun?.amount ?? 1}
+          onConfirm={(selectedIds) => {
+            const attackIndex = pendingStunAttack;
+
+            setPendingStunAttack(null);
+            handleAttack(attackIndex, selectedIds);
+          }}
+          onCancel={() => setPendingStunAttack(null)}
+        />
+      )}
+    </>
   );
 }
 
