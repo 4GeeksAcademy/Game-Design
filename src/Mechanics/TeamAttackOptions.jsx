@@ -1,11 +1,23 @@
-// TeamAttackOptions.jsx
-
 import React from "react";
+import { getModifiedAttackStat } from "./Modifiers.js";
+import { canUseAttack } from "./Health.js";
+
+function getTeamAttackCardType(attack) {
+  const hasUses = Number.isInteger(attack.uses);
+  const hasCooldown = Number(attack.turnCooldown) > 0;
+
+  if (hasUses && hasCooldown) return "team-attack-limited-cooldown";
+  if (hasUses) return "team-attack-limited";
+  if (hasCooldown) return "team-attack-cooldown";
+
+  return "team-attack-standard";
+}
 
 function AttackEffects({ attack }) {
   const buffs = Object.entries(attack.buff ?? {}).filter(
     ([, amount]) => typeof amount === "number" && amount !== 0,
   );
+
   const debuffs = Object.entries(attack.debuff ?? {}).filter(
     ([, amount]) => typeof amount === "number" && amount !== 0,
   );
@@ -19,7 +31,8 @@ function AttackEffects({ attack }) {
           <span className="team-effect-heading buff-heading">BUFFS</span>
           {buffs.map(([stat, amount]) => (
             <span className="team-effect buff" key={`buff-${stat}`}>
-              {stat.toUpperCase()} {amount > 0 ? "+" : ""}{amount}
+              {stat.toUpperCase()} {amount > 0 ? "+" : ""}
+              {amount}
             </span>
           ))}
         </div>
@@ -30,7 +43,8 @@ function AttackEffects({ attack }) {
           <span className="team-effect-heading debuff-heading">DEBUFFS</span>
           {debuffs.map(([stat, amount]) => (
             <span className="team-effect debuff" key={`debuff-${stat}`}>
-              {stat.toUpperCase()} {amount > 0 ? "+" : ""}{amount}
+              {stat.toUpperCase()} {amount > 0 ? "+" : ""}
+              {amount}
             </span>
           ))}
         </div>
@@ -50,27 +64,19 @@ export default function TeamAttackOptions({
 }) {
   if (!fighter) return null;
 
-  // const canAct =
-  //   phase === "fighting" &&
-  // !lockDuringAllyAttack &&
-  // (allowSimultaneousActions || isActive) &&
-  // fighter.health > 0 &&
-  // !fighter.turnFinished;
-
   const canFinishTurn =
-  phase === "fighting" &&
-  (allowSimultaneousActions || isActive) &&
-  fighter.health > 0 &&
-  !fighter.turnFinished;
+    phase === "fighting" &&
+    (allowSimultaneousActions || isActive) &&
+    fighter.health > 0 &&
+    !fighter.turnFinished;
 
-const canUseAttacks =
-  canFinishTurn &&
-  !lockDuringAllyAttack;
+  const canUseAttacks = canFinishTurn && !lockDuringAllyAttack;
 
-    
   return (
     <section
-      className={`player-attack-panel ${isActive ? "is-active" : "is-inactive"}`}
+      className={`player-attack-panel ${
+        isActive ? "is-active" : "is-inactive"
+      }`}
     >
       <header className="attack-panel-header">
         <h3>{fighter.name}</h3>
@@ -79,19 +85,38 @@ const canUseAttacks =
 
       <div className="team-attack-grid">
         {fighter.attacks.map((attack, index) => {
-          const usable =
-  canUseAttacks &&
-  attack.state === true &&
-  fighter.mana >= (attack.cost ?? 0);
+          const modifiedDamage = getModifiedAttackStat(
+            attack,
+            fighter,
+            "damage",
+          );
+
+          const modifiedSpeed = getModifiedAttackStat(attack, fighter, "speed");
+
+          const modifiedCost = getModifiedAttackStat(attack, fighter, "cost");
+          const hasEnoughMana = fighter.mana >= modifiedCost;
+          const attackAvailable = canUseAttack(attack);
+
+          const usable = canUseAttacks && attackAvailable && hasEnoughMana;
+
+          const isSacrifice = Number(attack.sacrifice?.health) > 0;
 
           return (
             <div className="team-attack-wrapper" key={`${fighter.id}-${index}`}>
               <button
                 type="button"
-                className="team-attack-card"
+                className={`team-attack-card ${getTeamAttackCardType(
+                  attack,
+                )} ${isSacrifice ? "team-attack-sacrifice" : ""}`}
                 disabled={!usable}
                 onClick={() => onAttack(fighter.id, index)}
               >
+                {isSacrifice && (
+                  <span className="team-attack-sacrifice-header">
+                    HEALTH SACRIFICE
+                  </span>
+                )}
+
                 {attack.image ? (
                   <img
                     className="team-attack-image"
@@ -106,12 +131,36 @@ const canUseAttacks =
                 <strong className="team-attack-name">{attack.name}</strong>
 
                 <span className="team-attack-damage">
-                  DAMAGE: {attack.damage ?? 0}
+                  DAMAGE: {modifiedDamage}
                 </span>
 
-                <span className="team-attack-cost">
-                  COST: {attack.cost ?? 0} MANA
+                <span className="team-attack-speed">
+                  SPEED: {modifiedSpeed}
                 </span>
+
+                <div className="team-attack-cost">
+                  <span>COST: {modifiedCost} MANA</span>
+
+                  {Number.isInteger(attack.uses) && (
+                    <span className="team-attack-availability">
+                      USES: {attack.remainingUses ?? attack.uses}/{attack.uses}
+                    </span>
+                  )}
+
+                  {Number(attack.turnCooldown) > 0 && (
+                    <span className="team-attack-availability">
+                      {(attack.cooldownRemaining ?? 0) > 0
+                        ? `COOLDOWN: ${attack.cooldownRemaining} ROUNDS`
+                        : "COOLDOWN: READY"}
+                    </span>
+                  )}
+
+                  {isSacrifice && (
+                    <span className="team-attack-sacrifice-cost">
+                      COST: {attack.sacrifice.health} HEALTH
+                    </span>
+                  )}
+                </div>
               </button>
 
               <AttackEffects attack={attack} />

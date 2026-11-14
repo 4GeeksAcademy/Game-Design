@@ -37,6 +37,8 @@ body {
 
 #opponentSection,
 #characterSection {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: center;
   width: 100%;
@@ -573,6 +575,7 @@ body {
   align-items: stretch;
   gap: 14px !important;
   overflow-x: auto;
+  min-width: 0;
   padding: 4px 3px 12px;
   scrollbar-color: #90ff36 #1b251e;
   scrollbar-width: thin;
@@ -2307,9 +2310,34 @@ body {
   width: 100%;
 }
 
+/* Story arena background behind both fighters. */
 #battleArena {
-  min-width: 0;
+  position: relative;
+  isolation: isolate;
+
+  /* Rounded frame around the story background */
+  border: 2px solid #13d5ff;
+  border-radius: 14px;
+  overflow: hidden;
+
+  /* Subtle arcade-style glow */
+  box-shadow:
+    0 0 8px rgba(19, 213, 255, 0.35),
+    inset 0 0 8px rgba(19, 213, 255, 0.12);
 }
+
+.story-battle-background {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  pointer-events: none;
+}
+
 
 
 #battleLayout #battleArena {
@@ -3567,10 +3595,16 @@ body {
 ========================================= */
 
 #aiAttackSection {
-  position: relative;
-  width: min(420px, 92vw);
-  margin: 20px auto;
-  animation: incomingAttack 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  z-index: 20;
+
+  /* Keep the incoming attack panel compact */
+  width: min(275px, 90%);
+  max-height: 90%;
+  overflow-y: auto;
 }
 
 #aiAttackCard {
@@ -3712,7 +3746,10 @@ body {
   box-shadow: inset 0 0 12px rgb(255 255 255 / 3%);
 }
 
-/* Speed threat colors */
+
+/* =========================================
+   SPEED THREAT COLORS — 1v1
+========================================= */
 
 .speed-easy {
   border-color: #7dac3c;
@@ -3723,15 +3760,21 @@ body {
 }
 
 .speed-challenging {
+  color: #ffe16b;
+  background: linear-gradient(145deg, #493b12, #29220f);
   border-color: #e7c52f;
+  box-shadow: 0 0 9px rgb(231 197 47 / 16%);
 }
 
 .speed-fast {
+  color: #ffad5c;
+  background: linear-gradient(145deg, #512b16, #291b13);
   border-color: #ff8138;
+  box-shadow: 0 0 9px rgb(255 129 56 / 18%);
 }
 
 .speed-very-fast {
-  border-color: #ed6941;
+ border-color : #ed6941;
 }
 
 .speed-unavoidable {
@@ -3748,6 +3791,7 @@ body {
     inset 0 0 12px #ff613114;
 }
 
+
 /* Mana cost remains neutral */
 
 .attack-cost-badge {
@@ -3756,6 +3800,27 @@ body {
 
 .attack-cost-badge strong {
   color: #dcffbf;
+}
+
+.attack-speed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 9px;
+
+  color: #13d5ff;
+  background: linear-gradient(145deg, #102d3a, #101923);
+  border: 1px solid #13d5ff;
+  border-radius: 6px;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+
+  text-shadow: 0 0 7px rgb(19 213 255 / 45%);
+  box-shadow: 0 0 8px rgb(19 213 255 / 15%);
 }
 
 /* =========================================
@@ -3983,4 +4048,829 @@ body {
 
 #takeDamageButtonIcon {
   font-size: 1.25rem;
+}
+
+/* Move attack options directly below the opponent HUD */
+#attackSection {
+  margin-top: 12px !important;
+  margin-bottom: 22px !important;
+}
+
+/* Keep the attack panel compact and cards in a horizontal row */
+#attackList {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+/* Give attacks more room on smaller screens */
+@media (max-width: 1100px) {
+  #attackSection {
+    margin-top: 12px !important;
+  }
+}
+
+/* Compact battle layout: fighters side by side, attacks directly below */
+@media (min-width: 1101px) {
+  #battleLayout #battleArena {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "opponent opponent"
+      "player   player"
+      "attacks  attacks";
+    align-items: start;
+    gap: 12px 16px;
+  }
+
+  #battleLayout #opponentSection {
+    grid-area: opponent;
+    margin: 0 !important;
+  }
+
+  #battleLayout #characterSection {
+    grid-area: player;
+    margin: 0 !important;
+  }
+
+  #battleLayout #attackSection {
+    grid-area: attacks;
+    margin: 0 !important;
+  }
+
+  /* Reduce the tall portrait/meter area */
+  #battleLayout #opponent.battle-status-panel {
+    grid-template-rows: 150px auto;
+    padding-top: 28px;
+  }
+
+  #battleLayout #opponentPortraitWrapper,
+  #battleLayout #opponent #opponentImage,
+  #battleLayout #opponentSideMeters .verticalMeter {
+    height: 150px !important;
+  }
+
+  #battleLayout #character.battle-status-panel {
+    grid-template-rows: auto auto auto;
+    padding-top: 14px;
+  }
+
+  #battleLayout #characterPortraitWrapper,
+  #battleLayout #character #characterImage,
+  #battleLayout #characterSideMeters .verticalMeter {
+    height: 150px !important;
+  }
+
+  #battleLayout #character #characterImage {
+    width: 95px;
+    flex-basis: 95px;
+  }
+}
+
+/* Keep the finish button from adding extra vertical space */
+#characterSection {
+  align-items: center;
+}
+
+@media (max-width: 1100px) {
+  #battleLayout #opponentSection,
+  #battleLayout #characterSection {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  #battleLayout #attackSection {
+    margin-top: 4px !important;
+  }
+}
+
+/* Shorter attack cards */
+#attackBody {
+  padding: 10px 16px;
+}
+
+#attackList {
+  align-items: stretch;
+  gap: 10px !important;
+  padding: 4px 3px 8px;
+}
+
+.attack-card-wrapper {
+  flex-basis: 170px;
+  min-width: 223px;
+}
+
+.attack-card-wrapper .attack-card {
+  padding: 8px;
+}
+
+/* Reduce the large image area */
+.attack-card .attack-image,
+.attack-card [id^="attackImage"] {
+  height: 100px !important;
+  margin-bottom: 6px;
+}
+
+/* Tighten spacing inside each card */
+.attack-card h5,
+.attack-card [id^="attackName"] {
+  min-height: 0;
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+}
+
+.attack-card .attack-stats,
+.attack-card [id^="attackStats"] {
+  margin: 4px 0 6px;
+  padding: 5px 0;
+}
+
+/* Fix oversized cost button height */
+.attack-card .attack-cost-button {
+  line-height: 5.2 !important;
+  margin-top: 4px !important;
+  padding: 6px 8px !important;
+}
+
+/* Add breathing room between opponent and player panels */
+@media (min-width: 1101px) {
+  #battleLayout #battleArena {
+    row-gap: 24px;
+  }
+}
+
+@media (max-width: 1100px) {
+  #battleLayout #opponentSection {
+    margin-bottom: 24px !important;
+  }
+
+  #battleLayout #characterSection {
+    margin-top: 24px !important;
+  }
+}
+
+
+#storyResultsScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at center, #202536 0%, #090b12 75%);
+  color: #fff;
+  text-align: center;
+}
+
+.story-results-content {
+  width: min(100%, 620px);
+  padding: 32px;
+  border: 1px solid #13d5ff;
+  background: rgba(9, 13, 24, 0.96);
+  box-shadow: 0 0 30px rgba(19, 213, 255, 0.2);
+}
+
+.story-results-eyebrow {
+  color: #13d5ff;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+#storyResultsScreen h1 {
+  margin: 20px 0;
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.story-results-victory {
+  color: #13d5ff;
+  text-shadow: 0 0 22px rgba(19, 213, 255, 0.45);
+}
+
+.story-results-defeat {
+  color: #ff3159;
+  text-shadow: 0 0 22px rgba(255, 49, 89, 0.4);
+}
+
+.story-results-message {
+  font-size: 1.1rem;
+}
+
+.story-results-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 32px 0;
+}
+
+.story-results-stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.story-results-stats span {
+  color: #aab4c8;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+}
+
+.story-results-stats strong {
+  font-size: 2rem;
+}
+
+.story-results-completion {
+  color: #13d5ff;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.story-results-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.story-results-actions button {
+  padding: 12px 18px;
+  border: 1px solid #13d5ff;
+  background: transparent;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.story-results-actions button:hover {
+  background: #13d5ff;
+  color: #090b12;
+}
+
+@media (max-width: 480px) {
+  .story-results-content {
+    padding: 24px 16px;
+  }
+
+  .story-results-stats {
+    gap: 24px;
+  }
+
+  .story-results-actions button {
+    width: 100%;
+  }
+}
+
+
+
+
+
+/* Center the incoming attack overlay in the viewport */
+#aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 30% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  width: min(360px, calc(100vw - 32px));
+  max-width: 360px;
+  max-height: calc(100vh - 32px);
+  margin: 0 !important;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  transform: translate(-50%, -50%) !important;
+  translate: none !important;
+  z-index: 100000 !important;
+
+ 
+  animation: incomingCardAppear 0.3s ease-out both;
+}
+
+@keyframes incomingCardAppear {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+#aiAttackSection #aiAttackCard {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+#aiAttackSection #defensiveActions {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 12px;
+}
+
+#aiAttackSection #aiAttackInfo,
+#aiAttackSection #aiAttackStats {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Incoming attack artwork */
+.incoming-attack-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 115px;
+  margin: 10px auto;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.incoming-attack-image img {
+  width: 100%;
+  height: 100%;
+  max-width: 180px;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+}
+
+/* Incoming attack overlay */
+#aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  transform: translate(-50%, -50%) !important;
+  translate: none !important;
+  z-index: 100000 !important;
+}
+
+#aiAttackSection,
+#aiAttackCard,
+#aiAttackInfo,
+#aiAttackStats,
+.incoming-attack-image {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#aiAttackInfo {
+  padding: 12px;
+}
+
+#aiAttackName {
+  margin-bottom: 10px;
+}
+
+/* Compact artwork: the image can never set the card's width */
+.incoming-attack-image {
+  width: 100%;
+  height: 76px;
+  margin: 8px auto;
+  overflow: hidden;
+  border: 1px solid rgb(255 49 89 / 30%);
+  background: #080d1c;
+}
+
+.incoming-attack-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* Smaller stat tiles help the warning feel like a card */
+.attack-threat-badge,
+.attack-cost-badge {
+  min-height: 72px;
+  padding: 7px 3px;
+}
+
+#defensiveActions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#defendButton,
+#evadeButton {
+  min-width: 0;
+  padding: 10px 8px;
+}
+
+#takeDamageButton {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 8px;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+#aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 12px !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  transform: translateX(-50%) !important;
+  translate: none !important;
+  z-index: 1000000 !important;
+}
+
+/* Keep animation transforms from overriding the fixed positioning. */
+#aiAttackSection.incoming-attack-card {
+  animation: incomingCardAppear 0.3s ease-out both;
+}
+
+@keyframes incomingCardAppear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.incoming-attack-image {
+  height: 60px;
+  margin: 6px auto;
+}
+
+#aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: min(380px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%) !important;
+  translate: none !important;
+  z-index: 1000000 !important;
+}
+
+/* Give each part of the card consistent breathing room */
+#aiAttackHeader {
+  padding: 10px 14px;
+}
+
+#aiAttackInfo {
+  padding: 14px 16px 16px;
+}
+
+#aiAttackName {
+  margin: 0 0 12px;
+  line-height: 1.15;
+}
+
+/* Fill the frame edge-to-edge; crop the artwork rather than letterbox it */
+.incoming-attack-image {
+  display: block;
+  width: 100%;
+  height: 112px;
+  margin: 0 0 14px;
+  overflow: hidden;
+  border: 1px solid rgb(255 49 89 / 35%);
+  border-radius: 8px;
+  background: #080d1c;
+}
+
+.incoming-attack-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 0;
+}
+
+#defenseTimer {
+  margin: 0 0 12px;
+}
+
+#aiAttackStats {
+  gap: 8px;
+}
+
+.attack-threat-badge,
+.attack-cost-badge {
+  min-height: 80px;
+}
+
+#defensiveActions {
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 12px 12px;
+  margin-top: 0;
+}
+
+#defendButton,
+#evadeButton {
+  min-width: 0;
+  padding: 11px 8px;
+}
+
+#takeDamageButton {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 8px;
+}
+
+#aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 12px !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  transform: translateX(-50%) !important;
+  translate: none !important;
+  z-index: 2147483647 !important;
+}
+
+
+/* =========================================================
+   ATTACK CARD AVAILABILITY STYLING
+========================================================= */
+
+/* Shared mana cost and availability container */
+.attack-cost {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  width: 100%;
+  min-height: 58px;
+  box-sizing: border-box;
+
+  margin: 7px 0 0;
+  padding: 9px 6px;
+
+  color: #ffffff;
+  background: linear-gradient(145deg, #1b2940, #101827);
+  border: 1px solid #465b7c;
+  border-radius: 7px;
+
+  text-align: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+/* Mana cost */
+.attack-mana-cost {
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+}
+
+/* Availability details */
+.attack-availability-info {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+  text-align: center;
+}
+
+
+/* =========================================================
+   ATTACK CARD AVAILABILITY - STREET ARCADE PALETTE
+========================================================= */
+
+/* =========================================================
+   LIMITED USES - COMBAT RED
+========================================================= */
+
+.attack-card.attack-limited {
+  background: linear-gradient(
+    145deg,
+    #391923,
+    #101827
+  );
+
+  border-color: #F04452;
+
+  box-shadow:
+    0 0 9px rgba(240, 68, 82, 0.25),
+    inset 0 0 15px rgba(100, 15, 25, 0.2);
+}
+
+.attack-card.attack-limited .attack-cost {
+  background: linear-gradient(
+    145deg,
+    #481923,
+    #21131e
+  );
+
+  border-color: #F04452;
+}
+
+.attack-card.attack-limited .attack-availability-info {
+  color: #FF6875;
+}
+
+.attack-card.attack-limited:hover:not(:disabled) {
+  background: linear-gradient(
+    145deg,
+    #501c29,
+    #151827
+  );
+
+  border-color: #FF6875;
+
+  box-shadow:
+    0 0 17px rgba(240, 68, 82, 0.45),
+    inset 0 0 18px rgba(100, 15, 25, 0.3);
+}
+
+
+/* =========================================================
+   TURN COOLDOWN - NEON ORANGE
+========================================================= */
+
+.attack-card.attack-cooldown {
+  background: linear-gradient(
+    145deg,
+    #382516,
+    #101827
+  );
+
+  border-color: #FF9B32;
+
+  box-shadow:
+    0 0 9px rgba(255, 155, 50, 0.25),
+    inset 0 0 15px rgba(100, 50, 10, 0.2);
+}
+
+.attack-card.attack-cooldown .attack-cost {
+  background: linear-gradient(
+    145deg,
+    #493019,
+    #211a15
+  );
+
+  border-color: #FF9B32;
+}
+
+.attack-card.attack-cooldown .attack-availability-info {
+  color: #FFC078;
+}
+
+.attack-card.attack-cooldown:hover:not(:disabled) {
+  background: linear-gradient(
+    145deg,
+    #50321b,
+    #151827
+  );
+
+  border-color: #FFC078;
+
+  box-shadow:
+    0 0 17px rgba(255, 155, 50, 0.45),
+    inset 0 0 18px rgba(100, 50, 10, 0.3);
+}
+
+
+/* =========================================================
+   BOTH RESTRICTIONS - BLACK CHERRY / BLOOD CRIMSON
+========================================================= */
+
+.attack-card.attack-limited-cooldown {
+  background: linear-gradient(
+    145deg,
+    #100207 0%,
+    #1B050C 55%,
+    #260711 100%
+  );
+
+  border: 1.5px solid #A92D48;
+
+  box-shadow:
+    0 0 5px rgba(169, 45, 72, 0.35),
+    0 0 13px rgba(169, 45, 72, 0.18),
+    inset 0 0 18px rgba(80, 5, 20, 0.35);
+}
+
+/* COST PANEL */
+.attack-card.attack-limited-cooldown .attack-cost {
+  background: linear-gradient(
+    145deg,
+    #16030A,
+    #21050D
+  );
+
+  border: 1px solid #822039;
+  box-shadow: inset 0 0 8px rgba(100, 10, 30, 0.2);
+}
+
+/* AVAILABILITY TEXT */
+.attack-card.attack-limited-cooldown .attack-availability-info {
+  color: #FF7189;
+}
+
+/* HOVER EFFECT */
+.attack-card.attack-limited-cooldown:hover:not(:disabled) {
+  background: linear-gradient(
+    145deg,
+    #1A030A,
+    #300713
+  );
+
+  border-color: #E04464;
+
+  box-shadow:
+    0 0 8px rgba(224, 68, 100, 0.55),
+    0 0 20px rgba(181, 47, 75, 0.3),
+    inset 0 0 20px rgba(100, 5, 25, 0.4);
+}
+
+/* =========================================
+   SACRIFICE ATTACK — OBSIDIAN BLACK
+========================================= */
+
+.attack-card.attack-sacrifice {
+  background:
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(95, 0, 18, 0.2),
+      transparent 65%
+    ),
+    #000000 !important;
+
+  color: #ffffff !important;
+  border: 1px solid #64121f !important;
+
+  box-shadow:
+    inset 0 0 18px rgba(100, 0, 20, 0.12),
+    0 0 8px rgba(100, 0, 20, 0.18);
+}
+
+.attack-card.attack-sacrifice:hover:not(:disabled),
+.attack-card.attack-sacrifice:focus-visible {
+  background:
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(120, 0, 24, 0.25),
+      transparent 65%
+    ),
+    #000000 !important;
+
+  border-color: #a51d35 !important;
+
+  box-shadow:
+    inset 0 0 22px rgba(120, 0, 24, 0.2),
+    0 0 14px rgba(140, 0, 25, 0.3);
+}
+
+.attack-sacrifice .attack-image {
+  background: #000000;
+}
+
+.attack-sacrifice-cost {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 6px 4px;
+
+  color: #ff526b;
+  background: #160307;
+  border: 1px solid #701426;
+  border-radius: 5px;
+
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-align: center;
 }

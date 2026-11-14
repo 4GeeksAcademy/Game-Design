@@ -4,16 +4,12 @@ import {
   chooseAttack,
   resolveBotAttack,
   advanceRound,
+  getTurnOrder,
+  getAttackLimit,
 } from "./BattleSimulator.js";
 
-const MAX_ROUNDS = 100;
-const OPENING_TURN_ATTACK_LIMIT = 3;
 
-const MAX_ATTACKS_PER_TURN = {
-  Easy: 1,
-  Normal: 6,
-  Hard: 10,
-};
+const MAX_ROUNDS = 100;
 
 // Create an independent battle without changing the original fighters.
 export function createWatchBattle(
@@ -118,10 +114,7 @@ export function createWatchTeamBattle(
   };
 }
 
-// Determine who attacks first in a 1v1 battle.
-function getTurnOrder(round) {
-  return round % 2 === 1 ? [0, 1] : [1, 0];
-}
+
 
 // Choose one unique living opponent for each living attacker.
 // A fighter without an available target must skip their turn.
@@ -263,14 +256,10 @@ function nextWatchDuelAction(battle) {
       return battle;
     }
 
-    const difficultyAttackLimit =
-  MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
-
-const isOpeningTurn = battle.round === 1 && battle.turnPosition === 0;
-
-const attackLimit = isOpeningTurn
-  ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyAttackLimit)
-  : difficultyAttackLimit;
+    const attackLimit = getAttackLimit(
+  difficulty,
+  battle.round === 1 && battle.turnPosition === 0,
+);
 
     const attack =
       battle.attacksThisTurn < attackLimit
@@ -409,14 +398,10 @@ function nextWatchTeamAction(battle) {
       continue;
     }
 
-    const difficultyAttackLimit =
-  MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
-
-const isOpeningTeamTurn = battle.round === 1 && battle.teamTurn === 0;
-
-const attackLimit = isOpeningTeamTurn
-  ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyAttackLimit)
-  : difficultyAttackLimit;
+    const attackLimit = getAttackLimit(
+  difficulty,
+  battle.round === 1 && battle.teamTurn === 0,
+);
 
 
     const attack =

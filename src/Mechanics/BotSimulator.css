@@ -481,3 +481,349 @@
   font-size: 0.85rem;
   margin-left: 8px;
 }
+
+.simulation-progress {
+  width: 100%;
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid rgba(19, 213, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.simulation-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.simulation-progress-header strong {
+  color: #13d5ff;
+}
+
+.simulation-progress-track {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #252525;
+}
+
+.simulation-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #087bff, #13d5ff);
+  box-shadow: 0 0 12px rgba(19, 213, 255, 0.55);
+  transition: width 0.2s ease;
+}
+
+.simulation-progress p {
+  margin: 9px 0 0;
+  color: #aaa;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.simulation-progress {
+  width: 100%;
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid rgba(19, 213, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.simulation-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: #13d5ff;
+  font-weight: bold;
+}
+
+.simulation-progress-track {
+  width: 100%;
+  height: 13px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #252525;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.simulation-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #087da8, #13d5ff);
+  box-shadow: 0 0 12px rgba(19, 213, 255, 0.55);
+  transition: width 0.2s ease;
+}
+
+.simulation-progress p {
+  margin: 10px 0 0;
+  color: #aaa;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* =========================================
+   ALL MATCHUPS - FIGHTER SELECTION
+========================================= */
+
+.analysis-fighter-selector {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid rgba(19, 213, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(10, 18, 25, 0.8);
+}
+
+.analysis-fighter-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.analysis-fighter-selector-header h3 {
+  margin: 0 0 8px;
+  color: #13d5ff;
+  font-weight: 900;
+}
+
+.analysis-fighter-selector-header p {
+  margin: 0;
+  color: #aebac5;
+  line-height: 1.5;
+}
+
+.analysis-selection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.analysis-selection-actions button {
+  padding: 9px 13px;
+  border: 1px solid #13d5ff;
+  border-radius: 5px;
+  color: #13d5ff;
+  background: #121820;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.analysis-selection-actions button:hover:not(:disabled) {
+  color: #08151a;
+  background: #13d5ff;
+}
+
+.analysis-selection-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.analysis-selection-count {
+  margin: 20px 0 12px;
+  color: #aebac5;
+}
+
+.analysis-selection-count strong {
+  color: #13d5ff;
+}
+
+.analysis-fighter-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.analysis-fighter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid #35434e;
+  border-radius: 6px;
+  background: #171d25;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.analysis-fighter-option:hover {
+  border-color: #13d5ff;
+  background: #202c36;
+}
+
+.analysis-fighter-option input {
+  width: 17px;
+  height: 17px;
+  accent-color: #13d5ff;
+  cursor: pointer;
+}
+
+.analysis-fighter-option span {
+  overflow: hidden;
+  color: #e0e7ee;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analysis-selection-warning {
+  margin: 16px 0 0;
+  color: #ff526d;
+  font-weight: 700;
+}
+
+
+/* =========================================
+   INDIVIDUAL FIGHTER MATCHUP RANKINGS
+========================================= */
+
+.fighter-matchup-rankings {
+  margin-top: 36px;
+}
+
+.fighter-matchup-rankings > h3 {
+  margin-bottom: 8px;
+  color: #13d5ff;
+  font-weight: 900;
+}
+
+.fighter-matchup-rankings > p {
+  color: #aebac5;
+  line-height: 1.5;
+}
+
+.fighter-matchup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.fighter-matchup-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #35434e;
+  border-radius: 9px;
+  background: #121820;
+}
+
+.fighter-matchup-card > h4 {
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #35434e;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.fighter-matchup-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.fighter-matchup-columns > div {
+  min-width: 0;
+}
+
+.fighter-matchup-columns h5 {
+  min-height: 34px;
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.difficult-opponents-heading {
+  color: #ff526d;
+}
+
+.favorable-opponents-heading {
+  color: #62e6a7;
+}
+
+.fighter-matchup-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fighter-matchup-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  padding: 9px;
+  border-radius: 5px;
+  background: #202832;
+}
+
+.matchup-rank {
+  flex-shrink: 0;
+  color: #13d5ff;
+  font-weight: 900;
+}
+
+.fighter-matchup-list li > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.fighter-matchup-list li strong {
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.fighter-matchup-list li small {
+  color: #aebac5;
+  font-size: 0.72rem;
+}
+
+.fighter-matchup-empty {
+  color: #84919d;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 850px) {
+  .analysis-fighter-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fighter-matchup-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 550px) {
+  .analysis-fighter-list {
+    grid-template-columns: 1fr;
+  }
+
+  .fighter-matchup-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-fighter-selector-header {
+    flex-direction: column;
+  }
+}

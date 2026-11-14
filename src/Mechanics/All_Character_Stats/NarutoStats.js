@@ -1,10 +1,10 @@
 import NarutoArenaImage from "../../assets/img/Naruto.png";
 
-import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
-import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
-import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
-import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
+import Attack1 from "../../assets/img/Attack_IMAGES/Rasengan.jpeg";
+import Attack2 from "../../assets/img/Attack_IMAGES/Multiple Shadow Clone Jutsu.png";
+import Attack3 from "../../assets/img/Attack_IMAGES/Wind Style: Rasenshuriken.jpeg";
+import Attack4 from "../../assets/img/Attack_IMAGES/NarutoSageMode.webp";
+import Attack5 from "../../assets/img/Attack_IMAGES/Tailed Beast Bomb Rasenshuriken.jpeg";
 
 const Naruto = {
   name: "Naruto Uzumaki",
@@ -28,7 +28,7 @@ const Naruto = {
 
   {
       name: "Rasengan",
-      image: null,
+      image: Attack1,
       damage: 45,
       speed: 30,
       cost: 15,
@@ -39,8 +39,8 @@ const Naruto = {
     },
 
     {
-      name: "Shadow Clone Barrage",
-      image: null,
+      name: "Multiple Shadow Clone Jutsu",
+      image: Attack2,
       damage: 25,
       speed: 75,
       cost: 20,
@@ -52,25 +52,13 @@ const Naruto = {
       }
     },
 
-    {
-      name: "Multiple Shadow Clone Jutsu",
-      image: null,
-      damage: 35,
-      speed: 65,
-      cost: 25,
-      state: true,
-      buff: {
-        cooldown: 3,
-        maximumCooldown: 5,
-        recovery: 2,
-      }
-    },
     
     {
       name: "Wind Style: Rasenshuriken",
-      image: null,
+      image: Attack3,
       damage: 65,
       speed: 40,
+      turnCooldown: 3,
       cost: 40,
       state: true,
       debuff: {
@@ -81,10 +69,11 @@ const Naruto = {
     },
     {
       name: "Sage Mode",
-      image: null,
+      image: Attack4,
       damage: 0,
       speed: 0,
       cost: 60,
+      turnCooldown: 5,
       state: true,
       buff: {
         agility: 10,
@@ -94,11 +83,12 @@ const Naruto = {
       },
     },
     {
-      name: "Tailed Beast Bomb",
-      image: null,
-      damage: 95,
+      name: "Tailed Beast Bomb Rasenshuriken",
+      image: Attack5,
+      damage: 135,
+      uses: 1,
       speed: 50,
-      cost: 70,
+      cost: 117,
       state: true,
     },
   ],

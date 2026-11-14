@@ -2,12 +2,28 @@ import { attackCharacter, evadeAttack } from "./Health.js";
 import { chooseNormalAttack, scoreAttack } from "./AI_NormalDifficulty.js";
 
 const MAX_ROUNDS = 100;
-const OPENING_TURN_ATTACK_LIMIT = 3;
+const OPENING_TURN_ATTACK_LIMIT = 4;
 const MAX_ATTACKS_PER_TURN = {
   Easy: 1,
   Normal: 6,
   Hard: 10,
 };
+
+
+// Both 1v1 systems use the same alternating turn order.
+function getTurnOrder(round) {
+  return round % 2 === 1 ? [0, 1] : [1, 0];
+}
+
+// The first fighter of the opening round gets the special attack limit.
+function getAttackLimit(difficulty, isOpeningTurn = false) {
+  const difficultyLimit =
+    MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+
+  return isOpeningTurn
+    ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyLimit)
+    : difficultyLimit;
+}
 
 // Make independent copies so the original roster never changes.
 function cloneFighter(fighter) {
@@ -41,23 +57,29 @@ function getDefense(fighter) {
 
 function chooseAttack(fighter, difficulty) {
   const available = fighter.attacks.filter(
-    (attack) => attack.state === true && fighter.mana >= (attack.cost ?? 0),
+    (attack) =>
+      attack.state === true &&
+      fighter.mana >= (attack.cost ?? 0) &&
+      // A pure teammate-healing move has no valid target in 1v1.
+      !(attack.heal && !(attack.damage > 0)),
   );
 
   if (available.length === 0) return null;
 
-  // Easy: choose a random usable attack.
   if (difficulty === "Easy") {
     return available[Math.floor(Math.random() * available.length)];
   }
 
-  // Normal: use the shared damage-first strategy.
   if (difficulty === "Normal") {
-    return chooseNormalAttack(fighter);
+    return chooseNormalAttack({
+      ...fighter,
+      attacks: available,
+    });
   }
 
-  // Hard: keep the existing scoring behavior for now.
-  return [...available].sort((a, b) => scoreAttack(b) - scoreAttack(a))[0];
+  return [...available].sort(
+    (a, b) => scoreAttack(b) - scoreAttack(a),
+  )[0];
 }
 
 
@@ -196,24 +218,20 @@ function runBotTurn(
       stats[defender.id].successfulEvades += 1;
     }
 
-    log.push({
-      round,
-      attacker: attacker.name,
-      defender: defender.name,
-      attack: attack.name,
-      action: result.action,
-      damage: healthBefore - defender.health,
-      attackerHealth: attacker.health,
-      defenderHealth: defender.health,
-      attackerMana: attacker.mana,
-      defenderMana: defender.mana,
-      attackerMana: attacker.mana,
-      defenderMana: defender.mana,
-      attackerManaUsed: Math.max(0, attackerManaBefore - attacker.mana),
-      attackerMana: attacker.mana,
-      defenderManaUsed: Math.max(0, defenderManaBefore - defender.mana),
-      defenderMana: defender.mana,
-    });
+   log.push({
+  round,
+  attacker: attacker.name,
+  defender: defender.name,
+  attack: attack.name,
+  action: result.action,
+  damage: healthBefore - defender.health,
+  attackerHealth: attacker.health,
+  defenderHealth: defender.health,
+  attackerMana: attacker.mana,
+  defenderMana: defender.mana,
+  attackerManaUsed: Math.max(0, attackerManaBefore - attacker.mana),
+  defenderManaUsed: Math.max(0, defenderManaBefore - defender.mana),
+});
   }
 
   stats[attacker.id].turnsTaken += 1;
@@ -286,28 +304,31 @@ function simulateBattle(
 
     roundsCompleted = round;
 
-    // Alternate who acts first each round to reduce first-turn bias.
-    // Keep the original fighter order consistent every round.
-    const order = [
-      [botOne, botTwo, difficultyOne],
-      [botTwo, botOne, difficultyTwo],
-    ];
+    // Alternate the starting fighter every round.
+const order = getTurnOrder(round);
 
-    for (const [attacker, defender, difficulty] of order) {
-      if (attacker.health <= 0 || defender.health <= 0) break;
+for (let position = 0; position < order.length; position++) {
+  const attackerIndex = order[position];
 
-      const attackerStats = attacker === botOne ? stats.botOne : stats.botTwo;
+  const attacker = fighters[attackerIndex];
+  const defender = fighters[1 - attackerIndex];
 
-      runBotTurn(
-  attacker,
-  defender,
-  difficulty,
-  stats,
-  log,
-  round,
-  round === 1 && attacker === botOne,
-);
-    }
+  const difficulty =
+    attackerIndex === 0 ? difficultyOne : difficultyTwo;
+
+  if (attacker.health <= 0 || defender.health <= 0) break;
+
+  runBotTurn(
+    attacker,
+    defender,
+    difficulty,
+    stats,
+    log,
+    round,
+    // Only the first fighter to act in round one gets this limit.
+    round === 1 && position === 0,
+  );
+}
 
     if (botOne.health <= 0 || botTwo.health <= 0) break;
 
@@ -639,4 +660,6 @@ export {
   chooseAttack,
   resolveBotAttack,
   advanceRound,
+  getTurnOrder,
+  getAttackLimit,
 };

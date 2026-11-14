@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import { getCharacterImage } from "../SkinManager.js";
+import Toga from "../All_Character_Stats/TogaStats.js";
+import TogaImage from "../../assets/img/Toga.png";
+import { Kenpachi } from "../All_Character_Stats/KempachiStats.js";
+import KenpachiImage from "../../assets/img/Kenpachi.png";
+import Hinata from "../All_Character_Stats/HinataStats.js";
+import HinataImage from "../../assets/img/Hinata.png";
+import Goku from "../All_Character_Stats/GokuStats.js";
+import GokuImage from "../../assets/img/Goku.jpeg";
 import mina from "../All_Character_Stats/Mina_AshidoStats.js";
 import minaArena from "../../assets/img/MinaAshidoArena.jpg";
 import rockLee from "../All_Character_Stats/Rock_LeeStats.js";
@@ -115,6 +123,42 @@ export const roster = [
     color: "yoruichi",
     description: "THE THUNDER GOD",
   },
+  // =====================================
+  // FESTIVAL SECRET CHARACTERS
+  // =====================================
+
+  {
+    id: "goku",
+    image: GokuImage,
+    data: Goku,
+    color: "goku",
+    description: "THE SAIYAN WARRIOR",
+    isFestivalSecret: true,
+  },
+  {
+    id: "kenpachi",
+    image: KenpachiImage,
+    data: Kenpachi,
+    color: "kenpachi",
+    description: "THE BLOODTHIRSTY SWORDSMAN",
+    isFestivalSecret: true,
+  },
+  {
+    id: "toga",
+    image: TogaImage,
+    data: Toga,
+    color: "toga",
+    description: "THE LOVABLE VILLAIN",
+    isFestivalSecret: true,
+  },
+  {
+    id: "hinata",
+    image: HinataImage,
+    data: Hinata,
+    color: "hinata",
+    description: "THE GENTLE FIST",
+    isFestivalSecret: true,
+  },
 ];
 
 function FighterStats({ fighter }) {
@@ -154,7 +198,10 @@ function FighterStats({ fighter }) {
     <div className={`roster-fighter-info ${fighter.color}`}>
       <div className="roster-fighter-layout">
         <div className="roster-fighter-portrait">
-          <img src={fighter.image} alt={stats.name} />
+          <img
+            src={getCharacterImage(fighter.id, fighter.image)}
+            alt={stats.name}
+          />
         </div>
 
         <div className="roster-fighter-details">
@@ -211,9 +258,20 @@ function CharacterSelection() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const teamSize = location.state?.teamSize ?? "1v1";
-  const difficulty = location.state?.difficulty ?? "Normal";
-  const teamControl = location.state?.teamControl ?? "single-player";
+  const levelConfig = location.state ?? {};
+
+  const isStoryMode = levelConfig.gameMode === "story";
+
+  const teamSize = levelConfig.teamSize ?? "1v1";
+  const difficulty = levelConfig.difficulty ?? "Normal";
+  const teamControl = levelConfig.teamControl ?? "single-player";
+
+  const storyOpponentIds = isStoryMode
+    ? (levelConfig.opponentTeamIds ??
+      (levelConfig.opponentId ? [levelConfig.opponentId] : []))
+    : [];
+
+  const storyOpponentId = storyOpponentIds[0] ?? null;
 
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
 
@@ -223,19 +281,44 @@ function CharacterSelection() {
   //   : teamControl === "cpu-assist"
   //     ? 1
   //     : 2;
-  const requiredFighters = teamSize === "2v2" ? 2 : 1;
-const cpuFighterCount = requiredFighters;
+  // Story encounters can override the standard team-size rules.
+  const isStoryOneVsTwo = isStoryMode && levelConfig.storyMatchType === "1v2";
+
+  const requiredFighters = isStoryOneVsTwo ? 1 : teamSize === "2v2" ? 2 : 1;
+
+  // A 1v2 story encounter has one player fighter and two opponents.
+  const cpuFighterCount = isStoryOneVsTwo ? 2 : requiredFighters;
 
   const [selectedIndices, setSelectedIndices] = useState([]);
 
-  const [cpuIndices, setCpuIndices] = useState([]);
+  const [cpuIndices, setCpuIndices] = useState(() => {
+    if (levelConfig.gameMode !== "story" || !levelConfig.opponentId) {
+      return [];
+    }
+
+    const opponentIds =
+      levelConfig.gameMode === "story"
+        ? (levelConfig.opponentTeamIds ??
+          (levelConfig.opponentId ? [levelConfig.opponentId] : []))
+        : [];
+
+    return opponentIds
+      .map((id) => roster.findIndex((fighter) => fighter.id === id))
+      .filter((index) => index >= 0);
+  });
   const [selectedIndex, setSelectedIndex] = useState(() => {
     const unlocked = getUnlockedCharacters();
-    const firstUnlocked = roster.findIndex((fighter) =>
-      unlocked.includes(fighter.id),
+
+    const firstSelectable = roster.findIndex(
+      (fighter) =>
+        unlocked.includes(fighter.id) &&
+        !(
+          location.state?.gameMode === "story" &&
+          fighter.id === location.state?.opponentId
+        ),
     );
 
-    return firstUnlocked >= 0 ? firstUnlocked : 0;
+    return firstSelectable >= 0 ? firstSelectable : 0;
   });
 
   const [playerAnimationKey, setPlayerAnimationKey] = useState(0);
@@ -267,6 +350,9 @@ const cpuFighterCount = requiredFighters;
   }, []);
 
   const isUnlocked = (fighter) => unlockedIds.includes(fighter.id);
+  const visibleRoster = roster
+    .map((fighter, index) => ({ fighter, index }))
+    .filter(({ fighter }) => !fighter.isFestivalSecret || isUnlocked(fighter));
 
   const changeFighter = (direction) => {
     if (phase !== "player") return;
@@ -277,7 +363,12 @@ const cpuFighterCount = requiredFighters;
     for (let step = 0; step < roster.length; step += 1) {
       nextIndex = (nextIndex + direction + roster.length) % roster.length;
 
-      if (isUnlocked(roster[nextIndex])) {
+      const candidate = roster[nextIndex];
+
+      if (
+        isUnlocked(candidate) &&
+        (!isStoryMode || !storyOpponentIds.includes(candidate.id))
+      ) {
         break;
       }
     }
@@ -336,6 +427,11 @@ const cpuFighterCount = requiredFighters;
 
     const fighter = roster[index];
 
+    // Story opponents are assigned by the level, not selected by the player.
+    if (isStoryMode && storyOpponentIds.includes(fighter.id)) {
+      return null;
+    }
+
     if (!isUnlocked(fighter)) {
       navigate("/shop");
       return;
@@ -370,12 +466,18 @@ const cpuFighterCount = requiredFighters;
       return;
     }
 
+    if (isStoryMode) {
+      // The story level has already assigned its opponent.
+      setPhase("ready");
+      return;
+    }
+
     setCpuIndices([]);
     setPhase("cpu");
   };
 
   useEffect(() => {
-    if (phase !== "cpu") return;
+    if (phase !== "cpu" || isStoryMode) return;
 
     const playerIds = selectedIndices.map((index) => roster[index].id);
 
@@ -383,9 +485,11 @@ const cpuFighterCount = requiredFighters;
     // The CPU can choose from the entire roster, including locked fighters.
     const eligibleOpponents = roster
       .map((fighter, index) => ({ fighter, index }))
-      .filter(({ fighter }) => !playerIds.includes(fighter.id));
-
-   
+      .filter(
+        ({ fighter }) =>
+          !playerIds.includes(fighter.id) &&
+          (!fighter.isFestivalSecret || unlockedIds.includes(fighter.id)),
+      );
 
     if (eligibleOpponents.length < cpuFighterCount) {
       setCpuIndices([]);
@@ -425,31 +529,31 @@ const cpuFighterCount = requiredFighters;
       return;
     }
 
-   
-    const selectedCpuIds = cpuIndices.map((index) => roster[index].id);
+    const playerTeamIds = selectedIndices.map((index) => roster[index].id);
 
-   const selectedPlayerIds = selectedIndices.map(
-  (index) => roster[index].id,
-);
+    const opponentTeamIds = cpuIndices.map((index) => roster[index].id);
 
-const opponentTeamIds = cpuIndices.map(
-  (index) => roster[index].id,
-);
+    navigate(
+      isStoryOneVsTwo || teamSize === "2v2" ? "/team-battle" : "/battle",
+      {
+        state: {
+          // Preserve every setting defined by the story level.
+          ...levelConfig,
 
-const playerTeamIds = selectedPlayerIds;
+          // Pass the selected fighters to the battle.
+          playerId: playerTeamIds[0],
+          opponentId: opponentTeamIds[0],
+          playerTeamIds,
+          opponentTeamIds,
 
-    navigate(teamSize === "1v1" ? "/battle" : "/team-battle", {
-  state: {
-    playerId: playerTeamIds[0],
-    opponentId: opponentTeamIds[0],
-    playerTeamIds,
-    opponentTeamIds,
-    teamSize,
-    difficulty,
-    teamControl,
-    gameMode: location.state?.gameMode ?? "quick",
-  },
-});
+          // Keep the established match settings.
+          teamSize,
+          difficulty,
+          teamControl,
+          gameMode: isStoryMode ? "story" : (levelConfig.gameMode ?? "quick"),
+        },
+      },
+    );
   };
 
   return (
@@ -519,16 +623,22 @@ const playerTeamIds = selectedPlayerIds;
             <span className="cpu-label">CPU</span>
             <div>
               <h2>
-                {teamControl === "cpu-assist" ? "CPU TEAM" : "CPU OPPONENT"}
+                {isStoryMode
+                  ? "STORY OPPONENT"
+                  : teamControl === "cpu-assist"
+                    ? "CPU TEAM"
+                    : "CPU OPPONENT"}
               </h2>
               <p>
-                {phase === "player"
-                  ? "WAITING FOR PLAYER"
-                  : phase === "cpu"
-                    ? "SELECTING TEAM..."
-                    : teamControl === "cpu-assist"
-                      ? "ALLY + OPPONENTS LOCKED"
-                      : "OPPONENT LOCKED"}
+                {isStoryMode
+                  ? "STORY OPPONENT ASSIGNED"
+                  : phase === "player"
+                    ? "WAITING FOR PLAYER"
+                    : phase === "cpu"
+                      ? "SELECTING TEAM..."
+                      : teamControl === "cpu-assist"
+                        ? "ALLY + OPPONENTS LOCKED"
+                        : "OPPONENT LOCKED"}
               </p>
             </div>
           </div>
@@ -552,21 +662,39 @@ const playerTeamIds = selectedPlayerIds;
         </section>
       </section>
 
+      {phase === "player" ? (
+        <button className="confirm-fighter-button" onClick={confirmSelection}>
+          {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
+          <span>▶</span>
+        </button>
+      ) : (
+        <button
+          className="confirm-fighter-button"
+          onClick={startBattle}
+          disabled={
+            phase !== "ready" ||
+            selectedIndices.length !== requiredFighters ||
+            cpuIndices.length !== cpuFighterCount
+          }
+        >
+          {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
+        </button>
+      )}
+
       <section className="roster-section">
         <div className="roster-title-row">
           <h2>FIGHTER ROSTER</h2>
           <span>
-            {
-              unlockedIds.filter((id) =>
-                roster.some((fighter) => fighter.id === id),
-              ).length
-            }{" "}
-            / {roster.length} UNLOCKED
+            {visibleRoster.filter(({ fighter }) => isUnlocked(fighter)).length}{" "}
+            / {visibleRoster.length} UNLOCKED
           </span>
         </div>
 
         <div className="character-roster-grid">
-          {roster.map((fighter, index) => {
+          {visibleRoster.map(({ fighter, index }) => {
+            if (isStoryMode && fighter.id === storyOpponentId) {
+              return null;
+            }
             const isPlayerSelected = selectedIndices.includes(index);
             const isKeyboardHighlighted = selectedIndex === index;
             const isCpuSelected = cpuIndices.includes(index);
@@ -622,7 +750,10 @@ const playerTeamIds = selectedPlayerIds;
                 )}
 
                 <span className="roster-portrait">
-                  <img src={fighter.image} alt={fighter.data.name} />
+                  <img
+                    src={getCharacterImage(fighter.id, fighter.image)}
+                    alt={fighter.data.name}
+                  />
 
                   {!fighterUnlocked && (
                     <span className="fighter-lock-overlay">
@@ -691,25 +822,6 @@ const playerTeamIds = selectedPlayerIds;
               .join(" + ") || "???"}
           </strong>
         </p>
-
-        {phase === "player" ? (
-          <button className="confirm-fighter-button" onClick={confirmSelection}>
-            {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
-            <span>▶</span>
-          </button>
-        ) : (
-          <button
-            className="confirm-fighter-button"
-            onClick={startBattle}
-            disabled={
-              phase !== "ready" ||
-              selectedIndices.length !== requiredFighters ||
-              cpuIndices.length !== cpuFighterCount
-            }
-          >
-            {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
-          </button>
-        )}
       </footer>
     </main>
   );

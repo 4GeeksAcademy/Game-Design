@@ -2,18 +2,36 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection";
-import { attackCharacter, evadeAttack } from "./Health.js";
+import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup";
+import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
+import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives";
+import {
+  attackCharacter,
+  evadeAttack,
+  canUseAttack,
+  applyHeal,
+  consumeAttack,
+} from "./Health.js";
+import {
+  getModifiedAttackStat,
+  getModifiedCharacterStat,
+  tickSelfModifiers,
+} from "./Modifiers.js";
+import { getCharacterImage } from "./SkinManager.js";
+import { resetAttacks } from "./Turns.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
-import { aiDefendOrEvade } from "./AI.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import useKeybinds from "./Main Page/useKeybinds.js";
+import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
+import { aiChooseAttack, aiChooseHealTarget, aiDefendOrEvade } from "./AI.js";
 import {
-  chooseNormalAttack,
+  chooseNormalTeamAction,
   normalDefendOrEvade,
 } from "./AI_NormalDifficulty.js";
+import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import "./Teambattle.css";
 
 function createBattleFighter(id) {
@@ -25,7 +43,10 @@ function createBattleFighter(id) {
   return {
     ...data,
     id: selected.id,
-    image: selected.image ?? data.image,
+    activeModifiers: (data.activeModifiers ?? []).map((modifier) => ({
+      ...modifier,
+    })),
+    image: getCharacterImage(selected.id, selected.image ?? data.image),
     health: data.health,
     maximumHealth: data.maximumHealth ?? data.health,
     mana: data.mana,
@@ -34,12 +55,39 @@ function createBattleFighter(id) {
       typeof data.defense === "object" && data.defense
         ? { ...data.defense }
         : data.defense,
-    attacks: (data.attacks ?? []).map((attack) => ({
-      ...attack,
-      state: true,
-      buff: attack.buff ? { ...attack.buff } : attack.buff,
-      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-    })),
+    attacks: (data.attacks ?? []).map((attack) => {
+      const remainingUses = Number.isInteger(attack.uses)
+        ? attack.uses
+        : attack.remainingUses;
+
+      const cooldownRemaining = attack.cooldownRemaining ?? 0;
+
+      return {
+        ...attack,
+        remainingUses,
+        cooldownRemaining,
+        cooldownStartedThisRound: false,
+        state:
+          (remainingUses == null || remainingUses > 0) &&
+          cooldownRemaining <= 0,
+        buff: attack.buff ? { ...attack.buff } : attack.buff,
+        debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+
+        heal: attack.heal
+          ? {
+              ...attack.heal,
+              buff: attack.heal.buff
+                ? { ...attack.heal.buff }
+                : attack.heal.buff,
+            }
+          : attack.heal,
+
+        activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+          ...effect,
+          effects: { ...effect.effects },
+        })),
+      };
+    }),
     turnFinished: false,
     blocked: false,
   };
@@ -272,6 +320,8 @@ function assignUniqueCpuTargets(opponents, players) {
 
 export default function TeamBattle() {
   const location = useLocation();
+  const levelConfig = location.state ?? {};
+  const isStoryMode = levelConfig.gameMode === "story";
   const {
     playerTeamIds = [],
     opponentTeamIds = [],
@@ -279,7 +329,9 @@ export default function TeamBattle() {
     teamControl = "single-player",
     difficulty = "Normal",
   } = location.state ?? {};
-
+  const isStory1v2 =
+    isStoryMode && playerTeamIds.length === 1 && opponentTeamIds.length === 2;
+  const [pendingHealSelection, setPendingHealSelection] = useState(null);
   const resolveLocalCoopDefenseRef = useRef(() => {});
   const [isIntroFadingOut, setIsIntroFadingOut] = useState(false);
   const [playerAttackPopup, setPlayerAttackPopup] = useState(null);
@@ -302,15 +354,35 @@ export default function TeamBattle() {
   const [isKnockoutFadingOut, setIsKnockoutFadingOut] = useState(false);
   const previousTeamsRef = useRef(teams);
   const [teamFinishComplete, setTeamFinishComplete] = useState(false);
-  const [isTeamFinishFadingOut, setIsTeamFinishFadingOut] =
-  useState(false);
-
-
+  const [isTeamFinishFadingOut, setIsTeamFinishFadingOut] = useState(false);
 
   const [allyAttackOutcome, setAllyAttackOutcome] = useState(null);
   const [pendingAllyAttack, setPendingAllyAttack] = useState(null);
   const [defenseOutcome, setDefenseOutcome] = useState(null);
   const [phase, setPhase] = useState("selecting");
+  const festivalBattleRecorded = useRef(false);
+
+  useEffect(() => {
+    if (
+      (phase !== "victory" && phase !== "defeat") ||
+      festivalBattleRecorded.current
+    ) {
+      return;
+    }
+
+    // Make sure the match is recorded only once.
+    festivalBattleRecorded.current = true;
+
+    // Both victories and defeats count as completed battles.
+    recordFestivalEvent("battle", 1);
+    recordDailyObjectiveEvent("battle", 1);
+
+    // Only victories count toward victory challenges.
+    if (phase === "victory") {
+      recordFestivalEvent("victory", 1);
+      recordDailyObjectiveEvent("victory", 1);
+    }
+  }, [phase]);
   const [roundNumber, setRoundNumber] = useState(1);
   const [showRoundIntro, setShowRoundIntro] = useState(true);
   const [roundTargets, setRoundTargets] = useState({});
@@ -319,7 +391,7 @@ export default function TeamBattle() {
     playerTeamIds[0] ?? null,
   );
 
-    const isFinalTeamPhase = phase === "victory" || phase === "defeat";
+  const isFinalTeamPhase = phase === "victory" || phase === "defeat";
 
   const winningTeam = phase === "victory" ? teams.player : teams.opponent;
 
@@ -341,6 +413,34 @@ export default function TeamBattle() {
   ]);
   const [damageDealt, setDamageDealt] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
+  // Prevent previously recorded damage from being counted again.
+  const lastFestivalDamage = useRef(0);
+
+  // Prevent previously recorded attacks from being counted again.
+  const lastFestivalAttacks = useRef(0);
+
+  // Track damage dealt by the player team.
+  useEffect(() => {
+    const newDamage = damageDealt - lastFestivalDamage.current;
+
+    lastFestivalDamage.current = damageDealt;
+
+    if (newDamage > 0) {
+      recordFestivalEvent("damage", newDamage);
+      recordDailyObjectiveEvent("damage", newDamage);
+    }
+  }, [damageDealt]);
+
+  // Track attacks executed by the player team.
+  useEffect(() => {
+    const newAttacks = attacksUsed - lastFestivalAttacks.current;
+
+    lastFestivalAttacks.current = attacksUsed;
+
+    if (newAttacks > 0) {
+      recordFestivalEvent("attack", newAttacks);
+    }
+  }, [attacksUsed]);
 
   const defenseResolvedRef = useRef(false);
 
@@ -370,28 +470,28 @@ export default function TeamBattle() {
   }, [knockout]);
 
   useEffect(() => {
-  if (!isFinalTeamPhase) {
+    if (!isFinalTeamPhase) {
+      setTeamFinishComplete(false);
+      setIsTeamFinishFadingOut(false);
+      return undefined;
+    }
+
     setTeamFinishComplete(false);
     setIsTeamFinishFadingOut(false);
-    return undefined;
-  }
 
-  setTeamFinishComplete(false);
-  setIsTeamFinishFadingOut(false);
+    const fadeTimer = setTimeout(() => {
+      setIsTeamFinishFadingOut(true);
+    }, 2600);
 
-  const fadeTimer = setTimeout(() => {
-    setIsTeamFinishFadingOut(true);
-  }, 2600);
+    const completeTimer = setTimeout(() => {
+      setTeamFinishComplete(true);
+    }, 3200);
 
-  const completeTimer = setTimeout(() => {
-    setTeamFinishComplete(true);
-  }, 3200);
-
-  return () => {
-    clearTimeout(fadeTimer);
-    clearTimeout(completeTimer);
-  };
-}, [isFinalTeamPhase, phase]);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(completeTimer);
+    };
+  }, [isFinalTeamPhase, phase]);
 
   useEffect(() => {
     if (!combatPopups.length) return undefined;
@@ -406,7 +506,7 @@ export default function TeamBattle() {
     return () => clearTimeout(timer);
   }, [combatPopups]);
 
-  const hasValidTeams =
+  const hasValidStandardTeams =
     teams.player.length === 2 &&
     teams.opponent.length === 2 &&
     teams.player.every(Boolean) &&
@@ -417,6 +517,19 @@ export default function TeamBattle() {
       (fighter, index) => fighter.id === opponentTeamIds[index],
     ) &&
     (!isCpuAssist || teams.player[1].isCpuTeammate);
+
+  const hasValidStory1v2 =
+    isStory1v2 &&
+    teams.player.length === 1 &&
+    teams.opponent.length === 2 &&
+    teams.player.every(Boolean) &&
+    teams.opponent.every(Boolean) &&
+    teams.player[0].id === playerTeamIds[0] &&
+    teams.opponent.every(
+      (fighter, index) => fighter.id === opponentTeamIds[index],
+    );
+
+  const hasValidTeams = hasValidStandardTeams || hasValidStory1v2;
 
   const addLog = (message, type = "hit") => {
     const entry = {
@@ -596,33 +709,23 @@ export default function TeamBattle() {
 
     const targetsForRound = { ...roundTargets };
 
-    // const playersWithTargets = teams.player.map((player) => {
-    //   if (player.isCpuTeammate) {
-    //     return {
-    //       ...player,
-    //       turnFinished: player.health <= 0 || livingOpponents.length === 0,
-    //     };
-    //   }
-
-    //   return {
-    //     ...player,
-    //     turnFinished:
-    //       player.health <= 0 ||
-    //       !livingOpponents.some(
-    //         (opponent) => targetsForRound[player.id] === opponent.id,
-    //         setRoundTargets(targetsForRound)
-    //       ),
-    //   };
-    // });
-
     const playersWithTargets = teams.player.map((player) => {
       const hasTarget = livingOpponents.some(
         (opponent) => targetsForRound[player.id] === opponent.id,
       );
 
+      const hasUsableHeal =
+        player.isCpuTeammate &&
+        player.attacks.some(
+          (attack) =>
+            attack.heal &&
+            canUseAttack(attack) &&
+            player.mana >= (attack.cost ?? 0),
+        );
+
       return {
         ...player,
-        turnFinished: player.health <= 0 || !hasTarget,
+        turnFinished: player.health <= 0 || (!hasTarget && !hasUsableHeal),
       };
     });
 
@@ -680,11 +783,59 @@ export default function TeamBattle() {
     });
   };
 
-  const useAttack = (fighterId, attackIndex, targetOverrideId = null) => {
+  const handleTeamAttack = (fighterId, attackIndex) => {
+    const fighter = teams.player.find((member) => member.id === fighterId);
+
+    const attack = fighter?.attacks?.[attackIndex];
+
+    if (!attack) return;
+
+    // Normal attacks and attacks without healing
+    // continue through the existing combat system.
+    if (!attack.heal) {
+      useAttack(fighterId, attackIndex);
+      return;
+    }
+
+    // Healing everyone requires no target selection.
+    if (attack.heal.target === "all") {
+      useAttack(fighterId, attackIndex);
+      return;
+    }
+
+    // Selected healing requires choosing a teammate.
+    if (attack.heal.target === "selected") {
+      setPendingHealSelection({
+        fighterId,
+        attackIndex,
+      });
+    }
+  };
+  const confirmHealTarget = (targetId) => {
+    if (!pendingHealSelection) return;
+
+    const { fighterId, attackIndex } = pendingHealSelection;
+
+    // Close the teammate-selection interface.
+    setPendingHealSelection(null);
+
+    // Pass the selected teammate into the healing logic.
+    useAttack(fighterId, attackIndex, null, targetId);
+  };
+
+  const useAttack = (
+    fighterId,
+    attackIndex,
+    targetOverrideId = null,
+    healTargetId = null,
+  ) => {
     if (phase !== "fighting") return;
 
     const updatedPlayers = teams.player.map((fighter) => ({
       ...fighter,
+      activeModifiers: (fighter.activeModifiers ?? []).map((modifier) => ({
+        ...modifier,
+      })),
       defense:
         typeof fighter.defense === "object" && fighter.defense
           ? { ...fighter.defense }
@@ -693,11 +844,28 @@ export default function TeamBattle() {
         ...attack,
         buff: attack.buff ? { ...attack.buff } : attack.buff,
         debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+
+        heal: attack.heal
+          ? {
+              ...attack.heal,
+              buff: attack.heal.buff
+                ? { ...attack.heal.buff }
+                : attack.heal.buff,
+            }
+          : attack.heal,
+
+        activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+          ...effect,
+          effects: { ...effect.effects },
+        })),
       })),
     }));
 
     const updatedOpponents = teams.opponent.map((fighter) => ({
       ...fighter,
+      activeModifiers: (fighter.activeModifiers ?? []).map((modifier) => ({
+        ...modifier,
+      })),
       defense:
         typeof fighter.defense === "object" && fighter.defense
           ? { ...fighter.defense }
@@ -706,6 +874,20 @@ export default function TeamBattle() {
         ...attack,
         buff: attack.buff ? { ...attack.buff } : attack.buff,
         debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+
+        heal: attack.heal
+          ? {
+              ...attack.heal,
+              buff: attack.heal.buff
+                ? { ...attack.heal.buff }
+                : attack.heal.buff,
+            }
+          : attack.heal,
+
+        activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+          ...effect,
+          effects: { ...effect.effects },
+        })),
       })),
     }));
 
@@ -716,24 +898,21 @@ export default function TeamBattle() {
       (fighter) => fighter.id === targetId,
     );
 
-    if (
-      !attacker ||
-      !defender ||
-      attacker.health <= 0 ||
-      attacker.turnFinished
-    ) {
-      return;
-    }
-
-    if (defender.health <= 0) {
-      addLog("That opponent has already been defeated.");
+    if (!attacker || attacker.health <= 0 || attacker.turnFinished) {
       return;
     }
 
     const attack = attacker.attacks[attackIndex];
 
-    if (!attack || attack.state !== true) {
-      addLog("That attack has already been used.");
+    if (!attack || !canUseAttack(attack)) {
+      addLog("That attack is unavailable or still on cooldown.");
+      return;
+    }
+
+    const modifiedCost = getModifiedAttackStat(attack, attacker, "cost");
+
+    if (attacker.mana < modifiedCost) {
+      addLog(`${attacker.name} does not have enough mana.`);
       return;
     }
 
@@ -741,8 +920,122 @@ export default function TeamBattle() {
       (move) => move.state === false,
     ).length;
 
-    if (roundNumber === 1 && attacksUsedThisTurn >= 3) {
-      addLog(`${attacker.name} has reached the 3-attack opening limit.`);
+    if (roundNumber === 1 && attacksUsedThisTurn >= 4) {
+      addLog(`${attacker.name} has reached the 4-attack opening limit.`);
+      return;
+    }
+
+    // ==========================================
+    // TEAM HEALING ATTACK
+    // ==========================================
+
+    if (attack.heal) {
+      let recipients = [];
+
+      if (attack.heal.target === "all") {
+        // Heal every living teammate, including the caster.
+        recipients = updatedPlayers.filter((fighter) => fighter.health > 0);
+      } else if (attack.heal.target === "selected") {
+        // Heal only the selected living teammate.
+        const target = updatedPlayers.find(
+          (fighter) => fighter.id === healTargetId,
+        );
+
+        if (!target || target.id === attacker.id || target.health <= 0) {
+          addLog("Choose a living teammate to heal.");
+          return;
+        }
+
+        recipients = [target];
+      } else {
+        addLog("This healing attack has an invalid target type.");
+        return;
+      }
+
+      if (recipients.length === 0) {
+        addLog("There are no available teammates to heal.");
+        return;
+      }
+
+      // Pay the mana cost once, regardless of recipient count.
+      attacker.mana -= attack.cost ?? 0;
+
+      // Apply healing and buffs to each recipient.
+      recipients.forEach((recipient) => {
+        const result = applyHeal(attack, recipient);
+
+        addLog(
+          `💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`,
+          "buff",
+        );
+
+        describeEffects(result.buffsApplied, recipient.name, "buff").forEach(
+          (message) => addLog(message, "buff"),
+        );
+      });
+
+      // Consume the healing attack exactly once.
+      consumeAttack(attack);
+      setAttacksUsed((value) => value + 1);
+
+      // Determine whether the CPU teammate can act again.
+      const isCpuAttacker = attacker.isCpuTeammate;
+
+      const attacksUsedAfter = attacker.attacks.filter(
+        (move) => move.state === false,
+      ).length;
+
+      const hasUsableAttack = attacker.attacks.some(
+        (move) => canUseAttack(move) && attacker.mana >= (move.cost ?? 0),
+      );
+
+      const cpuMustFinish =
+        !hasUsableAttack ||
+        (difficulty === "Easy" && attacksUsedAfter >= 1) ||
+        (roundNumber === 1 && attacksUsedAfter >= 4);
+
+      // Save the updated resources and attacks on the actual team fighter.
+      const playersAfter = updatedPlayers.map((fighter) => {
+        if (fighter.id !== attacker.id) return fighter;
+
+        return {
+          ...fighter,
+          attacks: attacker.attacks,
+          mana: attacker.mana,
+          health: attacker.health,
+          activeModifiers: attacker.activeModifiers ?? [],
+          turnFinished: isCpuAttacker ? cpuMustFinish : fighter.turnFinished,
+        };
+      });
+
+      setTeams({
+        player: playersAfter,
+        opponent: updatedOpponents,
+      });
+
+      // Release the CPU teammate's pending action so Normal can continue
+      // if it still has usable attacks.
+      if (isCpuAttacker) {
+        setPendingAllyAttack(null);
+      }
+
+      if (
+        playersAfter.every(
+          (fighter) => fighter.health <= 0 || fighter.turnFinished,
+        )
+      ) {
+        setPhase("cpu-fighting");
+        addLog("Your team is finished. The CPU is preparing its attacks.");
+      }
+
+      return;
+    }
+
+    // Normal attacks still require an enemy target.
+    if (!defender) return;
+
+    if (defender.health <= 0) {
+      addLog("That opponent has already been defeated.");
       return;
     }
 
@@ -766,6 +1059,11 @@ export default function TeamBattle() {
         : difficulty === "Normal"
           ? normalDefendOrEvade(attack, attacker, defender)
           : aiDefendOrEvade(attack, attacker, defender);
+
+    if (!result) {
+      addLog(`${attack.name} could not be used.`);
+      return;
+    }
 
     const outcome = result.evaded
       ? `${defender.name} evaded ${attack.name}.`
@@ -813,7 +1111,7 @@ export default function TeamBattle() {
 
         const hasUsableAttack = attacker.attacks.some(
           (candidate) =>
-            candidate.state === true && attacker.mana >= (candidate.cost ?? 0),
+            canUseAttack(candidate) && attacker.mana >= (candidate.cost ?? 0),
         );
 
         return {
@@ -821,6 +1119,7 @@ export default function TeamBattle() {
           attacks: attacker.attacks,
           mana: attacker.mana,
           health: attacker.health,
+          activeModifiers: attacker.activeModifiers ?? [],
           turnFinished:
             !hasUsableAttack ||
             (difficulty === "Easy" && attacksUsedThisTurn >= 1),
@@ -834,6 +1133,7 @@ export default function TeamBattle() {
           attacks: attacker.attacks,
           mana: attacker.mana,
           health: attacker.health,
+          activeModifiers: attacker.activeModifiers ?? [],
         };
       }
 
@@ -862,7 +1162,7 @@ export default function TeamBattle() {
 
       const nextAttackIndex = attacker.attacks.findIndex(
         (candidate) =>
-          candidate.state === true && attacker.mana >= (candidate.cost ?? 0),
+          canUseAttack(candidate) && attacker.mana >= (candidate.cost ?? 0),
       );
 
       const canAttackAgain =
@@ -972,7 +1272,17 @@ export default function TeamBattle() {
         (opponent) => opponent.id === targetId && opponent.health > 0,
       );
 
-      return (player.health <= 0 || !targetAlive) && !player.turnFinished
+      const hasUsableHeal =
+        player.isCpuTeammate &&
+        player.attacks.some(
+          (attack) =>
+            attack.heal &&
+            canUseAttack(attack) &&
+            player.mana >= (attack.cost ?? 0),
+        );
+
+      return (player.health <= 0 || (!targetAlive && !hasUsableHeal)) &&
+        !player.turnFinished
         ? { ...player, turnFinished: true }
         : player;
     });
@@ -1006,19 +1316,16 @@ export default function TeamBattle() {
     if (!ally || ally.turnFinished) return;
 
     const targetId = roundTargets[ally.id];
+
     const target = teams.opponent.find(
       (fighter) => fighter.id === targetId && fighter.health > 0,
     );
 
-    if (!target) {
-      finishPlayerTurn(ally.id);
-      return;
-    }
-
     const attacksUsedThisTurn = ally.attacks.filter(
       (attack) => attack.state === false,
     ).length;
-    if (roundNumber === 1 && attacksUsedThisTurn >= 3) {
+
+    if (roundNumber === 1 && attacksUsedThisTurn >= 4) {
       finishPlayerTurn(ally.id);
       return;
     }
@@ -1028,13 +1335,40 @@ export default function TeamBattle() {
       return;
     }
 
-    const selectedAttack =
-      difficulty === "Easy"
-        ? ally.attacks.find(
-            (attack) =>
-              attack.state === true && ally.mana >= (attack.cost ?? 0),
-          )
-        : chooseNormalAttack(ally);
+    let selectedAttack = null;
+    let healTargetId = null;
+
+    if (difficulty === "Easy") {
+      // If there is no opponent, Easy can only choose a healing attack.
+      const availableAttacks = target
+        ? ally.attacks
+        : ally.attacks.filter((attack) => attack.heal);
+
+      selectedAttack = aiChooseAttack({
+        ...ally,
+        attacks: availableAttacks,
+      });
+
+      // Easy randomly chooses a living teammate for selected healing.
+      if (selectedAttack?.heal?.target === "selected") {
+        const healTarget = aiChooseHealTarget(ally, teams.player);
+        healTargetId = healTarget?.id ?? null;
+      }
+    } else {
+      // Normal evaluates healing value and chooses the best recipient.
+      // Without an opponent, it considers healing attacks only.
+      const fighterToEvaluate = target
+        ? ally
+        : {
+            ...ally,
+            attacks: ally.attacks.filter((attack) => attack.heal),
+          };
+
+      const action = chooseNormalTeamAction(fighterToEvaluate, teams.player);
+
+      selectedAttack = action?.attack ?? null;
+      healTargetId = action?.healTargetId ?? null;
+    }
 
     const attackIndex = selectedAttack
       ? ally.attacks.indexOf(selectedAttack)
@@ -1045,13 +1379,26 @@ export default function TeamBattle() {
       return;
     }
 
-    setDefenseOutcome(null);
+    // Ordinary attacks still require an assigned living opponent.
+    if (!selectedAttack.heal && !target) {
+      finishPlayerTurn(ally.id);
+      return;
+    }
 
+    // A selected-target heal must have a valid living teammate.
+    if (selectedAttack.heal?.target === "selected" && !healTargetId) {
+      finishPlayerTurn(ally.id);
+      return;
+    }
+
+    setDefenseOutcome(null);
     setAllyAttackOutcome(null);
+
     setPendingAllyAttack({
       fighterId: ally.id,
-      targetId: target.id,
+      targetId: target?.id ?? null,
       attackIndex,
+      healTargetId,
     });
   };
 
@@ -1065,6 +1412,7 @@ export default function TeamBattle() {
         attackToRun.fighterId,
         attackToRun.attackIndex,
         attackToRun.targetId,
+        attackToRun.healTargetId,
       );
     }, 2000);
 
@@ -1131,7 +1479,7 @@ export default function TeamBattle() {
           .map((attack, attackIndex) => ({ attack, attackIndex }))
           .filter(
             ({ attack }) =>
-              attack.state === true && cpu.mana >= (attack.cost ?? 0),
+              canUseAttack(attack) && cpu.mana >= (attack.cost ?? 0),
           )
           .map(({ attackIndex }) => ({
             id: `${cpu.id}-${attackIndex}-${target.id}`,
@@ -1192,7 +1540,7 @@ export default function TeamBattle() {
         .map((attack, attackIndex) => ({ attack, attackIndex }))
         .filter(
           ({ attack }) =>
-            attack.state === true && cpu.mana >= (attack.cost ?? 0),
+            canUseAttack(attack) && cpu.mana >= (attack.cost ?? 0),
         )
         .slice(0, limit);
 
@@ -1246,29 +1594,75 @@ export default function TeamBattle() {
         return;
       }
 
-      const resetFighters = (fighters) =>
-        fighters.map((fighter) => ({
+      // Clone both teams first so temporary effects can find their targets.
+      const allFighters = [...teams.player, ...teams.opponent].map(
+        (fighter) => ({
           ...fighter,
-          mana:
-            fighter.health > 0
-              ? Math.min(
-                  fighter.maximumMana ?? fighter.mana,
-                  fighter.mana + (fighter.manaRegen ?? 0),
-                )
-              : fighter.mana,
-          turnFinished: false,
-          blocked: false,
+          activeModifiers: (fighter.activeModifiers ?? []).map((modifier) => ({
+            ...modifier,
+          })),
           attacks: fighter.attacks.map((attack) => ({
             ...attack,
-            state: true,
             buff: attack.buff ? { ...attack.buff } : attack.buff,
             debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+            activeEffects: attack.activeEffects
+              ? [...attack.activeEffects]
+              : [],
           })),
-        }));
+        }),
+      );
+
+      // Reset attack cooldowns and reverse expired effects.
+      allFighters.forEach((fighter) => {
+        fighter.attacks = resetAttacks(fighter.attacks, allFighters);
+      });
+
+      // Restore each fighter's normal round resources.
+      const resetFighters = (fighters) =>
+        fighters.map((fighter) => {
+          const updatedFighter = {
+            ...fighter,
+
+            mana:
+              fighter.health > 0
+                ? Math.min(
+                    getModifiedCharacterStat(fighter, "maximumMana"),
+                    fighter.mana +
+                      getModifiedCharacterStat(fighter, "manaRegen"),
+                  )
+                : fighter.mana,
+
+            cooldown:
+              fighter.health > 0
+                ? Math.round(
+                    Math.min(
+                      fighter.maximumCooldown == null
+                        ? (fighter.cooldown ?? 0)
+                        : getModifiedCharacterStat(fighter, "maximumCooldown"),
+                      (fighter.cooldown ?? 0) +
+                        (fighter.recovery == null
+                          ? 1
+                          : getModifiedCharacterStat(fighter, "recovery")),
+                    ),
+                  )
+                : fighter.cooldown,
+
+            turnFinished: false,
+            blocked: false,
+            attacks: fighter.attacks,
+          };
+
+          // Expire one duration only after this round's recovery is complete.
+          tickSelfModifiers(updatedFighter);
+
+          return updatedFighter;
+        });
+
+      const playerCount = teams.player.length;
 
       setTeams({
-        player: resetFighters(teams.player),
-        opponent: resetFighters(teams.opponent),
+        player: resetFighters(allFighters.slice(0, playerCount)),
+        opponent: resetFighters(allFighters.slice(playerCount)),
       });
       setRoundTargets({});
       setCpuQueueReady(false);
@@ -1294,7 +1688,7 @@ export default function TeamBattle() {
     }
 
     const attack = cpu.attacks[action.attackIndex];
-    if (!attack || attack.state !== true || cpu.mana < (attack.cost ?? 0)) {
+    if (!attack || !canUseAttack(attack) || cpu.mana < (attack.cost ?? 0)) {
       setCpuActionIndex((index) => index + 1);
       return;
     }
@@ -1472,16 +1866,14 @@ export default function TeamBattle() {
     let result;
 
     if (choice === "defend") {
-      const defense =
-        typeof currentDefender.defense === "object"
-          ? (currentDefender.defense?.amount ?? 0)
-          : (currentDefender.defense ?? 0);
+      const defense = getModifiedCharacterStat(currentDefender, "defense");
 
       result = attackCharacter(
         currentAttack,
         currentAttacker,
         currentDefender,
         defense,
+        { blocked: true },
       );
     } else if (choice === "evade") {
       result = evadeAttack(currentAttack, currentAttacker, currentDefender);
@@ -1492,12 +1884,30 @@ export default function TeamBattle() {
         currentAttacker,
         currentDefender,
         0,
+        { blocked: true },
       );
     }
 
     if (result) {
       Object.assign(currentAttacker, result.attacker ?? {});
       Object.assign(currentDefender, result.defender ?? {});
+    }
+
+    if (result && (choice === "defend" || choice === "evade")) {
+      currentDefender.cooldown = Math.max(
+        0,
+        (currentDefender.cooldown ?? 0) - 1,
+      );
+
+      currentDefender.blocked = true;
+    }
+    // Record successful defensive actions.
+    if (result) {
+      if (choice === "defend") {
+        recordFestivalEvent("block", 1);
+      } else if (choice === "evade" && result.evaded) {
+        recordFestivalEvent("evade", 1);
+      }
     }
 
     const healthAfter = Number(currentDefender.health) || 0;
@@ -1579,24 +1989,54 @@ export default function TeamBattle() {
         }
 
         const resetFighters = (fighters) =>
-          fighters.map((fighter) => ({
-            ...fighter,
-            mana:
-              fighter.health > 0
-                ? Math.min(
-                    fighter.maximumMana ?? fighter.mana,
-                    fighter.mana + (fighter.manaRegen ?? 0),
-                  )
-                : fighter.mana,
-            turnFinished: false,
-            blocked: false,
-            attacks: fighter.attacks.map((item) => ({
-              ...item,
-              state: true,
-              buff: item.buff ? { ...item.buff } : item.buff,
-              debuff: item.debuff ? { ...item.debuff } : item.debuff,
-            })),
-          }));
+          fighters.map((fighter) => {
+            const updatedFighter = {
+              ...fighter,
+
+              mana:
+                fighter.health > 0
+                  ? Math.min(
+                      getModifiedCharacterStat(fighter, "maximumMana"),
+                      fighter.mana +
+                        getModifiedCharacterStat(fighter, "manaRegen"),
+                    )
+                  : fighter.mana,
+
+              cooldown:
+                fighter.health > 0
+                  ? Math.round(
+                      Math.min(
+                        fighter.maximumCooldown == null
+                          ? (fighter.cooldown ?? 0)
+                          : getModifiedCharacterStat(
+                              fighter,
+                              "maximumCooldown",
+                            ),
+                        (fighter.cooldown ?? 0) +
+                          (fighter.recovery == null
+                            ? 1
+                            : getModifiedCharacterStat(fighter, "recovery")),
+                      ),
+                    )
+                  : fighter.cooldown,
+
+              turnFinished: false,
+              blocked: false,
+
+              attacks: resetAttacks(
+                fighter.attacks.map((attack) => ({
+                  ...attack,
+                  buff: attack.buff ? { ...attack.buff } : attack.buff,
+                  debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+                })),
+              ),
+            };
+
+            // Tick modifiers after this round's resource recovery.
+            tickSelfModifiers(updatedFighter);
+
+            return updatedFighter;
+          });
 
         setTeams({
           player: resetFighters(updatedPlayers),
@@ -1788,16 +2228,14 @@ export default function TeamBattle() {
       let result;
 
       if (choice === "defend") {
-        const defense =
-          typeof currentDefender.defense === "object"
-            ? (currentDefender.defense?.amount ?? 0)
-            : (currentDefender.defense ?? 0);
+        const defense = getModifiedCharacterStat(currentDefender, "defense");
 
         result = attackCharacter(
           attack,
           currentAttacker,
           currentDefender,
           defense,
+          { blocked: true },
         );
       } else if (choice === "evade") {
         result = evadeAttack(attack, currentAttacker, currentDefender);
@@ -1811,11 +2249,15 @@ export default function TeamBattle() {
       if (!result) {
         addLog("The defensive action could not be completed.");
       } else {
+        // Record successful defensive actions.
         if (choice === "defend" || choice === "evade") {
           currentDefender.cooldown = Math.max(
             0,
             (currentDefender.cooldown ?? 0) - 1,
           );
+
+          currentDefender.blocked = true;
+        } else if (choice === "evade") {
           currentDefender.blocked = true;
         }
 
@@ -1912,6 +2354,11 @@ export default function TeamBattle() {
       );
 
       if (result) {
+        if (result.action === "defend") {
+          recordFestivalEvent("block", 1);
+        } else if (result.evaded) {
+          recordFestivalEvent("evade", 1);
+        }
         defenseResolvedRef.current = true;
 
         const updatedPlayers = teams.player.map((fighter) =>
@@ -1967,6 +2414,7 @@ export default function TeamBattle() {
     setCombatLog(["Choose your fighters' targets."]);
     setCombatMessage("Choose your fighters' targets.");
     setPhase("selecting");
+    festivalBattleRecorded.current = false;
   };
 
   const pendingAttacker = pendingDefense
@@ -1989,9 +2437,11 @@ export default function TeamBattle() {
 
           <p className="error-eyebrow">BATTLE SETUP ERROR</p>
           <h2>Unable to load your teams</h2>
+
           <p className="error-message">
-            A 2v2 battle needs two valid fighters on each team. Return to
-            character selection and choose two fighters per side.
+            {isStory1v2
+              ? "A Story Mode 1v2 battle needs one valid player fighter and two valid opponents. Return to character selection and check your fighters."
+              : "A 2v2 battle needs two valid fighters on each team. Return to character selection and choose two fighters per side."}
           </p>
 
           <button
@@ -2006,12 +2456,41 @@ export default function TeamBattle() {
     );
   }
 
-  if (phase === "victory" && !knockout && teamFinishComplete) {
-    return (
+  if (
+    (phase === "victory" || phase === "defeat") &&
+    !knockout &&
+    teamFinishComplete
+  ) {
+    const won = phase === "victory";
+
+    if (isStoryMode) {
+      return (
+        <StoryResultsScreen
+          won={won}
+          playerName={teams.player.map((fighter) => fighter.name).join(" & ")}
+          opponentName={teams.opponent
+            .map((fighter) => fighter.name)
+            .join(" & ")}
+          damageDealt={damageDealt}
+          attacksUsed={attacksUsed}
+          levelConfig={levelConfig}
+          battlePath="/team-battle"
+        />
+      );
+    }
+
+    return won ? (
       <VictoryScreen
         damageDealt={damageDealt}
         attacksUsed={attacksUsed}
         message="Your team has defeated the opposing team!"
+        onRematch={resetBattle}
+      />
+    ) : (
+      <GameOverScreen
+        damageDealt={damageDealt}
+        attacksUsed={attacksUsed}
+        message="Your entire team has been defeated."
         onRematch={resetBattle}
       />
     );
@@ -2030,86 +2509,74 @@ export default function TeamBattle() {
 
   return (
     <main className="team-battle">
+      <FestivalChallengePopup />
+      {isFinalTeamPhase && (
+        <div
+          className={`team-finish-overlay ${
+            phase === "victory" ? "finish-victory" : "finish-defeat"
+          } ${isTeamFinishFadingOut ? "is-fading-out" : ""}`}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="team-finish-flash" />
 
-{isFinalTeamPhase && (
-  <div
-    className={`team-finish-overlay ${
-    phase === "victory" ? "finish-victory" : "finish-defeat"
-  } ${isTeamFinishFadingOut ? "is-fading-out" : ""}`}
-  role="alert"
-  aria-live="assertive"
-  >
-    <div className="team-finish-flash" />
+          <p className="team-finish-eyebrow">FIGHTER'S ARENA</p>
 
-    <p className="team-finish-eyebrow">
-      FIGHTER'S ARENA
-    </p>
+          <h1 className="team-finish-title">TEAM K.O.!</h1>
 
-    <h1 className="team-finish-title">
-      TEAM K.O.!
-    </h1>
+          <p className="team-finish-message">
+            {phase === "victory"
+              ? "THE OPPOSING TEAM HAS BEEN DEFEATED"
+              : "YOUR ENTIRE TEAM HAS BEEN DEFEATED"}
+          </p>
 
-    <p className="team-finish-message">
-      {phase === "victory"
-        ? "THE OPPOSING TEAM HAS BEEN DEFEATED"
-        : "YOUR ENTIRE TEAM HAS BEEN DEFEATED"}
-    </p>
+          <div className="team-finish-versus">
+            <div className="team-finish-side defeated-side">
+              <h2>DEFEATED</h2>
 
-    <div className="team-finish-versus">
-      <div className="team-finish-side defeated-side">
-        <h2>DEFEATED</h2>
+              <div className="team-finish-cards">
+                {defeatedTeam.map((fighter, index) => (
+                  <div
+                    className="team-finish-card"
+                    key={fighter.id}
+                    style={{ "--card-index": index }}
+                  >
+                    {fighter.image && <img src={fighter.image} alt="" />}
 
-        <div className="team-finish-cards">
-          {defeatedTeam.map((fighter, index) => (
-            <div
-              className="team-finish-card"
-              key={fighter.id}
-              style={{ "--card-index": index }}
-            >
-              {fighter.image && (
-                <img src={fighter.image} alt="" />
-              )}
-
-              <strong>{fighter.name}</strong>
-              <span>K.O.</span>
+                    <strong>{fighter.name}</strong>
+                    <span>K.O.</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="team-finish-vs">VS</div>
+            <div className="team-finish-vs">VS</div>
 
-      <div className="team-finish-side winning-side">
-        <h2>WINNERS</h2>
+            <div className="team-finish-side winning-side">
+              <h2>WINNERS</h2>
 
-        <div className="team-finish-cards">
-          {winningTeam.map((fighter, index) => (
-            <div
-              className="team-finish-card"
-              key={fighter.id}
-              style={{ "--card-index": index }}
-            >
-              {fighter.image && (
-                <img src={fighter.image} alt="" />
-              )}
+              <div className="team-finish-cards">
+                {winningTeam.map((fighter, index) => (
+                  <div
+                    className="team-finish-card"
+                    key={fighter.id}
+                    style={{ "--card-index": index }}
+                  >
+                    {fighter.image && <img src={fighter.image} alt="" />}
 
-              <strong>{fighter.name}</strong>
-              <span>
-                {Math.max(0, fighter.health)} HP
-              </span>
+                    <strong>{fighter.name}</strong>
+                    <span>{Math.max(0, fighter.health)} HP</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
+          </div>
 
-    <p className="team-finish-footer">
-      {teamFinishComplete
-        ? "RESULT CONFIRMED"
-        : "MATCH COMPLETE"}
-    </p>
-  </div>
-)}
+          <p className="team-finish-footer">
+            {teamFinishComplete ? "RESULT CONFIRMED" : "MATCH COMPLETE"}
+          </p>
+        </div>
+      )}
 
       {knockout && (
         <div
@@ -2318,7 +2785,83 @@ export default function TeamBattle() {
         </div>
       )}
 
+      {pendingHealSelection &&
+        (() => {
+          const healer = teams.player.find(
+            (fighter) => fighter.id === pendingHealSelection.fighterId,
+          );
+
+          if (!healer) return null;
+
+          const availableTeammates = teams.player.filter(
+            (fighter) => fighter.id !== healer.id && fighter.health > 0,
+          );
+
+          const attack = healer.attacks[pendingHealSelection.attackIndex];
+
+          return (
+            <div className="target-modal-backdrop">
+              <section className="target-modal">
+                <p className="eyebrow">TEAM HEALING</p>
+
+                <h2>Choose a teammate to heal</h2>
+
+                <p>
+                  {healer.name} is preparing <strong>{attack?.name}</strong>.
+                  Select a living teammate to receive the healing.
+                </p>
+
+                {availableTeammates.length > 0 ? (
+                  <div className="target-choice-group">
+                    {availableTeammates.map((teammate) => (
+                      <button
+                        key={teammate.id}
+                        type="button"
+                        className="target-choice-button"
+                        onClick={() => confirmHealTarget(teammate.id)}
+                      >
+                        {teammate.image && (
+                          <img
+                            src={teammate.image}
+                            alt=""
+                            className="heal-target-portrait"
+                          />
+                        )}
+
+                        {teammate.name}
+                        <span>
+                          {Math.max(0, teammate.health)} /{" "}
+                          {teammate.maximumHealth} HP
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No living teammates are available to heal.</p>
+                )}
+
+                <button
+                  type="button"
+                  className="confirm-target-button"
+                  onClick={() => setPendingHealSelection(null)}
+                >
+                  Cancel
+                </button>
+              </section>
+            </div>
+          );
+        })()}
+
       <section className="battlefield">
+        {isStoryMode && (
+          <div
+            className="team-battle-story-background"
+            style={{
+              backgroundImage: `url("${storyBackgrounds.arena}")`,
+            }}
+            aria-hidden="true"
+          />
+        )}
         <div className="battle-team cpu-team">
           <div className="team-heading">
             <span className="team-indicator" />
@@ -2717,7 +3260,7 @@ export default function TeamBattle() {
               phase={phase}
               lockDuringAllyAttack={isCpuAssist && Boolean(pendingAllyAttack)}
               allowSimultaneousActions={isLocalCoop}
-              onAttack={useAttack}
+              onAttack={handleTeamAttack}
               onFinishTurn={finishPlayerTurn}
             />
           ))}

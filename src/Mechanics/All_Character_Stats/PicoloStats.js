@@ -1,10 +1,12 @@
 import PicoloArenaImage from "../../assets/img/picolo.jpg";
 
-import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
-import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
-import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
-import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
+import Attack1 from "../../assets/img/Attack_IMAGES/Namekian Regeneration.jpeg";
+import Attack2 from "../../assets/img/Attack_IMAGES/Ki Control.png";
+import Attack3 from "../../assets/img/Attack_IMAGES/Light Grenade.png";
+import Attack4 from "../../assets/img/Attack_IMAGES/Hellzone Grenade.png";
+import Attack5 from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
+import Attack6 from "../../assets/img/Attack_IMAGES/Special Beam Cannon.png"
+import Attack7 from "../../assets/img/Attack_IMAGES/Masenko.jpg"
 
 const Picolo = {
   name: "Piccolo",
@@ -27,7 +29,7 @@ const Picolo = {
     {
       id: "regeneration",
       name: "Namekian Regeneration",
-      image: TabascoStarImage,
+      image: Attack1,
       damage: 0,
       speed: 0,
       cost: 35,
@@ -40,15 +42,16 @@ const Picolo = {
     {
       id: "ki-control",
       name: "Ki Control",
-      image: GasStarImage,
+      image: Attack2,
       damage: 0,
       speed: 0,
       cost: 10,
+      turnCooldown: 3,
       state: true,
       buff: {
         defense: 10,
         agility: 5,
-        mana: 30,
+        mana: 70,
       },
     },
 
@@ -58,7 +61,7 @@ const Picolo = {
     {
       id: "light-grenade",
       name: "Light Grenade",
-      image: TabascoStarImage,
+      image: Attack3,
       damage: 20,
       speed: 38,
       cost: 10,
@@ -71,20 +74,21 @@ const Picolo = {
     {
       id: "hellzone-grenade",
       name: "Hellzone Grenade",
-      image: FireBirdStarImage,
+      image: Attack4,
       damage: 40,
       speed: 48,
       cost: 13,
       state: true,
       debuff: {
         health: 12,
+        defense: 8,
       },
     },
 
     {
       id: "special-beam-cannon",
       name: "Special Beam Cannon",
-      image: ExplodingPineconeImage,
+      image: Attack5,
       damage: 45,
       speed: 60,
       cost: 15,
@@ -94,7 +98,7 @@ const Picolo = {
     {
       id: "explosive-wave",
       name: "Explosive Wave",
-      image: GasStarImage,
+      image: Attack6,
       damage: 40,
       speed: 40,
       cost: 20,
@@ -108,9 +112,10 @@ const Picolo = {
     {
       id: "masenko",
       name: "Masenko",
-      image: FireBirdStarImage,
-      damage: 25,
-      speed: 70,
+      uses: 1,
+      image: Attack7,
+      damage: 60,
+      speed: 90,
       cost: 27,
       state: true,
     },

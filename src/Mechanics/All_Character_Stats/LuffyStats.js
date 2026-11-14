@@ -24,21 +24,67 @@ const Luffy = {
   },
 
   attacks: [
-
     {
       name: "Second Gear",
       image: null,
       damage: 0,
       speed: 0,
-      cost: 10,
+      cost: 15,
+      turnCooldown: 5,
+      uses: 2,
+      sacrifice: {
+        health: 5,
+      },
       state: true,
       buff: {
         agility: 10,
         mana: 50,
-      }
+      },
+    },
+    {
+      id: "luffy-third-gear",
+      name: "Third Gear",
+      damage: 0,
+      speed: 0,
+      cost: 30,
+      state: true,
+      uses: 4,
+      turnCooldown: 3,
+      duration: 3,
+
+      attackModifiers: {
+        targetAttackIds: null,
+        stats: {
+          damage: {
+            multiplier: 1.8, 
+          },
+          speed: {
+            multiplier: 0.75,
+          },
+          cost: {
+            multiplier: 1.3,
+
+            
+          },
+        },
+      },
+
+      characterModifiers: {
+        agility: {
+          multiplier: 0.6,
+        },
+        defense: {
+          multiplier: 1.15,
+          amount: 10,
+        },
+        manaRegen: {
+          multiplier: 0.8,
+        },
+      },
     },
 
     {
+      id: "Gum-Gum Pistol",
       name: "Gum-Gum Pistol",
       image: null,
       damage: 35,
@@ -47,6 +93,7 @@ const Luffy = {
       state: true,
     },
     {
+      id: "Gum-Gum Gatling",
       name: "Gum-Gum Gatling",
       image: null,
       damage: 52,
@@ -55,6 +102,7 @@ const Luffy = {
       state: true,
     },
     {
+      id: "Gum-Gum Bazooka",
       name: "Gum-Gum Bazooka",
       image: null,
       damage: 70,
@@ -63,6 +111,7 @@ const Luffy = {
       state: true,
     },
     {
+      id: "Gum-Gum Red Hawk",
       name: "Gum-Gum Red Hawk",
       image: null,
       damage: 80,
@@ -75,6 +124,5 @@ const Luffy = {
     },
   ],
 };
-
 
 export default Luffy;

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -25,7 +24,10 @@ function getTeamName(team) {
 }
 
 function getTeamKey(team) {
-  return team.map((fighter) => fighter.id).sort().join("+");
+  return team
+    .map((fighter) => fighter.id)
+    .sort()
+    .join("+");
 }
 
 function getTeamMaximumHealth(team) {
@@ -40,16 +42,58 @@ function chooseRandom(candidates) {
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
+function getOneVsOneOutcome(result) {
+  const winner = result?.winner?.trim?.();
+
+  const firstName = result?.fighters?.[0]?.name;
+  const secondName = result?.fighters?.[1]?.name;
+
+  // First, use the winner reported by BattleSimulator.
+  if (winner && winner === firstName) return "first";
+  if (winner && winner === secondName) return "second";
+
+  // Fallback: compare the fighters' remaining health.
+  const firstHealth = result?.fighters?.[0]?.health ?? 0;
+  const secondHealth = result?.fighters?.[1]?.health ?? 0;
+
+  if (firstHealth > secondHealth) return "first";
+  if (secondHealth > firstHealth) return "second";
+
+  return "draw";
+}
+
+function getTeamBattleOutcome(result) {
+  if (result?.winner === "Team 1") return "first";
+  if (result?.winner === "Team 2") return "second";
+
+  // Fallback: compare the remaining health of both teams.
+  const firstHealth = (result?.teams?.[0] ?? []).reduce(
+    (total, fighter) => total + Math.max(0, fighter.health ?? 0),
+    0,
+  );
+
+  const secondHealth = (result?.teams?.[1] ?? []).reduce(
+    (total, fighter) => total + Math.max(0, fighter.health ?? 0),
+    0,
+  );
+
+  if (firstHealth > secondHealth) return "first";
+  if (secondHealth > firstHealth) return "second";
+
+  return "draw";
+}
+
 // -----------------------------------------------------------------------------
 // EXISTING 1v1 SIMULATION HELPERS
 // -----------------------------------------------------------------------------
 
-function runStartingOrderSeries(
+async function runStartingOrderSeries(
   firstFighter,
   secondFighter,
   requestedCount,
   firstDifficulty,
   secondDifficulty,
+  onProgress,
 ) {
   let firstWins = 0;
   let secondWins = 0;
@@ -74,13 +118,17 @@ function runStartingOrderSeries(
       },
     );
 
+    
+
     totalRounds += result.rounds;
 
-    if (result.winner === getFighterName(firstFighter)) {
+    const outcome = getOneVsOneOutcome(result);
+
+    if (outcome === "first") {
       firstWins++;
       firstWinnerHealthTotal += result.fighters[0].health;
       firstWinnerRoundsTotal += result.rounds;
-    } else if (result.winner === getFighterName(secondFighter)) {
+    } else if (outcome === "second") {
       secondWins++;
       secondWinnerHealthTotal += result.fighters[1].health;
       secondWinnerRoundsTotal += result.rounds;
@@ -93,6 +141,11 @@ function runStartingOrderSeries(
       selectedFighterOne: firstFighter,
       selectedFighterTwo: secondFighter,
     };
+    onProgress?.();
+
+    if ((i + 1) % 5 === 0 || i === requestedCount - 1) {
+      await yieldToBrowser();
+    }
   }
 
   return {
@@ -156,8 +209,13 @@ function recordFighterBattle(
   position,
 ) {
   const stats = fighterStats[fighter.id];
-  const won = result.winner === getFighterName(fighter);
-  const drew = result.winner === null;
+  const outcome = getOneVsOneOutcome(result);
+
+  const won =
+    (position === "first" && outcome === "first") ||
+    (position === "second" && outcome === "second");
+
+  const drew = outcome === "draw";
 
   stats.battles++;
   stats.totalRounds += result.rounds;
@@ -179,6 +237,68 @@ function recordFighterBattle(
   } else {
     stats.losses++;
   }
+}
+function createMatchupStats(fighters) {
+  const stats = {};
+
+  for (const fighter of fighters) {
+    stats[fighter.id] = {
+      id: fighter.id,
+      name: getFighterName(fighter),
+      opponents: {},
+    };
+  }
+
+  return stats;
+}
+
+
+function recordHeadToHead(matchupStats, fighter, opponent, outcome) {
+  const fighterStats = matchupStats[fighter.id];
+
+  if (!fighterStats.opponents[opponent.id]) {
+    fighterStats.opponents[opponent.id] = {
+      id: opponent.id,
+      name: getFighterName(opponent),
+      wins: 0,
+      losses: 0,
+      draws: 0,
+    };
+  }
+
+  const counterKey = {
+    win: "wins",
+    loss: "losses",
+    draw: "draws",
+  }[outcome];
+
+  if (!counterKey) return;
+
+  fighterStats.opponents[opponent.id][counterKey]++;
+}
+
+
+function createMatchupRankings(matchupStats) {
+  return Object.values(matchupStats).map((fighter) => {
+    const opponents = Object.values(fighter.opponents);
+
+    const mostDifficult = [...opponents]
+      .filter((opponent) => opponent.losses > 0)
+      .sort((a, b) => b.losses - a.losses || a.name.localeCompare(b.name))
+      .slice(0, 3);
+
+    const mostFavorable = [...opponents]
+      .filter((opponent) => opponent.wins > 0)
+      .sort((a, b) => b.wins - a.wins || a.name.localeCompare(b.name))
+      .slice(0, 3);
+
+    return {
+      id: fighter.id,
+      name: fighter.name,
+      mostDifficult,
+      mostFavorable,
+    };
+  });
 }
 
 function createFighterLeaderboard(fighterStats, availableFighters) {
@@ -274,12 +394,13 @@ function createFighterLeaderboard(fighterStats, availableFighters) {
 // NEW 2v2 SIMULATION HELPERS
 // -----------------------------------------------------------------------------
 
-function runTeamStartingOrderSeries(
+async function runTeamStartingOrderSeries(
   firstTeam,
   secondTeam,
   requestedCount,
   firstDifficulty,
   secondDifficulty,
+  onProgress,
 ) {
   let firstWins = 0;
   let secondWins = 0;
@@ -315,11 +436,13 @@ function runTeamStartingOrderSeries(
       0,
     );
 
-    if (result.winner === "Team 1") {
+    const outcome = getTeamBattleOutcome(result);
+
+    if (outcome === "first") {
       firstWins++;
       firstWinnerHealthTotal += firstTeamHealth;
       firstWinnerRoundsTotal += result.rounds;
-    } else if (result.winner === "Team 2") {
+    } else if (outcome === "second") {
       secondWins++;
       secondWinnerHealthTotal += secondTeamHealth;
       secondWinnerRoundsTotal += result.rounds;
@@ -332,6 +455,11 @@ function runTeamStartingOrderSeries(
       selectedTeamOne: firstTeam,
       selectedTeamTwo: secondTeam,
     };
+    onProgress?.();
+
+    if ((i + 1) % 5 === 0 || i === requestedCount - 1) {
+      await yieldToBrowser();
+    }
   }
 
   return {
@@ -357,7 +485,9 @@ function runTeamStartingOrderSeries(
       firstWins > 0 ? (firstWinnerRoundsTotal / firstWins).toFixed(1) : "N/A",
 
     secondAverageRoundsToWin:
-      secondWins > 0 ? (secondWinnerRoundsTotal / secondWins).toFixed(1) : "N/A",
+      secondWins > 0
+        ? (secondWinnerRoundsTotal / secondWins).toFixed(1)
+        : "N/A",
 
     lastResult,
   };
@@ -388,9 +518,13 @@ function createTeamRecord(team) {
 function recordTeamBattle(teamStats, team, result, position) {
   const stats = teamStats[getTeamKey(team)];
   const teamIndex = position === "first" ? 0 : 1;
-  const winnerLabel = position === "first" ? "Team 1" : "Team 2";
-  const won = result.winner === winnerLabel;
-  const drew = result.winner === null;
+  const outcome = getTeamBattleOutcome(result);
+
+  const won =
+    (position === "first" && outcome === "first") ||
+    (position === "second" && outcome === "second");
+
+  const drew = outcome === "draw";
 
   const ownHealth = result.teams[teamIndex].reduce(
     (total, fighter) => total + Math.max(0, fighter.health),
@@ -422,8 +556,7 @@ function recordTeamBattle(teamStats, team, result, position) {
 function createTeamLeaderboard(teamStats) {
   return Object.values(teamStats)
     .map((team) => {
-      const winRate =
-        team.battles > 0 ? (team.wins / team.battles) * 100 : 0;
+      const winRate = team.battles > 0 ? (team.wins / team.battles) * 100 : 0;
 
       const firstWinRate =
         team.startsFirstBattles > 0
@@ -508,10 +641,10 @@ function createTeamLeaderboard(teamStats) {
 function BotSimulator() {
   const navigate = useNavigate();
 
-  const [unlockedIds, setUnlockedIds] = useState(() =>
+  const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
+  const [selectedFighterIds, setSelectedFighterIds] = useState(() =>
     getUnlockedCharacters(),
   );
-
   const [battleType, setBattleType] = useState("1v1");
   const [mode, setMode] = useState("custom");
 
@@ -525,19 +658,67 @@ function BotSimulator() {
   const [difficultyTwo, setDifficultyTwo] = useState("Easy");
   const [simulationCount, setSimulationCount] = useState("100");
 
+  const [progress, setProgress] = useState({
+    completed: 0,
+    total: 0,
+  });
+
+  const progressPercentage =
+    progress.total > 0
+      ? Math.round((progress.completed / progress.total) * 100)
+      : 0;
+
   const [results, setResults] = useState(null);
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
-    const updateUnlocks = () => setUnlockedIds(getUnlockedCharacters());
+    const updateUnlocks = () => {
+      const nextUnlockedIds = getUnlockedCharacters();
+
+      setUnlockedIds(nextUnlockedIds);
+
+      // Preserve the user's current selection.
+      // Newly unlocked fighters are automatically included.
+      setSelectedFighterIds((previousIds) => [
+        ...previousIds.filter((id) => nextUnlockedIds.includes(id)),
+        ...nextUnlockedIds.filter((id) => !previousIds.includes(id)),
+      ]);
+    };
 
     window.addEventListener("unlocksUpdated", updateUnlocks);
-    return () => window.removeEventListener("unlocksUpdated", updateUnlocks);
+
+    return () => {
+      window.removeEventListener("unlocksUpdated", updateUnlocks);
+    };
   }, []);
 
   const availableFighters = roster.filter((fighter) =>
     unlockedIds.includes(fighter.id),
   );
+
+  const analysisFighters = availableFighters.filter((fighter) =>
+    selectedFighterIds.includes(fighter.id),
+  );
+
+  function toggleAnalysisFighter(id) {
+    setSelectedFighterIds((previousIds) =>
+      previousIds.includes(id)
+        ? previousIds.filter((fighterId) => fighterId !== id)
+        : [...previousIds, id],
+    );
+
+    setResults(null);
+  }
+
+  function selectAllAnalysisFighters() {
+    setSelectedFighterIds(availableFighters.map((fighter) => fighter.id));
+    setResults(null);
+  }
+
+  function deselectAllAnalysisFighters() {
+    setSelectedFighterIds([]);
+    setResults(null);
+  }
 
   function chooseFighter(preferredId, excludedIds = []) {
     const candidates = availableFighters.filter(
@@ -570,7 +751,7 @@ function BotSimulator() {
     return team;
   }
 
-  function runCustomSimulations(requestedCount) {
+  async function runCustomSimulations(requestedCount, onProgress) {
     const fighterOne = chooseFighter(fighterOneId);
     const fighterTwo = chooseFighter(
       fighterTwoId,
@@ -582,27 +763,27 @@ function BotSimulator() {
       return;
     }
 
-    const fighterOneStarts = runStartingOrderSeries(
+    const fighterOneStarts = await runStartingOrderSeries(
       fighterOne,
       fighterTwo,
       requestedCount,
       difficultyOne,
       difficultyTwo,
+      onProgress,
     );
 
-    const fighterTwoStarts = runStartingOrderSeries(
+    const fighterTwoStarts = await runStartingOrderSeries(
       fighterTwo,
       fighterOne,
       requestedCount,
       difficultyTwo,
       difficultyOne,
+      onProgress,
     );
 
-    const botOneWins =
-      fighterOneStarts.firstWins + fighterTwoStarts.secondWins;
+    const botOneWins = fighterOneStarts.firstWins + fighterTwoStarts.secondWins;
 
-    const botTwoWins =
-      fighterOneStarts.secondWins + fighterTwoStarts.firstWins;
+    const botTwoWins = fighterOneStarts.secondWins + fighterTwoStarts.firstWins;
 
     const draws = fighterOneStarts.draws + fighterTwoStarts.draws;
     const completed = fighterOneStarts.completed + fighterTwoStarts.completed;
@@ -627,10 +808,11 @@ function BotSimulator() {
     });
   }
 
-  function runAllMatchups(requestedCount) {
+  async function runAllMatchups(requestedCount, onProgress) {
     const fighterStats = {};
+    const matchupStats = createMatchupStats(analysisFighters);
 
-    for (const fighter of availableFighters) {
+    for (const fighter of analysisFighters) {
       fighterStats[fighter.id] = createFighterRecord(fighter);
     }
 
@@ -639,10 +821,10 @@ function BotSimulator() {
     let lastResult = null;
     let matchupCount = 0;
 
-    for (let i = 0; i < availableFighters.length; i++) {
-      for (let j = i + 1; j < availableFighters.length; j++) {
-        const fighterOne = availableFighters[i];
-        const fighterTwo = availableFighters[j];
+    for (let i = 0; i < analysisFighters.length; i++) {
+      for (let j = i + 1; j < analysisFighters.length; j++) {
+        const fighterOne = analysisFighters[i];
+        const fighterTwo = analysisFighters[j];
 
         matchupCount++;
 
@@ -672,6 +854,10 @@ function BotSimulator() {
               },
             );
 
+
+
+
+
             recordFighterBattle(
               fighterStats,
               order.first,
@@ -688,7 +874,44 @@ function BotSimulator() {
               "second",
             );
 
+            const battleOutcome = getOneVsOneOutcome(result);
+
+            const firstOutcome =
+              battleOutcome === "first"
+                ? "win"
+                : battleOutcome === "second"
+                  ? "loss"
+                  : "draw";
+
+            const secondOutcome =
+              battleOutcome === "second"
+                ? "win"
+                : battleOutcome === "first"
+                  ? "loss"
+                  : "draw";
+
+            recordHeadToHead(
+              matchupStats,
+              order.first,
+              order.second,
+              firstOutcome,
+            );
+
+            recordHeadToHead(
+              matchupStats,
+              order.second,
+              order.first,
+              secondOutcome,
+            );
+
             totalBattles++;
+
+            onProgress?.();
+
+            if (totalBattles % 5 === 0) {
+              await yieldToBrowser();
+            }
+
             totalRounds += result.rounds;
 
             lastResult = {
@@ -704,19 +927,18 @@ function BotSimulator() {
     setResults({
       type: "all",
       battleType: "1v1",
-      leaderboard: createFighterLeaderboard(
-        fighterStats,
-        availableFighters,
-      ),
+      leaderboard: createFighterLeaderboard(fighterStats, analysisFighters),
+      matchupRankings: createMatchupRankings(matchupStats),
       totalBattles,
       matchupCount,
       averageRounds:
         totalBattles > 0 ? (totalRounds / totalBattles).toFixed(1) : "0.0",
       lastResult,
     });
+    await yieldToBrowser();
   }
 
-  function runCustomTeamSimulations(requestedCount) {
+  async function runCustomTeamSimulations(requestedCount, onProgress) {
     const teamOne = resolveTeam(teamOneIds);
     const teamTwo = resolveTeam(
       teamTwoIds,
@@ -728,27 +950,27 @@ function BotSimulator() {
       return;
     }
 
-    const firstTeamStarts = runTeamStartingOrderSeries(
+    const firstTeamStarts = await runTeamStartingOrderSeries(
       teamOne,
       teamTwo,
       requestedCount,
       difficultyOne,
       difficultyTwo,
+      onProgress,
     );
 
-    const secondTeamStarts = runTeamStartingOrderSeries(
+    const secondTeamStarts = await runTeamStartingOrderSeries(
       teamTwo,
       teamOne,
       requestedCount,
       difficultyTwo,
       difficultyOne,
+      onProgress,
     );
 
-    const teamOneWins =
-      firstTeamStarts.firstWins + secondTeamStarts.secondWins;
+    const teamOneWins = firstTeamStarts.firstWins + secondTeamStarts.secondWins;
 
-    const teamTwoWins =
-      firstTeamStarts.secondWins + secondTeamStarts.firstWins;
+    const teamTwoWins = firstTeamStarts.secondWins + secondTeamStarts.firstWins;
 
     const draws = firstTeamStarts.draws + secondTeamStarts.draws;
     const completed = firstTeamStarts.completed + secondTeamStarts.completed;
@@ -773,13 +995,14 @@ function BotSimulator() {
     });
   }
 
-  function runAllTeamMatchups(requestedCount) {
+  async function runAllTeamMatchups(requestedCount, onProgress) {
     const allTeams = [];
 
-    // Build every unique two-fighter combination.
-    for (let i = 0; i < availableFighters.length; i++) {
-      for (let j = i + 1; j < availableFighters.length; j++) {
-        allTeams.push([availableFighters[i], availableFighters[j]]);
+    // Build every unique two-fighter combination
+    // using only the selected analysis roster.
+    for (let i = 0; i < analysisFighters.length; i++) {
+      for (let j = i + 1; j < analysisFighters.length; j++) {
+        allTeams.push([analysisFighters[i], analysisFighters[j]]);
       }
     }
 
@@ -789,7 +1012,7 @@ function BotSimulator() {
     }
 
     const teamStats = {};
-
+    const matchupStats = createMatchupStats(analysisFighters);
     for (const team of allTeams) {
       teamStats[getTeamKey(team)] = createTeamRecord(team);
     }
@@ -835,8 +1058,52 @@ function BotSimulator() {
 
             recordTeamBattle(teamStats, order.first, result, "first");
             recordTeamBattle(teamStats, order.second, result, "second");
+            const teamOutcome = getTeamBattleOutcome(result);
 
+            const firstTeamOutcome =
+              teamOutcome === "first"
+                ? "win"
+                : teamOutcome === "second"
+                  ? "loss"
+                  : "draw";
+
+            const secondTeamOutcome =
+              teamOutcome === "second"
+                ? "win"
+                : teamOutcome === "first"
+                  ? "loss"
+                  : "draw";
+
+            // Record all four individual cross-team matchups.
+            for (const fighter of order.first) {
+              for (const opponent of order.second) {
+                recordHeadToHead(
+                  matchupStats,
+                  fighter,
+                  opponent,
+                  firstTeamOutcome,
+                );
+              }
+            }
+
+            for (const fighter of order.second) {
+              for (const opponent of order.first) {
+                recordHeadToHead(
+                  matchupStats,
+                  fighter,
+                  opponent,
+                  secondTeamOutcome,
+                );
+              }
+            }
             totalBattles++;
+
+            onProgress?.();
+
+            if (totalBattles % 5 === 0) {
+              await yieldToBrowser();
+            }
+
             totalRounds += result.rounds;
 
             lastResult = {
@@ -853,6 +1120,7 @@ function BotSimulator() {
       type: "all",
       battleType: "2v2",
       leaderboard: createTeamLeaderboard(teamStats),
+      matchupRankings: createMatchupRankings(matchupStats),
       totalBattles,
       matchupCount,
       teamCombinationCount: allTeams.length,
@@ -860,16 +1128,22 @@ function BotSimulator() {
         totalBattles > 0 ? (totalRounds / totalBattles).toFixed(1) : "0.0",
       lastResult,
     });
+    await yieldToBrowser();
   }
 
-  function runSimulations() {
+  async function runSimulations() {
     const minimumFighters = battleType === "2v2" ? 4 : 2;
 
-    if (availableFighters.length < minimumFighters) {
+    const fightersToSimulate =
+      mode === "all" ? analysisFighters : availableFighters;
+
+    if (fightersToSimulate.length < minimumFighters) {
       alert(
-        battleType === "2v2"
-          ? "You need at least four unlocked fighters for 2v2."
-          : "You need at least two unlocked fighters to simulate battles.",
+        mode === "all"
+          ? `Select at least ${minimumFighters} fighters to run this analysis.`
+          : battleType === "2v2"
+            ? "You need at least four unlocked fighters for 2v2."
+            : "You need at least two unlocked fighters to simulate battles.",
       );
       return;
     }
@@ -879,21 +1153,68 @@ function BotSimulator() {
       Math.max(1, Number(simulationCount) || 1),
     );
 
+    // Calculate exactly how many battles this operation will run.
+    const fighterCount = fightersToSimulate.length;
+    const uniqueMatchups = (fighterCount * (fighterCount - 1)) / 2;
+
+    let totalBattles;
+
+    if (mode === "custom") {
+      // Two starting positions, each tested requestedCount times.
+      totalBattles = requestedCount * 2;
+    } else if (battleType === "1v1") {
+      totalBattles = uniqueMatchups * 2 * requestedCount;
+    } else {
+      // Every possible two-fighter team.
+      const teamCount = uniqueMatchups;
+
+      // Every unique team-versus-team matchup.
+      const teamMatchups = (teamCount * (teamCount - 1)) / 2;
+
+      totalBattles = teamMatchups * 2 * requestedCount;
+    }
+
     setRunning(true);
     setResults(null);
+    setProgress({
+      completed: 0,
+      total: totalBattles,
+    });
+
+    let completedBattles = 0;
+
+    const handleProgress = () => {
+      completedBattles++;
+
+      setProgress({
+        completed: completedBattles,
+        total: totalBattles,
+      });
+    };
 
     try {
+      // Give React time to display the progress bar before calculation.
+      await yieldToBrowser();
+
       if (battleType === "1v1") {
         if (mode === "all") {
-          runAllMatchups(requestedCount);
+          await runAllMatchups(requestedCount, handleProgress);
         } else {
-          runCustomSimulations(requestedCount);
+          await runCustomSimulations(requestedCount, handleProgress);
         }
-      } else if (mode === "all") {
-        runAllTeamMatchups(requestedCount);
       } else {
-        runCustomTeamSimulations(requestedCount);
+        if (mode === "all") {
+          await runAllTeamMatchups(requestedCount, handleProgress);
+        } else {
+          await runCustomTeamSimulations(requestedCount, handleProgress);
+        }
       }
+
+      // Ensure the progress indicator finishes at exactly 100%.
+      setProgress({
+        completed: totalBattles,
+        total: totalBattles,
+      });
     } catch (error) {
       console.error("Simulation failed:", error);
       alert("The simulation encountered an error. Check the console.");
@@ -924,7 +1245,7 @@ function BotSimulator() {
               ? getTeamName(result.selectedTeamOne)
               : result.winner === "Team 2" && isTeamBattle
                 ? getTeamName(result.selectedTeamTwo)
-                : result.winner ?? "Draw"}
+                : (result.winner ?? "Draw")}
           </strong>
         </p>
 
@@ -1087,9 +1408,7 @@ function BotSimulator() {
           <h1>BOT VS BOT</h1>
         </div>
 
-        <button onClick={() => navigate("/watch-mode")}>
-          ▶ WATCH BATTLE
-        </button>
+        <button onClick={() => navigate("/watch-mode")}>▶ WATCH BATTLE</button>
       </header>
 
       <section className="simulator-setup">
@@ -1209,19 +1528,18 @@ function BotSimulator() {
             <h3>EVERY UNLOCKED FIGHTER</h3>
 
             <p>
-              The simulator tests each unique pair of unlocked fighters in
-              both starting positions.
+              The simulator tests each unique pair of unlocked fighters in both
+              starting positions.
             </p>
 
             <p>
-              Fighters available: <strong>{availableFighters.length}</strong>
+              Fighters selected: <strong>{analysisFighters.length}</strong>
             </p>
 
             <p>
               Unique matchups:{" "}
               <strong>
-                {(availableFighters.length * (availableFighters.length - 1)) /
-                  2}
+                {(analysisFighters.length * (analysisFighters.length - 1)) / 2}
               </strong>
             </p>
           </div>
@@ -1232,20 +1550,19 @@ function BotSimulator() {
             <h3>EVERY TWO-FIGHTER TEAM</h3>
 
             <p>
-              The simulator creates every unique pair of unlocked fighters,
-              then tests each team against every other team in both starting
+              The simulator creates every unique pair of unlocked fighters, then
+              tests each team against every other team in both starting
               positions.
             </p>
 
             <p>
-              Available fighters: <strong>{availableFighters.length}</strong>
+              Fighters selected: <strong>{analysisFighters.length}</strong>
             </p>
 
             <p>
               Possible teams:{" "}
               <strong>
-                {(availableFighters.length * (availableFighters.length - 1)) /
-                  2}
+                {(analysisFighters.length * (analysisFighters.length - 1)) / 2}
               </strong>
             </p>
 
@@ -1253,6 +1570,66 @@ function BotSimulator() {
               This mode can run many battles. Start with 1–10 battles per
               matchup, then increase the count if performance is good.
             </p>
+          </div>
+        )}
+
+        {mode === "all" && (
+          <div className="analysis-fighter-selector">
+            <div className="analysis-fighter-selector-header">
+              <div>
+                <h3>SELECT FIGHTERS TO ANALYZE</h3>
+
+                <p>
+                  Choose which unlocked fighters should participate in the
+                  matchup simulations.
+                </p>
+              </div>
+
+              <div className="analysis-selection-actions">
+                <button
+                  type="button"
+                  onClick={selectAllAnalysisFighters}
+                  disabled={running}
+                >
+                  SELECT ALL
+                </button>
+
+                <button
+                  type="button"
+                  onClick={deselectAllAnalysisFighters}
+                  disabled={running}
+                >
+                  DESELECT ALL
+                </button>
+              </div>
+            </div>
+
+            <p className="analysis-selection-count">
+              Selected: <strong>{analysisFighters.length}</strong> /{" "}
+              {availableFighters.length} unlocked fighters
+            </p>
+
+            <div className="analysis-fighter-list">
+              {availableFighters.map((fighter) => (
+                <label className="analysis-fighter-option" key={fighter.id}>
+                  <input
+                    type="checkbox"
+                    checked={selectedFighterIds.includes(fighter.id)}
+                    onChange={() => toggleAnalysisFighter(fighter.id)}
+                    disabled={running}
+                  />
+
+                  <span>{getFighterName(fighter)}</span>
+                </label>
+              ))}
+            </div>
+
+            {analysisFighters.length < (battleType === "2v2" ? 4 : 2) && (
+              <p className="analysis-selection-warning">
+                Select at least {battleType === "2v2" ? 4 : 2} fighters to run
+                this analysis.
+              </p>
+            )}
           </div>
         )}
 
@@ -1280,11 +1657,41 @@ function BotSimulator() {
           onClick={runSimulations}
           disabled={
             running ||
-            availableFighters.length < (battleType === "2v2" ? 4 : 2)
+            (mode === "all" &&
+              analysisFighters.length < (battleType === "2v2" ? 4 : 2)) ||
+            (mode === "custom" &&
+              availableFighters.length < (battleType === "2v2" ? 4 : 2))
           }
         >
           {running ? "SIMULATING..." : "RUN SIMULATION"}
         </button>
+
+        {running && (
+          <div className="simulation-progress">
+            <div className="simulation-progress-header">
+              <span>CALCULATING MATCHUPS...</span>
+              <strong>{progressPercentage}%</strong>
+            </div>
+
+            <div
+              className="simulation-progress-track"
+              role="progressbar"
+              aria-valuenow={progressPercentage}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div
+                className="simulation-progress-fill"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+
+            <p>
+              {progress.completed.toLocaleString()} /{" "}
+              {progress.total.toLocaleString()} battles completed
+            </p>
+          </div>
+        )}
       </section>
 
       {results && results.type === "custom" && (
@@ -1305,9 +1712,11 @@ function BotSimulator() {
 
           {results.battleType === "1v1" && (
             <p>
-              <strong>Bot 1:</strong> {getFighterName(results.selectedFighterOne)}
+              <strong>Bot 1:</strong>{" "}
+              {getFighterName(results.selectedFighterOne)}
               {" vs "}
-              <strong>Bot 2:</strong> {getFighterName(results.selectedFighterTwo)}
+              <strong>Bot 2:</strong>{" "}
+              {getFighterName(results.selectedFighterTwo)}
             </p>
           )}
 
@@ -1317,12 +1726,16 @@ function BotSimulator() {
 
           <div className="simulation-stat-grid">
             <div>
-              <span>{results.battleType === "2v2" ? "TEAM 1 WINS" : "BOT 1 WINS"}</span>
+              <span>
+                {results.battleType === "2v2" ? "TEAM 1 WINS" : "BOT 1 WINS"}
+              </span>
               <strong>{results.botOneWins}</strong>
             </div>
 
             <div>
-              <span>{results.battleType === "2v2" ? "TEAM 2 WINS" : "BOT 2 WINS"}</span>
+              <span>
+                {results.battleType === "2v2" ? "TEAM 2 WINS" : "BOT 2 WINS"}
+              </span>
               <strong>{results.botTwoWins}</strong>
             </div>
 
@@ -1395,7 +1808,9 @@ function BotSimulator() {
                       {test.secondAverageHealthAfterWins}
                       {test.secondAverageHealthAfterWins !== "N/A" ? " HP" : ""}
                     </p>
-                    <p>Average rounds to win: {test.secondAverageRoundsToWin}</p>
+                    <p>
+                      Average rounds to win: {test.secondAverageRoundsToWin}
+                    </p>
                   </div>
                 );
               })}
@@ -1498,11 +1913,105 @@ function BotSimulator() {
             </table>
           </div>
 
+          {results.matchupRankings && (
+            <div className="fighter-matchup-rankings">
+              <h3>
+                {results.battleType === "2v2"
+                  ? "TEAM-BASED FIGHTER MATCHUPS"
+                  : "INDIVIDUAL FIGHTER MATCHUPS"}
+              </h3>
+
+              <p>
+                {results.battleType === "2v2"
+                  ? "These records show how fighters perform against opposing fighters based on their teams' overall battle results. Each team result is attributed to all four cross-team fighter pairings."
+                  : "Discover which opponents each fighter struggles against and which opponents they defeat most frequently."}
+              </p>
+
+              <div className="fighter-matchup-grid">
+                {results.matchupRankings.map((fighter) => (
+                  <div className="fighter-matchup-card" key={fighter.id}>
+                    <h4>{fighter.name}</h4>
+
+                    <div className="fighter-matchup-columns">
+                      <div>
+                        <h5 className="difficult-opponents-heading">
+                          TOUGHEST OPPONENTS
+                        </h5>
+
+                        {fighter.mostDifficult.length > 0 ? (
+                          <ol className="fighter-matchup-list">
+                            {fighter.mostDifficult.map((opponent, index) => (
+                              <li key={opponent.id}>
+                                <span className="matchup-rank">
+                                  #{index + 1}
+                                </span>
+
+                                <div>
+                                  <strong>{opponent.name}</strong>
+
+                                  <small>{opponent.losses} losses</small>
+
+                                  <small>
+                                    W: {opponent.wins} · L: {opponent.losses} ·
+                                    D: {opponent.draws}
+                                  </small>
+                                </div>
+                              </li>
+                            ))}
+                          </ol>
+                        ) : (
+                          <p className="fighter-matchup-empty">
+                            No recorded losses.
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <h5 className="favorable-opponents-heading">
+                          MOST FAVORABLE
+                        </h5>
+
+                        {fighter.mostFavorable.length > 0 ? (
+                          <ol className="fighter-matchup-list">
+                            {fighter.mostFavorable.map((opponent, index) => (
+                              <li key={opponent.id}>
+                                <span className="matchup-rank">
+                                  #{index + 1}
+                                </span>
+
+                                <div>
+                                  <strong>{opponent.name}</strong>
+
+                                  <small>{opponent.wins} wins</small>
+
+                                  <small>
+                                    W: {opponent.wins} · L: {opponent.losses} ·
+                                    D: {opponent.draws}
+                                  </small>
+                                </div>
+                              </li>
+                            ))}
+                          </ol>
+                        ) : (
+                          <p className="fighter-matchup-empty">
+                            No recorded wins.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <p className="simulation-warning">
-            Overall score combines win rate (60%), starting-position
-            performance (20%), health remaining after wins (10%), and speed
-            of victory (10%). Results depend on the selected AI difficulties
-            and are not a definitive measure of character or team balance.
+            Overall score combines win rate (60%), starting-position performance
+            (20%), health remaining after wins (10%), and speed of victory
+            (10%). Results depend on the selected AI difficulties and are not a
+            definitive measure of character or team balance. Please don't exceed
+            with the rounds as that causes the game to load longer. For example,
+            30 is recommened on 1v1 while 5 for 2v2.
           </p>
 
           {renderLastBattle(results.lastResult)}
@@ -1510,6 +2019,10 @@ function BotSimulator() {
       )}
     </main>
   );
+}
+
+function yieldToBrowser() {
+  return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 export default BotSimulator;

@@ -1,4 +1,9 @@
 import React from "react";
+import {
+  getModifiedAttackStat,
+  getModifiedCharacterStat,
+  activateSelfModifiers,
+} from "./Modifiers.js";
 
 // function attackCharacter(ATK, attacker, defender, defense = 0) {
 //   if (!ATK || !attacker || !defender) {
@@ -118,7 +123,6 @@ import React from "react";
 
 // export { attackCharacter, currentHealth, evadeAttack };
 
-
 function applyEffects(effects, character, direction = 1) {
   const applied = {};
 
@@ -184,10 +188,7 @@ function applyEffects(effects, character, direction = 1) {
       const previous = character.health;
       const maximum = character.maximumHealth ?? previous;
 
-      character.health = Math.max(
-        0,
-        Math.min(maximum, previous + change),
-      );
+      character.health = Math.max(0, Math.min(maximum, previous + change));
 
       applied.health = character.health - previous;
     }
@@ -197,10 +198,7 @@ function applyEffects(effects, character, direction = 1) {
       const previous = character.mana;
       const maximum = character.maximumMana ?? previous;
 
-      character.mana = Math.max(
-        0,
-        Math.min(maximum, previous + change),
-      );
+      character.mana = Math.max(0, Math.min(maximum, previous + change));
 
       applied.mana = character.mana - previous;
     }
@@ -210,7 +208,7 @@ function applyEffects(effects, character, direction = 1) {
       const previous =
         typeof character.defense === "number"
           ? character.defense
-          : character.defense?.amount ?? 0;
+          : (character.defense?.amount ?? 0);
 
       const next = Math.max(0, previous + change);
 
@@ -239,45 +237,175 @@ function applyEffects(effects, character, direction = 1) {
   return applied;
 }
 
-function attackCharacter(ATK, attacker, defender, defense = 0) {
-  if (!ATK || !attacker || !defender) {
-    return null;
+function applyHeal(attack, recipient) {
+  const heal = attack?.heal;
+
+  if (!heal || !recipient || recipient.health <= 0) {
+    return {
+      healed: 0,
+      buffsApplied: {},
+    };
   }
 
-  if (attacker.mana < (ATK.cost ?? 0)) {
+  const previousHealth = recipient.health;
+
+  // Main HP restoration
+  applyEffects({ health: Math.max(0, Number(heal.amount) || 0) }, recipient);
+
+  // Additional immediate resource restoration
+  const instantEffects = {};
+  const temporaryEffects = {};
+
+  const instantStats = ["health", "mana", "cooldown"];
+
+  Object.entries(heal.buff ?? {}).forEach(([stat, amount]) => {
+    if (typeof amount !== "number" || amount === 0) return;
+
+    if (instantStats.includes(stat)) {
+      instantEffects[stat] = amount;
+    } else {
+      temporaryEffects[stat] = amount;
+    }
+  });
+
+  applyEffects(instantEffects, recipient);
+
+  // Apply stat buffs to the teammate
+  const buffsApplied = applyEffects(temporaryEffects, recipient);
+
+  // Reuse the existing temporary-effect expiration system
+  recordTemporaryEffects(attack, recipient, buffsApplied);
+
+  return {
+    healed: recipient.health - previousHealth,
+    buffsApplied,
+  };
+}
+
+function canUseAttack(attack) {
+  if (!attack || attack.state !== true) return false;
+
+  const remainingUses = attack.remainingUses ?? attack.uses;
+
+  if (Number.isInteger(attack.uses) && remainingUses <= 0) {
+    return false;
+  }
+
+  if ((attack.cooldownRemaining ?? 0) > 0) {
+    return false;
+  }
+
+  return true;
+}
+
+function consumeAttack(attack) {
+  // Reduce remaining uses when the attack has a uses limit.
+  if (Number.isInteger(attack.uses)) {
+    attack.remainingUses = Math.max(
+      0,
+      (attack.remainingUses ?? attack.uses) - 1,
+    );
+  }
+
+  // Start the configured turn cooldown.
+  if (Number(attack.turnCooldown) > 0) {
+    attack.cooldownRemaining = Number(attack.turnCooldown);
+    attack.cooldownStartedThisRound = true;
+  }
+
+  // Mark the attack as used for this round.
+  attack.state = false;
+}
+
+function recordTemporaryEffects(attack, target, effects) {
+  if (
+    !attack ||
+    !target ||
+    !target.id ||
+    !effects ||
+    Number(attack.turnCooldown) <= 0
+  ) {
+    return;
+  }
+
+  const appliedEffects = Object.fromEntries(
+    Object.entries(effects).filter(
+      ([stat, amount]) => stat !== "health" && stat !== "mana" && amount !== 0,
+    ),
+  );
+
+  if (Object.keys(appliedEffects).length === 0) return;
+
+  attack.activeEffects ??= [];
+
+  attack.activeEffects.push({
+    targetId: target.id,
+    effects: appliedEffects,
+  });
+}
+
+function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
+  if (!ATK || !attacker || !defender) return null;
+
+  const attackCost = getModifiedAttackStat(ATK, attacker, "cost");
+
+  if (attacker.mana < attackCost) {
     console.log("Not enough mana!");
     return null;
   }
 
-  if (ATK.state !== true) {
-    console.log("Attack already used!");
+  if (!canUseAttack(ATK)) {
+    console.log("Attack is unavailable!");
     return null;
   }
 
-  // Pay the attack cost once.
-  attacker.mana -= ATK.cost ?? 0;
+  // Calculate the health cost of a sacrifice attack.
+  const sacrificeHealth = Math.max(0, Number(ATK.sacrifice?.health) || 0);
 
-  // Apply the attacker's buffs and opponent's debuffs.
-  // Apply the attacker's buffs and opponent's debuffs.
-const buffsApplied = applyEffects(ATK.buff, attacker);
-const debuffsApplied = applyEffects(ATK.debuff, defender, -1);
-  // Buffs and debuffs do not prevent normal attack damage.
+  // Prevent the attack from knocking out its own user.
+  if (attacker.health <= sacrificeHealth) {
+    console.log("Not enough health to use this sacrifice attack!");
+    return null;
+  }
+
+  const blocked = options.blocked === true;
+
+  // Pay both costs when the attack is activated.
+  attacker.mana -= attackCost ?? 0;
+  attacker.health -= sacrificeHealth;
+
+  // A conditional buff only activates when the attack isn't blocked.
+  const buffNotAppliedReason =
+    ATK.buffRequiresHit && blocked ? "blocked" : null;
+
+  const buffsApplied = buffNotAppliedReason
+    ? {}
+    : applyEffects(ATK.buff, attacker);
+
+  recordTemporaryEffects(ATK, attacker, buffsApplied);
+  activateSelfModifiers(attacker, ATK);
+
+  // By default, debuffs can still affect a defender who blocks.
+  // Set debuffRequiresHit to make the debuff require a successful hit.
+  const debuffNotAppliedReason =
+    ATK.debuffRequiresHit && blocked ? "blocked" : null;
+
+  const debuffsApplied = debuffNotAppliedReason
+    ? {}
+    : applyEffects(ATK.debuff, defender, -1);
   let damageReceived = 0;
+  recordTemporaryEffects(ATK, defender, debuffsApplied);
 
-  if (ATK.damage > 0 && defender.health > 0) {
-    damageReceived = Math.max(0, ATK.damage - defense);
+  const attackDamage = getModifiedAttackStat(ATK, attacker, "damage");
 
-    defender.health = Math.max(
-      0,
-      defender.health - damageReceived
-    );
+  if (attackDamage > 0 && defender.health > 0) {
+    damageReceived = Math.max(0, attackDamage - defense);
+    defender.health = Math.max(0, defender.health - damageReceived);
   }
 
-  ATK.state = false;
+  consumeAttack(ATK);
 
-  if (defender.health <= 0) {
-    console.log("Game over");
-  }
+  if (defender.health <= 0) console.log("Game over");
 
   return {
     attacker,
@@ -285,10 +413,10 @@ const debuffsApplied = applyEffects(ATK.debuff, defender, -1);
     damageReceived,
     buffsApplied,
     debuffsApplied,
-    action:
-      ATK.buff || ATK.debuff
-        ? "effect"
-        : "attack",
+    buffNotAppliedReason,
+    debuffNotAppliedReason,
+    sacrificePaid: sacrificeHealth,
+    action: ATK.buff || ATK.debuff ? "effect" : "attack",
   };
 }
 
@@ -310,62 +438,78 @@ function currentHealth(ATK, character, defense = 0) {
   }
 }
 
-
 function evadeAttack(ATK, attacker, defender) {
-  if (!ATK || !attacker || !defender || ATK.state !== true) {
+  if (!ATK || !attacker || !defender || !canUseAttack(ATK)) {
     return null;
   }
 
-  const attackCost = Number(ATK.cost) || 0;
-  const attackSpeed = Number(ATK.speed) || 0;
+  const attackCost = getModifiedAttackStat(ATK, attacker, "cost");
+  const attackSpeed = getModifiedAttackStat(ATK, attacker, "speed");
+  const attackDamage = getModifiedAttackStat(ATK, attacker, "damage");
+
   const attackerMana = Number(attacker.mana) || 0;
   const defenderMana = Number(defender.mana) || 0;
-  const defenderAgility = Number(defender.agility) || 0;
-  const defenderCooldown = Number(defender.cooldown) || 0;
+
+  const defenderAgility = getModifiedCharacterStat(defender, "agility");
+  const defenderCooldown = getModifiedCharacterStat(defender, "cooldown");
 
   if (attackerMana < attackCost) {
     console.log("Not enough attacker mana!");
     return null;
   }
 
-  // The attacker pays the attack's mana cost.
-  attacker.mana = attackerMana - attackCost;
+  // Calculate sacrifice health.
+  const sacrificeHealth = Math.max(0, Number(ATK.sacrifice?.health) || 0);
 
-  // Check whether the defender has a cooldown available.
+  // Prevent the attacker from knocking themselves out.
+  if (attacker.health <= sacrificeHealth) {
+    console.log("Not enough health to use this sacrifice attack!");
+    return null;
+  }
+
+  // Pay both costs when the attack is activated.
+  attacker.mana = attackerMana - attackCost;
+  attacker.health -= sacrificeHealth;
+
   const hasCooldown = defenderCooldown > 0;
 
-  // Spend one cooldown when available.
   if (hasCooldown) {
     defender.cooldown = defenderCooldown - 1;
   }
 
-  // Agility only helps when the defender has cooldown available.
   const usableAgility = hasCooldown ? defenderAgility : 0;
-
-  // Mana must cover whatever attack speed agility cannot cover.
   const manaNeeded = Math.max(0, attackSpeed - usableAgility);
   const manaSpent = Math.min(defenderMana, manaNeeded);
 
   defender.mana = defenderMana - manaSpent;
 
-  // Evasion succeeds if agility plus spent mana covers attack speed.
   const evaded = usableAgility + manaSpent >= attackSpeed;
 
-  // Preserve the existing buff/debuff behavior.
-  const buffsApplied = applyEffects(ATK.buff, attacker);
-  const debuffsApplied = evaded
+  // Conditional buffs only activate if the attack connects.
+  const buffNotAppliedReason = ATK.buffRequiresHit && evaded ? "evaded" : null;
+
+  const buffsApplied = buffNotAppliedReason
     ? {}
-    : applyEffects(ATK.debuff, defender, -1);
+    : applyEffects(ATK.buff, attacker);
+
+  recordTemporaryEffects(ATK, attacker, buffsApplied);
+  activateSelfModifiers(attacker, ATK);
+
+  // An evaded attack cannot apply debuffs.
+  // A successful evade prevents debuffs.
+  const debuffNotAppliedReason = evaded ? "evaded" : null;
+
+  const debuffsApplied = evaded ? {} : applyEffects(ATK.debuff, defender, -1);
+  recordTemporaryEffects(ATK, defender, debuffsApplied);
 
   let damageReceived = 0;
 
-  if (!evaded && ATK.damage > 0 && defender.health > 0) {
-    damageReceived = Math.max(0, Number(ATK.damage) || 0);
+  if (!evaded && attackDamage > 0 && defender.health > 0) {
+    damageReceived = attackDamage;
     defender.health = Math.max(0, defender.health - damageReceived);
   }
 
-  // Prevent this attack from being resolved twice.
-  ATK.state = false;
+  consumeAttack(ATK);
 
   return {
     attacker,
@@ -375,10 +519,19 @@ function evadeAttack(ATK, attacker, defender) {
     damageReceived,
     buffsApplied,
     debuffsApplied,
+    buffNotAppliedReason,
+    debuffNotAppliedReason,
+    sacrificePaid: sacrificeHealth,
     action: evaded ? "evade" : "attack",
   };
 }
 
-
-export { attackCharacter, currentHealth, evadeAttack, applyEffects };
-
+export {
+  attackCharacter,
+  currentHealth,
+  evadeAttack,
+  applyEffects,
+  applyHeal,
+  consumeAttack,
+  canUseAttack,
+};

@@ -1,0 +1,150 @@
+
+.story-reward-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  background:
+    radial-gradient(circle at center, #263b59 0%, #101827 55%, #080d16 100%);
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+.story-reward-content {
+  width: 100%;
+  max-width: 550px;
+  animation: story-reward-enter 0.7s ease-out both;
+}
+
+.story-reward-eyebrow {
+  color: #13d5ff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+}
+
+.story-reward-title {
+  color: #ffd76a;
+  font-size: clamp(30px, 6vw, 48px);
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 0 0 18px rgba(255, 190, 60, 0.45);
+  margin-bottom: 22px;
+}
+
+.story-reward-character {
+  position: relative;
+  width: 160px;
+  height: 210px;
+  margin: 0 auto 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.story-reward-character img {
+  position: relative;
+  z-index: 1;
+  width: 125px;
+  height: 190px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(19, 213, 255, 0.5));
+  animation: story-reward-reveal 1s ease-out both;
+}
+
+.story-reward-glow {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(19, 213, 255, 0.2);
+  filter: blur(35px);
+  animation: story-reward-pulse 2.5s ease-in-out infinite;
+}
+
+.story-reward-name {
+  font-size: 27px;
+  font-weight: 900;
+  margin: 10px 0;
+}
+
+.story-reward-unlocked {
+  color: #69f5a5;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin-bottom: 15px;
+}
+
+.story-reward-description {
+  max-width: 420px;
+  margin: 0 auto 15px;
+  color: #d5e0ed;
+  line-height: 1.6;
+}
+
+.story-reward-requirement {
+  color: #9db3ca;
+  font-size: 12px;
+  letter-spacing: 1px;
+  margin-bottom: 25px;
+}
+
+.story-reward-continue {
+  min-width: 190px;
+  padding: 13px 28px;
+  border: 2px solid #13d5ff;
+  border-radius: 5px;
+  background: #13d5ff;
+  color: #07121e;
+  font-weight: 900;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.story-reward-continue:hover {
+  background: transparent;
+  color: #13d5ff;
+  box-shadow: 0 0 18px rgba(19, 213, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+@keyframes story-reward-enter {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes story-reward-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.65);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes story-reward-pulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.12);
+  }
+}
