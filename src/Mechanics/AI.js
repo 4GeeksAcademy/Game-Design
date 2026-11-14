@@ -32,6 +32,45 @@ function aiChooseHealTarget(ai, teammates) {
   return availableTeammates[randomIndex];
 }
 
+function aiChooseStunTargets(defender, stun) {
+  if (
+    !defender ||
+    !Array.isArray(defender.attacks) ||
+    !stun ||
+    stun.type !== "selected"
+  ) {
+    return [];
+  }
+
+  const eligibleAttacks = defender.attacks
+    .filter((attack) => attack && (attack.stunned?.remainingRounds ?? 0) <= 0)
+    .map((attack) => {
+      let score = 0;
+
+      score += Math.max(0, attack.damage ?? 0) * 1.5;
+      score += Math.max(0, attack.speed ?? 0) * 0.5;
+
+      if (attack.buff) score += 12;
+      if (attack.debuff) score += 14;
+      if (attack.heal) score += 16;
+      if (attack.stun) score += 18;
+
+      score -= Math.max(0, attack.cost ?? 0) * 0.6;
+
+      return {
+        attack,
+        score,
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  const amount = Math.max(1, Number(stun.amount) || 1);
+
+  return eligibleAttacks
+    .slice(0, amount)
+    .map(({ attack }) => attack.id ?? attack.name);
+}
+
 // AI randomly chooses to defend or evade.
 
 // function aiDefendOrEvade(attack, attacker, defender) {
@@ -106,7 +145,12 @@ function aiTurn(ai, player, showAttack, hideAttack) {
   setTimeout(() => {
     // Apply damage only if the player did not defend or evade.
     if (player.blocked === false) {
-      attackCharacter(attack, ai, player);
+      const selectedAttackIds = aiChooseStunTargets(player, attack.stun);
+
+      attackCharacter(attack, ai, player, 0, {
+        selectedAttackIds,
+        fighters: [ai, player],
+      });
     }
 
     player.blocked = false;
@@ -132,8 +176,8 @@ function aiDefendOrEvade(attack, attacker, defender, options = {}) {
     if (Math.random() < 0.5) {
       const defense =
         typeof defender.defense === "object"
-          ? defender.defense?.amount ?? 0
-          : defender.defense ?? 0;
+          ? (defender.defense?.amount ?? 0)
+          : (defender.defense ?? 0);
 
       const damageReceived = Math.max(0, attack.damage - defense);
 
@@ -174,4 +218,5 @@ export {
   aiTurn,
   aiFinishTurn,
   aiDefendOrEvade,
+  aiChooseStunTargets,
 };

@@ -1,4 +1,5 @@
 import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
+import { aiChooseStunTargets } from "./AI.js";
 
 const MAX_QUEUE_SIZE = 10;
 const ATTACK_TIMEOUT = 10000;
@@ -92,8 +93,8 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
   if (!result) return null;
 
   if (choice === "defend") {
-  defender.cooldown = Math.max(0, cooldown - 1);
-}
+    defender.cooldown = Math.max(0, cooldown - 1);
+  }
 
   result.action = choice === "take-damage" ? "take damage" : choice;
 
@@ -327,7 +328,12 @@ function createNormalAIController({
         return;
       }
 
-      const result = attackCharacter(attack, attacker, defender);
+      const selectedAttackIds = aiChooseStunTargets(defender, attack.stun);
+
+      const result = attackCharacter(attack, attacker, defender, 0, {
+        selectedAttackIds,
+        fighters: [attacker, defender],
+      });
 
       currentAttack = null;
 

@@ -313,11 +313,11 @@ function applyStun(stun, attacker, defender, options = {}) {
     selectedAttacks = shuffled.slice(0, Math.max(1, Number(stun.amount) || 1));
   } else if (stun.type === "selected") {
     selectedAttacks = eligibleAttacks
-      .filter((attack) => selectedAttackIds.includes(attack.id))
+      .filter((attack) => selectedAttackIds.includes(attack.id ?? attack.name))
       .slice(0, Math.max(1, Number(stun.amount) || 1));
   }
 
-  const duration = Math.max(1, Number(stun.duration) || 1);
+  const duration = Math.max(1, Number(stun.duration) || 1) + 1;
   const stunnedNames = [];
 
   selectedAttacks.forEach((attack) => {
