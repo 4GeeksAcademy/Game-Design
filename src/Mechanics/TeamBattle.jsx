@@ -837,7 +837,7 @@ export default function TeamBattle() {
 
 
     setTeams((current) => ({ ...current, player: playersWithTargets }));
-    setCpuTargets(newCpuTargets);
+    
     addLog(
       isLocalCoop
         ? "Targets locked. Both players can act during this phase."
@@ -2583,6 +2583,7 @@ export default function TeamBattle() {
     setPhase("selecting");
     festivalBattleRecorded.current = false;
     teammateOpponentHistoryRef.current.clear();
+    previousCpuAttackersRef.current.clear();
   };
 
   const pendingAttacker = pendingDefense
