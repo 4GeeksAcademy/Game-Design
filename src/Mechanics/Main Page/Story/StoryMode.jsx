@@ -26,31 +26,67 @@ function StoryMode() {
       <p className="story-description">
         Fight your way through the story of Wild Cards.
       </p>
-      
 
       <div className="story-chapter-list">
         <button
-          className="story-chapter available"
+          type="button"
+          className="story-chapter-card story-chapter-card--available"
           onClick={() => setScreen("levels")}
         >
-          <span className="story-chapter-number">01</span>
-          <span className="story-chapter-info">
-            <strong>CHAPTER 1</strong>
-            <small>THE BEGINNING</small>
+          <span className="story-card-art story-card-art--chapter-one">
+            <span className="story-card-art-symbol">章</span>
+            <span className="story-card-art-index">01</span>
+            <span className="story-card-art-tag">AVAILABLE</span>
           </span>
-          <span className="story-chapter-status">PLAY ▶</span>
+
+          <span className="story-card-info">
+            <span className="story-card-number">
+              CHAPTER 01 / THE BEGINNING
+            </span>
+            <strong>THE BEGINNING</strong>
+            <span className="story-card-description">
+              Every legend starts somewhere. Begin your journey and discover the
+              fighters waiting ahead.
+            </span>
+            <span className="story-card-action">
+              ENTER CHAPTER <span>↗</span>
+            </span>
+          </span>
         </button>
 
         {[2, 3].map((chapter) => (
-          <button key={chapter} className="story-chapter locked" disabled>
-            <span className="story-chapter-number">
-              {String(chapter).padStart(2, "0")}
+          <button
+            type="button"
+            key={chapter}
+            className="story-chapter-card story-chapter-card--locked"
+            disabled
+          >
+            <span
+              className={`story-card-art story-card-art--chapter-${chapter}`}
+            >
+              <span className="story-card-art-symbol">
+                {chapter === 2 ? "弐" : "参"}
+              </span>
+              <span className="story-card-art-index">
+                {String(chapter).padStart(2, "0")}
+              </span>
+              <span className="story-card-art-tag">COMING SOON</span>
+              <span className="story-card-lock">🔒</span>
             </span>
-            <span className="story-chapter-info">
-              <strong>CHAPTER {chapter}</strong>
-              <small>COMING SOON</small>
+
+            <span className="story-card-info">
+              <span className="story-card-number">
+                CHAPTER {String(chapter).padStart(2, "0")} / CLASSIFIED
+              </span>
+              <strong>UNKNOWN CHAPTER</strong>
+              <span className="story-card-description">
+                This part of the campaign has not been released yet. Stay tuned
+                for the next chapter.
+              </span>
+              <span className="story-card-action story-card-action--locked">
+                LOCKED <span>◆</span>
+              </span>
             </span>
-            <span className="story-chapter-status">LOCKED</span>
           </button>
         ))}
       </div>

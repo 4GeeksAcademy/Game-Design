@@ -1,4 +1,4 @@
-
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap");
 .watch-page {
   min-height: 100vh;
   padding: 28px;
@@ -533,5 +533,436 @@
   .watch-fighter-image.fighter-stunned img,
   .watch-fighter-image.fighter-stunned::after {
     animation: none !important;
+  }
+}
+
+
+/* ==========================================
+   WILD CARDS — WATCH MODE
+   COMBAT RESEARCH LABORATORY
+========================================== */
+
+.watch-page {
+  --watch-blue: #168cff;
+  --watch-cyan: #27dfff;
+  --watch-dark: #050d1b;
+  --watch-panel: rgba(9, 25, 47, 0.94);
+  --watch-border: rgba(39, 160, 255, 0.35);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  font-family: "Rajdhani", sans-serif;
+  color: #edf7ff;
+
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(0, 119, 255, 0.25),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 0% 55%,
+      rgba(0, 190, 255, 0.08),
+      transparent 40%
+    ),
+    linear-gradient(145deg, #07172d, #030914 75%);
+}
+
+.watch-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.13;
+
+  background-image:
+    linear-gradient(rgba(39, 160, 255, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(39, 160, 255, 0.13) 1px, transparent 1px);
+
+  background-size: 42px 42px;
+}
+
+.watch-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* HEADER */
+
+.watch-header {
+  margin-bottom: 34px;
+}
+
+.watch-header h1 {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f4fbff;
+  text-shadow:
+    0 0 12px rgba(22, 140, 255, 0.35),
+    0 0 30px rgba(39, 223, 255, 0.12);
+}
+
+.watch-header p {
+  color: #9bb9d4;
+  font-size: 1.1rem;
+}
+
+.watch-eyebrow {
+  color: var(--watch-cyan) !important;
+  font-family: "Oxanium", sans-serif;
+  letter-spacing: 0.24em;
+  text-shadow: 0 0 12px rgba(39, 223, 255, 0.4);
+}
+
+.watch-back-button {
+  border: 1px solid var(--watch-border);
+  border-radius: 8px;
+  color: #dff5ff;
+  background: rgba(8, 28, 52, 0.9);
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.watch-back-button:hover {
+  border-color: var(--watch-cyan);
+  color: white;
+  background: rgba(22, 140, 255, 0.2);
+  box-shadow: 0 0 18px rgba(39, 223, 255, 0.15);
+}
+
+/* LAB PANELS */
+
+.watch-setup,
+.watch-arena,
+.watch-playback,
+.watch-combat-log {
+  border: 1px solid var(--watch-border);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(13, 37, 66, 0.96),
+      rgba(5, 16, 31, 0.97)
+    );
+  box-shadow:
+    0 14px 35px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(39, 223, 255, 0.06);
+}
+
+.watch-setup h2,
+.watch-combat-log h2 {
+  color: #eaf8ff;
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* FIGHTER CONFIGURATION */
+
+.watch-setup-side label {
+  color: #9fc5e4;
+  font-family: "Oxanium", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.watch-setup-side select {
+  border: 1px solid rgba(39, 160, 255, 0.3);
+  border-radius: 7px;
+  color: #eaf8ff;
+  background: #07172b;
+  font-family: "Rajdhani", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.watch-setup-side select:focus {
+  border-color: var(--watch-cyan);
+  box-shadow: 0 0 0 2px rgba(39, 223, 255, 0.12);
+}
+
+.watch-vs {
+  color: var(--watch-cyan);
+  font-family: "Oxanium", sans-serif;
+  text-shadow: 0 0 15px rgba(39, 223, 255, 0.45);
+}
+
+/* BUTTONS */
+
+.watch-primary-button,
+.watch-secondary-button,
+.watch-speed-button {
+  border-radius: 7px;
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: 0.2s ease;
+}
+
+.watch-primary-button {
+  border: 1px solid rgba(39, 223, 255, 0.65);
+  color: #03101d;
+  background: linear-gradient(110deg, #087bdf, #27dfff);
+  box-shadow: 0 0 18px rgba(22, 140, 255, 0.2);
+}
+
+.watch-primary-button:not(:disabled):hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 24px rgba(39, 223, 255, 0.35);
+}
+
+.watch-primary-button:disabled {
+  opacity: 0.35;
+  filter: grayscale(0.5);
+}
+
+.watch-secondary-button,
+.watch-speed-button {
+  border: 1px solid rgba(39, 160, 255, 0.3);
+  color: #c8e7ff;
+  background: rgba(13, 39, 68, 0.9);
+}
+
+.watch-secondary-button:hover,
+.watch-speed-button:hover {
+  border-color: var(--watch-cyan);
+  color: white;
+  background: rgba(22, 140, 255, 0.2);
+}
+
+.watch-speed-button.active {
+  border-color: var(--watch-cyan);
+  color: var(--watch-cyan);
+  background: rgba(39, 223, 255, 0.12);
+  box-shadow: inset 0 0 12px rgba(39, 223, 255, 0.08);
+}
+
+.watch-error {
+  color: #ff6683;
+  font-weight: 700;
+}
+
+/* BATTLE ARENA */
+
+.watch-arena {
+  min-height: 420px;
+  border-color: rgba(39, 160, 255, 0.42);
+
+  background:
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(0, 115, 220, 0.28),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(39, 223, 255, 0.08),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #0b2039, #050d1b 78%);
+}
+
+.watch-arena::before {
+  border-top-color: rgba(39, 160, 255, 0.25);
+  background: repeating-linear-gradient(
+    100deg,
+    transparent 0 55px,
+    rgba(39, 160, 255, 0.045) 56px 58px
+  );
+}
+
+.watch-round {
+  border: 1px solid rgba(39, 223, 255, 0.45);
+  color: var(--watch-cyan);
+  background: rgba(3, 15, 29, 0.92);
+  font-family: "Oxanium", sans-serif;
+  box-shadow: 0 0 15px rgba(39, 223, 255, 0.12);
+}
+
+/* FIGHTERS */
+
+.watch-fighter h2 {
+  color: #f1f9ff;
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.watch-fighter-stats {
+  color: #9bbbd6;
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* HEALTH / RESOURCE METERS */
+
+.watch-meter-label {
+  color: #b7d3e9;
+  font-family: "Oxanium", sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.watch-meter-track {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #020812;
+  box-shadow: inset 0 2px 5px #0009;
+}
+
+.watch-meter-fill {
+  box-shadow:
+    0 0 8px currentColor,
+    0 0 15px currentColor;
+}
+
+/* CENTER BATTLE DISPLAY */
+
+.watch-vs-large {
+  color: var(--watch-cyan);
+  font-family: "Oxanium", sans-serif;
+  text-shadow:
+    0 0 12px rgba(39, 223, 255, 0.65),
+    0 0 30px rgba(22, 140, 255, 0.35);
+}
+
+.watch-action-banner {
+  border: 1px solid rgba(39, 160, 255, 0.4);
+  color: #e8f7ff;
+  background: rgba(3, 15, 29, 0.95);
+  font-family: "Oxanium", sans-serif;
+  letter-spacing: 0.03em;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.25);
+}
+
+.watch-action-defend {
+  border-color: #f6d84a;
+  box-shadow: 0 0 12px rgba(246, 216, 74, 0.12);
+}
+
+.watch-action-evade {
+  border-color: var(--watch-cyan);
+  box-shadow: 0 0 12px rgba(39, 223, 255, 0.12);
+}
+
+.watch-action-take\ damage {
+  border-color: #ff3159;
+  box-shadow: 0 0 12px rgba(255, 49, 89, 0.12);
+}
+
+.watch-action-result {
+  color: #f6d84a;
+  font-family: "Oxanium", sans-serif;
+}
+
+/* PLAYBACK CONTROLS */
+
+.watch-playback {
+  border-color: rgba(39, 160, 255, 0.3);
+}
+
+.watch-speed-controls > span {
+  color: #9fc5e4;
+  font-family: "Oxanium", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* COMBAT LOG */
+
+.watch-log-list {
+  scrollbar-color: #168cff #07172b;
+  scrollbar-width: thin;
+}
+
+.watch-log-entry {
+  border: 1px solid rgba(39, 160, 255, 0.12);
+  color: #c8dced;
+  background: rgba(7, 24, 44, 0.88);
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.watch-log-entry:hover {
+  border-color: rgba(39, 223, 255, 0.3);
+}
+
+.watch-log-entry strong {
+  color: #f1faff;
+  font-family: "Oxanium", sans-serif;
+}
+
+.watch-log-round {
+  color: var(--watch-cyan);
+  font-family: "Oxanium", sans-serif;
+}
+
+/* KEEP THE EXISTING 125 x 190 PORTRAIT DIMENSIONS */
+
+.watch-fighter-image {
+  width: 125px;
+  height: 190px;
+  flex: 0 0 125px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.watch-fighter-image img {
+  width: 125px;
+  height: 190px;
+  max-width: 100%;
+  object-fit: cover;
+}
+
+/* Preserve the existing stun lighting and shake animations. */
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+  .watch-header h1 {
+    letter-spacing: 0.07em;
+  }
+
+  .watch-setup,
+  .watch-arena,
+  .watch-playback,
+  .watch-combat-log {
+    border-radius: 10px;
+  }
+
+  .watch-arena-fighters {
+    gap: 8px;
+  }
+
+  .watch-fighter-image {
+    width: 125px;
+    height: 190px;
+  }
+
+  .watch-fighter-image img {
+    width: 125px;
+    height: 190px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .watch-page *,
+  .watch-page *::before,
+  .watch-page *::after {
+    scroll-behavior: auto;
   }
 }
