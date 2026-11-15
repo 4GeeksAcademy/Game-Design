@@ -1482,3 +1482,356 @@
     transition: none;
   }
 }
+
+
+/* ==========================================
+   WILD CARDS — MAIN MENU NAVIGATION
+========================================== */
+
+.home-hero--main {
+  width: 100%;
+  max-width: 850px;
+  margin: auto;
+  padding: 10px 0 20px;
+}
+
+.home-hero--main .home-hero-brand {
+  margin-bottom: 24px;
+}
+
+.main-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: min(100%, 460px);
+  margin: 0 auto;
+}
+
+.main-menu-button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px 42px 1fr 24px;
+  align-items: center;
+  gap: 12px;
+  min-height: 61px;
+  padding: 9px 17px;
+  overflow: hidden;
+
+  border: 1px solid rgba(246, 216, 74, 0.25);
+  border-left: 3px solid rgba(165, 245, 27, 0.65);
+
+  background:
+    linear-gradient(
+      100deg,
+      rgba(28, 35, 43, 0.97),
+      rgba(13, 19, 29, 0.94)
+    );
+
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.main-menu-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -100%;
+  width: 65%;
+  transform: skewX(-22deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(165, 245, 27, 0.12),
+    transparent
+  );
+  transition: left 350ms ease;
+}
+
+.main-menu-button:hover {
+  z-index: 2;
+  transform: translateX(6px);
+  border-color: rgba(165, 245, 27, 0.8);
+  border-left-color: #a5f51b;
+  background: linear-gradient(
+    100deg,
+    rgba(54, 67, 40, 0.98),
+    rgba(17, 26, 29, 0.98)
+  );
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.main-menu-button:hover::before {
+  left: 140%;
+}
+
+.main-menu-button:focus-visible {
+  outline: 2px solid #f6d84a;
+  outline-offset: 3px;
+}
+
+.main-menu-index {
+  color: rgba(246, 216, 74, 0.65);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.main-menu-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(246, 216, 74, 0.3);
+  background: rgba(246, 216, 74, 0.07);
+  color: #f6d84a;
+  font-size: 18px;
+  font-weight: 900;
+  transform: skew(-5deg);
+}
+
+.main-menu-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.main-menu-label strong {
+  color: #f5f3e9;
+  font-size: 13px;
+  font-weight: 1000;
+  font-style: italic;
+  letter-spacing: 1.3px;
+}
+
+.main-menu-label small {
+  color: #929baa;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.main-menu-arrow {
+  color: #a5f51b;
+  font-size: 12px;
+  opacity: 0.65;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.main-menu-button:hover .main-menu-arrow {
+  transform: translateX(4px);
+  opacity: 1;
+}
+
+/* Main PLAY button */
+
+.main-menu-button--primary {
+  min-height: 69px;
+  border-color: rgba(165, 245, 27, 0.65);
+  border-left: 5px solid #a5f51b;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(83, 102, 42, 0.96),
+      rgba(22, 36, 28, 0.98) 65%,
+      rgba(13, 20, 27, 0.98)
+    );
+  box-shadow:
+    inset 0 0 22px rgba(165, 245, 27, 0.08),
+    0 5px 18px rgba(0, 0, 0, 0.2);
+}
+
+.main-menu-button--primary .main-menu-label strong {
+  color: #c8ff65;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.main-menu-button--primary .main-menu-icon {
+  border-color: rgba(165, 245, 27, 0.65);
+  background: rgba(165, 245, 27, 0.13);
+  color: #c8ff65;
+}
+
+.main-menu-button--primary .main-menu-index {
+  color: #c8ff65;
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+  .main-menu-nav {
+    width: min(100%, 420px);
+    gap: 8px;
+  }
+
+  .main-menu-button {
+    min-height: 57px;
+    padding: 8px 11px;
+    grid-template-columns: 25px 36px 1fr 18px;
+    gap: 8px;
+  }
+
+  .main-menu-label strong {
+    font-size: 11px;
+  }
+
+  .main-menu-label small {
+    font-size: 7px;
+  }
+
+  .main-menu-index {
+    font-size: 9px;
+  }
+
+  .main-menu-icon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* ==========================================
+   SINGLE PLAYER — MODE SELECTION
+========================================== */
+
+.single-player-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1120px;
+  gap: 18px;
+}
+
+.single-player-heading {
+  text-align: center;
+}
+
+.single-player-heading .home-eyebrow {
+  margin-bottom: 10px;
+}
+
+.single-player-screen .home-mode-grid {
+  width: 100%;
+}
+
+.single-player-screen .back-button {
+  margin-top: 10px;
+}
+
+/* ==========================================
+   WILD CARDS — SHARED BUTTON THEME
+========================================== */
+
+.arcade-button {
+  min-height: 57px;
+  padding: 15px 21px;
+  border: 1px solid rgba(246, 216, 74, 0.35);
+  border-left: 4px solid #a5f51b;
+  border-radius: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(31, 39, 44, 0.98),
+    rgba(13, 19, 29, 0.98)
+  );
+  color: #f5f3e9;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  box-shadow: none;
+}
+
+.arcade-button > span {
+  color: #a5f51b;
+}
+
+.arcade-button:hover:not(:disabled) {
+  transform: translateX(5px);
+  border-color: #a5f51b;
+  background: linear-gradient(
+    100deg,
+    rgba(60, 76, 39, 0.98),
+    rgba(18, 29, 30, 0.98)
+  );
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.3);
+}
+
+.primary-button,
+.primary-button:hover:not(:disabled) {
+  border-color: #a5f51b;
+  border-left: 5px solid #c5ff52;
+  background: linear-gradient(
+    100deg,
+    #53652e,
+    #263b2b 75%,
+    #17251f
+  );
+  color: #eaffc9;
+  box-shadow:
+    inset 0 0 18px rgba(165, 245, 27, 0.1),
+    0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.primary-button > span {
+  color: #d5ff85;
+}
+
+.back-button {
+  position: relative;
+  padding: 10px 17px;
+  border: 1px solid rgba(246, 216, 74, 0.3);
+  border-radius: 0;
+  background: rgba(15, 21, 30, 0.8);
+  color: #d4d0bd;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: 180ms ease;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 9px) 0,
+    100% 9px,
+    100% 100%,
+    9px 100%,
+    0 calc(100% - 9px)
+  );
+}
+
+.back-button:hover {
+  border-color: #f6d84a;
+  color: #f6d84a;
+  background: rgba(246, 216, 74, 0.08);
+  transform: translateX(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-menu-button,
+  .main-menu-button::before,
+  .main-menu-arrow {
+    transition: none;
+  }
+}

@@ -385,99 +385,111 @@ function Homescreen() {
     );
   };
 
-  const renderHome = () => (
-    <div className="home-hero">
-      <div className="home-hero-brand">
-        <p className="home-eyebrow">THE NEXT GENERATION OF CARD COMBAT</p>
+  
+const renderHome = () => (
+  <div className="home-hero home-hero--main">
+    <div className="home-hero-brand">
+      <p className="home-eyebrow">THE NEXT GENERATION OF CARD COMBAT</p>
 
-        <img src={wildCardsLogo} alt="Wild Cards" className="wild-cards-logo" />
+      <img
+        src={wildCardsLogo}
+        alt="Wild Cards"
+        className="wild-cards-logo"
+      />
 
-        <p className="home-subtitle">
-          CHOOSE YOUR FIGHTER. PLAY YOUR CARDS. MAKE YOUR LEGEND.
-        </p>
+      <p className="home-subtitle">
+        CHOOSE YOUR FIGHTER. PLAY YOUR CARDS. MAKE YOUR LEGEND.
+      </p>
 
-        <div className="hero-divider">
-          <span />
-          <b>EST. 2026</b>
-          <span />
-        </div>
+      <div className="hero-divider">
+        <span />
+        <b>EST. 2026</b>
+        <span />
       </div>
-
-      <div className="home-mode-grid">
-        <button
-          className="mode-card mode-card--quick"
-          onClick={() => openMenu("play")}
-        >
-          <span className="mode-card-art">
-            <span className="mode-art-symbol">VS</span>
-          </span>
-          <span className="mode-card-info">
-            <span className="mode-card-number">01 / COMPETITIVE</span>
-            <strong>QUICK BATTLE</strong>
-            <span>Enter the arena and fight.</span>
-          </span>
-          <span className="mode-card-arrow">↗</span>
-        </button>
-
-        <button
-          className="mode-card mode-card--story"
-          onClick={() => navigate("/story-mode")}
-        >
-          <span className="mode-card-art">
-            <span className="mode-art-symbol">章</span>
-          </span>
-          <span className="mode-card-info">
-            <span className="mode-card-number">02 / ADVENTURE</span>
-            <strong>STORY MODE</strong>
-            <span>Discover the stories behind the fighters.</span>
-          </span>
-          <span className="mode-card-arrow">↗</span>
-        </button>
-
-        <button
-          className="mode-card mode-card--simulator"
-          onClick={() => navigate("/bot-simulator")}
-        >
-          <span className="mode-card-art">
-            <span className="mode-art-symbol">⚔</span>
-          </span>
-          <span className="mode-card-info">
-            <span className="mode-card-number">03 / SPECTATOR</span>
-            <strong>BOT SIMULATOR</strong>
-            <span>Watch fighters battle automatically.</span>
-          </span>
-          <span className="mode-card-arrow">↗</span>
-        </button>
-
-        <button
-          className="mode-card mode-card--festival"
-          onClick={() => navigate("/festival")}
-        >
-          <span className="mode-card-art">
-            <span className="mode-art-symbol">冠</span>
-          </span>
-          <span className="mode-card-info">
-            <span className="mode-card-number">04 / LIMITED EVENTS</span>
-            <strong>FESTIVAL</strong>
-            <span>Take on challenges and earn rewards.</span>
-          </span>
-          <span className="mode-card-arrow">↗</span>
-        </button>
-      </div>
-
-      <nav className="home-utility-nav" aria-label="Other game options">
-        <button onClick={() => navigate("/shop")}>CHARACTER SHOP</button>
-        <span />
-        <button onClick={() => navigate("/inventory")}>INVENTORY</button>
-        <span />
-        <button onClick={() => navigate("/achievements")}>ACHIEVEMENTS</button>
-        <span />
-        <button onClick={() => openMenu("settings")}>SETTINGS</button>
-        <span />
-        <button onClick={() => openMenu("howToPlay")}>HOW TO PLAY</button>
-      </nav>
     </div>
-  );
+
+    <nav className="main-menu-nav" aria-label="Main menu">
+      <button
+        className="main-menu-button main-menu-button--primary"
+        onClick={() => openMenu("play")}
+      >
+        <span className="main-menu-index">01</span>
+        <span className="main-menu-icon">⚔</span>
+        <span className="main-menu-label">
+          <strong>PLAY</strong>
+          <small>ENTER THE ARENA</small>
+        </span>
+        <span className="main-menu-arrow">▶</span>
+      </button>
+
+      <button
+        className="main-menu-button"
+        onClick={() => navigate("/shop")}
+      >
+        <span className="main-menu-index">02</span>
+        <span className="main-menu-icon">◈</span>
+        <span className="main-menu-label">
+          <strong>CHARACTER SHOP</strong>
+          <small>DISCOVER NEW FIGHTERS</small>
+        </span>
+        <span className="main-menu-arrow">↗</span>
+      </button>
+
+      <button
+        className="main-menu-button"
+        onClick={() => navigate("/inventory")}
+      >
+        <span className="main-menu-index">03</span>
+        <span className="main-menu-icon">▤</span>
+        <span className="main-menu-label">
+          <strong>INVENTORY</strong>
+          <small>MANAGE YOUR COLLECTION</small>
+        </span>
+        <span className="main-menu-arrow">↗</span>
+      </button>
+
+      <button
+        className="main-menu-button"
+        onClick={() => openMenu("howToPlay")}
+      >
+        <span className="main-menu-index">04</span>
+        <span className="main-menu-icon">?</span>
+        <span className="main-menu-label">
+          <strong>HOW TO PLAY</strong>
+          <small>LEARN THE RULES</small>
+        </span>
+        <span className="main-menu-arrow">↗</span>
+      </button>
+
+      <button
+        className="main-menu-button"
+        onClick={() => openMenu("settings")}
+      >
+        <span className="main-menu-index">05</span>
+        <span className="main-menu-icon">⚙</span>
+        <span className="main-menu-label">
+          <strong>SETTINGS</strong>
+          <small>CONFIGURE YOUR GAME</small>
+        </span>
+        <span className="main-menu-arrow">↗</span>
+      </button>
+
+      <button
+        className="main-menu-button"
+        onClick={() => navigate("/achievements")}
+      >
+        <span className="main-menu-index">06</span>
+        <span className="main-menu-icon">🏆</span>
+        <span className="main-menu-label">
+          <strong>ACHIEVEMENTS</strong>
+          <small>TRACK YOUR PROGRESS</small>
+        </span>
+        <span className="main-menu-arrow">↗</span>
+      </button>
+    </nav>
+  </div>
+);
+
 
   const renderPlay = () => (
     <>
@@ -503,43 +515,85 @@ function Homescreen() {
     </>
   );
 
-  const renderSinglePlayer = () => (
-    <>
-      <p className="home-eyebrow">SINGLE PLAYER</p>
-      <h2 className="menu-title">CHOOSE YOUR MODE</h2>
+ 
+const renderSinglePlayer = () => (
+  <div className="single-player-screen">
+    <div className="single-player-heading">
+      <p className="home-eyebrow">CHOOSE YOUR EXPERIENCE</p>
+      <h2 className="menu-title">SINGLE PLAYER</h2>
+      <p className="menu-description">
+        Your journey begins here. Choose how you want to fight.
+      </p>
+    </div>
 
-      <div className="home-menu-buttons">
-        <button
-          className="arcade-button primary-button"
-          onClick={() => openMenu("battleSetup")}
-        >
-          QUICK / CUSTOM BATTLE <span>▶</span>
-        </button>
-
-        <button
-          className="arcade-button"
-          onClick={() => navigate("/bot-simulator")}
-        >
-          BOT VS BOT SIMULATOR <span>⚔</span>
-        </button>
-
-        <button
-          className="arcade-button"
-          onClick={() => navigate("/story-mode")}
-        >
-          STORY MODE <span>📖</span>
-        </button>
-
-        <button className="arcade-button" onClick={() => navigate("/festival")}>
-          FESTIVAL <span>🏆</span>
-        </button>
-      </div>
-
-      <button className="back-button" onClick={goBack}>
-        ← BACK
+    <div className="home-mode-grid">
+      <button
+        className="mode-card mode-card--quick"
+        onClick={() => openMenu("battleSetup")}
+      >
+        <span className="mode-card-art">
+          <span className="mode-art-symbol">VS</span>
+        </span>
+        <span className="mode-card-info">
+          <span className="mode-card-number">01 / COMPETITIVE</span>
+          <strong>QUICK BATTLE</strong>
+          <span>Enter the arena and fight.</span>
+        </span>
+        <span className="mode-card-arrow">↗</span>
       </button>
-    </>
-  );
+
+      <button
+        className="mode-card mode-card--story"
+        onClick={() => navigate("/story-mode")}
+      >
+        <span className="mode-card-art">
+          <span className="mode-art-symbol">章</span>
+        </span>
+        <span className="mode-card-info">
+          <span className="mode-card-number">02 / ADVENTURE</span>
+          <strong>STORY MODE</strong>
+          <span>Discover the stories behind the fighters.</span>
+        </span>
+        <span className="mode-card-arrow">↗</span>
+      </button>
+
+      <button
+        className="mode-card mode-card--simulator"
+        onClick={() => navigate("/bot-simulator")}
+      >
+        <span className="mode-card-art">
+          <span className="mode-art-symbol">⚔</span>
+        </span>
+        <span className="mode-card-info">
+          <span className="mode-card-number">03 / SPECTATOR</span>
+          <strong>BOT SIMULATOR</strong>
+          <span>Watch fighters battle automatically.</span>
+        </span>
+        <span className="mode-card-arrow">↗</span>
+      </button>
+
+      <button
+        className="mode-card mode-card--festival"
+        onClick={() => navigate("/festival")}
+      >
+        <span className="mode-card-art">
+          <span className="mode-art-symbol">冠</span>
+        </span>
+        <span className="mode-card-info">
+          <span className="mode-card-number">04 / LIMITED EVENTS</span>
+          <strong>FESTIVAL</strong>
+          <span>Take on challenges and earn rewards.</span>
+        </span>
+        <span className="mode-card-arrow">↗</span>
+      </button>
+    </div>
+
+    <button className="back-button" onClick={goBack}>
+      ← MAIN MENU
+    </button>
+  </div>
+);
+
 
   const renderBattleSetup = () => (
     <>
