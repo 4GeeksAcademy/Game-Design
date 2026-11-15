@@ -8,10 +8,12 @@ import {
   getAttackLimit,
 } from "./BattleSimulator.js";
 
-
 const MAX_ROUNDS = 100;
 
-// Create an independent battle without changing the original fighters.
+// =========================================
+// CREATE 1v1 WATCH BATTLE
+// =========================================
+
 export function createWatchBattle(
   fighterOne,
   fighterTwo,
@@ -38,9 +40,10 @@ export function createWatchBattle(
   };
 }
 
-// Normalize a difficulty setting for each fighter.
-// A single string can be supplied for the whole team,
-// or an array can provide an individual setting per fighter.
+// =========================================
+// DIFFICULTY NORMALIZATION
+// =========================================
+
 function normalizeDifficulties(difficulty, count) {
   if (Array.isArray(difficulty)) {
     return Array.from(
@@ -52,12 +55,10 @@ function normalizeDifficulties(difficulty, count) {
   return Array(count).fill(difficulty ?? "Normal");
 }
 
-/**
- * Create a 2v2 Watch Mode battle.
- *
- * Each team gets its turn as a team. Each living fighter
- * receives at most one unique target for that team's turn.
- */
+// =========================================
+// CREATE 2v2 WATCH BATTLE
+// =========================================
+
 export function createWatchTeamBattle(
   teamOne,
   teamTwo,
@@ -70,7 +71,9 @@ export function createWatchTeamBattle(
     teamOne.length !== 2 ||
     teamTwo.length !== 2
   ) {
-    throw new Error("Watch Mode team battles require two fighters per team.");
+    throw new Error(
+      "Watch Mode team battles require two fighters per team.",
+    );
   }
 
   const players = teamOne.map((fighter, index) => {
@@ -99,12 +102,10 @@ export function createWatchTeamBattle(
     difficulties,
     round: 1,
 
-    // Team 0 acts first, followed by Team 1.
     teamTurn: 0,
     fighterPosition: 0,
     attacksThisTurn: 0,
 
-    // These targets are reserved for the current team's turn.
     targetAssignments: {},
 
     finished: false,
@@ -114,10 +115,14 @@ export function createWatchTeamBattle(
   };
 }
 
+// =========================================
+// TARGET ASSIGNMENT
+// =========================================
 
+// Each living attacker receives a unique living target.
+// If there are fewer defenders than attackers,
+// the remaining attackers skip their turn.
 
-// Choose one unique living opponent for each living attacker.
-// A fighter without an available target must skip their turn.
 function assignUniqueTargets(attackers, defenders) {
   const livingAttackers = attackers.filter(
     (fighter) => fighter.health > 0,
@@ -127,9 +132,11 @@ function assignUniqueTargets(attackers, defenders) {
     .filter((fighter) => fighter.health > 0)
     .slice();
 
-  // Shuffle target order so the first teammate is not always favored.
+  // Shuffle targets to avoid always favoring
+  // the same teammate.
   for (let i = availableTargets.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
+
     [availableTargets[i], availableTargets[j]] = [
       availableTargets[j],
       availableTargets[i],
@@ -150,14 +157,19 @@ function assignUniqueTargets(attackers, defenders) {
 }
 
 function findFighter(battle, fighterId) {
-  return battle.fighters.find((fighter) => fighter.id === fighterId);
+  return battle.fighters.find(
+    (fighter) => fighter.id === fighterId,
+  );
 }
 
 function teamIsDefeated(team) {
   return team.every((fighter) => fighter.health <= 0);
 }
 
-// Determine the winner of a team battle.
+// =========================================
+// FINISH 2v2 BATTLE
+// =========================================
+
 function finishTeamBattle(battle) {
   battle.finished = true;
 
@@ -181,14 +193,16 @@ function finishTeamBattle(battle) {
     return;
   }
 
-  // If the round limit is reached, compare total surviving health.
+  // Round limit: compare surviving health.
   const teamOneHealth = teamOne.reduce(
-    (total, fighter) => total + Math.max(0, fighter.health),
+    (total, fighter) =>
+      total + Math.max(0, fighter.health),
     0,
   );
 
   const teamTwoHealth = teamTwo.reduce(
-    (total, fighter) => total + Math.max(0, fighter.health),
+    (total, fighter) =>
+      total + Math.max(0, fighter.health),
     0,
   );
 
@@ -201,24 +215,50 @@ function finishTeamBattle(battle) {
   }
 }
 
-// Record an action so the UI can animate it and display it in the log.
-function recordAction(battle, attacker, defender, attack, result, healthBefore) {
+// =========================================
+// RECORD COMBAT ACTION
+// =========================================
+
+function recordAction(
+  battle,
+  attacker,
+  defender,
+  attack,
+  result,
+  healthBefore,
+) {
   const action = {
     round: battle.round,
+
     attackerId: attacker.id,
     defenderId: defender?.id ?? null,
+
     attackerName: attacker.name,
     defenderName: defender?.name ?? null,
+
     attackName: attack?.name ?? null,
+
     action: result?.action ?? "skipped",
+
     damage: defender
       ? Math.max(0, healthBefore - defender.health)
       : 0,
+
     attackerHealth: attacker.health,
     defenderHealth: defender?.health ?? null,
+
     attackerMana: attacker.mana,
     defenderMana: defender?.mana ?? null,
+
     evaded: result?.evaded ?? false,
+
+    // New combat mechanics.
+    stunnedAttacks: result?.stunnedAttacks ?? [],
+    stunNotAppliedReason:
+      result?.stunNotAppliedReason ?? null,
+
+    buffsApplied: result?.buffsApplied ?? {},
+    debuffsApplied: result?.debuffsApplied ?? {},
   };
 
   battle.currentAction = action;
@@ -227,11 +267,17 @@ function recordAction(battle, attacker, defender, attack, result, healthBefore) 
   return action;
 }
 
-// Advance a 1v1 battle by at most one visible combat action.
+// =========================================
+// 1v1 WATCH BATTLE
+// =========================================
+
 function nextWatchDuelAction(battle) {
   const [fighterOne, fighterTwo] = battle.fighters;
 
-  if (fighterOne.health <= 0 || fighterTwo.health <= 0) {
+  if (
+    fighterOne.health <= 0 ||
+    fighterTwo.health <= 0
+  ) {
     finishBattle(battle);
     return battle;
   }
@@ -245,21 +291,28 @@ function nextWatchDuelAction(battle) {
 
   while (battle.turnPosition < order.length) {
     const attackerIndex = order[battle.turnPosition];
-    const defenderIndex = attackerIndex === 0 ? 1 : 0;
+
+    const defenderIndex =
+      attackerIndex === 0 ? 1 : 0;
 
     const attacker = battle.fighters[attackerIndex];
     const defender = battle.fighters[defenderIndex];
+
     const difficulty = battle.difficulties[attackerIndex];
 
-    if (attacker.health <= 0 || defender.health <= 0) {
+    if (
+      attacker.health <= 0 ||
+      defender.health <= 0
+    ) {
       finishBattle(battle);
       return battle;
     }
 
     const attackLimit = getAttackLimit(
-  difficulty,
-  battle.round === 1 && battle.turnPosition === 0,
-);
+      difficulty,
+      battle.round === 1 &&
+        battle.turnPosition === 0,
+    );
 
     const attack =
       battle.attacksThisTurn < attackLimit
@@ -273,7 +326,15 @@ function nextWatchDuelAction(battle) {
     }
 
     const healthBefore = defender.health;
-    const result = resolveBotAttack(attack, attacker, defender);
+
+    // Pass both fighters so stun can clean up
+    // temporary effects correctly.
+    const result = resolveBotAttack(
+      attack,
+      attacker,
+      defender,
+      battle.fighters,
+    );
 
     if (!result) {
       attack.state = false;
@@ -291,14 +352,19 @@ function nextWatchDuelAction(battle) {
       healthBefore,
     );
 
-    if (fighterOne.health <= 0 || fighterTwo.health <= 0) {
+    if (
+      fighterOne.health <= 0 ||
+      fighterTwo.health <= 0
+    ) {
       finishBattle(battle);
     }
 
     return battle;
   }
 
+  // Both fighters have finished their turns.
   advanceRound(battle.fighters);
+
   battle.round += 1;
   battle.turnPosition = 0;
   battle.attacksThisTurn = 0;
@@ -310,11 +376,17 @@ function nextWatchDuelAction(battle) {
   return battle;
 }
 
-// Advance a 2v2 battle by at most one visible combat action.
+// =========================================
+// 2v2 WATCH BATTLE
+// =========================================
+
 function nextWatchTeamAction(battle) {
   const [teamOne, teamTwo] = battle.teams;
 
-  if (teamIsDefeated(teamOne) || teamIsDefeated(teamTwo)) {
+  if (
+    teamIsDefeated(teamOne) ||
+    teamIsDefeated(teamTwo)
+  ) {
     finishTeamBattle(battle);
     return battle;
   }
@@ -324,14 +396,17 @@ function nextWatchTeamAction(battle) {
     return battle;
   }
 
-  // Keep processing internal turn transitions until an action is
-  // available to show, or the battle ends.
+  // Process internal transitions until an action
+  // is available to display or the battle ends.
   while (!battle.finished) {
     const attackers = battle.teams[battle.teamTurn];
     const defenders = battle.teams[1 - battle.teamTurn];
 
-    // Assign targets once at the start of this team's turn.
-    if (battle.fighterPosition === 0 && battle.attacksThisTurn === 0) {
+    // Assign targets once at the start of each team's turn.
+    if (
+      battle.fighterPosition === 0 &&
+      battle.attacksThisTurn === 0
+    ) {
       battle.targetAssignments = assignUniqueTargets(
         attackers,
         defenders,
@@ -339,9 +414,11 @@ function nextWatchTeamAction(battle) {
     }
 
     // Every fighter on this team has been considered.
-    if (battle.fighterPosition >= attackers.length) {
+    if (
+      battle.fighterPosition >= attackers.length
+    ) {
       if (battle.teamTurn === 0) {
-        // Team 1 has finished. Team 2 acts next.
+        // Team 1 finished. Team 2 acts next.
         battle.teamTurn = 1;
         battle.fighterPosition = 0;
         battle.attacksThisTurn = 0;
@@ -349,8 +426,9 @@ function nextWatchTeamAction(battle) {
         continue;
       }
 
-      // Both teams have acted: begin the next round.
+      // Both teams finished their turns.
       advanceRound(battle.fighters);
+
       battle.round += 1;
       battle.teamTurn = 0;
       battle.fighterPosition = 0;
@@ -365,17 +443,30 @@ function nextWatchTeamAction(battle) {
     }
 
     const attacker = attackers[battle.fighterPosition];
-    const targetId = battle.targetAssignments[attacker.id];
-    const defender = targetId ? findFighter(battle, targetId) : null;
-    const difficulty = battle.difficulties[battle.fighters.indexOf(attacker)];
 
-    // A fighter who is knocked out or has no unique target skips.
+    const targetId =
+      battle.targetAssignments[attacker.id];
+
+    const defender = targetId
+      ? findFighter(battle, targetId)
+      : null;
+
+    const difficulty =
+      battle.difficulties[
+        battle.fighters.indexOf(attacker)
+      ];
+
+    // A defeated fighter or fighter without a unique
+    // target cannot attack.
     if (
       attacker.health <= 0 ||
       !defender ||
       defender.health <= 0
     ) {
-      if (attacker.health > 0 && !defender) {
+      if (
+        attacker.health > 0 &&
+        !defender
+      ) {
         const action = recordAction(
           battle,
           attacker,
@@ -385,7 +476,8 @@ function nextWatchTeamAction(battle) {
           attacker.health,
         );
 
-        action.reason = "No unique target was available.";
+        action.reason =
+          "No unique target was available.";
 
         battle.fighterPosition += 1;
         battle.attacksThisTurn = 0;
@@ -399,17 +491,17 @@ function nextWatchTeamAction(battle) {
     }
 
     const attackLimit = getAttackLimit(
-  difficulty,
-  battle.round === 1 && battle.teamTurn === 0,
-);
-
+      difficulty,
+      battle.round === 1 &&
+        battle.teamTurn === 0,
+    );
 
     const attack =
       battle.attacksThisTurn < attackLimit
         ? chooseAttack(attacker, difficulty)
         : null;
 
-    // Move to the next teammate if this fighter has no more attacks.
+    // This fighter has no more usable attacks.
     if (!attack) {
       battle.fighterPosition += 1;
       battle.attacksThisTurn = 0;
@@ -417,7 +509,14 @@ function nextWatchTeamAction(battle) {
     }
 
     const healthBefore = defender.health;
-    const result = resolveBotAttack(attack, attacker, defender);
+
+    // Pass every fighter, not just the attacker and target.
+    const result = resolveBotAttack(
+      attack,
+      attacker,
+      defender,
+      battle.fighters,
+    );
 
     if (!result) {
       attack.state = false;
@@ -435,14 +534,17 @@ function nextWatchTeamAction(battle) {
       healthBefore,
     );
 
-    // The target remains reserved. If defeated, this attacker stops;
-    // their teammate does not take over that target during this turn.
+    // The assigned target remains reserved for this
+    // attacker. A teammate cannot take over mid-turn.
     if (defender.health <= 0) {
       battle.fighterPosition += 1;
       battle.attacksThisTurn = 0;
     }
 
-    if (teamIsDefeated(teamOne) || teamIsDefeated(teamTwo)) {
+    if (
+      teamIsDefeated(teamOne) ||
+      teamIsDefeated(teamTwo)
+    ) {
       finishTeamBattle(battle);
     }
 
@@ -452,7 +554,10 @@ function nextWatchTeamAction(battle) {
   return battle;
 }
 
-// Public function shared by the Watch Mode playback controls.
+// =========================================
+// PUBLIC PLAYBACK FUNCTION
+// =========================================
+
 export function nextWatchAction(battle) {
   if (!battle || battle.finished) {
     return battle;
@@ -465,12 +570,19 @@ export function nextWatchAction(battle) {
   return nextWatchDuelAction(battle);
 }
 
+// =========================================
+// FINISH 1v1 BATTLE
+// =========================================
+
 function finishBattle(battle) {
   battle.finished = true;
 
   const [fighterOne, fighterTwo] = battle.fighters;
 
-  if (fighterOne.health <= 0 && fighterTwo.health <= 0) {
+  if (
+    fighterOne.health <= 0 &&
+    fighterTwo.health <= 0
+  ) {
     battle.winner = null;
   } else if (fighterOne.health <= 0) {
     battle.winner = fighterTwo.name;

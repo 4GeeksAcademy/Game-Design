@@ -1,5 +1,15 @@
-import { attackCharacter, evadeAttack } from "./Health.js";
-import { chooseNormalAttack, scoreAttack } from "./AI_NormalDifficulty.js";
+import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
+
+import {
+  getModifiedAttackStat,
+  getModifiedCharacterStat,
+  tickSelfModifiers,
+} from "./Modifiers.js";
+
+import { resetAttacks } from "./Turns.js";
+import { aiChooseStunTargets } from "./AI.js";
+
+import { getNormalAttackPriority, scoreAttack } from "./AI_NormalDifficulty.js";
 
 const MAX_ROUNDS = 100;
 const OPENING_TURN_ATTACK_LIMIT = 4;
@@ -8,7 +18,6 @@ const MAX_ATTACKS_PER_TURN = {
   Normal: 6,
   Hard: 10,
 };
-
 
 // Both 1v1 systems use the same alternating turn order.
 function getTurnOrder(round) {
@@ -29,21 +38,68 @@ function getAttackLimit(difficulty, isOpeningTurn = false) {
 function cloneFighter(fighter) {
   return {
     ...fighter,
+
     defense:
       typeof fighter.defense === "object" && fighter.defense !== null
         ? { ...fighter.defense }
         : fighter.defense,
+
+    activeModifiers: (fighter.activeModifiers ?? []).map((modifier) => ({
+      ...modifier,
+      attackModifiers: modifier.attackModifiers
+        ? {
+            ...modifier.attackModifiers,
+            targetAttackIds: modifier.attackModifiers.targetAttackIds
+              ? [...modifier.attackModifiers.targetAttackIds]
+              : null,
+            stats: { ...modifier.attackModifiers.stats },
+          }
+        : null,
+      characterModifiers: modifier.characterModifiers
+        ? { ...modifier.characterModifiers }
+        : null,
+    })),
+
     maximumHealth: fighter.maximumHealth ?? fighter.health,
     maximumMana: fighter.maximumMana ?? fighter.mana,
     manaRegen: fighter.manaRegen ?? 0,
     maximumCooldown: fighter.maximumCooldown ?? 3,
     recovery: fighter.recovery ?? 1,
+
     turnFinished: false,
     blocked: false,
+
     attacks: (fighter.attacks ?? []).map((attack) => ({
       ...attack,
       buff: attack.buff ? { ...attack.buff } : attack.buff,
       debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+      heal: attack.heal
+        ? {
+            ...attack.heal,
+            buff: attack.heal.buff ? { ...attack.heal.buff } : attack.heal.buff,
+          }
+        : attack.heal,
+      stun: attack.stun ? { ...attack.stun } : attack.stun,
+      attackModifiers: attack.attackModifiers
+        ? {
+            ...attack.attackModifiers,
+            targetAttackIds: attack.attackModifiers.targetAttackIds
+              ? [...attack.attackModifiers.targetAttackIds]
+              : null,
+            stats: { ...attack.attackModifiers.stats },
+          }
+        : attack.attackModifiers,
+      characterModifiers: attack.characterModifiers
+        ? { ...attack.characterModifiers }
+        : attack.characterModifiers,
+      activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+        ...effect,
+        effects: { ...effect.effects },
+      })),
+      stunned: attack.stunned ? { ...attack.stunned } : null,
+      remainingUses: attack.remainingUses ?? attack.uses,
+      cooldownRemaining: attack.cooldownRemaining ?? 0,
+      cooldownStartedThisRound: false,
       state: true,
     })),
   };
@@ -58,8 +114,8 @@ function getDefense(fighter) {
 function chooseAttack(fighter, difficulty) {
   const available = fighter.attacks.filter(
     (attack) =>
-      attack.state === true &&
-      fighter.mana >= (attack.cost ?? 0) &&
+      canUseAttack(attack) &&
+      fighter.mana >= getModifiedAttackStat(attack, fighter, "cost") &&
       // A pure teammate-healing move has no valid target in 1v1.
       !(attack.heal && !(attack.damage > 0)),
   );
@@ -70,65 +126,75 @@ function chooseAttack(fighter, difficulty) {
     return available[Math.floor(Math.random() * available.length)];
   }
 
+  // Score attacks using their currently modified values.
+  const scoredAttacks = available.map((attack) => ({
+    ...attack,
+    damage: getModifiedAttackStat(attack, fighter, "damage"),
+    speed: getModifiedAttackStat(attack, fighter, "speed"),
+    cost: getModifiedAttackStat(attack, fighter, "cost"),
+    originalAttack: attack,
+  }));
+
   if (difficulty === "Normal") {
-    return chooseNormalAttack({
-      ...fighter,
-      attacks: available,
-    });
+    return getNormalAttackPriority(scoredAttacks)[0]?.originalAttack ?? null;
   }
 
-  return [...available].sort(
-    (a, b) => scoreAttack(b) - scoreAttack(a),
-  )[0];
+  return (
+    [...scoredAttacks].sort((a, b) => scoreAttack(b) - scoreAttack(a))[0]
+      ?.originalAttack ?? null
+  );
 }
 
+function resolveBotAttack(
+  attack,
+  attacker,
+  defender,
+  fighters = [attacker, defender],
+) {
+  const selectedAttackIds = aiChooseStunTargets(defender, attack.stun);
 
-function resolveBotAttack(attack, attacker, defender) {
-  // Pure buff/debuff moves cannot be blocked or evaded.
-  if ((attack.buff || attack.debuff) && !(attack.damage > 0)) {
-    return attackCharacter(attack, attacker, defender);
+  const options = {
+    selectedAttackIds,
+    fighters,
+  };
+
+  const damage = getModifiedAttackStat(attack, attacker, "damage");
+  const defense = getModifiedCharacterStat(defender, "defense");
+  const attackSpeed = getModifiedAttackStat(attack, attacker, "speed");
+
+  // Zero-damage abilities resolve directly.
+  // This includes stun, buffs, debuffs, and attack modifiers.
+  if (damage <= 0) {
+    return attackCharacter(attack, attacker, defender, 0, options);
   }
 
-  const damage = Math.max(0, attack.damage ?? 0);
-  const defense = getDefense(defender);
+  const defenderCooldown = getModifiedCharacterStat(defender, "cooldown");
 
-  // LOW-HEALTH RULE:
-  // At 5 HP or less, take a survivable hit to preserve
-  // the defensive cooldown and avoid spending evade mana.
-  // If the attack could knock the fighter out, use the
-  // normal defensive decision logic instead.
+  // Preserve the existing low-health behavior.
   if (defender.health <= 5 && defender.health > damage) {
-    const result = attackCharacter(attack, attacker, defender);
-
-    if (result) {
-      result.action = "take damage";
-      result.damageReceived = defender.health;
-    }
-
-    return result;
-  }
-
-  // No defensive charges available: take the attack normally.
-  if ((defender.cooldown ?? 0) <= 0) {
-    const result = attackCharacter(attack, attacker, defender);
+    const result = attackCharacter(attack, attacker, defender, 0, options);
 
     if (result) result.action = "take damage";
 
     return result;
   }
 
-  // Calculate the cost and feasibility of evading this attack.
-  const agilityNeeded = Math.max(
-    0,
-    (attack.speed ?? 0) - (defender.agility ?? 0),
-  );
+  // No defensive charges available.
+  if (defenderCooldown <= 0) {
+    const result = attackCharacter(attack, attacker, defender, 0, options);
 
+    if (result) result.action = "take damage";
+
+    return result;
+  }
+
+  const agility = getModifiedCharacterStat(defender, "agility");
+
+  const agilityNeeded = Math.max(0, attackSpeed - agility);
   const canEvade = defender.mana >= agilityNeeded;
 
-  // Calculate how much damage a block would allow through.
   const blockedDamage = Math.max(0, damage - defense);
 
-  // Decide whether the damage avoided is worth the mana cost.
   const manaAfterEvade = defender.mana - agilityNeeded;
   const maximumMana = defender.maximumMana ?? defender.mana;
   const manaReserve = maximumMana * 0.25;
@@ -140,33 +206,34 @@ function resolveBotAttack(attack, attacker, defender) {
     (agilityNeeded === 0 ||
       isLethalThreat ||
       (damage > defense &&
-        (blockedDamage >= 10 ||
-          manaAfterEvade >= manaReserve)));
+        (blockedDamage >= 10 || manaAfterEvade >= manaReserve)));
 
   if (shouldEvade) {
-    const result = evadeAttack(attack, attacker, defender);
+    const result = evadeAttack(attack, attacker, defender, options);
 
     if (result) {
-      defender.cooldown -= 1;
+      result.action = result.evaded ? "evade" : "take damage";
     }
 
     return result;
   }
 
-  // Otherwise, block using the existing defense behavior.
+  // Otherwise, block using modified defense.
   const healthBefore = defender.health;
 
-  const result = attackCharacter(attack, attacker, defender, defense);
+  const result = attackCharacter(attack, attacker, defender, defense, {
+    ...options,
+    blocked: true,
+  });
 
   if (result) {
-    defender.cooldown -= 1;
+    defender.cooldown = Math.max(0, defenderCooldown - 1);
     result.action = "defend";
     result.damageReceived = healthBefore - defender.health;
   }
 
   return result;
 }
-
 
 function runBotTurn(
   attacker,
@@ -176,6 +243,7 @@ function runBotTurn(
   log,
   round,
   isOpeningTurn = false,
+  fighters = [attacker, defender],
 ) {
   let attacksThisTurn = 0;
 
@@ -200,7 +268,7 @@ function runBotTurn(
     const attackerManaBefore = attacker.mana;
     const defenderManaBefore = defender.mana;
 
-    const result = resolveBotAttack(attack, attacker, defender);
+    const result = resolveBotAttack(attack, attacker, defender, fighters);
 
     if (!result) {
       // Prevent a failed move from trapping the simulator.
@@ -218,44 +286,57 @@ function runBotTurn(
       stats[defender.id].successfulEvades += 1;
     }
 
-   log.push({
-  round,
-  attacker: attacker.name,
-  defender: defender.name,
-  attack: attack.name,
-  action: result.action,
-  damage: healthBefore - defender.health,
-  attackerHealth: attacker.health,
-  defenderHealth: defender.health,
-  attackerMana: attacker.mana,
-  defenderMana: defender.mana,
-  attackerManaUsed: Math.max(0, attackerManaBefore - attacker.mana),
-  defenderManaUsed: Math.max(0, defenderManaBefore - defender.mana),
-});
+    log.push({
+      round,
+      attacker: attacker.name,
+      defender: defender.name,
+      attack: attack.name,
+      action: result.action,
+      damage: healthBefore - defender.health,
+      attackerHealth: attacker.health,
+      defenderHealth: defender.health,
+      attackerMana: attacker.mana,
+      defenderMana: defender.mana,
+      attackerManaUsed: Math.max(0, attackerManaBefore - attacker.mana),
+      defenderManaUsed: Math.max(0, defenderManaBefore - defender.mana),
+    });
   }
 
   stats[attacker.id].turnsTaken += 1;
 }
 
 function advanceRound(fighters) {
+  // First, recover resources using currently active modifiers.
   for (const fighter of fighters) {
-    // Restore mana without exceeding the current maximum.
-    fighter.mana = Math.min(
-      fighter.maximumMana,
-      fighter.mana + fighter.manaRegen,
+    const manaRegen = getModifiedCharacterStat(fighter, "manaRegen");
+
+    const maximumMana = getModifiedCharacterStat(fighter, "maximumMana");
+
+    fighter.mana = Math.min(maximumMana, fighter.mana + manaRegen);
+
+    const recovery = getModifiedCharacterStat(fighter, "recovery");
+
+    const maximumCooldown = getModifiedCharacterStat(
+      fighter,
+      "maximumCooldown",
     );
 
-    // Recover defensive charges without exceeding the maximum.
     fighter.cooldown = Math.min(
-      fighter.maximumCooldown,
-      (fighter.cooldown ?? 0) + fighter.recovery,
+      maximumCooldown,
+      (fighter.cooldown ?? 0) + recovery,
     );
+  }
 
-    // Make every attack available for the next round.
-    fighter.attacks = fighter.attacks.map((attack) => ({
-      ...attack,
-      state: true,
-    }));
+  // Expire temporary character and attack modifiers.
+  for (const fighter of fighters) {
+    tickSelfModifiers(fighter);
+  }
+
+  // Process stun, cooldown, and limited-use attacks.
+  // Passing all fighters also allows temporary effects
+  // to be reversed on the correct target.
+  for (const fighter of fighters) {
+    fighter.attacks = resetAttacks(fighter.attacks, fighters);
 
     fighter.turnFinished = false;
   }
@@ -305,30 +386,29 @@ function simulateBattle(
     roundsCompleted = round;
 
     // Alternate the starting fighter every round.
-const order = getTurnOrder(round);
+    const order = getTurnOrder(round);
 
-for (let position = 0; position < order.length; position++) {
-  const attackerIndex = order[position];
+    for (let position = 0; position < order.length; position++) {
+      const attackerIndex = order[position];
 
-  const attacker = fighters[attackerIndex];
-  const defender = fighters[1 - attackerIndex];
+      const attacker = fighters[attackerIndex];
+      const defender = fighters[1 - attackerIndex];
 
-  const difficulty =
-    attackerIndex === 0 ? difficultyOne : difficultyTwo;
+      const difficulty = attackerIndex === 0 ? difficultyOne : difficultyTwo;
 
-  if (attacker.health <= 0 || defender.health <= 0) break;
+      if (attacker.health <= 0 || defender.health <= 0) break;
 
-  runBotTurn(
-    attacker,
-    defender,
-    difficulty,
-    stats,
-    log,
-    round,
-    // Only the first fighter to act in round one gets this limit.
-    round === 1 && position === 0,
-  );
-}
+      runBotTurn(
+        attacker,
+        defender,
+        difficulty,
+        stats,
+        log,
+        round,
+        round === 1 && position === 0,
+        fighters,
+      );
+    }
 
     if (botOne.health <= 0 || botTwo.health <= 0) break;
 
@@ -372,15 +452,6 @@ for (let position = 0; position < order.length; position++) {
   };
 }
 
-
-
-
-
-
-
-
-
-
 /**
  * Choose one unique opponent for each fighter who can act.
  *
@@ -393,9 +464,7 @@ function assignUniqueTargets(attackers, defenders) {
 
   // Shuffle the available targets so the same teammate isn't
   // always favored when there is only one opponent left.
-  const availableTargets = [...livingDefenders].sort(
-    () => Math.random() - 0.5,
-  );
+  const availableTargets = [...livingDefenders].sort(() => Math.random() - 0.5);
 
   const assignments = new Map();
 
@@ -505,13 +574,13 @@ function simulateTeamBattle(
       if (defender.health <= 0) continue;
 
       const difficultyAttackLimit =
-  MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+        MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
 
-const isOpeningTeamTurn = round === 1 && attackers === players;
+      const isOpeningTeamTurn = round === 1 && attackers === players;
 
-const attackLimit = isOpeningTeamTurn
-  ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyAttackLimit)
-  : difficultyAttackLimit;
+      const attackLimit = isOpeningTeamTurn
+        ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyAttackLimit)
+        : difficultyAttackLimit;
 
       let attacksThisTurn = 0;
 
@@ -530,7 +599,12 @@ const attackLimit = isOpeningTeamTurn
         const defenderManaBefore = defender.mana;
         const healthBefore = defender.health;
 
-        const result = resolveBotAttack(attack, attacker, defender);
+        const result = resolveBotAttack(
+          attack,
+          attacker,
+          defender,
+          allFighters,
+        );
 
         if (!result) {
           // Avoid repeatedly trying a failed move.
@@ -540,8 +614,7 @@ const attackLimit = isOpeningTeamTurn
 
         attacksThisTurn++;
         stats[attacker.id].attacksUsed++;
-        stats[attacker.id].damageDealt +=
-          healthBefore - defender.health;
+        stats[attacker.id].damageDealt += healthBefore - defender.health;
 
         if (result.action === "defend") {
           stats[defender.id].blocks++;
@@ -560,14 +633,8 @@ const attackLimit = isOpeningTeamTurn
           defenderHealth: defender.health,
           attackerMana: attacker.mana,
           defenderMana: defender.mana,
-          attackerManaUsed: Math.max(
-            0,
-            attackerManaBefore - attacker.mana,
-          ),
-          defenderManaUsed: Math.max(
-            0,
-            defenderManaBefore - defender.mana,
-          ),
+          attackerManaUsed: Math.max(0, attackerManaBefore - attacker.mana),
+          defenderManaUsed: Math.max(0, defenderManaBefore - defender.mana),
         });
 
         // Don't allow the other teammate to take over this target
@@ -651,7 +718,6 @@ const attackLimit = isOpeningTeamTurn
     log,
   };
 }
-
 
 export {
   cloneFighter,
