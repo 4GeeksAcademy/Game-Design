@@ -454,3 +454,97 @@
     flex-direction: column;
   }
 }
+
+
+
+/* =========================================
+   WATCH MODE — STUNNED PORTRAIT EFFECT
+========================================= */
+
+.watch-fighter-image {
+  position: relative;
+  width: 125px;
+  height: 190px;
+  flex: 0 0 125px;
+  overflow: hidden;
+  isolation: isolate;
+  margin-inline: auto;
+}
+
+.watch-fighter-image.fighter-stunned {
+  animation: watch-stun-shake 0.35s infinite;
+}
+
+/* Keep the image within the exact portrait dimensions */
+.watch-fighter-image img {
+  display: block;
+  width: 125px;
+  height: 190px;
+  object-fit: cover;
+  position: relative;
+  z-index: 1;
+}
+
+.watch-fighter-image.fighter-stunned img {
+  filter:
+    drop-shadow(0 0 4px #13d5ff)
+    drop-shadow(0 0 9px rgba(19, 213, 255, 0.8));
+
+  animation: watch-stun-glow 1s ease-in-out infinite alternate;
+}
+
+/* Light stays strictly inside the portrait */
+.watch-fighter-image.fighter-stunned::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  background: linear-gradient(
+    110deg,
+    transparent 25%,
+    rgba(19, 213, 255, 0.12) 40%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(19, 213, 255, 0.4) 58%,
+    transparent 75%
+  );
+
+  background-size: 250% 100%;
+  animation: watch-stun-lightning 1.7s linear infinite;
+}
+
+@keyframes watch-stun-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes watch-stun-glow {
+  from {
+    filter:
+      drop-shadow(0 0 3px #13d5ff)
+      drop-shadow(0 0 6px rgba(19, 213, 255, 0.4));
+  }
+
+  to {
+    filter:
+      drop-shadow(0 0 6px #13d5ff)
+      drop-shadow(0 0 12px rgba(19, 213, 255, 0.9));
+  }
+}
+
+@keyframes watch-stun-lightning {
+  from { background-position: 100% 0; }
+  to { background-position: -150% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .watch-fighter-image.fighter-stunned,
+  .watch-fighter-image.fighter-stunned img,
+  .watch-fighter-image.fighter-stunned::after {
+    animation: none !important;
+  }
+}

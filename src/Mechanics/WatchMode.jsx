@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -57,9 +56,7 @@ function getFighterImage(fighter) {
 
 function HealthBar({ label, value, maximum, color }) {
   const percentage =
-    maximum > 0
-      ? Math.max(0, Math.min(100, (value / maximum) * 100))
-      : 0;
+    maximum > 0 ? Math.max(0, Math.min(100, (value / maximum) * 100)) : 0;
 
   return (
     <div className="watch-meter">
@@ -88,6 +85,9 @@ function FighterPanel({ fighter, color, side, compact = false }) {
 
   const stats = getFighterStats(fighter);
   const name = getFighterName(fighter);
+  const hasStunnedAttacks = (stats.attacks ?? []).some(
+    (attack) => (attack.stunned?.remainingRounds ?? 0) > 0,
+  );
 
   return (
     <div
@@ -99,10 +99,11 @@ function FighterPanel({ fighter, color, side, compact = false }) {
         padding: compact ? "10px" : undefined,
       }}
     >
-      <div
-        className="watch-fighter-image"
-        style={compact ? { maxWidth: "110px", margin: "0 auto" } : undefined}
-      >
+     <div
+  className={`watch-fighter-image ${
+    hasStunnedAttacks ? "fighter-stunned" : ""
+  }`}
+>
         {getFighterImage(fighter) && (
           <img src={getFighterImage(fighter)} alt={name} />
         )}
@@ -137,8 +138,8 @@ function FighterPanel({ fighter, color, side, compact = false }) {
         <span>
           DEF:{" "}
           {typeof stats.defense === "object"
-            ? stats.defense?.amount ?? 0
-            : stats.defense ?? 0}
+            ? (stats.defense?.amount ?? 0)
+            : (stats.defense ?? 0)}
         </span>
       </div>
     </div>
@@ -168,9 +169,7 @@ function createSnapshot(battle) {
       team.map((fighter) => fightersById.get(fighter.id)),
     ),
     log: [...battle.log],
-    currentAction: battle.currentAction
-      ? { ...battle.currentAction }
-      : null,
+    currentAction: battle.currentAction ? { ...battle.currentAction } : null,
   };
 }
 
@@ -273,13 +272,13 @@ export default function WatchMode() {
 
     setTeamOneIds((current) =>
       current.map((id, index) =>
-        id && ids.includes(id) ? id : ids[index] ?? "",
+        id && ids.includes(id) ? id : (ids[index] ?? ""),
       ),
     );
 
     setTeamTwoIds((current) =>
       current.map((id, index) =>
-        id && ids.includes(id) ? id : ids[index + 2] ?? "",
+        id && ids.includes(id) ? id : (ids[index + 2] ?? ""),
       ),
     );
   }, [availableFighters, firstId, secondId]);
@@ -380,9 +379,7 @@ export default function WatchMode() {
     const setter = teamNumber === 1 ? setTeamOneIds : setTeamTwoIds;
 
     setter((current) =>
-      current.map((id, index) =>
-        index === fighterIndex ? fighterId : id,
-      ),
+      current.map((id, index) => (index === fighterIndex ? fighterId : id)),
     );
   }
 
@@ -409,13 +406,9 @@ export default function WatchMode() {
   const fighterTwo = fightersInBattle[1];
   const action = battleView?.currentAction;
 
-  const displayedTeamOne = isTeamBattle
-    ? battleView.teams[0]
-    : [fighterOne];
+  const displayedTeamOne = isTeamBattle ? battleView.teams[0] : [fighterOne];
 
-  const displayedTeamTwo = isTeamBattle
-    ? battleView.teams[1]
-    : [fighterTwo];
+  const displayedTeamTwo = isTeamBattle ? battleView.teams[1] : [fighterTwo];
 
   const duplicateTeamSelection =
     new Set([...teamOneIds, ...teamTwoIds]).size !== 4;
@@ -423,10 +416,7 @@ export default function WatchMode() {
   return (
     <main className="watch-page">
       <header className="watch-header">
-        <button
-          className="watch-back-button"
-          onClick={() => navigate(-1)}
-        >
+        <button className="watch-back-button" onClick={() => navigate(-1)}>
           ← Back
         </button>
 
@@ -534,12 +524,10 @@ export default function WatchMode() {
                       label={`Team 1 · Fighter ${index + 1}`}
                       value={teamOneIds[index]}
                       fighters={availableFighters}
-                      excludedIds={teamOneIds.filter(
-                        (id, otherIndex) => otherIndex !== index,
-                      ).concat(teamTwoIds.filter(Boolean))}
-                      onChange={(id) =>
-                        updateTeamSelection(1, index, id)
-                      }
+                      excludedIds={teamOneIds
+                        .filter((id, otherIndex) => otherIndex !== index)
+                        .concat(teamTwoIds.filter(Boolean))}
+                      onChange={(id) => updateTeamSelection(1, index, id)}
                     />
                   </div>
                 ))}
@@ -562,12 +550,10 @@ export default function WatchMode() {
                       label={`Team 2 · Fighter ${index + 1}`}
                       value={teamTwoIds[index]}
                       fighters={availableFighters}
-                      excludedIds={teamTwoIds.filter(
-                        (id, otherIndex) => otherIndex !== index,
-                      ).concat(teamOneIds.filter(Boolean))}
-                      onChange={(id) =>
-                        updateTeamSelection(2, index, id)
-                      }
+                      excludedIds={teamTwoIds
+                        .filter((id, otherIndex) => otherIndex !== index)
+                        .concat(teamOneIds.filter(Boolean))}
+                      onChange={(id) => updateTeamSelection(2, index, id)}
                     />
                   </div>
                 ))}
@@ -609,23 +595,19 @@ export default function WatchMode() {
             </>
           )}
 
-          {availableFighters.length <
-            (battleMode === "2v2" ? 4 : 2) && (
+          {availableFighters.length < (battleMode === "2v2" ? 4 : 2) && (
             <p className="watch-error">
-              You need at least {battleMode === "2v2" ? "four" : "two"}{" "}
-              unlocked fighters to start this battle.
+              You need at least {battleMode === "2v2" ? "four" : "two"} unlocked
+              fighters to start this battle.
             </p>
           )}
 
           <button
             className="watch-primary-button"
             disabled={
-              availableFighters.length <
-                (battleMode === "2v2" ? 4 : 2) ||
+              availableFighters.length < (battleMode === "2v2" ? 4 : 2) ||
               (battleMode === "1v1"
-                ? !firstId ||
-                  !secondId ||
-                  firstId === secondId
+                ? !firstId || !secondId || firstId === secondId
                 : duplicateTeamSelection ||
                   [...teamOneIds, ...teamTwoIds].some((id) => !id))
             }
@@ -650,7 +632,8 @@ export default function WatchMode() {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "minmax(0, 1fr) minmax(110px, 0.5fr) minmax(0, 1fr)",
+                  gridTemplateColumns:
+                    "minmax(0, 1fr) minmax(110px, 0.5fr) minmax(0, 1fr)",
                   gap: "12px",
                   alignItems: "start",
                 }}
@@ -793,10 +776,7 @@ export default function WatchMode() {
                 </button>
               )}
 
-              <button
-                className="watch-secondary-button"
-                onClick={resetBattle}
-              >
+              <button className="watch-secondary-button" onClick={resetBattle}>
                 ↻ New Battle
               </button>
             </div>
@@ -826,9 +806,7 @@ export default function WatchMode() {
             <div className="watch-log-list" ref={logRef}>
               {battleView.log.map((entry, index) => (
                 <div className="watch-log-entry" key={index}>
-                  <span className="watch-log-round">
-                    R{entry.round}
-                  </span>
+                  <span className="watch-log-round">R{entry.round}</span>
 
                   <span>
                     <strong>{entry.attackerName}</strong>
