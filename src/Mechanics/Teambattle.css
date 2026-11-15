@@ -1,4 +1,5 @@
 /* Teambattle.css */
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap");
 
 .team-battle *,
 .team-battle *::before,
@@ -2874,4 +2875,484 @@ battlefield > .local-coop-incoming {
   align-self: start;
   justify-content: flex-start;
   overflow: visible;
+}
+
+
+/* =========================================
+   WILD CARDS — TEAM BATTLE THEME
+   ========================================= */
+
+.team-battle {
+  --cyan: #13d5ff;
+  --red: #ff3159;
+  --lime: #a5f51b;
+  --gold: #f6d84a;
+  --panel: rgba(17, 29, 19, 0.97);
+  --muted: #b4c1aa;
+
+  color: #fff9e9;
+  font-family: "Rajdhani", sans-serif;
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      rgba(165, 245, 27, 0.12),
+      transparent 55%
+    ),
+    linear-gradient(135deg, #17251a, #0c150e 55%, #080d1c);
+}
+
+.team-battle h1,
+.team-battle h2,
+.team-battle h3,
+.team-battle button,
+.team-battle .header-team-label,
+.team-battle .attack-panel-header,
+.team-battle .team-heading {
+  font-family: "Oxanium", sans-serif;
+}
+
+/* HEADER */
+
+.battle-header h1 {
+  color: #fff8e8;
+  text-shadow: 0 0 14px rgba(165, 245, 27, 0.2);
+}
+
+.battle-header h1 span {
+  color: var(--gold);
+}
+
+.header-team-label {
+  color: var(--muted);
+}
+
+.cpu-label {
+  color: #ff7187;
+}
+
+.player-label {
+  color: #50e6ff;
+}
+
+/* BATTLEFIELD */
+
+.battlefield {
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(165, 245, 27, 0.07),
+      transparent 65%
+    ),
+    linear-gradient(145deg, #19291b, #0c150f);
+  border-color: rgba(165, 245, 27, 0.18);
+}
+
+.battlefield::before {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 48px,
+    rgba(165, 245, 27, 0.035) 49px 50px
+  );
+}
+
+/* TEAM HEADINGS */
+
+.team-heading {
+  color: #ff7187;
+}
+
+.player-team .team-heading {
+  color: #50e6ff;
+}
+
+.team-heading h2 {
+  color: inherit;
+}
+
+/* FIGHTER CARDS */
+
+.fighter-card {
+  color: #fff8e8;
+  border-color: rgba(255, 49, 89, 0.3);
+  background:
+    radial-gradient(
+      ellipse at 50% 20%,
+      rgba(255, 49, 89, 0.07),
+      transparent 70%
+    ),
+    linear-gradient(145deg, #263021, #101812);
+}
+
+.player-team .fighter-card {
+  border-color: rgba(19, 213, 255, 0.35);
+  background:
+    radial-gradient(
+      ellipse at 50% 20%,
+      rgba(19, 213, 255, 0.07),
+      transparent 70%
+    ),
+    linear-gradient(145deg, #1c3029, #101812);
+}
+
+.fighter-card-heading h3 {
+  color: #fff8e8;
+}
+
+.fighter-card.is-selected {
+  border-color: var(--lime);
+  box-shadow:
+    0 0 12px rgba(165, 245, 27, 0.35),
+    0 0 22px rgba(165, 245, 27, 0.15);
+}
+
+.selected-mark {
+  color: var(--lime);
+}
+
+.fighter-card.is-defeated {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+/* FIGHTER RESOURCE BARS */
+
+.resource-label {
+  color: #dce7d4;
+}
+
+.resource-value {
+  color: #c0cdb6;
+}
+
+.resource-track {
+  background: #263629;
+}
+
+.health-fill {
+  background: linear-gradient(90deg, #ff3159, #ff9b78);
+}
+
+.mana-fill {
+  background: linear-gradient(90deg, #167bff, #20d9ff);
+}
+
+.fighter-stats,
+.fighter-stat-bars {
+  border-top-color: rgba(255, 255, 255, 0.12);
+  color: var(--muted);
+}
+
+.fighter-stats b,
+.stat-bar-row b {
+  color: #fff8e8;
+}
+
+.stat-bar-track {
+  background: #263629;
+}
+
+/* CENTER VERSUS MARK */
+
+.versus-mark {
+  border-color: rgba(246, 216, 74, 0.45);
+  color: var(--gold);
+  background: rgba(15, 25, 16, 0.9);
+  box-shadow: 0 0 22px rgba(246, 216, 74, 0.12);
+}
+
+.battle-center p {
+  color: #c4d0bb;
+}
+
+/* COMBAT LOG */
+
+.combat-log,
+.player-attack-panel {
+  border-color: rgba(165, 245, 27, 0.25);
+  background: linear-gradient(145deg, #1b2b1d, #0d160f);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.35);
+}
+
+.combat-log header {
+  color: var(--gold);
+  border-bottom-color: rgba(246, 216, 74, 0.2);
+}
+
+.log-dot {
+  background: var(--lime);
+  box-shadow: 0 0 8px var(--lime);
+}
+
+.combat-log-messages p {
+  color: #c7d2bf;
+}
+
+/* ATTACK PANEL */
+
+.player-attack-panel.is-active {
+  border-color: rgba(165, 245, 27, 0.65);
+  box-shadow: 0 0 16px rgba(165, 245, 27, 0.1);
+}
+
+.attack-panel-header h3 {
+  color: #fff8e8;
+}
+
+.attack-panel-header span {
+  color: var(--gold);
+}
+
+.attack-button,
+.team-attack-card {
+  color: #f5f4df;
+  border-color: rgba(165, 245, 27, 0.25);
+  background: linear-gradient(145deg, #263923, #101a13);
+}
+
+.attack-button strong,
+.team-attack-name {
+  color: #fff8e8;
+}
+
+.attack-button span,
+.team-attack-speed {
+  color: #c2ceb8;
+}
+
+.attack-button:not(:disabled):hover,
+.team-attack-card:not(:disabled):hover {
+  border-color: var(--lime);
+  background: linear-gradient(145deg, #354c2b, #172719);
+  box-shadow: 0 0 15px rgba(165, 245, 27, 0.16);
+}
+
+.attack-button:disabled,
+.team-attack-card:disabled {
+  opacity: 0.38;
+}
+
+/* TURN BUTTON */
+
+.finish-turn-button {
+  border-color: #fff1a0;
+  background: linear-gradient(135deg, #fff078, #f6d84a 65%, #d49b23);
+  color: #1a210c;
+  box-shadow: 0 0 16px rgba(246, 216, 74, 0.18);
+}
+
+.finish-turn-button:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 0 22px rgba(246, 216, 74, 0.35);
+}
+
+/* INCOMING ATTACK — CPU RED */
+
+.incoming-attack {
+  color: #fff4f3;
+  border-color: #ff526f;
+  background: linear-gradient(
+    145deg,
+    rgba(53, 22, 31, 0.98),
+    rgba(13, 16, 19, 0.98)
+  );
+  box-shadow:
+    0 0 22px rgba(255, 49, 89, 0.2),
+    inset 0 0 18px rgba(255, 49, 89, 0.05);
+}
+
+.incoming-topline {
+  color: #ff8295;
+  border-bottom-color: rgba(255, 82, 111, 0.25);
+}
+
+.incoming-topline span:last-child {
+  color: #f6d84a;
+}
+
+.incoming-attack h3 {
+  color: #fff0f1;
+}
+
+.incoming-attack > p {
+  color: #d1c5c4;
+}
+
+/* DEFENSE BUTTONS */
+
+.defend-button {
+  background: linear-gradient(135deg, #b87914, #e6a52c);
+  color: #211908 !important;
+}
+
+.evade-button {
+  background: linear-gradient(135deg, #087d51, #0ca66b);
+  color: white !important;
+}
+
+/* TARGET SELECTION MODAL */
+
+.target-modal-backdrop {
+  background: rgba(3, 9, 5, 0.88);
+}
+
+.target-modal {
+  border-color: rgba(165, 245, 27, 0.45);
+  background: linear-gradient(145deg, #263723, #101912);
+  box-shadow: 0 0 28px rgba(165, 245, 27, 0.12);
+}
+
+.target-modal .eyebrow {
+  color: var(--gold);
+}
+
+.target-modal h2 {
+  color: #fff8e8;
+}
+
+.target-modal > p {
+  color: #c1cdb7;
+}
+
+.target-choice-group {
+  border-color: rgba(255, 255, 255, 0.13);
+}
+
+.target-choice-button {
+  border-color: rgba(165, 245, 27, 0.2);
+  background: #19291b;
+  color: #fff8e8;
+}
+
+.target-choice-button.is-selected {
+  border-color: var(--lime);
+  background: #304525;
+  box-shadow: 0 0 12px rgba(165, 245, 27, 0.13);
+}
+
+.confirm-target-button {
+  background: linear-gradient(135deg, #fff078, #f6d84a);
+  color: #1a210c;
+}
+
+/* TEAM ROUND INTRO */
+
+.team-round-intro {
+  background:
+    radial-gradient(
+      ellipse at 20% 50%,
+      rgba(255, 49, 89, 0.18),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 80% 50%,
+      rgba(165, 245, 27, 0.17),
+      transparent 45%
+    ),
+    rgba(3, 10, 5, 0.97);
+}
+
+.team-round-intro__eyebrow {
+  color: var(--gold);
+}
+
+.team-round-intro__vs {
+  color: var(--gold);
+}
+
+.team-round-intro__team--player .team-round-intro__label {
+  color: #50e6ff;
+}
+
+.team-round-intro__team--cpu .team-round-intro__label {
+  color: #ff7187;
+}
+
+.team-round-intro__footer {
+  color: #d1ddc7;
+}
+
+/* KNOCKOUT OVERLAY */
+
+.team-ko-overlay {
+  background:
+    radial-gradient(
+      ellipse at center,
+      #263b22 0%,
+      #10190f 48%,
+      #030704 100%
+    );
+}
+
+.team-ko-overlay.ko-opponent {
+  --ko-color: #ff3159;
+  --ko-glow: rgba(255, 49, 89, 0.7);
+}
+
+.team-ko-overlay.ko-player {
+  --ko-color: #13d5ff;
+  --ko-glow: rgba(19, 213, 255, 0.65);
+}
+
+/* TEAM VICTORY / DEFEAT */
+
+.team-finish-overlay {
+  background:
+    radial-gradient(
+      ellipse at center,
+      #263b22 0%,
+      #10190f 60%,
+      #030704 100%
+    );
+}
+
+.team-finish-overlay.finish-victory {
+  --finish-color: #a5f51b;
+  --finish-glow: rgba(165, 245, 27, 0.5);
+}
+
+.team-finish-overlay.finish-defeat {
+  --finish-color: #ff3159;
+  --finish-glow: #ff315988;
+}
+
+.team-finish-message {
+  color: #e5eddc;
+}
+
+.team-finish-card {
+  border-color: rgba(165, 245, 27, 0.25);
+  background: linear-gradient(145deg, #243523, #101810);
+}
+
+/* ERROR SCREEN */
+
+.team-battle.error-screen {
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      rgba(255, 49, 89, 0.12),
+      transparent 55%
+    ),
+    #101810;
+}
+
+.team-battle .error-card {
+  border-color: rgba(165, 245, 27, 0.3);
+  background: linear-gradient(145deg, #263723, #111a12);
+}
+
+.team-battle .error-eyebrow {
+  color: var(--gold);
+}
+
+.team-battle .error-back-button {
+  background: var(--gold);
+  color: #211d0c;
+}
+
+/* FOCUS VISIBILITY */
+
+.team-battle button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }

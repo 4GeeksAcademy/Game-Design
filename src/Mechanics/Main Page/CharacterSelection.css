@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap");
 
 .character-select-screen *,
 .character-select-screen *::before,
@@ -1522,4 +1523,443 @@
 .secret-fighter-placeholder strong {
   font-size: 14px;
   font-weight: 900;
+}
+
+
+/* =========================================
+   WILD CARDS — CHARACTER SELECTION
+   Homepage green + gold visual identity
+========================================= */
+
+.character-select-screen {
+  --select-lime: #a5f51b;
+  --select-gold: #f6d84a;
+  --select-red: #ff3159;
+  --select-cyan: #13d5ff;
+
+  min-height: 100vh;
+  color: #fff9e9;
+  background:
+    radial-gradient(
+      ellipse at 50% 12%,
+      rgba(165, 245, 27, 0.13),
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 50% 85%,
+      rgba(246, 216, 74, 0.045),
+      transparent 50%
+    ),
+    linear-gradient(145deg, #17251a, #101811 48%, #080d1c);
+  font-family: "Rajdhani", sans-serif;
+}
+
+.character-select-screen h1,
+.character-select-screen h2,
+.character-select-screen h3,
+.character-select-screen button,
+.character-select-screen .select-match-info,
+.character-select-screen .select-eyebrow,
+.character-select-screen .roster-stat-heading,
+.character-select-screen .roster-tile strong {
+  font-family: "Oxanium", sans-serif;
+}
+
+/* HEADER AND TITLE */
+
+.select-back-button,
+.roster-nav-button {
+  border-color: rgba(165, 245, 27, 0.35);
+  background: #17231a;
+  color: #f4f0d9;
+  font-family: "Oxanium", sans-serif;
+}
+
+.select-back-button:hover,
+.roster-nav-button:hover:not(:disabled) {
+  border-color: var(--select-lime);
+  color: var(--select-lime);
+  box-shadow: 0 0 14px rgba(165, 245, 27, 0.15);
+}
+
+.select-match-info span {
+  border-color: rgba(246, 216, 74, 0.3);
+  background: rgba(246, 216, 74, 0.055);
+  color: var(--select-gold);
+  font-family: "Oxanium", sans-serif;
+}
+
+.select-eyebrow {
+  color: var(--select-lime);
+}
+
+.select-heading h1 {
+  color: #fff9e9;
+  text-shadow:
+    3px 3px 0 #26351c,
+    0 0 22px rgba(165, 245, 27, 0.18);
+}
+
+.select-heading > p:last-child {
+  color: #c1cbb8;
+  font-size: 15px;
+}
+
+/* PLAYER AND CPU PANELS */
+
+.roster-side {
+  border: 1px solid rgba(165, 245, 27, 0.2);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(35, 51, 31, 0.96),
+      rgba(12, 19, 17, 0.98)
+    );
+  box-shadow:
+    inset 0 0 25px rgba(165, 245, 27, 0.025),
+    0 12px 28px rgba(0, 0, 0, 0.2);
+}
+
+.player-side {
+  border-top: 3px solid var(--select-lime);
+}
+
+.cpu-side {
+  border-top: 3px solid var(--select-red);
+}
+
+.player-label {
+  color: #14200c;
+  background: var(--select-lime);
+  box-shadow: 0 0 16px rgba(165, 245, 27, 0.25);
+}
+
+.cpu-label {
+  color: white;
+  background: var(--select-red);
+  box-shadow: 0 0 16px rgba(255, 49, 89, 0.25);
+}
+
+.roster-side-heading h2 {
+  color: #fff7df;
+}
+
+.roster-side-heading p {
+  color: #b0bda8;
+}
+
+/* FIGHTER INFORMATION */
+
+.player-side .roster-fighter-info {
+  --fighter-accent: var(--select-lime);
+}
+
+.cpu-side .roster-fighter-info {
+  --fighter-accent: var(--select-red);
+}
+
+.roster-fighter-info.lee {
+  --fighter-accent: var(--select-lime);
+}
+
+.roster-fighter-description {
+  color: var(--fighter-accent);
+}
+
+.roster-fighter-info h2 {
+  color: #fff8e7;
+  font-family: "Oxanium", sans-serif;
+  text-shadow: 0 0 14px rgba(165, 245, 27, 0.08);
+}
+
+.roster-stat-list > div {
+  border-color: rgba(165, 245, 27, 0.15);
+  background: rgba(9, 17, 13, 0.75);
+}
+
+.roster-stat-list span {
+  color: #b3c0a9;
+}
+
+.roster-stat-list strong {
+  color: var(--fighter-accent);
+}
+
+.roster-stat-heading {
+  color: #e8e8d6;
+}
+
+.roster-stat-heading strong {
+  color: #fff7df;
+}
+
+.roster-stat-track {
+  border-color: #40513a;
+  background: #111b14;
+}
+
+.roster-moves p {
+  color: var(--select-gold);
+}
+
+.roster-moves span {
+  border-color: rgba(246, 216, 74, 0.2);
+  background: #19241a;
+  color: #f2edda;
+}
+
+/* CPU PLACEHOLDER */
+
+.cpu-placeholder {
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(255, 49, 89, 0.09),
+      transparent 70%
+    );
+}
+
+.cpu-placeholder > span {
+  color: var(--select-red);
+}
+
+.cpu-placeholder strong {
+  color: #ff8294;
+}
+
+.cpu-placeholder p {
+  color: #aeb8a7;
+}
+
+/* VERSUS DIVIDER */
+
+.versus-divider {
+  color: var(--select-gold);
+  text-shadow: 0 0 18px rgba(246, 216, 74, 0.3);
+}
+
+/* ROSTER GRID */
+
+.roster-title-row h2 {
+  color: var(--select-gold);
+}
+
+.roster-title-row > span {
+  color: #b2bea9;
+}
+
+/* Fighter tiles use lime as the default accent.
+   CPU selection remains red. */
+
+.roster-tile {
+  --tile-accent: var(--select-lime);
+
+  border-color: rgba(165, 245, 27, 0.2);
+  background:
+    radial-gradient(
+      ellipse at 50% 30%,
+      rgba(165, 245, 27, 0.12),
+      transparent 72%
+    ),
+    linear-gradient(145deg, #1b2b1d, #0d1511);
+  color: #fff8e6;
+}
+
+.roster-tile.mina,
+.roster-tile.lee {
+  --tile-accent: var(--select-lime);
+}
+
+.roster-tile-info {
+  background: linear-gradient(
+    135deg,
+    rgba(35, 51, 31, 0.98),
+    rgba(13, 21, 16, 0.98)
+  );
+}
+
+.roster-tile-info > strong {
+  color: #fff8e6;
+}
+
+.roster-tile-description {
+  color: #bdc9b4;
+}
+
+/* Player selection */
+
+.roster-tile.p1-selected {
+  border-color: var(--select-lime);
+  box-shadow:
+    0 0 10px rgba(165, 245, 27, 0.45),
+    0 0 24px rgba(165, 245, 27, 0.2);
+}
+
+.roster-tile.p1-selected .roster-tile-info {
+  background: linear-gradient(
+    135deg,
+    rgba(165, 245, 27, 0.16),
+    #17251a 75%
+  );
+}
+
+/* CPU selection */
+
+.roster-tile.cpu-selected {
+  border-color: var(--select-red);
+  box-shadow:
+    inset 0 0 22px rgba(255, 49, 89, 0.1),
+    0 0 14px rgba(255, 49, 89, 0.25);
+}
+
+.roster-tile.cpu-selected:not(.p1-selected) {
+  --tile-accent: var(--select-red);
+}
+
+/* Both players selecting the same fighter */
+
+.roster-tile.p1-selected.cpu-selected {
+  border-color: var(--select-gold);
+  box-shadow: 0 0 16px rgba(246, 216, 74, 0.25);
+}
+
+/* Selection cursors */
+
+.p1-cursor {
+  background: var(--select-lime);
+  color: #14200c;
+}
+
+.cpu-cursor {
+  background: var(--select-red);
+  color: white;
+}
+
+.p2-cursor {
+  background: var(--select-cyan);
+  color: #07111f;
+  border-color: var(--select-cyan);
+}
+
+/* Keyboard selection */
+
+.roster-tile.keyboard-highlighted {
+  outline-color: var(--select-gold);
+  box-shadow: 0 0 15px rgba(246, 216, 74, 0.35);
+}
+
+/* Navigation and footer */
+
+.roster-controls p {
+  color: #b5c0ac;
+}
+
+.select-footer {
+  border-top-color: rgba(165, 245, 27, 0.2);
+}
+
+.select-footer p {
+  color: #b9c4b0;
+}
+
+.select-footer strong {
+  color: var(--select-gold);
+}
+
+/* CONFIRM BUTTON */
+
+.confirm-fighter-button {
+  border: 1px solid #ffe77a;
+  background: linear-gradient(135deg, #f6d84a, #e8ad25);
+  color: #211d0c;
+  box-shadow:
+    4px 4px 0 #87651b,
+    0 0 16px rgba(246, 216, 74, 0.13);
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+}
+
+.confirm-fighter-button:hover:not(:disabled) {
+  border-color: #fff3a4;
+  background: linear-gradient(135deg, #ffe978, #f6c83c);
+  color: #171708;
+  box-shadow:
+    0 0 25px rgba(246, 216, 74, 0.35),
+    4px 4px 0 #87651b;
+  filter: brightness(1.06);
+}
+
+@keyframes confirm-button-ready {
+  0%, 100% {
+    box-shadow: 4px 4px 0 #87651b;
+  }
+  50% {
+    box-shadow:
+      0 0 17px rgba(246, 216, 74, 0.2),
+      4px 4px 0 #87651b;
+  }
+}
+
+/* LOCKED FIGHTERS */
+
+.fighter-lock-overlay {
+  background: rgba(5, 12, 7, 0.68);
+}
+
+.fighter-lock-icon {
+  border-color: rgba(246, 216, 74, 0.75);
+  background: rgba(13, 21, 16, 0.95);
+  color: var(--select-gold);
+  box-shadow: 0 0 14px rgba(246, 216, 74, 0.12);
+}
+
+.fighter-lock-overlay strong {
+  color: var(--select-gold);
+}
+
+.fighter-unavailable:hover {
+  border-color: var(--select-gold);
+}
+
+/* SECRET FIGHTER PLACEHOLDER */
+
+.secret-fighter-placeholder {
+  background: linear-gradient(145deg, #26351f, #0d1510);
+  border-color: rgba(246, 216, 74, 0.35);
+  color: var(--select-gold);
+}
+
+/* 2V2 PREVIEW PANELS */
+
+.roster-team-preview > .roster-fighter-info {
+  border-color: rgba(165, 245, 27, 0.2);
+  background: linear-gradient(145deg, #1c2b1d, #0c1510);
+}
+
+.roster-team-preview .roster-fighter-portrait {
+  border-color: rgba(165, 245, 27, 0.2);
+  background: radial-gradient(
+    ellipse,
+    #293b25,
+    #0b140e 75%
+  );
+}
+
+/* Keep focus accessible */
+
+.character-select-screen button:focus-visible {
+  outline-color: var(--select-gold);
+  outline-offset: 3px;
+}
+
+/* RESPONSIVE POLISH */
+
+@media (max-width: 520px) {
+  .select-heading h1 {
+    font-size: clamp(27px, 8vw, 38px);
+  }
+
+  .select-match-info span {
+    color: var(--select-gold);
+  }
 }
