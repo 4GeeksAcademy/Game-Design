@@ -18,13 +18,13 @@ image: GokuImage,
 
   mana: 130,
   maximumMana: 130,
-  manaRegen: 12,
+  manaRegen: 41,
 
   defense: {
-    amount: 12,
+    amount: 40,
   },
 
-  agility: 28,
+  agility: 40,
 
   cooldown: 4,
   maximumCooldown: 4,
@@ -43,30 +43,30 @@ image: GokuImage,
     {
       name: "Kamehameha",
       image: Attack1,
-      damage: 55,
+      damage: 61,
       speed: 30,
-      cost: 18,
+      cost: 14,
       state: true,
     },
     {
       name: "Kaio-ken Rush",
       damage: 65,
       speed: 34,
-      cost: 25,
+      cost: 17,
       state: true,
     },
     {
       name: "Meteor Combination",
       damage: 75,
       speed: 30,
-      cost: 28,
+      cost: 20,
       state: true,
     },
     {
       name: "Dragon Fist",
       damage: 82,
       speed: 27,
-      cost: 45,
+      cost: 25,
       state: true,
     },
     
@@ -77,11 +77,10 @@ image: GokuImage,
       damage: 110,
       speed: 20,
       cost: 130,
+      uses: 1,
       state: true,
-      debuff: {
-        Cooldown: 2,
-        maximumCooldown: 1,
-        manaRegen: 7,
+      buff: {
+        manaRegen: -12,
       }
     },
   ],

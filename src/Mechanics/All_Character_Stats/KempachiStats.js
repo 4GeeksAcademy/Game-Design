@@ -16,13 +16,13 @@ const Kenpachi = {
 
   mana: 250,
   maximumMana: 250,
-  manaRegen: 12,
+  manaRegen: 32,
 
   defense: {
     amount: 5,
   },
 
-  agility: 35,
+  agility: 41,
 
   cooldown: 2,
   maximumCooldown: 2,

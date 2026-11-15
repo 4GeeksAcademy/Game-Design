@@ -30,6 +30,7 @@ const Picolo = {
       id: "regeneration",
       name: "Namekian Regeneration",
       image: Attack1,
+      turnCooldown: 3,
       damage: 0,
       speed: 0,
       cost: 35,
@@ -52,6 +53,7 @@ const Picolo = {
         defense: 10,
         agility: 5,
         mana: 70,
+        manaRegen: 12,
       },
     },
 

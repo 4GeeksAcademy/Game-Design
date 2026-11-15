@@ -61,7 +61,7 @@ const TenTen = {
       cost: 12,
       state: true,
       debuff: {
-        health: 5,
+        health: 7,
         agility: 10,
       },
     },
@@ -124,6 +124,14 @@ const TenTen = {
         manaRegen: 7,
         cooldown: 1,
       },
+       stun: {
+        type: "random", // "selected" | "random" | "all"
+        amount: 3, // attacks affected
+        duration: 1, // how long it will last
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: false,
     },
   ],
 };

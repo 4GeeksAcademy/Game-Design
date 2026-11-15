@@ -46,6 +46,7 @@ const Ochaco = {
       speed: 45,
       cost: 7,
       state: true,
+      debuffRequiresHit: true,
       turnCooldown: 2,
       debuff: {
         health: 5,
@@ -70,12 +71,30 @@ const Ochaco = {
       },
     },
 
+    
+
+    {
+      name: "Zero Gravity: Floating Combo",
+      image: Attack5,
+      turnCooldown: 3,
+      damage: 20,
+      speed: 68,
+      cost: 18,
+      state: true,
+      debuffRequiresHit: true,
+      debuff: {
+        defense: 25,
+        agility: 25,
+        cooldown: 2,
+      },
+    },
+
     {
       name: "Meteor Fafrotskies",
       image: Attack4,
       damage: 55,
-      speed: 40,
-      cost: 15,
+      speed: 44,
+      cost: 40,
       uses: 2,
       state: true,
       debuff: {
@@ -83,21 +102,6 @@ const Ochaco = {
         defense: 10,
       },
     },
-
-    {
-      name: "Zero Gravity: Floating Combo",
-      image: Attack5,
-      damage: 20,
-      speed: 50,
-      cost: 18,
-      state: true,
-      debuff: {
-        agility: 15,
-        cooldown: 2,
-      },
-    },
-
-    
   ],
 };
 

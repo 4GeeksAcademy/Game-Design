@@ -24,6 +24,29 @@ const Usopp = {
   },
 
   attacks: [
+    
+    {
+    name: "Fake Hammer",
+    image: FakeHammerImage,
+    damage: 1,
+    speed: 45,
+    cost: 3,
+    state: true,
+    debuff: {
+      defense: 8,
+      agility: 3,
+      cooldown: 2,
+    },
+    // STUN CONFIGURATION
+      stun: {
+        type: "all", 
+        duration: 1, 
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: true,
+  },
+
   {
     name: "Green Star: Exploding Pinecone",
     image: ExplodingPineconeImage,
@@ -78,19 +101,7 @@ const Usopp = {
     },
   },
 
-  {
-    name: "Fake Hammer",
-    image: FakeHammerImage,
-    damage: 1,
-    speed: 30,
-    cost: 1,
-    state: true,
-    debuff: {
-      defense: 8,
-      agility: 3,
-      cooldown: 2,
-    },
-  },
+  
 ],
 };
 

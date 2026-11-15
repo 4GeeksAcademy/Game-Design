@@ -1,15 +1,11 @@
 import RockLeeArena from "../../assets/img/RockLeeArena.jpg";
 
-import Attack1 from "../../assets/img/Attack_IMAGES/Hidden Lotus Awakening.png"
-import Attack2 from "../../assets/img/Attack_IMAGES/Rapid Fists.jpeg"
-import Attack3 from "../../assets/img/Attack_IMAGES/Leaf Hurricane.jpeg"
+import Attack1 from "../../assets/img/Attack_IMAGES/Hidden Lotus Awakening.png";
+import Attack2 from "../../assets/img/Attack_IMAGES/Rapid Fists.jpeg";
+import Attack3 from "../../assets/img/Attack_IMAGES/Leaf Hurricane.jpeg";
 // import Attack4 from ""
-import Attack5 from "../../assets/img/Attack_IMAGES/Barrier Breaker Kick.jpeg"
-import Attack6 from "../../assets/img/Attack_IMAGES/Ultra Wind Wave.png"
-
-
-
-
+import Attack5 from "../../assets/img/Attack_IMAGES/Barrier Breaker Kick.jpeg";
+import Attack6 from "../../assets/img/Attack_IMAGES/Ultra Wind Wave.png";
 
 const rockLee = {
   name: "Rock Lee",
@@ -29,7 +25,6 @@ const rockLee = {
   },
 
   attacks: [
-
     {
       name: "Hidden Lotus Awakening",
       image: Attack1,
@@ -42,8 +37,8 @@ const rockLee = {
         agility: 5,
         mana: 50,
         defense: 10,
-        cooldown: 1,
-        maximumCooldown: 1,
+        cooldown: 2,
+        maximumCooldown: 2,
         recovery: 1,
       },
       state: true,
@@ -55,7 +50,7 @@ const rockLee = {
       damage: 15,
       speed: 45,
       cost: 5,
-    buffRequiresHit: true,
+      buffRequiresHit: true,
       buff: {
         agility: 5,
         mana: 15,
@@ -73,6 +68,12 @@ const rockLee = {
         agility: 3,
         mana: 3,
       },
+      stun: {
+        type: "random", // "selected" | "random" | "all"
+        amount: 1, // attacks affected
+        duration: 1, // how long it will last
+      },
+      stunRequiresHit: true,
       state: true,
     },
 
@@ -81,9 +82,9 @@ const rockLee = {
       // image: Attack4,
       damage: 30,
       speed: 70,
-      cost: 15,
+      cost: 17,
       buff: {
-        agility: 5,
+        agility: 9,
         mana: 10,
       },
       state: true,
@@ -95,6 +96,7 @@ const rockLee = {
       damage: 20,
       speed: 55,
       cost: 20,
+      debuffRequiresHit: true,
       buff: {
         agility: 2,
         mana: 5,
@@ -106,7 +108,6 @@ const rockLee = {
       state: true,
     },
 
-    
     {
       name: "Ultra Wind Wave",
       image: Attack6,
@@ -127,6 +128,15 @@ const rockLee = {
         maximumCooldown: 2,
         recovery: 1,
       },
+      stun: {
+        type: "random", // "selected" | "random" | "all"
+        amount: 4, // attacks affected
+        duration: 3, // how long it will last
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: true,
+
       state: true,
     },
   ],

@@ -59,7 +59,7 @@ const Toga = {
       buffRequiresHit: true,
       debuffRequiresHit: true,
       buff: {
-        health: 12,
+        health: 9,
         agility: 4,
       },
       debuff: {
@@ -71,13 +71,13 @@ const Toga = {
       // Official move name
       name: "Blood Sucker",
       image: Attack3,
-      damage: 40,
+      damage: 20,
       speed: 35,
       cost: 18,
       state: true,
       buffRequiresHit: true,
       buff: {
-        health: 30,
+        health: 20,
         mana: 35,
         manaRegen: 5,
       },
@@ -94,7 +94,7 @@ const Toga = {
       buffRequiresHit: true,
       debuffRequiresHit: true,
       buff: {
-        health: 15,
+        health: 14,
         agility: 5,
         cooldown: 1,
       },
@@ -117,7 +117,7 @@ const Toga = {
         agility: 3,
       },
       debuff: {
-        health: 10,
+        health: 18,
       }
     },
 
@@ -130,10 +130,15 @@ const Toga = {
       cost: 48,
       state: true,
       buffRequiresHit: true,
+      debuffRequiresHit: true,
       buff: {
-        health: 22,
+        health: 8,
         agility: 5,
       },
+      debuff: {
+        health: 16,
+        defense: 6,
+      }
     },
   ],
 };

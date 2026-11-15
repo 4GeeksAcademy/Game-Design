@@ -40,6 +40,15 @@ const Yoruichi = {
         mana: 10,
         manaRegen: 3,
       },
+      // STUN CONFIGURATION
+      stun: {
+        type: "random", // "selected" | "random" | "all"
+        amount: 1, // attacks affected
+        duration: 1, // how long it will last
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: true,
     },
 
     {
@@ -55,22 +64,6 @@ const Yoruichi = {
         mana: 4,
         manaRegen: 3,
         cooldown: 1,
-      },
-    },
-
-    {
-      name: "Shunko: Lightning Release",
-      image: Attack3,
-      damage: 12,
-      cost: 13,
-      speed: 80,
-      state: true,
-      buffRequiresHit: true,
-      buff: {
-        agility: 7,
-        defense: 3,
-        mana: 2,
-        manaRegen: 3,
       },
     },
 
@@ -123,8 +116,29 @@ const Yoruichi = {
       },
     },
 
+    {
+      name: "Shunko: Lightning Release",
+      image: Attack3,
+      damage: 12,
+      cost: 37,
+      speed: 80,
+      state: true,
+      buffRequiresHit: true,
+      buff: {
+        agility: 7,
+        defense: 3,
+        mana: 2,
+        manaRegen: 3,
+      },
+      // STUN CONFIGURATION
+      stun: {
+        type: "all", // "selected" | "random" | "all"
+        duration: 1, // how long it will last
+      },
 
-
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: true,
+    },
   ],
 };
 

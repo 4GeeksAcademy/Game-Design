@@ -89,12 +89,12 @@ const attacklist = {
       // STUN CONFIGURATION
       stun: {
         type: "selected", // "selected" | "random" | "all"
-        amount: 6, // attacks affected
-        duration: 5, // how long
+        amount: 2, // attacks affected
+        duration: 3, // how long it will last
       },
 
       // Only apply stun if the attack successfully hits.
-      stunRequiresHit: false,
+      stunRequiresHit: true,
     },
   ],
 };

@@ -23,10 +23,8 @@ const Naruto = {
     active: true,
   },
 
- attacks: [
-
-
-  {
+  attacks: [
+    {
       name: "Rasengan",
       image: Attack1,
       damage: 45,
@@ -35,7 +33,16 @@ const Naruto = {
       state: true,
       debuff: {
         defense: 15,
-      }
+      },
+      // STUN CONFIGURATION
+      stun: {
+        type: "random", // "selected" | "random" | "all"
+        amount: 2, // attacks affected
+        duration: 2, // how long it will last
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: true,
     },
 
     {
@@ -43,29 +50,36 @@ const Naruto = {
       image: Attack2,
       damage: 25,
       speed: 75,
-      cost: 20,
+      cost: 15,
       state: true,
       buff: {
         cooldown: 2,
         maximumCooldown: 3,
         recovery: 1,
-      }
+      },
     },
 
-    
     {
       name: "Wind Style: Rasenshuriken",
       image: Attack3,
       damage: 65,
       speed: 40,
       turnCooldown: 3,
-      cost: 40,
+      cost: 50,
       state: true,
       debuff: {
         health: 50,
         defense: 30,
         agility: 13,
       },
+      // STUN CONFIGURATION
+      stun: {
+        type: "all", // "selected" | "random" | "all"
+        duration: 3, // how long it will last
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: true,
     },
     {
       name: "Sage Mode",
@@ -90,9 +104,19 @@ const Naruto = {
       speed: 50,
       cost: 117,
       state: true,
+      debuff: {
+        health: 50,
+      },
+      // STUN CONFIGURATION
+      stun: {
+        type: "all", // "selected" | "random" | "all"
+        duration: 3, // how long it will last
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: true,
     },
   ],
 };
-
 
 export default Naruto;

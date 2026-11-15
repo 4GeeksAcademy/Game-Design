@@ -1,5 +1,3 @@
-
-
 import minaArenaImage from "../../assets/img/MinaAshidoArena.jpg";
 
 const mina = {
@@ -23,10 +21,10 @@ const mina = {
     {
       name: "Acid Shot",
       damage: 15,
-      speed: 40,
+      speed: 45,
       cost: 12,
       state: true,
-      
+
       buff: {
         mana: 20,
       },
@@ -54,9 +52,9 @@ const mina = {
     {
       name: "Acid Bomb",
       damage: 40,
-      speed: 10,
+      speed: 20,
       cost: 40,
-      
+
       buffRequiresHit: true,
       buff: {
         defense: 6,
@@ -75,9 +73,18 @@ const mina = {
       name: "Acid Corrosion",
       damage: 10,
       speed: 20,
-      cost: 20,
-      debuff: { health: 5, defense: 10, agility: 10, cooldown: 1, recovery: 1 },
+      cost: 25,
+      debuff: { health: 10, defense: 10, agility: 10, cooldown: 1, recovery: 1 },
       state: true,
+      // STUN CONFIGURATION
+      stun: {
+        type: "random", // "selected" | "random" | "all"
+        amount: 1, // attacks affected
+        duration: 2, // how long it will last
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: true,
     },
   ],
 };

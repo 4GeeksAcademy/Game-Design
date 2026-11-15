@@ -13,8 +13,8 @@ const Kirishima = {
   health: 125,
   maximumHealth: 125,
 
-  mana: 70,
-  maximumMana: 70,
+  mana: 110,
+  maximumMana: 110,
   manaRegen: 20,
 
   cooldown: 3,
@@ -40,7 +40,8 @@ const Kirishima = {
         defense: 40,
         maximumCooldown: 3,
         cooldown: 3,
-        recovery: 2,
+        recovery: 1,
+        manaRegen: 17,
       },
     },
 
@@ -112,7 +113,9 @@ const Kirishima = {
         defense: 50,
         agility: 5,
         maximumCooldown: 5,
-        cooldown: 5,  
+        cooldown: 5, 
+        recovery: 2, 
+        manaRegen: 21,
       },
     },
     {

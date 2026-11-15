@@ -20,7 +20,7 @@ const Chad = {
   cooldown: 3,
   maximumCooldown: 3,
   recovery: 1,
-  agility: 10,
+  agility: 9,
   defense: {
     amount: 65,
     active: true,
