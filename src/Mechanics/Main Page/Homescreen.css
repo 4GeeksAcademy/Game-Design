@@ -1835,3 +1835,613 @@
     transition: none;
   }
 }
+
+
+/* ==============================================
+   WILD CARDS — CONSOLE MENU LAYOUT SYSTEM
+   Main menu + all selection screens
+============================================== */
+
+.home-screen {
+  --wc-lime: #a5f51b;
+  --wc-gold: #f6d84a;
+  --wc-dark: #10141c;
+  --wc-panel: rgba(12, 18, 27, 0.92);
+  --wc-muted: #aab3c0;
+}
+
+/* Give the screens more horizontal room */
+
+.home-content {
+  width: 100%;
+  max-width: 1500px;
+  min-height: 0;
+  padding: 28px 0 36px;
+  align-items: stretch;
+  justify-content: center;
+  text-align: left;
+}
+
+/* Main menu: logo above, controls below */
+
+.home-hero--main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 1500px;
+  min-height: 65vh;
+  margin: auto;
+  padding: 25px 0;
+}
+
+.home-hero--main .home-hero-brand {
+  align-items: flex-start;
+  width: min(520px, 100%);
+  margin: 0 0 auto;
+  text-align: left;
+}
+
+.home-hero--main .wild-cards-logo {
+  width: min(460px, 75vw);
+  max-height: 190px;
+  object-position: left center;
+}
+
+.home-hero--main .home-eyebrow {
+  margin-left: 8px;
+}
+
+.home-hero--main .home-subtitle {
+  margin-left: 8px;
+  text-align: left;
+}
+
+.home-hero--main .hero-divider {
+  margin-left: 8px;
+}
+
+/* Menu buttons occupy the lower-left area */
+
+.main-menu-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: min(690px, 100%);
+  margin: 35px 0 0;
+}
+
+.main-menu-button {
+  min-height: 66px;
+  padding: 10px 14px;
+  background:
+    linear-gradient(
+      110deg,
+      rgba(29, 37, 42, 0.96),
+      rgba(11, 17, 26, 0.94)
+    );
+  border-color: rgba(246, 216, 74, 0.2);
+  border-left: 3px solid rgba(165, 245, 27, 0.65);
+}
+
+.main-menu-button--primary {
+  grid-column: span 2;
+  min-height: 75px;
+}
+
+.main-menu-button:not(.main-menu-button--primary) {
+  grid-template-columns: 25px 34px 1fr 15px;
+  gap: 8px;
+  min-height: 59px;
+}
+
+.main-menu-button:not(.main-menu-button--primary) .main-menu-icon {
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+}
+
+.main-menu-button:not(.main-menu-button--primary)
+.main-menu-label strong {
+  font-size: 11px;
+}
+
+.main-menu-button:not(.main-menu-button--primary)
+.main-menu-label small {
+  font-size: 7px;
+  letter-spacing: 1px;
+}
+
+/* More depth in the menu panels */
+
+.main-menu-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.025) 50%,
+    transparent 80%
+  );
+}
+
+.main-menu-button:hover {
+  transform: translateX(5px);
+}
+
+/* ==============================================
+   SHARED SUBMENU STAGE
+============================================== */
+
+.home-content:has(.home-menu-buttons),
+.home-content:has(.single-player-screen),
+.home-content:has(.choice-grid),
+.home-content:has(.difficulty-list),
+.home-content:has(.team-control-grid) {
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+}
+
+/* Play / game mode selection */
+
+.home-content:has(.home-menu-buttons) {
+  padding-left: clamp(5px, 5vw, 80px);
+}
+
+.home-content:has(.home-menu-buttons) > * {
+  max-width: 520px;
+}
+
+.home-menu-buttons {
+  max-width: 460px;
+  gap: 12px;
+}
+
+/* Single-player cards */
+
+.single-player-screen {
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1100px;
+  margin: auto 0;
+}
+
+.single-player-heading {
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.single-player-heading .home-eyebrow {
+  margin-bottom: 8px;
+}
+
+.single-player-screen .home-mode-grid {
+  max-width: 1050px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.single-player-screen .mode-card {
+  min-height: 230px;
+}
+
+/* Consistent screen headings */
+
+.menu-title {
+  margin-bottom: 10px;
+  color: #fff9e9;
+  font-size: clamp(32px, 5vw, 49px);
+  letter-spacing: -1.5px;
+  text-shadow:
+    3px 3px 0 rgba(0, 0, 0, 0.45),
+    0 0 20px rgba(246, 216, 74, 0.12);
+}
+
+.home-eyebrow {
+  color: var(--wc-gold);
+  font-size: 10px;
+  letter-spacing: 4px;
+}
+
+.menu-description {
+  max-width: 490px;
+  margin: 0 0 27px;
+  color: #d1d4d8;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* ==============================================
+   1V1 / 2V2 — MATCH FORMAT SELECTION
+============================================== */
+
+.home-content:has(.choice-grid) {
+  padding-left: clamp(5px, 5vw, 80px);
+}
+
+.home-content:has(.choice-grid) > .home-eyebrow,
+.home-content:has(.choice-grid) > .menu-title,
+.home-content:has(.choice-grid) > .menu-description {
+  width: min(100%, 570px);
+}
+
+.choice-grid {
+  width: min(100%, 570px);
+  max-width: 570px;
+  gap: 15px;
+}
+
+.choice-button {
+  position: relative;
+  min-height: 190px;
+  overflow: hidden;
+  gap: 14px;
+  border: 1px solid rgba(246, 216, 74, 0.28);
+  border-bottom: 4px solid rgba(165, 245, 27, 0.45);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(44, 55, 43, 0.94),
+      rgba(12, 19, 26, 0.97)
+    );
+  clip-path: polygon(
+    0 0,
+    calc(100% - 18px) 0,
+    100% 18px,
+    100% 100%,
+    18px 100%,
+    0 calc(100% - 18px)
+  );
+}
+
+.choice-button:nth-child(2) {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(64, 54, 39, 0.94),
+      rgba(12, 19, 26, 0.97)
+    );
+}
+
+.choice-button strong {
+  color: #fff4d0;
+  font-size: clamp(45px, 6vw, 65px);
+  text-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.choice-button > span {
+  color: #c9c9bd;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.choice-button:hover:not(:disabled) {
+  border-color: var(--wc-gold);
+  border-bottom-color: var(--wc-lime);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.choice-button.selected {
+  border-color: var(--wc-lime);
+  border-bottom-color: var(--wc-lime);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(79, 99, 42, 0.95),
+      rgba(14, 25, 24, 0.98)
+    );
+  box-shadow:
+    inset 0 0 30px rgba(165, 245, 27, 0.1),
+    0 0 20px rgba(165, 245, 27, 0.15);
+  animation: none;
+}
+
+.choice-button.selected strong {
+  color: #d7ff91;
+}
+
+.choice-button:disabled {
+  filter: grayscale(0.8);
+}
+
+/* Continue action */
+
+.continue-button {
+  width: min(100%, 570px);
+  max-width: 570px;
+  margin-top: 22px;
+}
+
+/* ==============================================
+   DIFFICULTY — THREE DISTINCT LEVELS
+============================================== */
+
+.home-content:has(.difficulty-list) {
+  padding-left: clamp(5px, 5vw, 80px);
+}
+
+.difficulty-list {
+  width: min(100%, 570px);
+  max-width: 570px;
+  gap: 12px;
+}
+
+.difficulty-button {
+  position: relative;
+  min-height: 75px;
+  padding: 18px 23px;
+  border: 1px solid rgba(246, 216, 74, 0.22);
+  border-left: 4px solid rgba(246, 216, 74, 0.35);
+  background:
+    linear-gradient(
+      100deg,
+      rgba(31, 39, 43, 0.97),
+      rgba(12, 18, 27, 0.97)
+    );
+  color: #e9e6d9;
+  font-size: 14px;
+  letter-spacing: 3px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 13px) 0,
+    100% 13px,
+    100% 100%,
+    0 100%
+  );
+}
+
+.difficulty-button:hover {
+  border-color: var(--wc-gold);
+  border-left-color: var(--wc-lime);
+  background: rgba(47, 57, 39, 0.97);
+}
+
+.difficulty-button.selected {
+  border-color: var(--wc-lime);
+  border-left-color: var(--wc-lime);
+  background:
+    linear-gradient(
+      100deg,
+      rgba(66, 86, 37, 0.97),
+      rgba(17, 29, 25, 0.98)
+    );
+  color: #eaffc9;
+  box-shadow: inset 0 0 20px rgba(165, 245, 27, 0.09);
+}
+
+.difficulty-check {
+  color: var(--wc-lime);
+}
+
+/* ==============================================
+   TEAM CONTROL — MATCHUP OPTIONS
+============================================== */
+
+.home-content:has(.team-control-grid) {
+  padding-left: clamp(5px, 5vw, 80px);
+}
+
+.team-control-grid {
+  width: min(100%, 760px);
+  max-width: 760px;
+  gap: 13px;
+  margin: 20px 0 25px;
+}
+
+.team-control-card {
+  min-height: 170px;
+  padding: 18px;
+  border: 1px solid rgba(246, 216, 74, 0.24);
+  border-bottom: 3px solid rgba(165, 245, 27, 0.35);
+  border-radius: 0;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(34, 43, 44, 0.97),
+      rgba(12, 18, 27, 0.98)
+    );
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+}
+
+.team-control-card:hover:not(:disabled) {
+  transform: translateY(-4px);
+  border-color: var(--wc-gold);
+  border-bottom-color: var(--wc-lime);
+}
+
+.team-control-card.selected {
+  border: 1px solid var(--wc-lime);
+  border-bottom: 3px solid var(--wc-lime);
+  box-shadow: 0 0 20px rgba(165, 245, 27, 0.15);
+}
+
+/* Keep player and CPU distinction,
+   but tone down the old neon colors */
+
+.matchup-rectangle.player {
+  border-color: #a5f51b;
+  background: rgba(165, 245, 27, 0.12);
+  color: #caff7c;
+}
+
+.matchup-rectangle.cpu {
+  border-color: #f6d84a;
+  background: rgba(246, 216, 74, 0.1);
+  color: #ffe98b;
+}
+
+/* ==============================================
+   SHARED BUTTONS
+============================================== */
+
+.arcade-button {
+  min-height: 58px;
+  border: 1px solid rgba(246, 216, 74, 0.3);
+  border-left: 4px solid var(--wc-lime);
+  border-radius: 0;
+  background:
+    linear-gradient(
+      100deg,
+      rgba(34, 43, 42, 0.98),
+      rgba(12, 18, 27, 0.98)
+    );
+  color: #f7f2df;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 13px) 0,
+    100% 13px,
+    100% 100%,
+    13px 100%,
+    0 calc(100% - 13px)
+  );
+  box-shadow: none;
+}
+
+.arcade-button > span {
+  color: var(--wc-lime);
+}
+
+.arcade-button:hover:not(:disabled) {
+  transform: translateX(5px);
+  border-color: var(--wc-lime);
+  background:
+    linear-gradient(
+      100deg,
+      rgba(65, 82, 39, 0.98),
+      rgba(17, 28, 27, 0.98)
+    );
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.primary-button,
+.primary-button:hover:not(:disabled) {
+  border-color: var(--wc-lime);
+  border-left-color: #d6ff8b;
+  background:
+    linear-gradient(
+      100deg,
+      #566b31,
+      #2b422c 75%,
+      #17251f
+    );
+  color: #f0ffd9;
+  box-shadow:
+    inset 0 0 20px rgba(165, 245, 27, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.primary-button > span {
+  color: #e5ffb5;
+}
+
+.back-button {
+  margin: 24px 0 0;
+  padding: 11px 17px;
+  border: 1px solid rgba(246, 216, 74, 0.28);
+  border-radius: 0;
+  background: rgba(12, 18, 27, 0.8);
+  color: #d9d2bd;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 9px) 0,
+    100% 9px,
+    100% 100%,
+    9px 100%,
+    0 calc(100% - 9px)
+  );
+}
+
+.back-button:hover {
+  border-color: var(--wc-gold);
+  color: var(--wc-gold);
+  text-shadow: none;
+}
+
+/* ==============================================
+   RESPONSIVE CONSOLE LAYOUT
+============================================== */
+
+@media (max-width: 900px) {
+  .home-content {
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+
+  .single-player-screen .home-mode-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-hero--main {
+    min-height: 60vh;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-content:has(.home-menu-buttons),
+  .home-content:has(.choice-grid),
+  .home-content:has(.difficulty-list),
+  .home-content:has(.team-control-grid) {
+    padding-left: 0;
+  }
+
+  .home-hero--main {
+    min-height: auto;
+    padding: 30px 0;
+  }
+
+  .home-hero--main .home-hero-brand {
+    margin-bottom: 28px;
+  }
+
+  .main-menu-nav {
+    grid-template-columns: 1fr;
+    width: 100%;
+    margin-top: 15px;
+  }
+
+  .main-menu-button--primary {
+    grid-column: span 1;
+  }
+
+  .choice-button {
+    min-height: 145px;
+  }
+
+  .choice-button strong {
+    font-size: 42px;
+  }
+
+  .team-control-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .single-player-screen .home-mode-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero--main .wild-cards-logo {
+    width: min(380px, 90vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choice-button,
+  .difficulty-button,
+  .team-control-card,
+  .arcade-button,
+  .main-menu-button {
+    animation: none;
+    transition: none;
+  }
+}
