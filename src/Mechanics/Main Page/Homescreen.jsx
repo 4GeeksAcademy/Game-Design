@@ -413,7 +413,7 @@ const renderHome = () => (
         className="main-menu-button main-menu-button--primary"
         onClick={() => openMenu("play")}
       >
-        <span className="main-menu-index">01</span>
+       
         <span className="main-menu-icon">⚔</span>
         <span className="main-menu-label">
           <strong>PLAY</strong>
@@ -426,7 +426,7 @@ const renderHome = () => (
         className="main-menu-button"
         onClick={() => navigate("/shop")}
       >
-        <span className="main-menu-index">02</span>
+        
         <span className="main-menu-icon">◈</span>
         <span className="main-menu-label">
           <strong>CHARACTER SHOP</strong>
@@ -439,7 +439,7 @@ const renderHome = () => (
         className="main-menu-button"
         onClick={() => navigate("/inventory")}
       >
-        <span className="main-menu-index">03</span>
+        
         <span className="main-menu-icon">▤</span>
         <span className="main-menu-label">
           <strong>INVENTORY</strong>
@@ -452,7 +452,7 @@ const renderHome = () => (
         className="main-menu-button"
         onClick={() => openMenu("howToPlay")}
       >
-        <span className="main-menu-index">04</span>
+      
         <span className="main-menu-icon">?</span>
         <span className="main-menu-label">
           <strong>HOW TO PLAY</strong>
@@ -465,7 +465,7 @@ const renderHome = () => (
         className="main-menu-button"
         onClick={() => openMenu("settings")}
       >
-        <span className="main-menu-index">05</span>
+       
         <span className="main-menu-icon">⚙</span>
         <span className="main-menu-label">
           <strong>SETTINGS</strong>
@@ -478,7 +478,7 @@ const renderHome = () => (
         className="main-menu-button"
         onClick={() => navigate("/achievements")}
       >
-        <span className="main-menu-index">06</span>
+       
         <span className="main-menu-icon">🏆</span>
         <span className="main-menu-label">
           <strong>ACHIEVEMENTS</strong>

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap");
 /* ================================
    HOMESCREEN - ARCADE FIGHTING GAME
 ================================ */
@@ -2444,4 +2445,265 @@
     animation: none;
     transition: none;
   }
+}
+
+
+/* ==========================================
+   MAIN MENU — FINAL NAVIGATION ARRANGEMENT
+========================================== */
+
+.main-menu-nav {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: min(100%, 430px);
+  margin: 30px 0 0;
+}
+
+.main-menu-button {
+  display: grid;
+  grid-template-columns: 42px 1fr 24px;
+  min-height: 63px;
+  width: 100%;
+}
+
+.main-menu-button--primary {
+  min-height: 76px;
+}
+
+.main-menu-index {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .main-menu-nav {
+    width: 100%;
+    margin-top: 20px;
+  }
+}
+
+/* ==========================================
+   WILD CARDS — MENU BUTTON TEXT ALIGNMENT FIX
+========================================== */
+
+/* Main menu button layout */
+.main-menu-button {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 24px;
+  align-items: center;
+  column-gap: 15px;
+
+  min-height: 76px;
+  padding: 13px 20px;
+  text-align: left;
+}
+
+/* Icon */
+.main-menu-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+/* Text container */
+.main-menu-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 7px;
+
+  min-width: 0;
+  width: 100%;
+  line-height: normal;
+}
+
+/* Main button title */
+.main-menu-label strong {
+  display: block;
+  width: 100%;
+  margin: 0;
+
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 1000;
+  letter-spacing: 1.4px;
+  white-space: normal;
+}
+
+/* Button description */
+.main-menu-label small {
+  display: block;
+  width: 100%;
+  margin: 0;
+
+  font-size: 9px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  color: #aab3c0;
+  white-space: normal;
+}
+
+/* Arrow */
+.main-menu-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+}
+
+/* Primary Play button */
+.main-menu-button--primary {
+  min-height: 84px;
+  padding: 15px 20px;
+}
+
+.main-menu-button--primary .main-menu-label {
+  gap: 8px;
+}
+
+.main-menu-button--primary .main-menu-label strong {
+  font-size: 17px;
+  letter-spacing: 2px;
+}
+
+.main-menu-button--primary .main-menu-label small {
+  font-size: 9px;
+}
+
+/* Other menu buttons */
+.main-menu-button:not(.main-menu-button--primary) {
+  min-height: 72px;
+  grid-template-columns: 44px minmax(0, 1fr) 24px;
+  gap: 15px;
+}
+
+.main-menu-button:not(.main-menu-button--primary)
+.main-menu-label strong {
+  font-size: 13px;
+}
+
+.main-menu-button:not(.main-menu-button--primary)
+.main-menu-label small {
+  font-size: 9px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .main-menu-button {
+    grid-template-columns: 36px minmax(0, 1fr) 20px;
+    min-height: 68px;
+    padding: 11px 13px;
+    column-gap: 11px;
+  }
+
+  .main-menu-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+
+  .main-menu-label {
+    gap: 5px;
+  }
+
+  .main-menu-label strong {
+    font-size: 12px;
+  }
+
+  .main-menu-label small {
+    font-size: 8px;
+    line-height: 1.4;
+    letter-spacing: 0.7px;
+  }
+
+  .main-menu-button--primary {
+    min-height: 75px;
+  }
+}
+
+/* ==========================================
+   WILD CARDS — GAMER / ANIME TYPOGRAPHY
+========================================== */
+
+/* Main interface font */
+.home-screen {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 600;
+}
+
+/* Main menu and screen headings */
+.home-screen .menu-title,
+.home-screen .home-eyebrow,
+.home-screen .single-player-heading,
+.home-screen .team-control-title,
+.home-screen .starter-modal h2 {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+}
+
+/* Menu button labels */
+.home-screen .main-menu-label strong,
+.home-screen .arcade-button,
+.home-screen .difficulty-button,
+.home-screen .back-button,
+.home-screen .continue-button {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+}
+
+/* Main PLAY button */
+.home-screen .main-menu-button--primary .main-menu-label strong {
+  font-weight: 800;
+  letter-spacing: 2.5px;
+}
+
+/* Supporting menu descriptions */
+.home-screen .menu-description,
+.home-screen .home-subtitle,
+.home-screen .main-menu-label small,
+.home-screen .team-control-description,
+.home-screen .home-footer,
+.home-screen .starter-modal-note {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Small interface labels */
+.home-screen .main-menu-index,
+.home-screen .home-utility-nav button,
+.home-screen .header-tag,
+.home-screen .currency-label,
+.home-screen .choice-button > span,
+.home-screen .difficulty-button {
+  letter-spacing: 1.5px;
+}
+
+/* Match format numbers */
+.home-screen .choice-button strong {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+}
+
+/* Team selection headings */
+.home-screen .team-control-matchup > b {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+}
+
+/* Starter character selection */
+.home-screen .starter-choice-name,
+.home-screen .starter-choice-status,
+.home-screen .starter-selected-check {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+}
+
+/* Currency display */
+.home-screen .currency-display {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
 }

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap");
 /* =========================================
    FESTIVAL PAGE
 ========================================= */
@@ -1028,4 +1029,878 @@
   color: #ff526c;
   background: rgba(255, 82, 108, 0.12);
   border: 1px solid #ff526c;
+}
+
+
+/* =====================================================
+   WILD CARDS — COMBAT FESTIVAL
+   PREMIUM TOURNAMENT THEME
+===================================================== */
+
+.festival-screen {
+  --fest-lime: #a5f51b;
+  --fest-gold: #f6d84a;
+  --fest-dark: #10141c;
+  --fest-panel: #171e29;
+  --fest-muted: #aab3c0;
+
+  padding: 26px clamp(18px, 4vw, 65px) 55px;
+  background: #10141c;
+  color: #f5f3e9;
+  isolation: isolate;
+}
+
+/* Atmospheric tournament background */
+
+.festival-background {
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(246, 216, 74, 0.15),
+      transparent 43%
+    ),
+    radial-gradient(
+      ellipse at 90% 35%,
+      rgba(165, 245, 27, 0.07),
+      transparent 35%
+    ),
+    linear-gradient(
+      180deg,
+      #20252a 0%,
+      #131a22 42%,
+      #10141c 100%
+    );
+}
+
+.festival-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  pointer-events: none;
+  background-image:
+    linear-gradient(
+      rgba(246, 216, 74, 0.12) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(246, 216, 74, 0.12) 1px,
+      transparent 1px
+    );
+  background-size: 55px 55px;
+  mask-image: linear-gradient(
+    to bottom,
+    black,
+    transparent 85%
+  );
+}
+
+/* HEADER */
+
+.festival-header {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(246, 216, 74, 0.22);
+}
+
+.festival-logo span {
+  color: var(--fest-lime);
+  font-style: italic;
+  text-shadow: 0 0 15px rgba(165, 245, 27, 0.25);
+}
+
+.festival-logo h1 {
+  color: #f5f3e9;
+  font-size: 16px;
+  font-weight: 1000;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.festival-back-button {
+  padding: 11px 19px;
+  border: 1px solid rgba(246, 216, 74, 0.35);
+  background: rgba(15, 21, 29, 0.85);
+  color: #e9e4d1;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 11px) 0,
+    100% 11px,
+    100% 100%,
+    11px 100%,
+    0 calc(100% - 11px)
+  );
+}
+
+.festival-back-button:hover {
+  border-color: var(--fest-lime);
+  background: rgba(165, 245, 27, 0.08);
+  color: var(--fest-lime);
+}
+
+/* FESTIVAL HERO */
+
+.festival-intro {
+  max-width: 1000px;
+  margin: 65px auto 50px;
+  padding: 38px 20px;
+  text-align: center;
+  border-top: 1px solid rgba(246, 216, 74, 0.25);
+  border-bottom: 1px solid rgba(246, 216, 74, 0.25);
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(246, 216, 74, 0.045),
+      transparent
+    );
+}
+
+.festival-eyebrow {
+  color: var(--fest-lime);
+  font-size: 10px;
+  font-weight: 1000;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.festival-intro h2 {
+  margin: 12px 0;
+  color: #fff8df;
+  font-size: clamp(38px, 6vw, 72px);
+  font-style: italic;
+  font-weight: 1000;
+  letter-spacing: 2px;
+  text-shadow:
+    3px 4px 0 rgba(0, 0, 0, 0.6),
+    0 0 25px rgba(246, 216, 74, 0.14);
+}
+
+.festival-description {
+  max-width: 560px;
+  margin: 12px auto 0;
+  color: #c0c5c8;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.festival-status {
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.festival-status span {
+  padding: 9px 14px;
+  border: 1px solid rgba(246, 216, 74, 0.25);
+  background: rgba(14, 20, 27, 0.8);
+  color: var(--fest-gold);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+}
+
+/* OVERALL PROGRESS */
+
+.festival-progress-section {
+  max-width: 1050px;
+  margin: 0 auto 65px;
+  padding: 23px 26px;
+  border: 1px solid rgba(246, 216, 74, 0.22);
+  border-left: 4px solid var(--fest-lime);
+  background: linear-gradient(
+    110deg,
+    rgba(34, 43, 42, 0.96),
+    rgba(13, 19, 28, 0.97)
+  );
+  clip-path: polygon(
+    0 0,
+    calc(100% - 15px) 0,
+    100% 15px,
+    100% 100%,
+    0 100%
+  );
+}
+
+.festival-section-label {
+  color: #b7c0bd;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.festival-progress-info strong {
+  color: var(--fest-lime);
+  font-size: 24px;
+  font-weight: 1000;
+}
+
+.festival-progress-percent {
+  color: var(--fest-gold);
+  font-size: 22px;
+  font-weight: 1000;
+}
+
+.festival-progress-track {
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 0;
+  background: #30363b;
+}
+
+.festival-progress-fill {
+  border-radius: 0;
+  background: linear-gradient(
+    90deg,
+    #718f28,
+    var(--fest-lime),
+    #e5ff9c
+  );
+  box-shadow: 0 0 15px rgba(165, 245, 27, 0.3);
+}
+
+/* SECTION HEADINGS */
+
+.festival-section-heading {
+  margin-bottom: 22px;
+}
+
+.festival-section-heading h3 {
+  color: #f5f3e9;
+  font-size: clamp(20px, 2.5vw, 28px);
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+.festival-tier-count,
+.festival-refresh-label,
+.festival-daily-label {
+  color: var(--fest-lime);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+/* REWARD TRACK */
+
+.festival-track-container {
+  padding: 0 0 12px;
+  border: 1px solid rgba(246, 216, 74, 0.2);
+  border-radius: 0;
+  background: rgba(8, 13, 20, 0.94);
+  scrollbar-color: var(--fest-lime) #202833;
+}
+
+.festival-track {
+  padding: 18px;
+}
+
+.festival-tier-header {
+  min-height: 76px;
+  border: 1px solid #38413e;
+  border-radius: 0;
+  background: linear-gradient(
+    180deg,
+    #29312f,
+    #151d22
+  );
+}
+
+.festival-tier-number {
+  color: #e8e6d9;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+}
+
+.festival-tier-header strong {
+  color: #aeb8ae;
+  font-size: 10px;
+}
+
+.festival-tier-header.tier-unlocked {
+  border-color: var(--fest-lime);
+  background: linear-gradient(
+    180deg,
+    rgba(165, 245, 27, 0.2),
+    #17221d
+  );
+  box-shadow: inset 0 0 15px rgba(165, 245, 27, 0.08);
+}
+
+.festival-tier-header.tier-unlocked .festival-tier-number,
+.festival-tier-header.tier-unlocked strong {
+  color: var(--fest-lime);
+}
+
+/* FREE AND ELITE REWARD CARDS */
+
+.festival-reward-slot {
+  min-height: 195px;
+  gap: 10px;
+  padding: 13px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  background: linear-gradient(
+    145deg,
+    #222b30,
+    #111920
+  );
+}
+
+.festival-reward-slot:hover {
+  border-color: var(--fest-lime);
+  box-shadow: 0 7px 18px rgba(165, 245, 27, 0.1);
+}
+
+.reward-name {
+  color: #e4e3d9;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.reward-status {
+  color: var(--fest-lime);
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.reward-icon {
+  color: var(--fest-gold);
+}
+
+.free-reward-row .character-reward-slot {
+  border-color: rgba(165, 245, 27, 0.55);
+  border-radius: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(165, 245, 27, 0.12),
+    #131c1c
+  );
+}
+
+.elite-reward-row .character-reward-slot {
+  border-color: rgba(246, 216, 74, 0.7);
+  border-radius: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(246, 216, 74, 0.13),
+    #1c1b19
+  );
+  box-shadow: inset 0 0 16px rgba(246, 216, 74, 0.05);
+}
+
+.elite-reward-row .character-reward-slot:hover {
+  border-color: var(--fest-gold);
+  box-shadow: 0 7px 20px rgba(246, 216, 74, 0.15);
+}
+
+.elite-reward-row .reward-character-image {
+  filter: drop-shadow(0 0 8px rgba(246, 216, 74, 0.4));
+}
+
+/* TRACK LABELS */
+
+.festival-reward-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid rgba(246, 216, 74, 0.2);
+  background: #1a2228;
+}
+
+.festival-reward-label strong {
+  color: #e8e5d8;
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.free-reward-row .festival-reward-label {
+  border-left: 3px solid var(--fest-lime);
+}
+
+.elite-reward-row .festival-reward-label {
+  border-left: 3px solid var(--fest-gold);
+}
+
+.festival-track-divider {
+  padding: 14px;
+  border-top: 1px solid rgba(246, 216, 74, 0.2);
+  border-bottom: 1px solid rgba(246, 216, 74, 0.2);
+  background: rgba(246, 216, 74, 0.045);
+  color: var(--fest-gold);
+  font-size: 10px;
+  font-weight: 1000;
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+.festival-track-hint {
+  color: #aab3c0;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+/* CLAIM BUTTONS */
+
+.festival-claim-button {
+  border: 1px solid rgba(165, 245, 27, 0.55);
+  border-radius: 0;
+  background: rgba(165, 245, 27, 0.08);
+  color: var(--fest-lime);
+  font-size: 8px;
+  font-weight: 1000;
+  letter-spacing: 0.7px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 7px) 0,
+    100% 7px,
+    100% 100%,
+    7px 100%,
+    0 calc(100% - 7px)
+  );
+}
+
+.festival-claim-button:not(:disabled):hover {
+  border-color: var(--fest-lime);
+  background: var(--fest-lime);
+  color: #11180d;
+  box-shadow: 0 0 16px rgba(165, 245, 27, 0.25);
+}
+
+.elite-reward-row .festival-claim-button {
+  border-color: rgba(246, 216, 74, 0.65);
+  background: rgba(246, 216, 74, 0.08);
+  color: var(--fest-gold);
+}
+
+.elite-reward-row .festival-claim-button:not(:disabled):hover {
+  background: var(--fest-gold);
+  color: #17140a;
+  box-shadow: 0 0 16px rgba(246, 216, 74, 0.25);
+}
+
+/* ELITE PASS */
+
+.festival-elite-banner {
+  position: relative;
+  margin-top: 30px;
+  padding: 25px;
+  border: 1px solid rgba(246, 216, 74, 0.55);
+  border-left: 5px solid var(--fest-gold);
+  border-radius: 0;
+  background:
+    radial-gradient(
+      ellipse at 15% 50%,
+      rgba(246, 216, 74, 0.12),
+      transparent 55%
+    ),
+    linear-gradient(
+      110deg,
+      #292820,
+      #171b20
+    );
+  clip-path: polygon(
+    0 0,
+    calc(100% - 17px) 0,
+    100% 17px,
+    100% 100%,
+    17px 100%,
+    0 calc(100% - 17px)
+  );
+}
+
+.elite-crown {
+  color: var(--fest-gold);
+  font-size: 42px;
+  filter: drop-shadow(0 0 10px rgba(246, 216, 74, 0.3));
+}
+
+.festival-elite-banner h4 {
+  color: var(--fest-gold);
+  font-size: 17px;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+.festival-elite-banner p {
+  color: #c5c2b5;
+  line-height: 1.6;
+}
+
+.festival-coin-balance {
+  color: var(--fest-lime);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.festival-elite-button {
+  padding: 13px 22px;
+  border: 1px solid var(--fest-gold);
+  border-radius: 0;
+  background: linear-gradient(
+    110deg,
+    #76602a,
+    #3c3420
+  );
+  color: #fff1b4;
+  font-size: 10px;
+  font-weight: 1000;
+  letter-spacing: 1.3px;
+  cursor: pointer;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 11px) 0,
+    100% 11px,
+    100% 100%,
+    11px 100%,
+    0 calc(100% - 11px)
+  );
+}
+
+.festival-elite-button:not(:disabled):hover {
+  background: var(--fest-gold);
+  color: #17140a;
+  box-shadow: 0 0 22px rgba(246, 216, 74, 0.25);
+}
+
+.festival-elite-button:disabled {
+  border-color: var(--fest-lime);
+  background: rgba(165, 245, 27, 0.1);
+  color: var(--fest-lime);
+  opacity: 1;
+  cursor: default;
+}
+
+/* CHALLENGES AND DAILY OBJECTIVES */
+
+.festival-challenges-section,
+.festival-daily-section {
+  margin-bottom: 65px;
+}
+
+.festival-challenge-card {
+  position: relative;
+  min-height: 215px;
+  padding: 20px;
+  border: 1px solid rgba(246, 216, 74, 0.18);
+  border-left: 3px solid rgba(165, 245, 27, 0.6);
+  border-radius: 0;
+  background: linear-gradient(
+    145deg,
+    rgba(32, 42, 43, 0.96),
+    rgba(13, 19, 28, 0.98)
+  );
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.festival-challenge-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--fest-lime);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.challenge-icon {
+  font-size: 26px;
+}
+
+.challenge-category {
+  color: var(--fest-gold);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+.festival-challenge-card h4 {
+  color: #f6f2df;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+.festival-challenge-card p {
+  color: #aeb8bb;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.challenge-points {
+  color: var(--fest-lime);
+  font-size: 13px;
+  font-weight: 1000;
+}
+
+.challenge-progress {
+  color: #b7b9ad;
+  font-size: 10px;
+}
+
+.challenge-progress-track {
+  height: 5px;
+  border-radius: 0;
+  background: #343b3c;
+}
+
+.challenge-progress-fill {
+  border-radius: 0;
+  background: linear-gradient(
+    90deg,
+    #708f29,
+    var(--fest-lime)
+  );
+  box-shadow: 0 0 9px rgba(165, 245, 27, 0.25);
+}
+
+.challenge-completed {
+  border-color: var(--fest-lime);
+  box-shadow: inset 0 0 18px rgba(165, 245, 27, 0.06);
+}
+
+.challenge-complete-label {
+  color: var(--fest-lime);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+/* DAILY OBJECTIVES */
+
+.festival-daily-grid .festival-challenge-card {
+  min-height: 205px;
+}
+
+/* REWARD POPUP */
+
+.festival-reward-popup {
+  border: 2px solid var(--fest-lime);
+  border-radius: 0;
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(165, 245, 27, 0.14),
+      transparent 60%
+    ),
+    linear-gradient(145deg, #252d2c, #10161e);
+  box-shadow: 0 0 35px rgba(165, 245, 27, 0.18);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 18px) 0,
+    100% 18px,
+    100% 100%,
+    18px 100%,
+    0 calc(100% - 18px)
+  );
+}
+
+.reward-popup-eyebrow {
+  color: var(--fest-lime);
+}
+
+.festival-reward-popup h2 {
+  color: #fff8df;
+  text-shadow: 0 0 15px rgba(165, 245, 27, 0.25);
+}
+
+.reward-popup-description {
+  color: #c5c9bd;
+}
+
+.reward-popup-line {
+  background: var(--fest-lime);
+  box-shadow: 0 0 15px rgba(165, 245, 27, 0.5);
+}
+
+.character-reward-popup {
+  border-color: var(--fest-gold);
+  box-shadow: 0 0 35px rgba(246, 216, 74, 0.2);
+}
+
+.character-reward-popup .reward-popup-eyebrow,
+.character-reward-popup h2 {
+  color: var(--fest-gold);
+}
+
+.character-reward-popup .reward-popup-line {
+  background: var(--fest-gold);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .festival-intro {
+    margin-top: 45px;
+  }
+
+  .festival-progress-section {
+    padding: 19px;
+  }
+}
+
+@media (max-width: 600px) {
+  .festival-screen {
+    padding: 18px 14px 40px;
+  }
+
+  .festival-intro {
+    margin: 35px auto;
+    padding: 28px 12px;
+  }
+
+  .festival-intro h2 {
+    font-size: clamp(32px, 10vw, 45px);
+    line-height: 1.05;
+  }
+
+  .festival-status {
+    gap: 7px;
+  }
+
+  .festival-status span {
+    font-size: 8px;
+  }
+
+  .festival-progress-info strong {
+    font-size: 18px;
+  }
+
+  .festival-elite-banner {
+    padding: 19px;
+  }
+
+  .festival-elite-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .festival-screen *,
+  .festival-screen *::before,
+  .festival-screen *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ==========================================
+   WILD CARDS FESTIVAL — GAMER TYPOGRAPHY
+========================================== */
+
+/* Main Festival typography */
+.festival-screen {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 600;
+}
+
+/* Strong display typography */
+.festival-logo h1,
+.festival-intro h2,
+.festival-section-heading h3,
+.festival-elite-banner h4,
+.festival-reward-popup h2 {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+/* Logo */
+.festival-logo h1 {
+  font-size: 21px;
+  letter-spacing: 2.5px;
+}
+
+/* Main title */
+.festival-intro h2 {
+  font-size: clamp(38px, 5vw, 64px);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+/* Small category labels */
+.festival-eyebrow,
+.festival-section-label,
+.festival-tier-count,
+.festival-refresh-label,
+.festival-daily-label,
+.challenge-category,
+.reward-popup-eyebrow {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+/* Descriptions and supporting information */
+.festival-description,
+.festival-elite-banner p,
+.festival-challenge-card p,
+.festival-daily-card p,
+.reward-popup-description {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.5;
+}
+
+/* Challenge titles */
+.festival-challenge-card h4,
+.festival-daily-card h4 {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Reward track */
+.festival-reward-label,
+.festival-tier-number,
+.festival-tier-header strong,
+.reward-name,
+.reward-status {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+}
+
+/* Progress and reward values */
+.festival-progress-info strong,
+.festival-progress-percent,
+.challenge-points,
+.festival-daily-card strong,
+.festival-coin-balance {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+}
+
+/* Buttons */
+.festival-back-button,
+.festival-elite-button,
+.festival-claim-button,
+.festival-test-button {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Reward popup */
+.festival-reward-popup,
+.festival-reward-popup button {
+  font-family: "Rajdhani", sans-serif;
+}
+
+.festival-reward-popup h2 {
+  letter-spacing: 1.5px;
+}
+
+/* Responsive title sizing */
+@media (max-width: 600px) {
+  .festival-intro h2 {
+    font-size: 36px;
+    letter-spacing: 2px;
+  }
+
+  .festival-logo h1 {
+    font-size: 18px;
+  }
 }
