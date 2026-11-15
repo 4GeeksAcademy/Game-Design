@@ -5138,3 +5138,59 @@ body {
 #gameContainer button:focus-visible {
   outline-color: #f6d84a;
 }
+
+
+/* BUTTON POLISH — SOFTER 1V1 PALETTE */
+
+#finishTurnButton {
+  background: radial-gradient(
+    circle at 35% 25%,
+    #e9d77d,
+    #cbb34e 70%,
+    #927b32
+  );
+  border-color: #e5d58b;
+  outline-color: #88733a;
+  box-shadow:
+    0 0 9px rgba(203, 179, 78, 0.25),
+    0 0 18px rgba(203, 179, 78, 0.1),
+    inset 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+#finishTurnButton:hover:not(:disabled) {
+  background: radial-gradient(
+    circle at 35% 25%,
+    #f5e59a,
+    #ddc35d 70%,
+    #a58a3d
+  );
+  box-shadow:
+    0 0 13px rgba(230, 205, 105, 0.45),
+    0 0 24px rgba(230, 205, 105, 0.18);
+}
+
+#defendButton {
+  background: linear-gradient(135deg, #89651f, #b58b3c);
+  border-color: #c5a45c;
+}
+
+#evadeButton {
+  background: linear-gradient(135deg, #205b40, #347a55);
+  border-color: #559875;
+}
+
+#defendButton:hover:not(:disabled),
+#evadeButton:hover:not(:disabled) {
+  filter: brightness(1.13);
+}
+
+#takeDamageButton {
+  background: linear-gradient(135deg, #702b34, #963d43);
+  border-color: #b65c62;
+  box-shadow: 0 4px 12px rgba(150, 61, 67, 0.18);
+}
+
+[id^="attackButton"]:hover:not(:disabled) {
+  border-color: #a5c76c !important;
+  box-shadow: 0 0 12px rgba(165, 199, 108, 0.12);
+}

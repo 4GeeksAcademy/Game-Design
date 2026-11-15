@@ -3356,3 +3356,57 @@ battlefield > .local-coop-incoming {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
 }
+
+
+/* BUTTON POLISH — SOFTER TEAM BATTLE PALETTE */
+
+.team-battle .defend-button {
+  background: linear-gradient(135deg, #89651f, #b58b3c);
+  border-color: #c5a45c;
+  color: #fff7e5 !important;
+}
+
+.team-battle .evade-button {
+  background: linear-gradient(135deg, #205b40, #347a55);
+  border-color: #559875;
+  color: #f2fff5 !important;
+}
+
+.team-battle .take-damage-button {
+  background: linear-gradient(135deg, #702b34, #963d43);
+  border-color: #b65c62;
+  color: #fff4f4;
+}
+
+.team-battle .defend-button:hover:not(:disabled),
+.team-battle .evade-button:hover:not(:disabled),
+.team-battle .take-damage-button:hover:not(:disabled) {
+  filter: brightness(1.13);
+}
+
+.team-battle .confirm-target-button {
+  background: linear-gradient(135deg, #d8c36c, #bca44b);
+  border-color: #e3d38d;
+  color: #211e12;
+}
+
+.team-battle .confirm-target-button:hover {
+  background: linear-gradient(135deg, #ead98b, #d0b85d);
+  box-shadow: 0 0 12px rgba(218, 194, 108, 0.2);
+}
+
+.team-battle .target-choice-button.is-selected {
+  border-color: #a5c76c;
+  background: #293d29;
+  box-shadow: 0 0 10px rgba(165, 199, 108, 0.12);
+}
+
+.team-battle .team-attack-card:not(:disabled):hover {
+  border-color: #a5c76c;
+  box-shadow: 0 0 12px rgba(165, 199, 108, 0.12);
+}
+
+.team-battle .error-back-button {
+  background: #c5ad59;
+  color: #211e12;
+}
