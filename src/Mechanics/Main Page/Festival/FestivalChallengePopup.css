@@ -1,15 +1,4 @@
 
-.festival-completion-container {
-  position: fixed;
-  top: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100000;
-  width: min(420px, calc(100vw - 30px));
-  pointer-events: none;
-  animation: festival-popup-enter 0.4s ease-out;
-}
-
 .festival-completion-popup {
   display: flex;
   align-items: center;
@@ -79,6 +68,14 @@
 }
 
 .festival-completion-container {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100000;
+  width: min(420px, calc(100vw - 30px));
+  pointer-events: none;
+  animation: festival-popup-enter 0.4s ease-out;
   transition:
     opacity 0.5s ease,
     transform 0.5s ease;

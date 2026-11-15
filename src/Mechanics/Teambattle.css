@@ -1,25 +1,4 @@
 /* Teambattle.css */
-.team-battle {
-  --cyan: #20d9ff;
-  --red: #ff3f61;
-  --panel: rgba(8, 16, 31, 0.96);
-  --muted: #9baec5;
-
-  width: 100%;
-  height: 100vh;
-  min-height: 600px;
-  overflow: auto;
-  padding: 14px 22px 18px;
-  display: grid;
-  grid-template-rows: 46px minmax(0, 1fr) 190px;
-  gap: 12px;
-  color: #f5f8ff;
-  font-family: Arial, Helvetica, sans-serif;
-  background:
-    radial-gradient(ellipse at 50% 45%, rgba(33, 72, 105, 0.34), transparent 54%),
-    linear-gradient(135deg, #080d18, #111827 52%, #080d18);
-  box-sizing: border-box;
-}
 
 .team-battle *,
 .team-battle *::before,
@@ -35,13 +14,6 @@
 .team-battle button:focus-visible {
   outline: 2px solid white;
   outline-offset: 2px;
-}
-
-.battle-header {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 16px;
 }
 
 .battle-header h1 {
@@ -68,24 +40,6 @@
 
 .cpu-label { color: #ff7187; }
 .player-label { color: #50e6ff; text-align: right; }
-
-.battlefield {
-  position: relative;
-  isolation: isolate;
-  min-height: 0;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(90px, 0.18fr) minmax(0, 1fr);
-  align-items: stretch;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid #ffffff20;
-  border-radius: 15px;
-  background:
-    linear-gradient(90deg, #080e1bd9, #111b2a55 50%, #080e1bd9),
-    radial-gradient(ellipse at center, #293a4d, #101725 72%);
-  box-shadow: inset 0 0 40px #20d9ff0a, 0 10px 35px #0005;
-}
 
 .battlefield::before {
   content: "";
@@ -135,31 +89,6 @@
   box-shadow: 0 0 12px currentColor;
 }
 
-.fighter-grid {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: center;
-  gap: 12px;
-}
-
-.fighter-card {
-  min-width: 0;
-  height: min(100%, 340px);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  padding: 11px;
-  border: 1px solid #ff3f6170;
-  border-radius: 12px;
-  background: linear-gradient(155deg, #172033f5, #090f1cf5);
-  text-align: left;
-  box-shadow: 0 8px 24px #0005;
-  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
-}
-
 .player-team .fighter-card { border-color: #20d9ff70; }
 button.fighter-card { width: 100%; cursor: pointer; }
 .fighter-card:hover:not(:disabled) { transform: translateY(-2px); }
@@ -198,16 +127,6 @@ button.fighter-card { width: 100%; cursor: pointer; }
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 1px;
-}
-
-.fighter-portrait {
-  width: 100%;
-  height: clamp(75px, 16vh, 175px);
-  min-height: 0;
-  object-fit: contain;
-  object-position: center;
-  border-radius: 7px;
-  background: #0003;
 }
 
 .fighter-bars {
@@ -296,24 +215,6 @@ button.fighter-card { width: 100%; cursor: pointer; }
   line-height: 1.45;
 }
 
-.battle-bottom {
-  min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(180px, 0.9fr) minmax(0, 1.4fr) minmax(0, 1.4fr);
-  gap: 10px;
-}
-
-.combat-log,
-.player-attack-panel {
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  border: 1px solid #20d9ff45;
-  border-radius: 11px;
-  background: var(--panel);
-  box-shadow: 0 5px 20px #0003;
-}
-
 .combat-log {
   display: flex;
   flex-direction: column;
@@ -353,22 +254,8 @@ button.fighter-card { width: 100%; cursor: pointer; }
   line-height: 1.35;
 }
 
-.player-attack-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-}
-
 .player-attack-panel.is-inactive { opacity: 0.66; }
 .player-attack-panel.is-active { border-color: #20d9ff9c; }
-
-.attack-panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 6px;
-}
 
 .attack-panel-header h3 {
   overflow: hidden;
@@ -450,49 +337,8 @@ button.fighter-card { width: 100%; cursor: pointer; }
 .finish-turn-button:disabled { opacity: 0.38; cursor: not-allowed; }
 
 /* Compact incoming prompt; only the current queued attack is shown. */
-.incoming-attack {
-  position: absolute;
-  z-index: 5;
-  top: 50%;
-  left: 50%;
-  width: min(330px, 42%);
-  max-height: 94%;
-  overflow-y: auto;
-  padding: 11px;
-  transform: translate(-50%, -50%);
-  border: 1px solid #ff5470;
-  border-radius: 11px;
-  background: linear-gradient(145deg, #29101df5, #0b111ff7);
-  box-shadow:  0 0 25px #ff31594a;
-  text-align: center;
-  animation: card-enter 220ms ease-out both;
-}
-
-.incoming-topline {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  color: #ff8799;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 1px;
-}
-
-.incoming-topline span:last-child {
-  color: var(--cyan);
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-}
 
 .incoming-topline .timer-urgent { color: #ff3159 !important; }
-
-.incoming-matchup {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr);
-  align-items: center;
-  gap: 5px;
-  margin-top: 8px;
-}
 
 .incoming-fighter {
   min-width: 0;
@@ -612,13 +458,6 @@ button.fighter-card { width: 100%; cursor: pointer; }
 .confirm-target-button { margin-top: 8px; }
 .modal-message { margin-bottom: 0; }
 
-.error-screen {
-  display: block;
-  height: auto;
-  min-height: 100vh;
-  padding: 30px;
-}
-
 @keyframes card-enter {
   from { opacity: 0; transform: translate(-50%, -47%) scale(0.97); }
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -682,7 +521,6 @@ button.fighter-card { width: 100%; cursor: pointer; }
   .team-heading { min-height: 18px; }
   .team-heading h2 { font-size: 10px; }
   .fighter-card { height: 100%; }
-  .fighter-portrait { height: clamp(65px, 12vh, 100px); }
   .battle-center { flex-direction: row; }
   .versus-mark { width: 34px; height: 34px; font-size: 11px; }
   .battle-center p { max-width: 220px; }
@@ -736,12 +574,6 @@ button.fighter-card { width: 100%; cursor: pointer; }
   background: #253247;
 }
 
-.stat-bar-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #167bff, #20d9ff);
-}
-
 .stat-defense .stat-bar-fill { background: #a0a0a0; }
 .stat-agility .stat-bar-fill { background: #f4c542; }
 .stat-regen .stat-bar-fill { background: #38d996; }
@@ -751,28 +583,11 @@ button.fighter-card { width: 100%; cursor: pointer; }
 .stat-bar-fill {
   height: 100%;
   border-radius: inherit;
+  background: linear-gradient(90deg, #167bff, #20d9ff);
   transition: width 250ms ease;
 }
       
 /* Narrower fighter cards and contained portraits */
-.fighter-grid {
-  grid-template-columns: repeat(2, minmax(0, 300px));
-  justify-content: center;
-  gap: 12px;
-}
-
-.fighter-card {
-  width: 100%;
-  justify-self: center;
-}
-
-.fighter-portrait {
-  width: 100%;
-  max-width: 100px;
-  height: clamp(75px, 16vh, 150px);
-  align-self: center;
-  object-fit: contain;
-}
 
 /* Keep the two cards usable on smaller screens */
 @media (max-width: 620px) {
@@ -780,55 +595,31 @@ button.fighter-card { width: 100%; cursor: pointer; }
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .fighter-portrait {
+  .fighter-portrait { height: clamp(65px, 12vh, 100px);
     max-width: 150px;
   }
 }
 
 .fighter-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
   grid-template-columns: repeat(2, minmax(0, 270px));
-  justify-content: center;
+  align-items: center;
   gap: 12px;
-}
-
-.fighter-card {
-  width: 100%;
-  padding: 10px;
+  justify-content: center;
 }
 
 .fighter-portrait {
-  max-width: 130px;
-}
-
-.team-attack-grid {
-  flex: 1;
-  min-height: 0;
-  overflow-x: auto;
-  display: grid;
-  grid-auto-columns: minmax(125px, 1fr);
-  grid-auto-flow: column;
-  gap: 8px;
-  padding: 2px 2px 7px;
-}
-
-.team-attack-wrapper {
-  position: relative;
-  min-width: 0;
-}
-
-.team-attack-card {
   width: 100%;
-  height: 100%;
-  min-height: 120px;
-  padding: 7px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  border: 1px solid #31516a;
-  border-radius: 8px;
-  background: linear-gradient(145deg, #14283c, #0b1422);
-  cursor: pointer;
+  height: clamp(75px, 16vh, 150px);
+  min-height: 0;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 7px;
+  background: #0003;
+  max-width: 130px;
+  align-self: center;
 }
 
 .team-attack-card:not(:disabled):hover {
@@ -841,30 +632,11 @@ button.fighter-card { width: 100%; cursor: pointer; }
   cursor: not-allowed;
 }
 
-.team-attack-image,
-.team-attack-image-placeholder {
-  width: 100%;
-  height: 58px;
-  flex: 0 0 58px;
-  border-radius: 5px;
-  object-fit: contain;
-  background: #0004;
-}
-
 .team-attack-image-placeholder {
   display: grid;
   place-items: center;
   color: var(--muted);
   font-size: 9px;
-}
-
-.team-attack-name {
-  width: 100%;
-  overflow: hidden;
-  font-size: 10px;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .team-attack-damage,
@@ -927,147 +699,52 @@ button.fighter-card { width: 100%; cursor: pointer; }
 }
 
 /* Give the attack panels and cards room to breathe */
-.battle-bottom {
-  align-items: stretch;
-  gap: 12px;
-}
-
-.player-attack-panel {
-  min-width: 0;
-  min-height: 230px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 
 .attack-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
   flex: 0 0 auto;
 }
 
-.team-attack-grid {
-  flex: 1 1 auto;
-  min-height: 150px;
-  grid-auto-columns: 132px;
-  gap: 10px;
-  padding: 2px 2px 12px;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-.team-attack-wrapper {
-  min-width: 0;
-  min-height: 0;
-}
-
-.team-attack-card {
-  min-height: 140px;
-  padding: 8px;
-  gap: 7px;
-}
-
-.team-attack-image,
-.team-attack-image-placeholder {
-  height: 68px;
-  flex-basis: 68px;
-}
-
 .team-attack-name {
+  width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  text-align: center;
+  text-overflow: ellipsis;
   white-space: normal;
   line-height: 1.2;
 }
 
-.finish-turn-button {
-  flex: 0 0 auto;
-  margin-top: auto;
-}
-
 @media (max-width: 850px) {
-  .battle-bottom {
-    grid-template-columns: 1fr;
-  }
-
-  .player-attack-panel {
-    min-height: 220px;
-  }
-}
-.battle-bottom {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.6fr) minmax(0, 1fr) minmax(0, 1fr);
-  align-items: stretch;
-  gap: 12px;
-  min-height: 300px;
-}
-
-.player-attack-panel {
-  min-width: 0;
-  min-height: 300px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.team-attack-grid {
-  min-height: 180px;
-  grid-auto-columns: 112px;
-  gap: 8px;
-  padding: 2px 2px 14px;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-.team-attack-card {
-  min-height: 160px;
-  padding: 7px;
-  gap: 6px;
 }
 
 .team-attack-image,
 .team-attack-image-placeholder {
+  width: 100%;
   height: 64px;
+  flex: 0 0 58px;
+  border-radius: 5px;
+  object-fit: contain;
+  background: #0004;
   flex-basis: 64px;
 }
 
 @media (max-width: 850px) {
-  .battle-bottom {
-    grid-template-columns: 1fr;
-  }
 
   .player-attack-panel {
     min-height: 260px;
   }
 }
 
-.player-attack-panel {
-  height: auto;
-  min-height: 0;
-  align-self: start;
-  justify-content: flex-start;
-}
-
-.finish-turn-button {
+.finish-turn-button { /* overrides margin-top: auto */
   flex: 0 0 auto;
-  margin-top: 8px; /* overrides margin-top: auto */
+  margin-top: 8px;
 }
 
 /* Shorten the battlefield so the attack panels fit higher on screen */
-.team-battle {
-  min-height: 100vh;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.battlefield {
-  min-height: 0;
-  height: 52vh;
-  margin-bottom: 12px;
-}
-
-.battle-bottom {
-  margin-top: 0;
-  padding-bottom: 12px;
-}
 
 @media (max-height: 800px) {
   .battlefield {
@@ -1076,85 +753,76 @@ button.fighter-card { width: 100%; cursor: pointer; }
 }
 
 @media (max-width: 850px) {
-  .team-battle {
-    height: auto;
-    min-height: 100vh;
-    overflow-y: visible;
-  }
-
-  .battlefield {
-    height: auto;
-    min-height: 420px;
-  }
 }
 
 /* Keep the battle and controls together in the viewport */
-.team-battle {
-  height: 100vh;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-sizing: border-box;
-}
 
 .battle-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
   flex: 0 0 auto;
-}
-
-.battlefield {
-  flex: 1 1 auto;
-  height: auto;
-  min-height: 0;
-  margin-bottom: 0;
-}
-
-.battle-bottom {
-  flex: 0 0 290px;
-  min-height: 0;
-  margin-top: 0;
-  padding-bottom: 0;
-  overflow: hidden;
 }
 
 .combat-log,
 .player-attack-panel {
+  min-width: 0;
   min-height: 0;
+  overflow: hidden;
+  border: 1px solid #20d9ff45;
+  border-radius: 11px;
+  background: var(--panel);
+  box-shadow: 0 5px 20px #0003;
   height: 100%;
 }
 
-.team-attack-grid {
-  min-height: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
 @media (max-height: 800px) {
-  .battle-bottom {
-    flex-basis: 250px;
-  }
 }
 
 @media (max-width: 850px) {
   .team-battle {
     height: auto;
     min-height: 100vh;
+    overflow-y: visible;
     overflow: visible;
   }
 
   .battlefield {
-    flex: none;
+    height: auto;
     min-height: 420px;
+    flex: none;
   }
 
   .battle-bottom {
+    grid-template-columns: 1fr;
     flex: none;
     overflow: visible;
   }
 }
 
 .team-battle {
+  --cyan: #20d9ff;
+  --red: #ff3f61;
+  --panel: rgba(8, 16, 31, 0.96);
+  --muted: #9baec5;
+
+  width: 100%;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  padding: 14px 22px 18px;
+  display: flex;
+  grid-template-rows: 46px minmax(0, 1fr) 190px;
+  gap: 12px;
+  color: #f5f8ff;
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(33, 72, 105, 0.34), transparent 54%),
+    linear-gradient(135deg, #080d18, #111827 52%, #080d18);
+  box-sizing: border-box;
+  overflow-y: auto;
+  flex-direction: column;
   position: relative;
 }
 
@@ -1187,33 +855,22 @@ button.fighter-card { width: 100%; cursor: pointer; }
   }
 }
 
-.fighter-effects {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 6px;
-}
-
-.fighter-effect {
-  padding: 3px 6px;
-  border-radius: 4px;
-  font-size: 0.68rem;
-  font-weight: 700;
-}
-
-.fighter-effect.buff {
-  color: #8fffc0;
-  background: #137a4933;
-  border: 1px solid #35d98788;
-}
-
-.fighter-effect.debuff {
-  color: #ff9aa8;
-  background: #a51e3d33;
-  border: 1px solid #ff526388;
-}
-
 .fighter-card {
+  min-width: 0;
+  height: min(100%, 340px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid #ff3f6170;
+  border-radius: 12px;
+  background: linear-gradient(155deg, #172033f5, #090f1cf5);
+  text-align: left;
+  box-shadow: 0 8px 24px #0005;
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  width: 100%;
+  justify-self: center;
   position: relative;
 }
 
@@ -1226,13 +883,14 @@ button.fighter-card { width: 100%; cursor: pointer; }
 }
 
 .fighter-effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
   position: absolute;
   left: 10px;
   right: 10px;
   bottom: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
   max-height: 56px;
   overflow-y: auto;
   z-index: 2;
@@ -1405,15 +1063,6 @@ button.fighter-card { width: 100%; cursor: pointer; }
   box-sizing: border-box;
 }
 
-.incoming-outcome {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid #ffffff25;
-  color: #8fffc0;
-  font-size: 11px;
-  font-weight: 800;
-}
-
 .ally-popup-outcome {
   margin-top: 10px;
   color: #8fffc0;
@@ -1425,18 +1074,6 @@ button.fighter-card { width: 100%; cursor: pointer; }
 battlefield > .local-coop-incoming {
   width: min(330px, 38%);
   max-height: 46%;
-}
-
-.battlefield > .local-coop-incoming.is-first {
-  top: 24px;
-  bottom: auto;
-  transform: translateX(-50%);
-}
-
-.battlefield > .local-coop-incoming.is-second {
-  top: auto;
-  bottom: 24px;
-  transform: translateX(-50%);
 }
 
 @media (max-width: 620px) {
@@ -1481,17 +1118,6 @@ battlefield > .local-coop-incoming {
 }
 
 /* Final local-co-op card positions */
-.battlefield > .local-coop-incoming.is-first {
-  top: 24px !important;
-  bottom: auto !important;
-  transform: translateX(-50%) !important;
-}
-
-.battlefield > .local-coop-incoming.is-second {
-  top: auto !important;
-  bottom: 24px !important;
-  transform: translateX(-50%) !important;
-}
 
 .take-damage-button {
   flex: 1 1 100%;
@@ -1529,33 +1155,6 @@ battlefield > .local-coop-incoming {
 .take-damage-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.incoming-attack-image {
-  display: block;
-  width: 100%;
-  height: 90px;
-  margin: 8px auto 4px;
-  object-fit: contain;
-  border-radius: 8px;
-  background: #0004;
-}
-
-.incoming-threats {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 5px;
-  margin-top: 7px;
-}
-
-.incoming-threats span {
-  padding: 4px 7px;
-  border: 1px solid currentColor;
-  border-radius: 5px;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.4px;
 }
 
 /* Damage threat colors */
@@ -1655,21 +1254,17 @@ battlefield > .local-coop-incoming {
   box-shadow: 0 0 8px rgb(19 213 255 / 15%);
 }
 
-
-.incoming-attack-image {
-  display: block;
-  width: 100%;
-  height: 90px;
-  margin: 8px auto 4px;
-  object-fit: contain;
-  border-radius: 8px;
-  background: #0004;
-}
-
 /* Incoming attack warning card */
 .incoming-attack {
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  left: 50%;
   width: min(360px, 42%);
+  max-height: 94%;
+  overflow-y: auto;
   padding: 14px;
+  transform: translate(-50%, -50%);
   border: 1px solid #ff526f;
   border-radius: 14px;
   background:
@@ -1677,15 +1272,21 @@ battlefield > .local-coop-incoming {
   box-shadow:
     0 0 22px rgb(255 49 89 / 24%),
     inset 0 0 18px rgb(255 49 89 / 7%);
+  text-align: center;
+  animation: card-enter 220ms ease-out both;
 }
 
 .incoming-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #ff8295;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.4px;
   align-items: center;
   padding-bottom: 8px;
   border-bottom: 1px solid rgb(255 82 111 / 25%);
-  color: #ff8295;
-  font-size: 11px;
-  letter-spacing: 1.4px;
 }
 
 .incoming-topline span:first-child::before {
@@ -1703,11 +1304,15 @@ battlefield > .local-coop-incoming {
 .incoming-topline span:last-child {
   color: #65eaff;
   font-size: 16px;
-  font-weight: 900;
   font-variant-numeric: tabular-nums;
+  font-weight: 900;
 }
 
 .incoming-matchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
   margin-top: 10px;
   color: #eaf3ff;
   font-size: 12px;
@@ -1725,11 +1330,11 @@ battlefield > .local-coop-incoming {
   height: 105px;
   margin: 10px auto 6px;
   object-fit: contain;
-  border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 9px;
   background:
     radial-gradient(ellipse, rgb(255 82 111 / 15%), transparent 70%),
     #080d18;
+  border: 1px solid rgb(255 255 255 / 12%);
   filter: drop-shadow(0 0 8px rgb(255 82 111 / 25%));
 }
 
@@ -1745,6 +1350,7 @@ battlefield > .local-coop-incoming {
   flex-wrap: wrap;
   justify-content: center;
   gap: 6px;
+  margin-top: 7px;
   margin: 8px 0 10px;
 }
 
@@ -1752,10 +1358,10 @@ battlefield > .local-coop-incoming {
   padding: 5px 7px;
   border: 1px solid currentColor;
   border-radius: 5px;
-  background: rgb(0 0 0 / 25%);
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.35px;
+  background: rgb(0 0 0 / 25%);
 }
 
 .incoming-attack .defense-actions {
@@ -1779,7 +1385,9 @@ battlefield > .local-coop-incoming {
 }
 
 .incoming-outcome {
+  margin-top: 10px;
   padding-top: 9px;
+  border-top: 1px solid #ffffff25;
   color: #8fffc0;
   font-size: 11px;
   font-weight: 800;
@@ -1832,15 +1440,15 @@ battlefield > .local-coop-incoming {
 .battlefield > .local-coop-incoming.is-first {
   top: 50% !important;
   bottom: auto !important;
-  left: 27% !important;
   transform: translate(-50%, -50%) !important;
+  left: 27% !important;
 }
 
 .battlefield > .local-coop-incoming.is-second {
   top: 50% !important;
   bottom: auto !important;
-  left: 73% !important;
   transform: translate(-50%, -50%) !important;
+  left: 73% !important;
 }
 
 @media (max-width: 620px) {
@@ -1859,28 +1467,6 @@ battlefield > .local-coop-incoming {
 /* =========================================
    TEAM BATTLE — ROUND INTRO
 ========================================= */
-
-.team-round-intro {
-  
-  position: fixed;
-  inset: 0;
-  transition: opacity 0.6s ease, visibility 0.6s ease;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  padding: 24px;
-  overflow: hidden;
-  color: #fff;
-  text-align: center;
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(255, 49, 89, 0.22), transparent 45%),
-    radial-gradient(ellipse at 80% 50%, rgba(19, 213, 255, 0.20), transparent 45%),
-    rgba(3, 7, 17, 0.97);
-  animation: teamIntroFadeIn 0.45s ease-out both;
-}
 
 .team-round-intro__eyebrow {
   color: #a9b7ca;
@@ -2062,10 +1648,11 @@ battlefield > .local-coop-incoming {
 
 
 .error-screen {
-  min-height: 100vh;
   display: grid;
-  place-items: center;
+  height: auto;
+  min-height: 100vh;
   padding: 24px;
+  place-items: center;
   background:
     radial-gradient(ellipse at 50% 35%, rgba(118, 46, 66, 0.28), transparent 55%),
     #101116;
@@ -2142,8 +1729,13 @@ battlefield > .local-coop-incoming {
 
 
 .team-round-intro {
+
+  /* Prevent the old entrance animation from overriding opacity. */
   position: fixed;
   inset: 0;
+  transition:
+    opacity 0.6s ease,
+    visibility 0s linear 0.6s;
   z-index: 10000;
 
   display: flex;
@@ -2169,15 +1761,10 @@ battlefield > .local-coop-incoming {
       transparent 45%
     ),
     rgba(3, 7, 17, 0.97);
-
-  /* Prevent the old entrance animation from overriding opacity. */
   animation: none !important;
 
   opacity: 0;
   visibility: hidden;
-  transition:
-    opacity 0.6s ease,
-    visibility 0s linear 0.6s;
 }
 
 .team-round-intro.is-visible {
@@ -2781,14 +2368,26 @@ battlefield > .local-coop-incoming {
 .battlefield {
   position: relative;
   isolation: isolate;
+  min-height: 0;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(90px, 0.18fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+  padding: 16px;
 
   border: 2px solid #13d5ff;
   border-radius: 14px;
+  background:
+    linear-gradient(90deg, #080e1bd9, #111b2a55 50%, #080e1bd9),
+    radial-gradient(ellipse at center, #293a4d, #101725 72%);
 
   box-shadow:
     0 0 8px rgba(19, 213, 255, 0.35),
     inset 0 0 8px rgba(19, 213, 255, 0.12);
+  height: auto;
+  margin-bottom: 0;
+  flex: 1 1 auto;
 }
 
 .team-battle-story-background {
@@ -2810,16 +2409,6 @@ battlefield > .local-coop-incoming {
 ========================================= */
 
 /* Keep card content in a predictable vertical layout */
-.team-attack-card {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 5px;
-  overflow: hidden;
-  text-align: center;
-}
 
 /* Image */
 .team-attack-card .team-attack-image,
@@ -2845,20 +2434,6 @@ battlefield > .local-coop-incoming {
 }
 
 /* Mana and availability container */
-.team-attack-card .team-attack-cost {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: 100%;
-  box-sizing: border-box;
-  margin-top: 3px;
-  padding: 5px 4px;
-  line-height: 1.3;
-  border-radius: 4px;
-  text-align: center;
-}
 
 /* Each availability label */
 .team-attack-availability {
@@ -3192,8 +2767,15 @@ battlefield > .local-coop-incoming {
 
 /* Give the bottom battle panels more vertical room */
 .battle-bottom {
-  flex: 0 0 330px;
   min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+  margin-top: 0;
+  padding-bottom: 0;
+  flex: 0 0 330px;
+  overflow: hidden;
 }
 
 /* Slightly reduce the panel height on shorter screens */
@@ -3205,26 +2787,44 @@ battlefield > .local-coop-incoming {
 
 /* Allow the attack grid to scroll vertically if necessary */
 .team-attack-grid {
+  flex: 1 1 auto;
   min-height: 0;
+  overflow-x: auto;
+  display: grid;
+  grid-auto-columns: 112px;
+  grid-auto-flow: column;
+  gap: 8px;
+  padding: 2px 2px 14px;
+  overflow-y: auto;
   grid-auto-rows: 220px;
   align-content: start;
-  overflow-x: auto;
-  overflow-y: auto;
 }
 
 /* Give every attack card enough room for its information */
 .team-attack-wrapper {
+  position: relative;
+  min-width: 0;
   min-height: 220px;
   height: 220px;
 }
 
 .team-attack-card {
-  box-sizing: border-box;
   width: 100%;
   height: 100%;
   min-height: 220px;
+  padding: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #31516a;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #14283c, #0b1422);
+  cursor: pointer;
+  box-sizing: border-box;
   justify-content: flex-start;
   overflow: hidden;
+  text-align: center;
 }
 
 /* Prevent important information from shrinking */
@@ -3247,12 +2847,31 @@ battlefield > .local-coop-incoming {
 
 /* Keep mana, uses, cooldown and sacrifice costs visible */
 .team-attack-card .team-attack-cost {
-  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  box-sizing: border-box;
   margin-top: 3px;
+  padding: 5px 4px;
+  line-height: 1.3;
+  border-radius: 4px;
+  text-align: center;
+  flex: 0 0 auto;
 }
 
 /* Preserve the attack panel's layout */
 .player-attack-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  min-width: 0;
   min-height: 0;
+  height: auto;
+  align-self: start;
+  justify-content: flex-start;
   overflow: visible;
 }

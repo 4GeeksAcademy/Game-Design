@@ -356,22 +356,6 @@
   }
 }
 
-
-.combat-log-entry {
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  border-radius: 6px;
-}
-
-.combat-log-health {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-  margin-top: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
 .combat-log-health span {
   padding: 4px 8px;
   border-radius: 4px;
@@ -437,6 +421,8 @@
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .combat-log-health > span {
@@ -482,50 +468,8 @@
   margin-left: 8px;
 }
 
-.simulation-progress {
-  width: 100%;
-  margin-top: 20px;
-  padding: 16px;
-  border: 1px solid rgba(19, 213, 255, 0.3);
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.45);
-}
-
-.simulation-progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: bold;
-}
-
 .simulation-progress-header strong {
   color: #13d5ff;
-}
-
-.simulation-progress-track {
-  width: 100%;
-  height: 12px;
-  overflow: hidden;
-  border-radius: 20px;
-  background: #252525;
-}
-
-.simulation-progress-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #087bff, #13d5ff);
-  box-shadow: 0 0 12px rgba(19, 213, 255, 0.55);
-  transition: width 0.2s ease;
-}
-
-.simulation-progress p {
-  margin: 9px 0 0;
-  color: #aaa;
-  font-size: 0.8rem;
-  text-align: center;
 }
 
 .simulation-progress {
@@ -543,6 +487,7 @@
   align-items: center;
   margin-bottom: 10px;
   color: #13d5ff;
+  font-size: 0.85rem;
   font-weight: bold;
 }
 
@@ -557,11 +502,11 @@
 
 .simulation-progress-fill {
   height: 100%;
-  width: 0%;
   border-radius: inherit;
   background: linear-gradient(90deg, #087da8, #13d5ff);
   box-shadow: 0 0 12px rgba(19, 213, 255, 0.55);
   transition: width 0.2s ease;
+  width: 0%;
 }
 
 .simulation-progress p {

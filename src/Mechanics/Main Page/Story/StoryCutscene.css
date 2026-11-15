@@ -222,17 +222,6 @@
   transform-origin: right bottom;
 }
 
-.vn-character img {
-  display: block;
-  width: auto;
-  height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-  filter: drop-shadow(0 12px 18px #0005);
-  user-select: none;
-}
-
 /* Character animations.
    The translate property preserves the positioning transform. */
 
@@ -291,26 +280,6 @@
 /* =========================
    OVERLAID DIALOGUE
 ========================= */
-
-.vn-dialogue-area {
-  position: absolute;
-  z-index: 5;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  padding: 0 4% 16px;
-  box-sizing: border-box;
-
-  background: linear-gradient(
-    180deg,
-    transparent,
-    #080f2040 10%,
-    #080f20b8 100%
-  );
-
-  cursor: pointer;
-}
 
 .vn-dialogue-panel {
   position: relative;
@@ -555,29 +524,41 @@
     animation: none;
   }
 }
-
-.vn-character-rocklee-pushups {
-  z-index: 5;
-}
 /* =========================
    ROCK LEE PUSH-UP POSES
 ========================= */
 
 .vn-character-rocklee-pushups {
-  height: min(58%, 500px);
 
   /* Raise Lee above the dialogue box */
-  bottom: 190px;
 
   /* Put Lee above the dialogue layer */
   z-index: 6;
+  height: min(58%, 500px);
+  bottom: 190px;
 
   pointer-events: none;
 }
 
 /* Dialogue stays below the special character sprite */
 .vn-dialogue-area {
+  position: absolute;
   z-index: 5;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding: 0 4% 16px;
+  box-sizing: border-box;
+
+  background: linear-gradient(
+    180deg,
+    transparent,
+    #080f2040 10%,
+    #080f20b8 100%
+  );
+
+  cursor: pointer;
 }
 
 /* Mobile adjustments */
@@ -594,6 +575,14 @@
 
 /* Default idle: subtle breathing for every character. */
 .vn-character img {
+  display: block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 12px 18px #0005);
+  user-select: none;
   transform-origin: center bottom;
   animation: vn-idle 4s ease-in-out infinite;
 }

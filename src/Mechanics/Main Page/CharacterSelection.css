@@ -1,17 +1,4 @@
 
-.character-select-screen {
-  --select-red: #ff3159;
-  --select-cyan: #13d5ff;
-
-  min-height: 100vh;
-  padding: 24px clamp(16px, 4vw, 55px);
-  color: #f5f7ff;
-  background:
-    radial-gradient(ellipse at 50% 40%, #1a2945 0%, transparent 65%),
-    #080d1c;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 .character-select-screen *,
 .character-select-screen *::before,
 .character-select-screen *::after {
@@ -69,11 +56,6 @@
   letter-spacing: 1px;
 }
 
-.select-heading {
-  margin: 32px auto 26px;
-  text-align: center;
-}
-
 .select-eyebrow {
   margin: 0 0 10px;
   color: var(--select-cyan);
@@ -111,14 +93,6 @@
   padding: 18px;
   border: 1px solid #34415a;
   background: linear-gradient(145deg, #151e30, #0c1220);
-}
-
-.player-side {
-  border-top: 3px solid var(--select-cyan);
-}
-
-.cpu-side {
-  border-top: 3px solid var(--select-red);
 }
 
 .roster-side-heading {
@@ -166,24 +140,6 @@
   letter-spacing: 1px;
 }
 
-.versus-divider {
-  display: grid;
-  place-items: center;
-  align-self: center;
-  color: #fff;
-  font-size: 29px;
-  font-weight: 1000;
-  font-style: italic;
-  text-shadow: 0 0 18px #ff315955;
-  transform: skew(-8deg);
-}
-
-.roster-fighter-info {
-  --fighter-accent: var(--select-red);
-  min-width: 0;
-  animation: roster-enter 0.2s ease-out;
-}
-
 .roster-fighter-info.lee {
   --fighter-accent: var(--select-cyan);
 }
@@ -202,12 +158,6 @@
   font-size: clamp(23px, 3vw, 36px);
   font-weight: 1000;
   font-style: italic;
-}
-
-.roster-stat-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
 }
 
 .roster-stat-list > div {
@@ -318,49 +268,12 @@
   letter-spacing: 1px;
 }
 
-.character-roster-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.roster-tile {
-  --tile-accent: #53617a;
-  position: relative;
-  display: flex;
-  min-width: 0;
-  min-height: 175px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 28px 8px 14px;
-  overflow: hidden;
-  border: 2px solid #2b3850;
-  background:
-    radial-gradient(ellipse at 50% 35%, #26344b, transparent 70%),
-    #101726;
-  color: #fff;
-  cursor: pointer;
-  transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
-}
-
 .roster-tile.mina {
   --tile-accent: var(--select-red);
 }
 
 .roster-tile.lee {
   --tile-accent: var(--select-cyan);
-}
-
-.roster-tile:hover:not(:disabled) {
-  transform: translateY(-3px);
-  border-color: var(--tile-accent);
-}
-
-.roster-tile.p1-selected {
-  border-color: var(--select-cyan);
-  box-shadow: inset 0 0 22px #13d5ff15, 0 0 14px #13d5ff25;
 }
 
 .roster-tile.cpu-selected {
@@ -401,36 +314,10 @@
   color: #fff;
 }
 
-.roster-tile.cpu-selected:not(.p1-selected) {
-  animation: cpu-lock 0.35s ease-in-out;
-}
-
-.roster-portrait {
-  display: grid;
-  place-items: center;
-  width: 86px;
-  height: 86px;
-  border: 1px solid color-mix(in srgb, var(--tile-accent) 65%, transparent);
-  background: color-mix(in srgb, var(--tile-accent) 12%, #080d18);
-  color: var(--tile-accent);
-  font-size: 60px;
-  font-weight: 1000;
-  font-style: italic;
-  line-height: 1;
-  text-shadow: 0 0 18px color-mix(in srgb, var(--tile-accent) 35%, transparent);
-}
-
 .roster-tile strong {
   overflow-wrap: anywhere;
   font-size: 12px;
   font-weight: 1000;
-  text-align: center;
-}
-
-.roster-tile-description {
-  color: #98a7bf;
-  font-size: 8px;
-  font-weight: 900;
   text-align: center;
 }
 
@@ -509,11 +396,6 @@
 
 .confirm-fighter-button span {
   margin-left: 12px;
-}
-
-.confirm-fighter-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 0 22px #ff315955, 4px 4px 0 #79172c;
 }
 
 .confirm-fighter-button:disabled {
@@ -669,8 +551,9 @@
 
 .roster-stat-list {
   display: flex;
-  flex-direction: column;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  flex-direction: column;
   width: 100%;
   margin: 18px 0;
 }
@@ -707,13 +590,6 @@
   border-radius: 4px;
   background: #111a2a;
   box-shadow: inset 0 1px 4px #0009;
-}
-
-.roster-stat-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.35s ease;
-  box-shadow: 0 0 10px currentColor;
 }
 
 /* Individual stat colors */
@@ -803,52 +679,40 @@
 
 /* Fighter roster portrait images */
 
-.roster-portrait {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.roster-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  display: block;
-}
-
 /* Full-image character roster tiles */
 .character-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
   align-items: start;
 }
 
-.roster-tile {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  overflow: hidden;
-  text-align: left;
-}
-
 .roster-portrait {
-  position: relative;
   display: block;
+  place-items: center;
   width: 100%;
-  aspect-ratio: 2 / 3;
-  overflow: hidden;
+  height: 86px;
+  border: 1px solid color-mix(in srgb, var(--tile-accent) 65%, transparent);
   background: #080d1c;
+  color: var(--tile-accent);
+  font-size: 60px;
+  font-weight: 1000;
+  font-style: italic;
+  line-height: 1;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--tile-accent) 35%, transparent);
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 2 / 3;
 }
 
 .roster-portrait img {
-  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
   object-position: center;
+  display: block;
   transition: transform 0.25s ease;
 }
 
@@ -872,7 +736,10 @@
 }
 
 .roster-tile-description {
+  color: #98a7bf;
   font-size: 10px;
+  font-weight: 900;
+  text-align: center;
   line-height: 1.4;
   letter-spacing: 0.7px;
 }
@@ -949,6 +816,16 @@
 
 /* Bring the screen in smoothly */
 .character-select-screen {
+  --select-red: #ff3159;
+  --select-cyan: #13d5ff;
+
+  min-height: 100vh;
+  padding: 24px clamp(16px, 4vw, 55px);
+  color: #f5f7ff;
+  background:
+    radial-gradient(ellipse at 50% 40%, #1a2945 0%, transparent 65%),
+    #080d1c;
+  font-family: Arial, Helvetica, sans-serif;
   animation: select-screen-enter 0.45s ease-out both;
 }
 
@@ -957,19 +834,32 @@
 }
 
 .select-heading {
+  margin: 32px auto 26px;
+  text-align: center;
   animation: select-heading-impact 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
 }
 
 /* Player and CPU panels enter from opposite sides */
 .player-side {
+  border-top: 3px solid var(--select-cyan);
   animation: player-panel-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
 }
 
 .cpu-side {
+  border-top: 3px solid var(--select-red);
   animation: cpu-panel-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
 .versus-divider {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  color: #fff;
+  font-size: 29px;
+  font-weight: 1000;
+  font-style: italic;
+  text-shadow: 0 0 18px #ff315955;
+  transform: skew(-8deg);
   animation: versus-impact 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
 }
 
@@ -992,12 +882,6 @@
 .character-roster-grid .roster-tile:nth-child(12) { animation-delay: 0.49s; }
 
 /* Make the current player selection feel active */
-.roster-tile.p1-selected {
-  border-color: var(--select-cyan);
-  box-shadow:
-    inset 0 0 22px rgba(19, 213, 255, 0.12),
-    0 0 14px rgba(19, 213, 255, 0.25);
-}
 
 .roster-tile.p1-selected .roster-tile-info {
   background: linear-gradient(
@@ -1009,6 +893,7 @@
 
 /* CPU selection stays red */
 .roster-tile.cpu-selected:not(.p1-selected) {
+  animation: cpu-lock 0.35s ease-in-out;
   border-color: var(--select-red);
   box-shadow:
     inset 0 0 22px rgba(255, 49, 89, 0.12),
@@ -1018,6 +903,7 @@
 /* A stronger card hover without the old hover glitches */
 .roster-tile:hover:not(:disabled) {
   transform: translateY(-4px) scale(1.015);
+  border-color: var(--tile-accent);
   filter: brightness(1.08);
   z-index: 2;
 }
@@ -1060,10 +946,11 @@
 }
 
 .confirm-fighter-button:hover:not(:disabled) {
-  filter: brightness(1.12);
+  transform: translateY(-2px);
   box-shadow:
     0 0 26px rgba(255, 49, 89, 0.45),
     4px 4px 0 #79172c;
+  filter: brightness(1.12);
 }
 
 /* Keyframes */
@@ -1217,19 +1104,38 @@
 
 /* Smooth movement and glow changes */
 .roster-tile {
+  --tile-accent: #53617a;
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 175px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid #2b3850;
+  background:
+    radial-gradient(ellipse at 50% 35%, #26344b, transparent 70%),
+    #101726;
+  color: #fff;
+  cursor: pointer;
   transition:
     border-color 0.25s ease,
     box-shadow 0.25s ease,
     filter 0.25s ease;
+  height: 100%;
+  text-align: left;
 }
 
 /* Impact animation when the selected fighter changes */
 .roster-tile.p1-selected {
-  animation: fighterSelectPop 0.38s cubic-bezier(.16, 1, .3, 1) both;
   border-color: #13d5ff;
   box-shadow:
     0 0 10px rgba(19, 213, 255, 0.65),
     0 0 25px rgba(19, 213, 255, 0.35);
+  animation: fighterSelectPop 0.38s cubic-bezier(.16, 1, .3, 1) both;
   z-index: 2;
 }
 
@@ -1327,6 +1233,8 @@
 
 /* Play when React mounts the new fighter info */
 .roster-fighter-info {
+  --fighter-accent: var(--select-red);
+  min-width: 0;
   animation: fighter-info-impact 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -1360,7 +1268,10 @@
 
 /* Smoothly animate stat bars when their values change */
 .roster-stat-fill {
+  height: 100%;
+  border-radius: 3px;
   transition: width 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 10px currentColor;
 }
 
 /* Keyframes */
@@ -1453,21 +1364,12 @@
 
 
 /* Display multiple fighter previews in team-selection mode. */
-.roster-team-preview {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  align-items: start;
-}
 
 .roster-team-preview > * {
   min-width: 0;
 }
 
 @media (max-width: 900px) {
-  .roster-team-preview {
-    grid-template-columns: 1fr;
-  }
 }
 
 .p2-cursor {
@@ -1479,13 +1381,6 @@
 
 
 /* Highlight the fighter currently browsed with the keyboard */
-.roster-tile.keyboard-highlighted {
-  outline: 3px solid #13d5ff;
-  outline-offset: 3px;
-  box-shadow: 0 0 14px rgba(19, 213, 255, 0.55);
-  transform: translateY(-3px);
-  z-index: 1;
-}
 
 .roster-tile.keyboard-highlighted {
   outline: 3px solid #13d5ff;
@@ -1504,8 +1399,8 @@
 .roster-team-preview {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
   gap: 14px;
+  align-items: start;
 }
 
 .roster-team-preview > .roster-fighter-info {

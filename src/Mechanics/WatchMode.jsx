@@ -99,11 +99,11 @@ function FighterPanel({ fighter, color, side, compact = false }) {
         padding: compact ? "10px" : undefined,
       }}
     >
-     <div
-  className={`watch-fighter-image ${
-    hasStunnedAttacks ? "fighter-stunned" : ""
-  }`}
->
+      <div
+        className={`watch-fighter-image ${
+          hasStunnedAttacks ? "fighter-stunned" : ""
+        }`}
+      >
         {getFighterImage(fighter) && (
           <img src={getFighterImage(fighter)} alt={name} />
         )}

@@ -198,27 +198,6 @@
   text-align: center;
 }
 
-.watch-fighter-image {
-  position: relative;
-  display: flex;
-  align-items: end;
-  justify-content: center;
-  height: 230px;
-  margin-bottom: 8px;
-}
-
-.watch-fighter-image img {
-  position: relative;
-  z-index: 1;
-  max-width: 100%;
-  width: 210px;
-  height: 100%;
-  object-fit: contain;
-  object-position: bottom;
-  filter: drop-shadow(0 8px 12px #0008);
-  animation: watch-idle 2.8s ease-in-out infinite;
-}
-
 .watch-fighter-right .watch-fighter-image img {
   transform: scaleX(-1);
   animation-name: watch-idle-right;
@@ -463,8 +442,12 @@
 
 .watch-fighter-image {
   position: relative;
-  width: 125px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
   height: 190px;
+  margin-bottom: 8px;
+  width: 125px;
   flex: 0 0 125px;
   overflow: hidden;
   isolation: isolate;
@@ -477,12 +460,16 @@
 
 /* Keep the image within the exact portrait dimensions */
 .watch-fighter-image img {
-  display: block;
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
   width: 125px;
   height: 190px;
   object-fit: cover;
-  position: relative;
-  z-index: 1;
+  object-position: bottom;
+  filter: drop-shadow(0 8px 12px #0008);
+  animation: watch-idle 2.8s ease-in-out infinite;
+  display: block;
 }
 
 .watch-fighter-image.fighter-stunned img {
