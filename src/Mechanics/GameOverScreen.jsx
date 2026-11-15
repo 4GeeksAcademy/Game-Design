@@ -15,7 +15,7 @@ function GameOverScreen({
     if (onRematch) {
       onRematch();
     } else {
-      navigate("/character-select");
+      navigate(0);
     }
   };
 

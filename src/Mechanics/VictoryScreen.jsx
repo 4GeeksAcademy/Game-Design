@@ -15,7 +15,7 @@ function VictoryScreen({
     if (onRematch) {
       onRematch();
     } else {
-      navigate("/character-select");
+      navigate(0);
     }
   };
 

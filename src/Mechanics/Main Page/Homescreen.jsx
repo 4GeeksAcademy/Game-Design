@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import mina from "../All_Character_Stats/Mina_AshidoStats.js";
 import Kirishima from "../All_Character_Stats/KirishimaStats.js";
+import wildCardsLogo from "../../assets/img/logo.png";
 import { useNavigate } from "react-router-dom";
 import { getCoins, getUnlockedCharacters, unlockCharacter } from "../Currency";
 import {
@@ -385,51 +386,97 @@ function Homescreen() {
   };
 
   const renderHome = () => (
-    <>
-      <p className="home-eyebrow">THE FIGHT STARTS HERE</p>
+    <div className="home-hero">
+      <div className="home-hero-brand">
+        <p className="home-eyebrow">THE NEXT GENERATION OF CARD COMBAT</p>
 
-      <h1 className="home-title">
-        <span className="title-accent">MAIN</span>
-        <span>MENU</span>
-      </h1>
+        <img src={wildCardsLogo} alt="Wild Cards" className="wild-cards-logo" />
 
-      <p className="home-subtitle">Choose your fighter. Prove your strength.</p>
+        <p className="home-subtitle">
+          CHOOSE YOUR FIGHTER. PLAY YOUR CARDS. MAKE YOUR LEGEND.
+        </p>
 
-      <div className="home-menu-buttons">
+        <div className="hero-divider">
+          <span />
+          <b>EST. 2026</b>
+          <span />
+        </div>
+      </div>
+
+      <div className="home-mode-grid">
         <button
-          className="arcade-button primary-button"
+          className="mode-card mode-card--quick"
           onClick={() => openMenu("play")}
         >
-          PLAY <span>▶</span>
-        </button>
-
-        <button className="arcade-button " onClick={() => navigate("/shop")}>
-          CHARACTER SHOP <span>◈</span>
-        </button>
-
-        <button className="arcade-button" onClick={() => openMenu("settings")}>
-          SETTINGS
-        </button>
-
-        <button className="arcade-button" onClick={() => openMenu("howToPlay")}>
-          HOW TO PLAY
+          <span className="mode-card-art">
+            <span className="mode-art-symbol">VS</span>
+          </span>
+          <span className="mode-card-info">
+            <span className="mode-card-number">01 / COMPETITIVE</span>
+            <strong>QUICK BATTLE</strong>
+            <span>Enter the arena and fight.</span>
+          </span>
+          <span className="mode-card-arrow">↗</span>
         </button>
 
         <button
-          className="arcade-button"
-          onClick={() => navigate("/inventory")}
+          className="mode-card mode-card--story"
+          onClick={() => navigate("/story-mode")}
         >
-          INVENTORY <span>🎒</span>
+          <span className="mode-card-art">
+            <span className="mode-art-symbol">章</span>
+          </span>
+          <span className="mode-card-info">
+            <span className="mode-card-number">02 / ADVENTURE</span>
+            <strong>STORY MODE</strong>
+            <span>Discover the stories behind the fighters.</span>
+          </span>
+          <span className="mode-card-arrow">↗</span>
         </button>
 
         <button
-          className="arcade-button"
-          onClick={() => navigate("/achievements")}
+          className="mode-card mode-card--simulator"
+          onClick={() => navigate("/bot-simulator")}
         >
-          ACHIEVEMENTS <span>🏅</span>
+          <span className="mode-card-art">
+            <span className="mode-art-symbol">⚔</span>
+          </span>
+          <span className="mode-card-info">
+            <span className="mode-card-number">03 / SPECTATOR</span>
+            <strong>BOT SIMULATOR</strong>
+            <span>Watch fighters battle automatically.</span>
+          </span>
+          <span className="mode-card-arrow">↗</span>
+        </button>
+
+        <button
+          className="mode-card mode-card--festival"
+          onClick={() => navigate("/festival")}
+        >
+          <span className="mode-card-art">
+            <span className="mode-art-symbol">冠</span>
+          </span>
+          <span className="mode-card-info">
+            <span className="mode-card-number">04 / LIMITED EVENTS</span>
+            <strong>FESTIVAL</strong>
+            <span>Take on challenges and earn rewards.</span>
+          </span>
+          <span className="mode-card-arrow">↗</span>
         </button>
       </div>
-    </>
+
+      <nav className="home-utility-nav" aria-label="Other game options">
+        <button onClick={() => navigate("/shop")}>CHARACTER SHOP</button>
+        <span />
+        <button onClick={() => navigate("/inventory")}>INVENTORY</button>
+        <span />
+        <button onClick={() => navigate("/achievements")}>ACHIEVEMENTS</button>
+        <span />
+        <button onClick={() => openMenu("settings")}>SETTINGS</button>
+        <span />
+        <button onClick={() => openMenu("howToPlay")}>HOW TO PLAY</button>
+      </nav>
+    </div>
   );
 
   const renderPlay = () => (
@@ -631,10 +678,7 @@ function Homescreen() {
       <div className="arcade-background" />
 
       <header className="home-header">
-        <div className="game-logo">
-          <span className="logo-mark">VS</span>
-          <span className="logo-name">Wild Cards</span>
-        </div>
+        <div className="home-header-spacer" />
 
         <div className="home-header-right">
           <div className="currency-display" aria-label={`${coins} coins`}>
