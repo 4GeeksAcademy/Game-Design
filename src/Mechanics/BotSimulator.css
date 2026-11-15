@@ -772,3 +772,307 @@
     flex-direction: column;
   }
 }
+
+
+/* ==========================================
+   WILD CARDS — COMBAT RESEARCH LABORATORY
+========================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap");
+
+.bot-simulator {
+  --lab-blue: #168cff;
+  --lab-cyan: #27dfff;
+  --lab-dark: #050d1b;
+  --lab-panel: rgba(9, 25, 47, 0.94);
+  --lab-border: rgba(39, 160, 255, 0.35);
+
+  font-family: "Rajdhani", sans-serif;
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(0, 119, 255, 0.24),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 0% 50%,
+      rgba(0, 190, 255, 0.08),
+      transparent 40%
+    ),
+    linear-gradient(145deg, #07172d, #030914 75%);
+}
+
+/* Laboratory atmosphere */
+.bot-simulator::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  background-image:
+    linear-gradient(rgba(39, 223, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(39, 223, 255, 0.12) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, black, transparent 90%);
+}
+
+.bot-simulator > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.simulator-header {
+  max-width: 1450px;
+  margin: 0 auto 38px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--lab-border);
+}
+
+.simulator-header h1 {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-shadow: 0 0 18px rgba(39, 223, 255, 0.25);
+}
+
+.simulator-header p {
+  color: var(--lab-cyan);
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+}
+
+.simulator-header button {
+  border-color: var(--lab-border);
+  border-radius: 2px;
+  background: #0c2039;
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+}
+
+.simulator-header button:hover {
+  border-color: var(--lab-cyan);
+  color: var(--lab-cyan);
+  box-shadow: 0 0 16px rgba(39, 223, 255, 0.15);
+}
+
+/* Main research panels */
+.simulator-setup,
+.simulation-results {
+  position: relative;
+  border: 1px solid var(--lab-border);
+  border-radius: 4px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(13, 37, 66, 0.96),
+      rgba(5, 16, 32, 0.98)
+    );
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(39, 223, 255, 0.06);
+}
+
+.simulator-setup h2,
+.simulation-results h2 {
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.simulator-setup > p {
+  color: #a9c6e2;
+}
+
+/* Fighter experiment panels */
+.simulator-bot {
+  border: 1px solid rgba(39, 160, 255, 0.3);
+  border-radius: 3px;
+  background: linear-gradient(145deg, #102947, #071629);
+}
+
+.simulator-bot h3 {
+  color: #39caff;
+  font-family: "Oxanium", sans-serif;
+  letter-spacing: 1px;
+}
+
+.simulator-bot:last-child h3 {
+  color: #ff526d;
+}
+
+.simulator-bot select,
+.simulation-count input {
+  border-color: rgba(39, 160, 255, 0.4);
+  border-radius: 2px;
+  background: #071a30;
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+}
+
+.simulator-bot select:focus,
+.simulation-count input:focus {
+  outline: 1px solid var(--lab-cyan);
+  border-color: var(--lab-cyan);
+  box-shadow: 0 0 12px rgba(39, 223, 255, 0.15);
+}
+
+/* VS indicator */
+.simulator-versus {
+  color: var(--lab-cyan);
+  font-family: "Oxanium", sans-serif;
+  text-shadow: 0 0 15px rgba(39, 223, 255, 0.5);
+}
+
+/* Simulation mode selector */
+.simulator-mode-buttons button {
+  border-color: var(--lab-border);
+  border-radius: 2px;
+  background: #0b2039;
+  font-family: "Oxanium", sans-serif;
+  font-weight: 700;
+}
+
+.simulator-mode-buttons button.active {
+  color: #03111e;
+  background: var(--lab-cyan);
+  border-color: var(--lab-cyan);
+  box-shadow: 0 0 18px rgba(39, 223, 255, 0.25);
+}
+
+/* Run experiment */
+.run-simulation-button {
+  border: 1px solid var(--lab-cyan);
+  border-radius: 2px;
+  color: #03111e;
+  background: linear-gradient(100deg, #168cff, #27dfff);
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+  letter-spacing: 2px;
+  box-shadow: 0 0 20px rgba(39, 223, 255, 0.13);
+}
+
+.run-simulation-button:hover:not(:disabled) {
+  background: linear-gradient(100deg, #42b5ff, #8cefff);
+  box-shadow: 0 0 25px rgba(39, 223, 255, 0.3);
+}
+
+/* Research statistics */
+.simulation-stat-grid > div {
+  border: 1px solid var(--lab-border);
+  border-radius: 3px;
+  background: rgba(5, 19, 36, 0.95);
+}
+
+.simulation-stat-grid span {
+  color: #8eb5d9;
+  font-family: "Oxanium", sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.simulation-stat-grid strong {
+  color: var(--lab-cyan);
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+}
+
+/* Progress indicator */
+.simulation-progress {
+  border-color: var(--lab-border);
+  border-radius: 3px;
+  background: rgba(3, 14, 29, 0.96);
+}
+
+.simulation-progress-header {
+  color: var(--lab-cyan);
+  font-family: "Oxanium", sans-serif;
+}
+
+.simulation-progress-header strong {
+  color: #fff;
+}
+
+.simulation-progress-track {
+  border: 1px solid rgba(39, 223, 255, 0.25);
+  border-radius: 2px;
+  background: #071426;
+}
+
+.simulation-progress-fill {
+  border-radius: 1px;
+  background: linear-gradient(90deg, #0875e5, #27dfff);
+  box-shadow: 0 0 15px rgba(39, 223, 255, 0.5);
+}
+
+/* Results tables */
+.matchup-table-wrapper {
+  border-color: var(--lab-border);
+  border-radius: 3px;
+}
+
+.matchup-table th {
+  color: var(--lab-cyan);
+  background: #0b2542;
+  font-family: "Oxanium", sans-serif;
+}
+
+.matchup-table td {
+  background: #091a30;
+}
+
+.matchup-table tbody tr:hover td {
+  background: #102c4b;
+}
+
+.matchup-table .overall-score-cell {
+  color: var(--lab-cyan);
+}
+
+/* Combat logs */
+.simulation-log {
+  border-color: var(--lab-border);
+  border-radius: 3px;
+  background: #030d1a;
+}
+
+.simulation-log p {
+  border-bottom-color: rgba(39, 160, 255, 0.16);
+}
+
+/* Analysis sections */
+.analysis-fighter-selector,
+.fighter-matchup-card,
+.starting-order-card {
+  border-color: var(--lab-border);
+  border-radius: 3px;
+  background: var(--lab-panel);
+}
+
+.analysis-fighter-selector-header h3,
+.fighter-matchup-rankings > h3 {
+  color: var(--lab-cyan);
+  font-family: "Oxanium", sans-serif;
+}
+
+.analysis-fighter-option {
+  border-color: rgba(39, 160, 255, 0.22);
+  border-radius: 3px;
+  background: #0b1c31;
+}
+
+.analysis-fighter-option:hover {
+  border-color: var(--lab-cyan);
+  background: #102c4b;
+}
+
+.analysis-fighter-option input {
+  accent-color: var(--lab-cyan);
+}
+
+/* Responsive safety */
+@media (max-width: 700px) {
+  .simulator-header {
+    gap: 12px;
+  }
+}
