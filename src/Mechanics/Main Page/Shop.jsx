@@ -22,6 +22,7 @@ import {
 } from "../Currency.js";
 
 import "./Shop.css";
+import { playGameSound } from "../../audio/audioManager.js";
 
 const fighters = [
   { id: "mina", data: mina, cost: 2500, unlockable: true },
@@ -80,6 +81,7 @@ function Shop() {
 
     if (unlockCharacter(fighter.id)) {
       setUnlocked(getUnlockedCharacters());
+      playGameSound("purchase");
       setMessage(`${fighter.data.name} unlocked successfully!`);
     }
   };
