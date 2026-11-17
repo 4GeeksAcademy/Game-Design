@@ -11,8 +11,8 @@ import {
 
 function getTrack(pathname) {
   if (pathname.includes("battle") || pathname.includes("watch-mode") || pathname.includes("bot-simulator")) return "battle";
-  if (pathname.includes("story")) return "story";
   if (pathname.includes("victory") || pathname.includes("story-reward")) return "victory";
+  if (pathname.includes("story")) return "story";
   return "menu";
 }
 
