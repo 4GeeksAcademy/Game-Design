@@ -123,7 +123,7 @@ function AttackOptions({
       const damage = result.damageReceived ?? 0;
       if (damage > 0) setDamageDealt((previous) => previous + damage);
 
-      playGameSound("attack");
+      if (damage > 0 && result.action === "attack") playGameSound("attack");
       setAttacksUsed((previous) => previous + 1);
       showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
 
