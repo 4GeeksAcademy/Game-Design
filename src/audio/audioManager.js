@@ -10,6 +10,14 @@ let masterGain = null;
 let musicGain = null;
 let musicTimer = null;
 let musicStep = 0;
+let audioElement = null;
+const MUSIC_FILES = {
+  menu: "/audio/music/menu-theme.mp3",
+  story: "/audio/music/story-theme.mp3",
+  battle1v1: "/audio/music/battle-1v1.mp3",
+  battle2v2: "/audio/music/battle-2v2.mp3",
+  victory: "/audio/music/victory-theme.mp3",
+};
 let currentTrack = "menu";
 let settings = loadSettings();
 
@@ -46,6 +54,7 @@ function applyVolumes() {
   const now = audioContext.currentTime;
   masterGain.gain.setTargetAtTime(settings.muted ? 0 : settings.master, now, 0.04);
   musicGain.gain.setTargetAtTime(settings.music, now, 0.08);
+  if (audioElement) audioElement.volume = settings.muted ? 0 : Math.max(0, Math.min(1, settings.master * settings.music));
 }
 
 function makeTone(frequency, duration, type = "sine", volume = 0.06, when = 0, destination = null, category = "effects") {
@@ -130,25 +139,58 @@ function playMusicStep() {
   musicStep += 1;
 }
 
-export function startMusic(track = "menu") {
-  ensureAudio();
-  if (currentTrack !== track) {
-    currentTrack = track;
-    musicStep = 0;
-    if (musicTimer) {
-      window.clearInterval(musicTimer);
-      musicTimer = null;
-    }
-  }
+function startSynthMusic() {
   if (!audioContext || musicTimer || settings.muted || settings.music <= 0) return;
   playMusicStep();
   const pattern = musicPatterns[currentTrack] || musicPatterns.menu;
   musicTimer = window.setInterval(playMusicStep, (60 / pattern.bpm / 2) * 1000);
 }
 
+export function startMusic(track = "menu") {
+  ensureAudio();
+  if (currentTrack !== track) {
+    stopMusic();
+    currentTrack = track;
+    musicStep = 0;
+  }
+  if (settings.muted || settings.music <= 0 || audioElement || musicTimer) return;
+
+  const filePath = MUSIC_FILES[currentTrack];
+  if (filePath && typeof Audio !== "undefined") {
+    const player = new Audio(filePath);
+    player.loop = true;
+    player.volume = Math.max(0, Math.min(1, settings.master * settings.music));
+    player.oncanplay = () => {
+      if (audioElement === player) player.play().catch(() => {
+        if (audioElement === player) {
+          audioElement = null;
+          startSynthMusic();
+        }
+      });
+    };
+    player.onerror = () => {
+      if (audioElement === player) {
+        audioElement = null;
+        startSynthMusic();
+      }
+    };
+    audioElement = player;
+    player.load();
+    return;
+  }
+
+  startSynthMusic();
+}
+
 export function stopMusic() {
   if (musicTimer && typeof window !== "undefined") window.clearInterval(musicTimer);
   musicTimer = null;
+  if (audioElement) {
+    audioElement.pause();
+    audioElement.removeAttribute("src");
+    audioElement.load();
+    audioElement = null;
+  }
 }
 
 export function playUISound(kind = "click") {
