@@ -24,3 +24,15 @@ If a file is not present, the Web Audio prototype plays instead.
 
 ## Character sound profiles
 Character dialogue and expression effects currently use synthesized voice-like prototypes. The profile keys are character ID + expression in `src/audio/audioManager.js`; recorded voice clips can be added in a later asset pass.
+
+## Hosted CC0 sound effects currently used by the game
+
+These are library MP3 files hotlinked by `src/audio/audioManager.js` (the game streams them when the matching event occurs; they are not bundled into the repository yet):
+
+- UI click: SFXMint library — `https://sfxmint.com/dl/ui-click-56.mp3`
+- Attack impact: SFXMint library — `https://sfxmint.com/dl/impact-punch-51.mp3`
+- Successful shop purchase / cash register: SFXMint library — `https://sfxmint.com/dl/office-cash-register-16.mp3`
+
+SFXMint states that its public sound library is dedicated to CC0 1.0, permits commercial use without attribution, and allows hotlinking. See [SFXMint license and terms](https://sfxmint.com/terms).
+
+**Hosting note:** These effects currently stream from SFXMint. If the service changes a file URL or becomes unavailable, the sound will not play; gameplay will continue. We can later download approved clips into `public/audio/effects/` and switch the asset map to local files for self-hosting.
