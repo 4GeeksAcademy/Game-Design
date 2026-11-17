@@ -189,6 +189,19 @@ export function playDialogueBlip(characterId = "narrator") {
 
 // One-shot reactions tied to expression changes. File-backed clips can replace
 // these synth prototypes while keeping the same character/expression keys.
+const genericExpressionProfiles = {
+  happy: { notes: [740, 880], duration: 0.075, type: "triangle" },
+  excited: { notes: [660, 880, 990], duration: 0.065, type: "square" },
+  angry: { notes: [220, 165], duration: 0.09, type: "square" },
+  determined: { notes: [392, 494], duration: 0.09, type: "triangle" },
+  serious: { notes: [330], duration: 0.1, type: "sine" },
+  relate: { notes: [587, 659], duration: 0.08, type: "triangle" },
+  facepalm: { notes: [392, 330], duration: 0.12, type: "sine" },
+  exasperated: { notes: [330, 294], duration: 0.13, type: "sine" },
+  pushups1: { notes: [145, 115], duration: 0.12, type: "sawtooth" },
+  pushups2: { notes: [125, 95], duration: 0.14, type: "sawtooth" },
+};
+
 const expressionProfiles = {
   rockLee: {
     happy: { notes: [784, 988], duration: 0.075, type: "triangle" },
@@ -210,10 +223,12 @@ const expressionProfiles = {
 };
 
 export function playCharacterExpression(characterId, expression) {
-  const profile = expressionProfiles[characterId]?.[expression];
+  const profile = expressionProfiles[characterId]?.[expression] || genericExpressionProfiles[expression];
   if (!profile) return;
+  const characterSeed = String(characterId || "").split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const characterPitch = 1 + ((characterSeed % 9) - 4) * 0.012;
   profile.notes.forEach((note, index) => {
-    makeTone(note, profile.duration, profile.type, 0.035, index * 0.075, null, "voices");
+    makeTone(note * characterPitch, profile.duration, profile.type, 0.035, index * 0.075, null, "voices");
   });
 }
 
