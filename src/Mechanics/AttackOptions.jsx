@@ -6,6 +6,7 @@ import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import { canUseAttack } from "./Health.js";
 import StunTargetSelector from "./StunTargetSelector.jsx";
 import "./BattleUI.css";
+import { playGameSound } from "../audio/audioManager.js";
 
 function isAttackAvailable(attack) {
   return canUseAttack(attack);
@@ -122,6 +123,7 @@ function AttackOptions({
       const damage = result.damageReceived ?? 0;
       if (damage > 0) setDamageDealt((previous) => previous + damage);
 
+      if (damage > 0 && result.action === "attack") playGameSound("attack");
       setAttacksUsed((previous) => previous + 1);
       showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
 
