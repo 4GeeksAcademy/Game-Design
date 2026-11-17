@@ -18,6 +18,7 @@ import {
   tickSelfModifiers,
 } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
+import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
 import VictoryScreen from "./VictoryScreen.jsx";
 import GameOverScreen from "./GameOverScreen.jsx";
@@ -1192,6 +1193,7 @@ export default function TeamBattle() {
       (value) =>
         value + Math.max(0, healthBefore - Math.max(0, defender.health)),
     );
+    if (!attacker.isCpuTeammate) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
 
     const playersAfter = updatedPlayers.map((fighter) => {
