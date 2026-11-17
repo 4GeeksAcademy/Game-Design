@@ -25,14 +25,31 @@ If a file is not present, the Web Audio prototype plays instead.
 ## Character sound profiles
 Character dialogue and expression effects currently use synthesized voice-like prototypes. The profile keys are character ID + expression in `src/audio/audioManager.js`; recorded voice clips can be added in a later asset pass.
 
-## Hosted CC0 sound effects currently used by the game
 
-These are library MP3 files hotlinked by `src/audio/audioManager.js` (the game streams them when the matching event occurs; they are not bundled into the repository yet):
+## Bundled audio files
 
-- UI click: SFXMint library — `https://sfxmint.com/dl/ui-click-56.mp3`
-- Attack impact: SFXMint library — `https://sfxmint.com/dl/impact-punch-51.mp3`
-- Successful shop purchase / cash register: SFXMint library — `https://sfxmint.com/dl/office-cash-register-16.mp3`
+All files below are stored locally in this repository. The game loads them from `public/audio/` using paths based on Vite's `BASE_URL`, so they work with the GitHub Pages `/Game-Design/` deployment.
 
-SFXMint states that its public sound library is dedicated to CC0 1.0, permits commercial use without attribution, and allows hotlinking. See [SFXMint license and terms](https://sfxmint.com/terms).
+### Sound effects
 
-**Hosting note:** These effects currently stream from SFXMint. If the service changes a file URL or becomes unavailable, the sound will not play; gameplay will continue. We can later download approved clips into `public/audio/effects/` and switch the asset map to local files for self-hosting.
+| Local file | Source | License |
+|---|---|---|
+| `effects/ui-click.mp3` | [Kenney — Interface Sounds](https://kenney.nl/assets/interface-sounds), click sound | CC0 1.0 |
+| `effects/purchase-coin.mp3` | [Kenney — Casino Audio](https://kenney.nl/assets/casino-audio), coin sound | CC0 1.0 |
+| `effects/attack-impact.ogg` | [Kenney — Impact Sounds](https://kenney.nl/assets/impact-sounds), medium punch impact | CC0 1.0 |
+
+### Music
+
+| Local file | Track / creator | Source | License |
+|---|---|---|---|
+| `music/menu-theme.mp3` | Upbeat Loop — BenjaTheMaker | [OpenGameArt](https://opengameart.org/content/upbeat-short-music-loop-vorbis-oog) | CC0 1.0 |
+| `music/story-theme.mp3` | Peaceful Days — Juhani Junkala | [OpenGameArt](https://opengameart.org/content/jrpg-pack-4-calm) | CC0 1.0 |
+| `music/battle-1v1.mp3` | Stage 2 — Juhani Junkala | [OpenGameArt](https://opengameart.org/content/4-chiptunes-adventure) | CC0 1.0 |
+| `music/battle-2v2.mp3` | Head in the Sand — congusbongus | [OpenGameArt](https://opengameart.org/content/head-in-the-sand-seamless-loop) | CC0 1.0 |
+| `music/victory-theme.mp3` | Kenney Music Jingles — NES stinger | [Kenney — Music Jingles](https://kenney.nl/assets/music-jingles) | CC0 1.0 |
+
+These assets were sourced from the public [S3M1TR4SH asset-library](https://github.com/S3M1TR4SH/asset-library), which documents the individual asset sources and CC0 licenses in its `LICENSES.md`. The punch impact was sourced from [GeorgeQLe/assets-sfx-combat](https://github.com/GeorgeQLe/assets-sfx-combat), which includes Kenney's CC0 license information.
+
+## Replacing audio later
+
+Keep the filenames above and replace the corresponding files in `public/audio/music/` or `public/audio/effects/`. The code does not need to change as long as the filenames remain the same. Music and effects are loaded locally; no external sound-library URL is required.
