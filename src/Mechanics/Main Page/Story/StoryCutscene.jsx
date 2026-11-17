@@ -244,9 +244,11 @@ function StoryCutscene({
       index += 1;
       setVisibleCharacters(index);
 
-      // A quiet voice-style blip every few visible characters.
-      if (index % 3 === 0 && fullText[index - 1] && !/\\s/.test(fullText[index - 1])) {
-        playDialogueBlip(dialogueLines[dialogueIndex]?.characterId || "narrator");
+      // Each speaker has an individual typewriter voice profile.
+      const speakerId = dialogueLines[dialogueIndex]?.characterId || "narrator";
+      const voiceProfile = getDialogueProfile(speakerId);
+      if (index % voiceProfile.interval === 0 && fullText[index - 1] && !/\s/.test(fullText[index - 1])) {
+        playDialogueBlip(speakerId);
       }
 
       if (index >= fullText.length) {
