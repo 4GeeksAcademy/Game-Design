@@ -12,11 +12,11 @@ let musicTimer = null;
 let musicStep = 0;
 let audioElement = null;
 const MUSIC_FILES = {
-  menu: "/audio/music/menu-theme.mp3",
-  story: "/audio/music/story-theme.mp3",
-  battle1v1: "/audio/music/battle-1v1.mp3",
-  battle2v2: "/audio/music/battle-2v2.mp3",
-  victory: "/audio/music/victory-theme.mp3",
+  menu: `${import.meta.env.BASE_URL}audio/music/menu-theme.mp3`,
+  story: `${import.meta.env.BASE_URL}audio/music/story-theme.mp3`,
+  battle1v1: `${import.meta.env.BASE_URL}audio/music/battle-1v1.mp3`,
+  battle2v2: `${import.meta.env.BASE_URL}audio/music/battle-2v2.mp3`,
+  victory: `${import.meta.env.BASE_URL}audio/music/victory-theme.mp3`,
 };
 let currentTrack = "menu";
 let settings = loadSettings();
