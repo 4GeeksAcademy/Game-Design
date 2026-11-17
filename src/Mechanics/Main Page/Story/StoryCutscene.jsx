@@ -4,6 +4,7 @@ import { roster } from "../CharacterSelection.jsx";
 import { storyExpressions } from "./StoryExpressions.js";
 import { storyBackgrounds } from "./StoryBackgrounds.js";
 import { preloadStoryImages } from "./PreloadStoryImages.js";
+import { playDialogueBlip } from "../../../audio/audioManager.js";
 import "./StoryCutscene.css";
 
 function StoryBackground({ backgroundKey }) {
@@ -228,6 +229,11 @@ function StoryCutscene({
     typingTimerRef.current = setInterval(() => {
       index += 1;
       setVisibleCharacters(index);
+
+      // A quiet voice-style blip every few visible characters.
+      if (index % 3 === 0 && fullText[index - 1] && !/\\s/.test(fullText[index - 1])) {
+        playDialogueBlip(dialogueLines[dialogueIndex]?.characterId || "narrator");
+      }
 
       if (index >= fullText.length) {
         clearInterval(typingTimerRef.current);
