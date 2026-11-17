@@ -3,6 +3,7 @@ import mina from "../All_Character_Stats/Mina_AshidoStats.js";
 import Kirishima from "../All_Character_Stats/KirishimaStats.js";
 import wildCardsLogo from "../../assets/img/logo.png";
 import { useNavigate } from "react-router-dom";
+import { getAudioSettings, updateAudioSettings } from "../../audio/audioManager.js";
 import { getCoins, getUnlockedCharacters, unlockCharacter } from "../Currency";
 import {
   ATTACK_SLOT_COUNT,
@@ -36,8 +37,13 @@ function Homescreen() {
 
   const canPlay2v2 = unlockedCharacters.length >= 2;
   const [keybinds, setKeybinds] = useState(() => loadKeybinds());
+  const [audioSettings, setAudioSettings] = useState(() => getAudioSettings());
   const [listeningFor, setListeningFor] = useState(null);
   const [keybindMessage, setKeybindMessage] = useState("");
+
+  const changeAudioSetting = (key, value) => {
+    setAudioSettings(updateAudioSettings({ [key]: value }));
+  };
 
   const resetKeybinds = () => {
     const defaults = JSON.parse(JSON.stringify(DEFAULT_KEYBINDS));
@@ -253,13 +259,59 @@ function Homescreen() {
           </p>
         )}
 
+        <section className="audio-settings-section" aria-labelledby="audio-settings-title">
+          <p className="home-eyebrow">SOUND & MUSIC</p>
+          <h2 className="menu-title" id="audio-settings-title">AUDIO SETTINGS</h2>
+          <p className="menu-description">
+            Adjust the soundtrack, sound effects, and character voices independently.
+          </p>
+
+          {[
+            ["master", "Master volume", "Controls all game audio."],
+            ["music", "Background music", "Menu, story, and battle themes."],
+            ["effects", "Sound effects", "Buttons, impacts, and action sounds."],
+            ["voices", "Character voices", "Dialogue typing and expression reactions."],
+          ].map(([key, label, description]) => (
+            <label className="audio-setting-row" key={key}>
+              <span className="audio-setting-copy">
+                <strong>{label}</strong>
+                <small>{description}</small>
+              </span>
+              <span className="audio-setting-control">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={audioSettings[key]}
+                  onChange={(event) => changeAudioSetting(key, Number(event.target.value))}
+                  aria-label={label}
+                />
+                <output>{Math.round(audioSettings[key] * 100)}%</output>
+              </span>
+            </label>
+          ))}
+
+          <label className="audio-mute-row">
+            <span>
+              <strong>Mute all audio</strong>
+              <small>Quickly silence music, effects, and voices.</small>
+            </span>
+            <input
+              type="checkbox"
+              checked={audioSettings.muted}
+              onChange={(event) => changeAudioSetting("muted", event.target.checked)}
+            />
+          </label>
+        </section>
+
         <div className="settings-actions">
           <button
             type="button"
             className="arcade-button"
             onClick={resetKeybinds}
           >
-            RESTORE DEFAULTS
+            RESTORE KEYBINDS
           </button>
 
           <button type="button" className="back-button" onClick={goBack}>
