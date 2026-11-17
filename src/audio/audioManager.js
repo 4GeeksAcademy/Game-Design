@@ -1,11 +1,11 @@
-// Central audio controls for Wild Cards.
-// Replace these Web Audio-generated sounds with files in public/audio later
-// without changing the components that call this module.
+// Central audio engine for Wild Cards.
+// All sound profiles are kept here so recorded files can replace the
+// synthesized prototypes later without changing game components.
 
 const STORAGE_KEY = "wild-cards-audio-settings";
-const DEFAULTS = { master: 0.7, music: 0.22, effects: 0.55, muted: false };
+const DEFAULTS = { master: 0.75, music: 0.3, effects: 0.65, voices: 0.8, muted: false };
 
-let context = null;
+let audioContext = null;
 let masterGain = null;
 let musicGain = null;
 let musicTimer = null;
@@ -22,47 +22,42 @@ function loadSettings() {
 }
 
 function saveSettings() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  } catch {
-    // Audio still works when storage is unavailable.
-  }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); } catch { /* Storage is optional. */ }
 }
 
 function ensureAudio() {
   if (typeof window === "undefined") return null;
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextClass) return null;
-
-  if (!context) {
-    context = new AudioContextClass();
-    masterGain = context.createGain();
-    musicGain = context.createGain();
+  if (!audioContext) {
+    audioContext = new AudioContextClass();
+    masterGain = audioContext.createGain();
+    musicGain = audioContext.createGain();
     musicGain.connect(masterGain);
-    masterGain.connect(context.destination);
+    masterGain.connect(audioContext.destination);
     applyVolumes();
   }
-  if (context.state === "suspended") context.resume().catch(() => {});
-  return context;
+  if (audioContext.state === "suspended") audioContext.resume().catch(() => {});
+  return audioContext;
 }
 
 function applyVolumes() {
-  if (!context || !masterGain || !musicGain) return;
-  const now = context.currentTime;
+  if (!audioContext || !masterGain || !musicGain) return;
+  const now = audioContext.currentTime;
   masterGain.gain.setTargetAtTime(settings.muted ? 0 : settings.master, now, 0.04);
   musicGain.gain.setTargetAtTime(settings.music, now, 0.08);
 }
 
-function tone(frequency, duration, type = "sine", volume = 0.08, destination = null, when = 0) {
-  const audio = ensureAudio();
-  if (!audio || settings.muted || settings.effects <= 0) return;
-  const oscillator = audio.createOscillator();
-  const gain = audio.createGain();
-  const start = audio.currentTime + when;
+function makeTone(frequency, duration, type = "sine", volume = 0.06, when = 0, destination = null, category = "effects") {
+  const ctx = ensureAudio();
+  if (!ctx || settings.muted || settings[category] <= 0) return;
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const start = ctx.currentTime + when;
   oscillator.type = type;
   oscillator.frequency.setValueAtTime(frequency, start);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume * settings.effects), start + 0.012);
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume * settings[category]), start + 0.012);
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   oscillator.connect(gain);
   gain.connect(destination || masterGain);
@@ -70,30 +65,68 @@ function tone(frequency, duration, type = "sine", volume = 0.08, destination = n
   oscillator.stop(start + duration + 0.03);
 }
 
-const progressions = {
-  menu: [ [110, 138.59, 164.81], [98, 123.47, 146.83], [130.81, 164.81, 196], [87.31, 110, 130.81] ],
-  story: [ [130.81, 155.56, 196], [110, 130.81, 164.81], [98, 123.47, 146.83], [116.54, 146.83, 174.61] ],
-  battle: [ [73.42, 110, 146.83], [82.41, 123.47, 164.81], [65.41, 98, 130.81], [87.31, 130.81, 174.61] ],
-  victory: [ [130.81, 164.81, 196], [146.83, 185, 220], [164.81, 196, 246.94], [146.83, 185, 220] ],
+// Bright, major-key arcade phrases instead of the previous ominous drone.
+// The patterns are deliberately short prototypes: replace with custom music later.
+const musicPatterns = {
+  menu: {
+    bpm: 112,
+    notes: [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46, 523.25, 659.25, 783.99, 1046.5, 880, 783.99, 698.46, 659.25],
+    bass: [130.81, 164.81, 196, 164.81],
+  },
+  story: {
+    bpm: 92,
+    notes: [392, 493.88, 587.33, 493.88, 440, 523.25, 659.25, 523.25, 392, 440, 523.25, 587.33],
+    bass: [98, 130.81, 146.83, 130.81],
+  },
+  battle1v1: {
+    bpm: 132,
+    notes: [392, 523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 783.99, 659.25, 523.25, 659.25, 587.33, 783.99, 880, 1046.5],
+    bass: [98, 98, 130.81, 146.83],
+  },
+  battle2v2: {
+    bpm: 146,
+    notes: [329.63, 392, 493.88, 587.33, 659.25, 587.33, 493.88, 392, 349.23, 440, 523.25, 659.25, 698.46, 659.25, 587.33, 493.88],
+    bass: [82.41, 110, 130.81, 110],
+  },
+  victory: {
+    bpm: 120,
+    notes: [523.25, 659.25, 783.99, 1046.5, 783.99, 880, 1046.5, 1318.51],
+    bass: [130.81, 164.81, 196, 261.63],
+  },
 };
 
 function playMusicStep() {
-  if (!context || settings.muted || settings.music <= 0) return;
-  const progression = progressions[currentTrack] || progressions.menu;
-  const chord = progression[Math.floor(musicStep / 4) % progression.length];
-  const note = chord[musicStep % 3];
-  const now = context.currentTime;
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  oscillator.type = "triangle";
-  oscillator.frequency.setValueAtTime(note, now);
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.linearRampToValueAtTime(0.12, now + 0.7);
-  gain.gain.setTargetAtTime(0.0001, now + 2.2, 0.4);
-  oscillator.connect(gain);
-  gain.connect(musicGain);
-  oscillator.start(now);
-  oscillator.stop(now + 4.2);
+  const ctx = audioContext;
+  if (!ctx || settings.muted || settings.music <= 0) return;
+  const pattern = musicPatterns[currentTrack] || musicPatterns.menu;
+  const index = musicStep % pattern.notes.length;
+  const now = ctx.currentTime;
+  const beat = 60 / pattern.bpm / 2;
+  const melody = ctx.createOscillator();
+  const melodyGain = ctx.createGain();
+  melody.type = "triangle";
+  melody.frequency.setValueAtTime(pattern.notes[index], now);
+  melodyGain.gain.setValueAtTime(0.0001, now);
+  melodyGain.gain.linearRampToValueAtTime(0.075, now + 0.018);
+  melodyGain.gain.exponentialRampToValueAtTime(0.0001, now + beat * 0.82);
+  melody.connect(melodyGain);
+  melodyGain.connect(musicGain);
+  melody.start(now);
+  melody.stop(now + beat);
+
+  if (musicStep % 2 === 0) {
+    const bass = ctx.createOscillator();
+    const bassGain = ctx.createGain();
+    bass.type = "triangle";
+    bass.frequency.setValueAtTime(pattern.bass[Math.floor(musicStep / 2) % pattern.bass.length], now);
+    bassGain.gain.setValueAtTime(0.0001, now);
+    bassGain.gain.linearRampToValueAtTime(0.11, now + 0.015);
+    bassGain.gain.exponentialRampToValueAtTime(0.0001, now + beat * 1.7);
+    bass.connect(bassGain);
+    bassGain.connect(musicGain);
+    bass.start(now);
+    bass.stop(now + beat * 1.8);
+  }
   musicStep += 1;
 }
 
@@ -102,39 +135,86 @@ export function startMusic(track = "menu") {
   if (currentTrack !== track) {
     currentTrack = track;
     musicStep = 0;
+    if (musicTimer) {
+      window.clearInterval(musicTimer);
+      musicTimer = null;
+    }
   }
-  if (!context || musicTimer) return;
+  if (!audioContext || musicTimer || settings.muted || settings.music <= 0) return;
   playMusicStep();
-  musicTimer = window.setInterval(playMusicStep, 3000);
+  const pattern = musicPatterns[currentTrack] || musicPatterns.menu;
+  musicTimer = window.setInterval(playMusicStep, (60 / pattern.bpm / 2) * 1000);
 }
 
 export function stopMusic() {
-  if (musicTimer) window.clearInterval(musicTimer);
+  if (musicTimer && typeof window !== "undefined") window.clearInterval(musicTimer);
   musicTimer = null;
 }
 
 export function playUISound(kind = "click") {
   const sounds = {
-    click: [520, 0.055, "square", 0.035],
-    confirm: [740, 0.1, "triangle", 0.06],
-    back: [330, 0.08, "triangle", 0.045],
-    unlock: [880, 0.28, "sine", 0.07],
-    hit: [115, 0.12, "sawtooth", 0.09],
-    block: [245, 0.09, "square", 0.045],
-    victory: [660, 0.18, "triangle", 0.07],
+    click: [620, 0.045, "square", 0.025],
+    confirm: [784, 0.09, "triangle", 0.05],
+    back: [440, 0.07, "triangle", 0.035],
+    unlock: [988, 0.24, "sine", 0.065],
+    hit: [125, 0.11, "sawtooth", 0.08],
+    block: [280, 0.08, "square", 0.04],
+    victory: [784, 0.16, "triangle", 0.06],
   };
   const [frequency, duration, type, volume] = sounds[kind] || sounds.click;
-  tone(frequency, duration, type, volume);
-  if (kind === "confirm" || kind === "unlock" || kind === "victory") {
-    tone(frequency * 1.25, duration * 0.8, "sine", volume * 0.65, null, 0.09);
+  makeTone(frequency, duration, type, volume);
+  if (["confirm", "unlock", "victory"].includes(kind)) {
+    makeTone(frequency * 1.25, duration * 0.8, "sine", volume * 0.6, 0.08);
   }
 }
 
-export function playDialogueBlip(characterId = "") {
-  // Slight pitch variation keeps the typewriter voice from sounding robotic.
-  const seed = String(characterId).split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  const pitch = 390 + (seed % 7) * 24 + Math.random() * 18;
-  tone(pitch, 0.035, "square", 0.018);
+// Distinct typewriter timbres for each fighter. These are temporary synthesized
+// voice textures until recorded character-specific clips are placed in public/audio.
+const dialogueProfiles = {
+  rockLee: { base: 510, type: "square", duration: 0.027, volume: 0.025, interval: 3 },
+  tenten: { base: 690, type: "triangle", duration: 0.032, volume: 0.021, interval: 3 },
+  narrator: { base: 420, type: "sine", duration: 0.025, volume: 0.014, interval: 4 },
+  default: { base: 570, type: "triangle", duration: 0.028, volume: 0.018, interval: 3 },
+};
+
+export function getDialogueProfile(characterId) {
+  return dialogueProfiles[characterId] || dialogueProfiles.default;
+}
+
+export function playDialogueBlip(characterId = "narrator") {
+  const profile = getDialogueProfile(characterId);
+  const variation = (Math.random() - 0.5) * 38;
+  makeTone(profile.base + variation, profile.duration, profile.type, profile.volume, 0, null, "voices");
+}
+
+// One-shot reactions tied to expression changes. File-backed clips can replace
+// these synth prototypes while keeping the same character/expression keys.
+const expressionProfiles = {
+  rockLee: {
+    happy: { notes: [784, 988], duration: 0.075, type: "triangle" },
+    excited: { notes: [659, 880, 1175], duration: 0.065, type: "square" },
+    determined: { notes: [392, 523], duration: 0.09, type: "triangle" },
+    serious: { notes: [330], duration: 0.1, type: "sine" },
+    pushups1: { notes: [145, 115], duration: 0.12, type: "sawtooth" },
+    pushups2: { notes: [125, 95], duration: 0.14, type: "sawtooth" },
+    angry: { notes: [185, 140], duration: 0.09, type: "square" },
+  },
+  tenten: {
+    happy: { notes: [880, 1046], duration: 0.07, type: "triangle" },
+    angry: { notes: [260, 220], duration: 0.09, type: "square" },
+    exasperated: { notes: [330, 294], duration: 0.13, type: "sine" },
+    facepalm: { notes: [392, 330], duration: 0.12, type: "sine" },
+    relate: { notes: [587, 659], duration: 0.08, type: "triangle" },
+    neutral: { notes: [440], duration: 0.045, type: "sine" },
+  },
+};
+
+export function playCharacterExpression(characterId, expression) {
+  const profile = expressionProfiles[characterId]?.[expression];
+  if (!profile) return;
+  profile.notes.forEach((note, index) => {
+    makeTone(note, profile.duration, profile.type, 0.035, index * 0.075, null, "voices");
+  });
 }
 
 export function getAudioSettings() {
@@ -146,7 +226,7 @@ export function updateAudioSettings(next) {
   saveSettings();
   applyVolumes();
   if (settings.muted || settings.music <= 0) stopMusic();
-  else if (!musicTimer && context) startMusic(currentTrack);
+  else if (audioContext && !musicTimer) startMusic(currentTrack);
   return getAudioSettings();
 }
 
