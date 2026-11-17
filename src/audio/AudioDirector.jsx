@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, {  useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { initializeAudio, playUISound, startMusic, stopMusic } from "./audioManager.js";
 
