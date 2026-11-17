@@ -2707,3 +2707,98 @@
   font-family: "Oxanium", sans-serif;
   font-weight: 700;
 }
+
+/* ================================
+   SETTINGS — AUDIO CONTROLS
+================================ */
+.audio-settings-section {
+  width: min(100%, 920px);
+  margin: 34px auto 24px;
+  padding: 24px clamp(16px, 3vw, 30px);
+  border: 1px solid rgba(255, 211, 89, 0.22);
+  border-radius: 14px;
+  background: rgba(7, 18, 30, 0.58);
+  text-align: left;
+}
+
+.audio-settings-section .home-eyebrow,
+.audio-settings-section .menu-title,
+.audio-settings-section .menu-description {
+  text-align: left;
+}
+
+.audio-setting-row,
+.audio-mute-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 15px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  color: #f4f5f7;
+}
+
+.audio-setting-copy,
+.audio-mute-row > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.audio-setting-copy strong,
+.audio-mute-row strong {
+  color: #ffe08a;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+.audio-setting-copy small,
+.audio-mute-row small {
+  color: #aab8c8;
+  font-size: 0.75rem;
+}
+
+.audio-setting-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(48%, 300px);
+}
+
+.audio-setting-control input {
+  flex: 1;
+  min-width: 100px;
+  accent-color: #ffd45c;
+  cursor: pointer;
+}
+
+.audio-setting-control output {
+  min-width: 42px;
+  color: #ffe08a;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.audio-mute-row input {
+  width: 20px;
+  height: 20px;
+  accent-color: #ffd45c;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .audio-settings-section {
+    padding: 18px 14px;
+  }
+
+  .audio-setting-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .audio-setting-control {
+    width: 100%;
+  }
+}
