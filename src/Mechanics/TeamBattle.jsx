@@ -1189,11 +1189,9 @@ export default function TeamBattle() {
       Object.assign(defender, result.defender ?? {});
     }
 
-    setDamageDealt(
-      (value) =>
-        value + Math.max(0, healthBefore - Math.max(0, defender.health)),
-    );
-    if (!attacker.isCpuTeammate) playGameSound("attack");
+    const damageActuallyDealt = Math.max(0, healthBefore - Math.max(0, defender.health));
+    setDamageDealt((value) => value + damageActuallyDealt);
+    if (!attacker.isCpuTeammate && damageActuallyDealt > 0) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
 
     const playersAfter = updatedPlayers.map((fighter) => {
