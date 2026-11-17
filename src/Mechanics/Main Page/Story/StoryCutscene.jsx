@@ -4,7 +4,7 @@ import { roster } from "../CharacterSelection.jsx";
 import { storyExpressions } from "./StoryExpressions.js";
 import { storyBackgrounds } from "./StoryBackgrounds.js";
 import { preloadStoryImages } from "./PreloadStoryImages.js";
-import { playDialogueBlip } from "../../../audio/audioManager.js";
+import { getDialogueProfile, playCharacterExpression, playDialogueBlip } from "../../../audio/audioManager.js";
 import "./StoryCutscene.css";
 
 function StoryBackground({ backgroundKey }) {
@@ -137,6 +137,7 @@ function StoryCutscene({
   const [visibleCharacters, setVisibleCharacters] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const typingTimerRef = useRef(null);
+  const previousExpressionsRef = useRef({});
   const dialogue = dialogueLines[dialogueIndex];
 
   const fighter = dialogue?.characterId
@@ -215,6 +216,19 @@ function StoryCutscene({
     });
   }, [dialogueIndex, dialogueLines]);
 
+  // Play a one-shot reaction only when a character changes expression.
+  useEffect(() => {
+    const characterId = dialogue?.characterId;
+    const expression = dialogue?.expression ?? "neutral";
+    if (!characterId) return;
+
+    const previousExpression = previousExpressionsRef.current[characterId];
+    if (previousExpression !== expression && expression !== "neutral") {
+      playCharacterExpression(characterId, expression);
+    }
+    previousExpressionsRef.current[characterId] = expression;
+  }, [dialogueIndex, dialogue?.characterId, dialogue?.expression]);
+
   // Reveal the current line gradually.
   useEffect(() => {
     setVisibleCharacters(0);
@@ -230,9 +244,11 @@ function StoryCutscene({
       index += 1;
       setVisibleCharacters(index);
 
-      // A quiet voice-style blip every few visible characters.
-      if (index % 3 === 0 && fullText[index - 1] && !/\\s/.test(fullText[index - 1])) {
-        playDialogueBlip(dialogueLines[dialogueIndex]?.characterId || "narrator");
+      // Each speaker has an individual typewriter voice profile.
+      const speakerId = dialogueLines[dialogueIndex]?.characterId || "narrator";
+      const voiceProfile = getDialogueProfile(speakerId);
+      if (index % voiceProfile.interval === 0 && fullText[index - 1] && !/\s/.test(fullText[index - 1])) {
+        playDialogueBlip(speakerId);
       }
 
       if (index >= fullText.length) {
