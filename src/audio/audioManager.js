@@ -158,7 +158,8 @@ export function startMusic(track = "menu") {
   const filePath = MUSIC_FILES[currentTrack];
   if (filePath && typeof Audio !== "undefined") {
     const player = new Audio(filePath);
-    player.loop = true;
+    // Victory is a short celebratory stinger, not a background loop.
+    player.loop = currentTrack !== "victory";
     player.volume = Math.max(0, Math.min(1, settings.master * settings.music));
     player.oncanplay = () => {
       if (audioElement === player) player.play().catch(() => {
