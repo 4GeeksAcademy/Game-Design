@@ -20,20 +20,21 @@ const INTRO_SLIDES = [
   },
 ];
 
-// Give each line two beats. At faster tempos, use three beats so the pause
-// stays within the requested 1–2 second range.
+// Give each line a consistent two-beat pause. At faster tempos, use three
+// beats so every reveal stays around 1–2 seconds. We use the track's BPM as
+// timing metadata, but do not depend on its playback clock: the intro must
+// still work while music is loading, muted, or blocked by autoplay.
 function getIntroBeatTiming() {
-  const { bpm, currentTime = 0 } = getMusicBeatInfo();
-  const safeBpm = Number(bpm) > 0 ? Number(bpm) : 120;
+  const musicInfo = getMusicBeatInfo();
+  const parsedBpm = Number(musicInfo?.bpm);
+  const safeBpm = Number.isFinite(parsedBpm) && parsedBpm > 0 ? parsedBpm : 120;
   const beatDuration = 60 / safeBpm;
   const beatsPerStep = safeBpm >= 130 ? 3 : 2;
   const stepDuration = beatDuration * beatsPerStep;
-  const elapsedInStep = currentTime % stepDuration;
-  const delayToNextStep = stepDuration - elapsedInStep;
 
   return {
-    delay: Math.max(80, delayToNextStep),
-    stepDuration,
+    delay: stepDuration * 1000,
+    stepDuration: stepDuration * 1000,
   };
 }
 
