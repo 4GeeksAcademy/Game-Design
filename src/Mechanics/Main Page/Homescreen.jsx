@@ -446,7 +446,7 @@ const renderHome = () => (
       <img
         src={wildCardsLogo}
         alt="Wild Cards"
-        className="wild-cards-logo"
+        className="wild-cards-logo wc-beat-animation--bounce"
       />
 
       <p className="home-subtitle">
