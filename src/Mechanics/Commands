@@ -1,68 +1,208 @@
-// Reset unlocked characters to the starter roster
-localStorage.removeItem("fightersArenaUnlockedCharacters");
 
-// Give yourself 10,000 coins
+
+
+
+// Give yourself 10,000 coins (replaces your current balance):
 localStorage.setItem("fightersArenaCoins", "10000");
-
-// Notify the game that the saved values changed
-window.dispatchEvent(new Event("unlocksUpdated"));
 window.dispatchEvent(new Event("coinsUpdated"));
 
-console.log("Progress reset! Coins:", localStorage.getItem("fightersArenaCoins"));
-console.log("Unlocked characters reset to the starter roster.");
-
-localStorage.removeItem("fightersArenaOwnedSkins");
 
 
-(() => {
-  const keysToReset = [
-    // Currency and character unlocks
-    "fightersArenaCoins",
-    "fightersArenaUnlockedCharacters",
 
-    // Skins
-    "fightersArenaOwnedSkins",
-    "fightersArenaEquippedSkins",
+// Add 10,000 coins to your existing balance:
+const current = Number(localStorage.getItem("fightersArenaCoins")) || 0;
 
-    // Festival
-    "fighters-arena-combat-festival-2026",
-    "fighters-arena-rotating-challenges",
+localStorage.setItem("fightersArenaCoins", String(current + 10000));
 
-    // Daily objectives
-    "fighters-arena-daily-objectives",
+window.dispatchEvent(new Event("coinsUpdated"));
 
-    // Achievements and story progression
-    "fightersArenaAchievements",
-    "storyLevel1Complete",
-  ];
+console.log("New balance:", current + 10000);
 
-  keysToReset.forEach((key) => {
-    localStorage.removeItem(key);
-  });
 
-  // Refresh game data and UI
-  window.dispatchEvent(new Event("coinsUpdated"));
-  window.dispatchEvent(new Event("unlocksUpdated"));
-  window.dispatchEvent(new Event("skinsUpdated"));
+// Reset coins to zero:
+localStorage.setItem("fightersArenaCoins", "0");
+window.dispatchEvent(new Event("coinsUpdated"));
 
-  console.clear();
 
-  console.log("🔥 Wild Cards FACTORY RESET COMPLETE!");
-  console.log("Coins, characters, skins, Festival, and progression reset.");
-  console.log("Restarting game...");
-
-  location.reload();
-})();
-
-// unlock all characters
+// Unlock ALL characters:
 localStorage.setItem(
   "fightersArenaUnlockedCharacters",
   JSON.stringify([
-    "mina", "rockLee", "usopp", "chad",
-    "picolo", "tenten", "kirishima", "ochaco",
-    "luffy", "ichigo", "naruto", "yoruichi",
-    "goku", "toga", "kenpachi", "hinata"
+    "mina",
+    "rockLee",
+    "usopp",
+    "chad",
+    "picolo",
+    "tenten",
+    "kirishima",
+    "ochaco",
+    "luffy",
+    "ichigo",
+    "naruto",
+    "yoruichi",
+    "goku",
+    "toga",
+    "kenpachi",
+    "hinata"
   ])
 );
 
 window.dispatchEvent(new Event("unlocksUpdated"));
+
+console.log("All characters unlocked!");
+
+
+// Unlock one specific character:
+
+
+const unlocked = JSON.parse(
+  localStorage.getItem("fightersArenaUnlockedCharacters") || "[]"
+);
+
+if (!unlocked.includes("goku")) {
+  unlocked.push("goku");
+}
+
+localStorage.setItem(
+  "fightersArenaUnlockedCharacters",
+  JSON.stringify(unlocked)
+);
+
+window.dispatchEvent(new Event("unlocksUpdated"));
+
+console.log("Goku unlocked!");
+
+// Reset character unlocks to the starter roster:
+localStorage.removeItem("fightersArenaUnlockedCharacters");
+
+window.dispatchEvent(new Event("unlocksUpdated"));
+
+console.log("Character unlocks reset!");
+
+
+// Check unlocked characters:
+console.log(
+  JSON.parse(
+    localStorage.getItem("fightersArenaUnlockedCharacters") || "[]"
+  )
+);
+
+// Add 1,000 Festival points:
+const key = "fighters-arena-combat-festival-2026";
+
+const progress = JSON.parse(
+  localStorage.getItem(key) || "{}"
+);
+
+progress.points = Math.min(
+  50000,
+  (Number(progress.points) || 0) + 1000
+);
+
+localStorage.setItem(key, JSON.stringify({
+  festivalId: "combat-festival-2026",
+  points: progress.points,
+  elitePassOwned: progress.elitePassOwned ?? false,
+  claimedFreeRewards: progress.claimedFreeRewards ?? [],
+  claimedEliteRewards: progress.claimedEliteRewards ?? []
+}));
+
+window.dispatchEvent(
+  new CustomEvent("festivalProgressUpdated", {
+    detail: progress
+  })
+);
+
+console.log("Festival points:", progress.points);
+
+// Set Festival points to a specific amount:
+
+// For example, 25,000 points:
+
+const progress = JSON.parse(
+  localStorage.getItem(key) || "{}"
+);
+
+progress.points = 25000;
+
+localStorage.setItem(key, JSON.stringify({
+  festivalId: "combat-festival-2026",
+  points: 25000,
+  elitePassOwned: progress.elitePassOwned ?? false,
+  claimedFreeRewards: progress.claimedFreeRewards ?? [],
+  claimedEliteRewards: progress.claimedEliteRewards ?? []
+}));
+
+window.dispatchEvent(
+  new CustomEvent("festivalProgressUpdated", {
+    detail: progress
+  })
+);
+
+
+// Reset Festival points and rewards:
+localStorage.removeItem("fighters-arena-combat-festival-2026");
+
+window.dispatchEvent(
+  new CustomEvent("festivalProgressUpdated", {
+    detail: {
+      festivalId: "combat-festival-2026",
+      points: 0,
+      elitePassOwned: false,
+      claimedFreeRewards: [],
+      claimedEliteRewards: []
+    }
+  })
+);
+
+console.log("Festival progress reset!");
+
+
+// Reset all owned skins:
+localStorage.removeItem("fightersArenaOwnedSkins");
+localStorage.removeItem("fightersArenaEquippedSkins");
+
+window.dispatchEvent(new Event("skinsUpdated"));
+
+console.log("Skin progress reset!");
+
+// Check owned skins:
+console.log(
+  JSON.parse(
+    localStorage.getItem("fightersArenaOwnedSkins") || "[]"
+  )
+);
+
+
+
+// FACTORY RESET
+
+(() => {
+  const keysToReset = [
+    "fightersArenaCoins",
+    "fightersArenaUnlockedCharacters",
+
+    "fightersArenaOwnedSkins",
+    "fightersArenaEquippedSkins",
+
+    "fighters-arena-combat-festival-2026",
+    "fighters-arena-rotating-challenges",
+
+    "fighters-arena-daily-objectives",
+
+    "fightersArenaAchievements",
+    "storyLevel1Complete"
+  ];
+
+  keysToReset.forEach(key => {
+    localStorage.removeItem(key);
+  });
+
+  window.dispatchEvent(new Event("coinsUpdated"));
+  window.dispatchEvent(new Event("unlocksUpdated"));
+  window.dispatchEvent(new Event("skinsUpdated"));
+
+  console.log("WILD CARDS FACTORY RESET COMPLETE!");
+
+  location.reload();
+})();
