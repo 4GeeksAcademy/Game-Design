@@ -306,22 +306,23 @@ export function playDialogueBlip(characterId = "narrator") {
 // current Rock Lee / Tenten story scenes has an explicit sound assignment.
 // Replace any URL with a local /audio/voices/... MP3 later without changing
 // StoryCutscene.jsx.
+// Local character reaction clips in public/audio/voices/.
+// Only map expressions that have a suitable recording. Missing expressions
+// intentionally stay silent until a matching voice clip is added.
+const VOICE_BASE = `${import.meta.env.BASE_URL}audio/voices/`;
 const EXPRESSION_AUDIO = {
   rockLee: {
-    happy: "https://sfxmint.com/dl/man-chuckle-06.mp3",
-    excited: "https://sfxmint.com/dl/man-chuckle-08.mp3",
-    determined: "https://sfxmint.com/dl/character-emote-08.mp3",
-    serious: "https://sfxmint.com/dl/character-emote-06.mp3",
-    angry: "https://sfxmint.com/dl/character-emote-05.mp3",
-    pushups1: "https://sfxmint.com/dl/pain-grunt-06.mp3",
-    pushups2: "https://sfxmint.com/dl/pain-grunt-10.mp3",
+    happy: `${VOICE_BASE}rockLee/happy.wav`,
+    excited: `${VOICE_BASE}rockLee/excited.wav`,
+    serious: `${VOICE_BASE}rockLee/serious.wav`,
+    pushups1: `${VOICE_BASE}rockLee/rocklee-pushups.wav`,
+    pushups2: `${VOICE_BASE}rockLee/rocklee-pushups.wav`,
   },
   tenten: {
-    happy: "https://sfxmint.com/dl/character-emote-10.mp3",
-    angry: "https://sfxmint.com/dl/pain-grunt-03.mp3",
-    facepalm: "https://sfxmint.com/dl/character-emote-07.mp3",
-    exasperated: "https://sfxmint.com/dl/character-emote-09.mp3",
-    relate: "https://sfxmint.com/dl/character-emote-04.mp3",
+    happy: `${VOICE_BASE}tenten/TenTen-happy.wav`,
+    angry: `${VOICE_BASE}tenten/tenten-angry.wav`,
+    facepalm: `${VOICE_BASE}tenten/TenTen-facepalm.wav`,
+    exasperated: `${VOICE_BASE}tenten/TenTen-facepalm.wav`,
   },
 };
 
