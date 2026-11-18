@@ -63,6 +63,7 @@ These CC0 1.0 MP3 clips are currently streamed directly from SFXMint. They are n
 | Rock Lee — happy | Cartoon Man Chuckle 06 | [SFXMint](https://sfxmint.com/sounds/man-chuckle-06) |
 | Rock Lee — excited | Hearty Man Chuckle 08 | [SFXMint](https://sfxmint.com/sounds/man-chuckle-08) |
 | Rock Lee — determined | Impressed Ooh Character Emote 08 | [SFXMint](https://sfxmint.com/sounds/character-emote-08) |
+| Rock Lee — angry | Grumble Character Emote 05 | [SFXMint](https://sfxmint.com/sounds/character-emote-05) |
 | Rock Lee — serious | Thinking Hmm Character Emote 06 | [SFXMint](https://sfxmint.com/sounds/character-emote-06) |
 | Rock Lee — pushups1 | Lifting Effort Pain Grunt 06 | [SFXMint](https://sfxmint.com/sounds/pain-grunt-06) |
 | Rock Lee — pushups2 | Long Strain Pain Grunt 10 | [SFXMint](https://sfxmint.com/sounds/pain-grunt-10) |
@@ -72,4 +73,4 @@ These CC0 1.0 MP3 clips are currently streamed directly from SFXMint. They are n
 | Tenten — exasperated | Sigh Character Emote 09 | [SFXMint](https://sfxmint.com/sounds/character-emote-09) |
 | Tenten — relate | Giggle Character Emote 04 | [SFXMint](https://sfxmint.com/sounds/character-emote-04) |
 
-SFXMint states that its library files are CC0 1.0, including commercial use and hotlinking. The sound URLs are centralized in `EXPRESSION_AUDIO` in `src/audio/audioManager.js`.
+SFXMint states that its library files are CC0 1.0, including commercial use and hotlinking. Neutral expressions intentionally stay silent. The sound URLs are centralized in `EXPRESSION_AUDIO` in `src/audio/audioManager.js`.
