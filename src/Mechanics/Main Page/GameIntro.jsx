@@ -26,18 +26,18 @@ const INTRO_SLIDES = [
 // Set useCustomBpm to false to follow the active music track's BPM.
 const INTRO_TIMING = {
   useCustomBpm: true,
-  customBpm: 150,
+  customBpm: 130,
 
   // Per-line pacing, in order, for each slide.
   lineBeats: {
-    credit: [2, 2, 3],
-    beta: [2, 2, 3],
-    community: [2, 3, 3],
+    credit: [3.5, 1.9, 2.8],
+    beta: [3.2, 2, 2],
+    community: [3, 1, 3],
   },
 
   // Time each signature word holds before the next word appears.
   // The final word gets the longest hold for a more dramatic finish.
-  finaleWordBeats: [2, 3, 6],
+  finaleWordBeats: [2, 3, 5],
 };
 
 // The intro follows a beat clock derived from either the test BPM above or the
