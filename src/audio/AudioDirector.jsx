@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { initializeAudio, playUISound, startMusic, stopMusic } from "./audioManager.js";
+import { initializeAudio, playUISound, startMusic, stopMusic, getMusicBeatInfo } from "./audioManager.js";
 
 function getTrack(pathname, routeState) {
   // Victory and reward screens get their own one-shot stinger.
@@ -38,21 +38,38 @@ export default function AudioDirector() {
     const handleClick = (event) => {
       const control = event.target.closest("button, [role='button'], a");
       if (!control || control.disabled || control.getAttribute("aria-disabled") === "true") return;
+      // Attack cards play their own heavier action sound from their handlers.
+      if (control.matches(".attack-card, .team-attack-card")) return;
       const label = (control.getAttribute("aria-label") || control.textContent || "").toLowerCase();
       playUISound(/back|cancel|close|return/.test(label) ? "back" : "click");
     };
-    document.addEventListener("click", handleClick);
+    // Capture phase catches buttons even when a component stops propagation.
+    document.addEventListener("click", handleClick, true);
 
     return () => {
       window.removeEventListener("pointerdown", unlock);
       window.removeEventListener("keydown", unlock);
-      document.removeEventListener("click", handleClick);
+      document.removeEventListener("click", handleClick, true);
     };
   }, [musicCategory]);
 
   useEffect(() => {
     startMusic(musicCategory);
     return () => stopMusic();
+  }, [musicCategory]);
+
+
+  // Keep CSS logo animations locked to the active track's BPM metadata.
+  useEffect(() => {
+    const updateTempo = () => {
+      const { bpm } = getMusicBeatInfo();
+      const safeBpm = Number(bpm) > 0 ? Number(bpm) : 120;
+      document.documentElement.style.setProperty("--wc-bpm", String(safeBpm));
+      document.documentElement.style.setProperty("--wc-beat-duration", `${60 / safeBpm}s`);
+    };
+    updateTempo();
+    window.addEventListener("wildcards:musicchange", updateTempo);
+    return () => window.removeEventListener("wildcards:musicchange", updateTempo);
   }, [musicCategory]);
 
   return null;
