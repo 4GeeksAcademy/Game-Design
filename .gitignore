@@ -12,13 +12,10 @@ dist
 dist-ssr
 *.local
 public/
-# Allow soundtrack MP3s to be added without force-adding them.
+# Keep other public assets ignored, but allow every file under public/audio/.
 !public/
 public/*
 !public/audio/
-public/audio/*
-!public/audio/music/
-!public/audio/music/*.mp3
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
