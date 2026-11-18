@@ -99,7 +99,7 @@ const level1Cutscene1 = [
   {
     speaker: "ROCK LEE",
     text: "ONE THOUSAND! ONE THOUSAND AND ONE! ONE THOUSAND AND TWO!",
-    musicTrackId: "story-training",
+    musicTrackId: "story-adventure-naruto",
     characterId: "rockLee",
     expression: "pushups2",
     position: "center",
@@ -353,7 +353,7 @@ function createCutscene2({ won, playerName }) {
     {
       speaker: "TENTEN",
       text: "Lee. Please tell me you haven't been challenging strangers again.",
-      musicTrackId: "story-light",
+      musicTrackId: "story-wonder-naruto",
       characterId: "tenten",
       expression: "angry",
       position: "center",
