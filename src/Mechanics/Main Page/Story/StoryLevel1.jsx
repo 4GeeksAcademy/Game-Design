@@ -26,6 +26,7 @@ const level1Cutscene1 = [
   {
     speaker: "NARRATOR",
     text: "By the time you reach the Land of Fire, your legs are begging you to stop. You have traveled farther than you intended, and the thought of sleeping beneath another tree is becoming less appealing by the minute.",
+    musicTrackId: "story-main",
     characterId: null,
     expression: "neutral",
     position: "center",
@@ -98,6 +99,7 @@ const level1Cutscene1 = [
   {
     speaker: "ROCK LEE",
     text: "ONE THOUSAND! ONE THOUSAND AND ONE! ONE THOUSAND AND TWO!",
+    musicTrackId: "story-training",
     characterId: "rockLee",
     expression: "pushups2",
     position: "center",
@@ -351,6 +353,7 @@ function createCutscene2({ won, playerName }) {
     {
       speaker: "TENTEN",
       text: "Lee. Please tell me you haven't been challenging strangers again.",
+      musicTrackId: "story-light",
       characterId: "tenten",
       expression: "angry",
       position: "center",
