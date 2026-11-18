@@ -154,7 +154,9 @@ function StoryCutscene({
 
   const finishCutscene = () => {
     if (onComplete) {
-      onComplete();
+      // Pass the exact background visible on the final dialogue line so
+      // character selection and the following battle can stay in the same scene.
+      onComplete(dialogue?.background ?? levelConfig.background ?? null);
       return;
     }
 
