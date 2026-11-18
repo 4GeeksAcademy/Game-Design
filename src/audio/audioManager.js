@@ -8,19 +8,43 @@ const DEFAULTS = { master: 0.75, music: 0.3, effects: 0.65, voices: 0.8, muted: 
 let audioContext = null;
 let masterGain = null;
 let musicGain = null;
-let musicTimer = null;
-let musicStep = 0;
-let audioElement = null;
-const MUSIC_FILES = {
-  menu: `${import.meta.env.BASE_URL}audio/music/menu-theme.mp3`,
-  story: `${import.meta.env.BASE_URL}audio/music/story-theme.mp3`,
-  battle1v1: `${import.meta.env.BASE_URL}audio/music/battle-1v1.mp3`,
-  battle2v2: `${import.meta.env.BASE_URL}audio/music/battle-2v2.mp3`,
-  victory: `${import.meta.env.BASE_URL}audio/music/victory-theme.mp3`,
-};
-let currentTrack = "menu";
-let settings = loadSettings();
+// MUSIC LIBRARY: add tracks here; both battle modes share BATTLE_MUSIC_TRACKS.
+// Story Mode uses its own STORY_MUSIC_TRACKS list. Keep files in public/audio/music/.
+const MUSIC_BASE = `${import.meta.env.BASE_URL}audio/music/`;
 
+export const MENU_MUSIC_TRACKS = [
+  { id: "main-menu", title: "Main Menu", file: `${MUSIC_BASE}menu-theme.mp3` },
+];
+
+export const BATTLE_MUSIC_TRACKS = [
+  { id: "battle-main", title: "Stage 2", file: `${MUSIC_BASE}battle-1v1.mp3` },
+];
+
+export const STORY_MUSIC_TRACKS = [
+  { id: "story-main", title: "Peaceful Days", file: `${MUSIC_BASE}story-theme.mp3` },
+];
+
+export const VICTORY_MUSIC_TRACKS = [
+  { id: "victory-main", title: "Victory", file: `${MUSIC_BASE}victory-theme.mp3` },
+];
+
+// Set an index to select a different song from each playlist.
+const ACTIVE_TRACKS = { menu: 0, battle: 0, story: 0, victory: 0 };
+const MUSIC_PLAYLISTS = { menu: MENU_MUSIC_TRACKS, battle: BATTLE_MUSIC_TRACKS, story: STORY_MUSIC_TRACKS, victory: VICTORY_MUSIC_TRACKS };
+
+function normalizeMusicCategory(category) {
+  if (category === "battle1v1" || category === "battle2v2") return "battle";
+  return MUSIC_PLAYLISTS[category] ? category : "menu";
+}
+
+function getSelectedMusic(category) {
+  const playlist = MUSIC_PLAYLISTS[category] || MUSIC_PLAYLISTS.menu;
+  return playlist[ACTIVE_TRACKS[category] ?? 0] || playlist[0] || null;
+}
+
+let currentTrack = "menu";
+let audioElement = null;
+let settings = loadSettings();
 function loadSettings() {
   try {
     return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") };
@@ -50,11 +74,11 @@ function ensureAudio() {
 }
 
 function applyVolumes() {
+  if (audioElement) audioElement.volume = settings.muted ? 0 : Math.max(0, Math.min(1, settings.master * settings.music));
   if (!audioContext || !masterGain || !musicGain) return;
   const now = audioContext.currentTime;
   masterGain.gain.setTargetAtTime(settings.muted ? 0 : settings.master, now, 0.04);
   musicGain.gain.setTargetAtTime(settings.music, now, 0.08);
-  if (audioElement) audioElement.volume = settings.muted ? 0 : Math.max(0, Math.min(1, settings.master * settings.music));
 }
 
 function makeTone(frequency, duration, type = "sine", volume = 0.06, when = 0, destination = null, category = "effects") {
@@ -74,128 +98,58 @@ function makeTone(frequency, duration, type = "sine", volume = 0.06, when = 0, d
   oscillator.stop(start + duration + 0.03);
 }
 
-// Bright, major-key arcade phrases instead of the previous ominous drone.
-// The patterns are deliberately short prototypes: replace with custom music later.
-const musicPatterns = {
-  menu: {
-    bpm: 112,
-    notes: [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46, 523.25, 659.25, 783.99, 1046.5, 880, 783.99, 698.46, 659.25],
-    bass: [130.81, 164.81, 196, 164.81],
-  },
-  story: {
-    bpm: 92,
-    notes: [392, 493.88, 587.33, 493.88, 440, 523.25, 659.25, 523.25, 392, 440, 523.25, 587.33],
-    bass: [98, 130.81, 146.83, 130.81],
-  },
-  battle1v1: {
-    bpm: 132,
-    notes: [392, 523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 783.99, 659.25, 523.25, 659.25, 587.33, 783.99, 880, 1046.5],
-    bass: [98, 98, 130.81, 146.83],
-  },
-  battle2v2: {
-    bpm: 146,
-    notes: [329.63, 392, 493.88, 587.33, 659.25, 587.33, 493.88, 392, 349.23, 440, 523.25, 659.25, 698.46, 659.25, 587.33, 493.88],
-    bass: [82.41, 110, 130.81, 110],
-  },
-  victory: {
-    bpm: 120,
-    notes: [523.25, 659.25, 783.99, 1046.5, 783.99, 880, 1046.5, 1318.51],
-    bass: [130.81, 164.81, 196, 261.63],
-  },
-};
-
-function playMusicStep() {
-  const ctx = audioContext;
-  if (!ctx || settings.muted || settings.music <= 0) return;
-  const pattern = musicPatterns[currentTrack] || musicPatterns.menu;
-  const index = musicStep % pattern.notes.length;
-  const now = ctx.currentTime;
-  const beat = 60 / pattern.bpm / 2;
-  const melody = ctx.createOscillator();
-  const melodyGain = ctx.createGain();
-  melody.type = "triangle";
-  melody.frequency.setValueAtTime(pattern.notes[index], now);
-  melodyGain.gain.setValueAtTime(0.0001, now);
-  melodyGain.gain.linearRampToValueAtTime(0.075, now + 0.018);
-  melodyGain.gain.exponentialRampToValueAtTime(0.0001, now + beat * 0.82);
-  melody.connect(melodyGain);
-  melodyGain.connect(musicGain);
-  melody.start(now);
-  melody.stop(now + beat);
-
-  if (musicStep % 2 === 0) {
-    const bass = ctx.createOscillator();
-    const bassGain = ctx.createGain();
-    bass.type = "triangle";
-    bass.frequency.setValueAtTime(pattern.bass[Math.floor(musicStep / 2) % pattern.bass.length], now);
-    bassGain.gain.setValueAtTime(0.0001, now);
-    bassGain.gain.linearRampToValueAtTime(0.11, now + 0.015);
-    bassGain.gain.exponentialRampToValueAtTime(0.0001, now + beat * 1.7);
-    bass.connect(bassGain);
-    bassGain.connect(musicGain);
-    bass.start(now);
-    bass.stop(now + beat * 1.8);
+// Recorded files are the only background-music source. There is no synthesized
+// fallback: a missing file must not silently revive the old prototype melody.
+function attemptMusicPlayback(player) {
+  if (!player || player !== audioElement || settings.muted || settings.music <= 0 || !player.paused) return;
+  player.volume = Math.max(0, Math.min(1, settings.master * settings.music));
+  const result = player.play();
+  if (result && typeof result.catch === "function") {
+    result.catch(() => {
+      // Autoplay may be blocked until the user interacts. Keep this player so
+      // the AudioDirector can retry it on the next pointer or keyboard gesture.
+    });
   }
-  musicStep += 1;
 }
 
-function startSynthMusic() {
-  if (!audioContext || musicTimer || settings.muted || settings.music <= 0) return;
-  playMusicStep();
-  const pattern = musicPatterns[currentTrack] || musicPatterns.menu;
-  musicTimer = window.setInterval(playMusicStep, (60 / pattern.bpm / 2) * 1000);
-}
+export function startMusic(category = "menu") {
+  const nextCategory = normalizeMusicCategory(category);
+  const selectedTrack = getSelectedMusic(nextCategory);
+  if (!selectedTrack?.file || settings.muted || settings.music <= 0) return;
 
-export function startMusic(track = "menu") {
-  ensureAudio();
-  if (currentTrack !== track) {
+  if (currentTrack !== nextCategory || (audioElement && audioElement.dataset.trackId !== selectedTrack.id)) {
     stopMusic();
-    currentTrack = track;
-    musicStep = 0;
+    currentTrack = nextCategory;
   }
-  if (settings.muted || settings.music <= 0 || audioElement || musicTimer) return;
-
-  const filePath = MUSIC_FILES[currentTrack];
-  if (filePath && typeof Audio !== "undefined") {
-    const player = new Audio(filePath);
-    // Victory is a short celebratory stinger, not a background loop.
-    player.loop = currentTrack !== "victory";
-    player.volume = Math.max(0, Math.min(1, settings.master * settings.music));
-    player.oncanplay = () => {
-      if (audioElement === player) player.play().catch(() => {
-        if (audioElement === player) {
-          audioElement = null;
-          startSynthMusic();
-        }
-      });
-    };
-    player.onerror = () => {
-      if (audioElement === player) {
-        audioElement = null;
-        startSynthMusic();
-      }
-    };
-    audioElement = player;
-    player.load();
+  if (audioElement) {
+    attemptMusicPlayback(audioElement);
     return;
   }
+  if (typeof Audio === "undefined") return;
 
-  startSynthMusic();
+  const player = new Audio(selectedTrack.file);
+  player.dataset.trackId = selectedTrack.id;
+  player.preload = "auto";
+  player.loop = nextCategory !== "victory";
+  player.volume = Math.max(0, Math.min(1, settings.master * settings.music));
+  player.addEventListener("canplay", () => attemptMusicPlayback(player));
+  player.addEventListener("error", () => {
+    if (audioElement === player) audioElement = null;
+    // Never replace a missing MP3 with synthesized prototype music.
+  });
+  audioElement = player;
+  player.load();
 }
 
 export function stopMusic() {
-  if (musicTimer && typeof window !== "undefined") window.clearInterval(musicTimer);
-  musicTimer = null;
-  if (audioElement) {
-    audioElement.pause();
-    audioElement.removeAttribute("src");
-    audioElement.load();
-    audioElement = null;
-  }
+  if (!audioElement) return;
+  audioElement.pause();
+  audioElement.removeAttribute("src");
+  audioElement.load();
+  audioElement = null;
 }
 
-// Real, file-based sound effects from SFXMint's CC0 library.
-// These URLs point to actual MP3 files; they are not generated by Web Audio.
+// Local, file-based sound effects bundled in public/audio/effects/.
 const AUDIO_ASSETS = {
   click: `${import.meta.env.BASE_URL}audio/effects/ui-click.mp3`,
   attack: `${import.meta.env.BASE_URL}audio/effects/attack-impact.ogg`,
@@ -309,7 +263,7 @@ export function updateAudioSettings(next) {
   saveSettings();
   applyVolumes();
   if (settings.muted || settings.music <= 0) stopMusic();
-  else if (audioContext && !musicTimer) startMusic(currentTrack);
+  else startMusic(currentTrack);
   return getAudioSettings();
 }
 
