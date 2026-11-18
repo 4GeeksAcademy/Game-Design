@@ -194,6 +194,10 @@ function AttackOptions({
         return;
       }
 
+      // Every valid attack selection gets its dedicated impact sound,
+      // including attacks that open the stun-target picker.
+      playGameSound("attack");
+
       // Only selected-type stun attacks need player input.
       if (attack.stun?.type === "selected") {
         const eligibleAttacks = (opponent.attacks ?? []).filter(
@@ -207,8 +211,6 @@ function AttackOptions({
         }
       }
 
-      // A valid attack selection gets its own heavier action sound.
-      playGameSound("attack");
       // Ordinary attacks and other stun types resolve normally.
       handleAttack(index);
     },
