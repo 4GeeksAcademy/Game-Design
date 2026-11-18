@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
+import GameIntro from "../Mechanics/Main Page/GameIntro.jsx";
 import { Routes, Route } from "react-router-dom";
 
 // Import components from Mechanics folder
@@ -20,6 +21,13 @@ import StoryRewardScreen from "../Mechanics/Main Page/Story/StoryRewardScreen.js
 import StoryLevel1 from "../Mechanics/Main Page/Story/StoryLevel1.jsx";
 
 export const AppRoutes = () => {
+  const [introComplete, setIntroComplete] = useState(false);
+  const finishIntro = useCallback(() => setIntroComplete(true), []);
+
+  if (!introComplete) {
+    return <GameIntro onComplete={finishIntro} />;
+  }
+
   return (
     <Routes>
       <Route path="/watch-mode" element={<WatchMode />} />
