@@ -10,6 +10,8 @@ let masterGain = null;
 let musicGain = null;
 // MUSIC LIBRARY: add tracks here; both battle modes share BATTLE_MUSIC_TRACKS.
 // Story Mode uses its own STORY_MUSIC_TRACKS list. Keep files in public/audio/music/.
+// BPM is editable track metadata (not automatic audio analysis). Set it to the
+// song's measured tempo; the beat clock uses 60 / BPM seconds per beat.
 const MUSIC_BASE = `${import.meta.env.BASE_URL}audio/music/`;
 
 export const MENU_MUSIC_TRACKS = [
