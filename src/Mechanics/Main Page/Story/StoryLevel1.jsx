@@ -841,12 +841,13 @@ function StoryLevel1() {
   const previousPlayerName = levelConfig.previousPlayerName ?? "Player";
 
   // Scene 1 -> Battle 1: Player versus Rock Lee.
-  const startFirstBattle = () => {
+  const startFirstBattle = (background) => {
     navigate("/character-select", {
       state: {
         ...levelConfig,
         gameMode: "story",
         storyPhase: "battle1",
+        background,
         storyMatchType: "1v1",
         teamSize: "1v1",
         opponentId: "rockLee",
@@ -856,12 +857,13 @@ function StoryLevel1() {
   };
 
   // Scene 2 -> Battle 2: Player versus Rock Lee and Tenten.
-  const startSecondBattle = () => {
+  const startSecondBattle = (background) => {
     navigate("/character-select", {
       state: {
         ...levelConfig,
         gameMode: "story",
         storyPhase: "battle2",
+        background,
         storyMatchType: "1v2",
         teamSize: "1v1",
         opponentId: "rockLee",
