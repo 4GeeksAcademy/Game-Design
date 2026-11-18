@@ -182,6 +182,15 @@ export function startMusicById(trackId) {
   return true;
 }
 
+export function resumeMusic() {
+  if (audioElement) {
+    attemptMusicPlayback(audioElement);
+    return;
+  }
+  if (activeMusicTrack) playMusicTrack(activeMusicTrack, currentTrack);
+  else startMusic(currentTrack);
+}
+
 export function getMusicBeatInfo() {
   return {
     bpm: Number(activeMusicTrack?.bpm) > 0 ? Number(activeMusicTrack.bpm) : 120,
