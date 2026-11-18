@@ -275,7 +275,7 @@ export function playDialogueBlip(characterId = "narrator") {
 const EXPRESSION_AUDIO = {
   rockLee: {
     happy: "https://sfxmint.com/dl/man-chuckle-06.mp3",
-    excited: "https://sfxmint.com/dl/man-chuckle-06.mp3",
+    excited: "https://sfxmint.com/dl/man-chuckle-08.mp3",
     determined: "https://sfxmint.com/dl/character-emote-08.mp3",
     serious: "https://sfxmint.com/dl/character-emote-06.mp3",
     pushups1: "https://sfxmint.com/dl/pain-grunt-06.mp3",
@@ -283,10 +283,10 @@ const EXPRESSION_AUDIO = {
   },
   tenten: {
     happy: "https://sfxmint.com/dl/character-emote-10.mp3",
-    angry: "https://sfxmint.com/dl/character-emote-05.mp3",
-    facepalm: "https://sfxmint.com/dl/character-emote-09.mp3",
-    exasperated: "https://sfxmint.com/dl/character-emote-05.mp3",
-    relate: "https://sfxmint.com/dl/character-emote-07.mp3",
+    angry: "https://sfxmint.com/dl/pain-grunt-03.mp3",
+    facepalm: "https://sfxmint.com/dl/character-emote-07.mp3",
+    exasperated: "https://sfxmint.com/dl/character-emote-09.mp3",
+    relate: "https://sfxmint.com/dl/character-emote-04.mp3",
   },
 };
 
