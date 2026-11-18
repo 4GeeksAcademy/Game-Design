@@ -8,9 +8,20 @@ function getTrack(pathname, routeState) {
     return "victory";
   }
 
-  // Story mode keeps its active cutscene/dialogue theme through character
-  // selection and into either battle route. Since the category stays "story",
-  // navigation will not restart the track or replace it with battle music.
+  // Story Mode has its own two-step music flow:
+  // 1. Play the character-selection theme while choosing a fighter.
+  // 2. Switch to the Story Mode level theme once the battle begins.
+  // This check must come before the general Story Mode check below.
+  if (
+    routeState?.gameMode === "story" &&
+    (pathname.includes("character-select") ||
+      pathname.includes("character-selection"))
+  ) {
+    return "characterSelect";
+  }
+
+  // Keep the Story Mode level theme through both 1v1 and team battles.
+  // Quick Battle and the other non-story modes never enter this branch.
   if (routeState?.gameMode === "story") {
     return "story";
   }
