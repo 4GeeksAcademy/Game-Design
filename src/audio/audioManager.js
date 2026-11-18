@@ -14,8 +14,15 @@ let musicGain = null;
 // song's measured tempo; the beat clock uses 60 / BPM seconds per beat.
 const MUSIC_BASE = `${import.meta.env.BASE_URL}audio/music/`;
 
+// Central music registry. Every id is unique, and every entry owns its BPM.
+// Change bpm here when you measure a song's real tempo. The animation clock
+// automatically reads the BPM belonging to whichever id is currently playing.
 export const MENU_MUSIC_TRACKS = [
   { id: "main-menu", title: "Main Menu", file: `${MUSIC_BASE}menu-theme.mp3`, bpm: 120 },
+];
+
+export const CHARACTER_SELECT_MUSIC_TRACKS = [
+  { id: "character-select-main", title: "Character Select", file: `${MUSIC_BASE}character-select-theme.mp3`, bpm: 120 },
 ];
 
 export const BATTLE_MUSIC_TRACKS = [
@@ -26,11 +33,9 @@ export const STORY_MUSIC_TRACKS = [
   { id: "story-main", title: "Peaceful Days", file: `${MUSIC_BASE}story-theme.mp3`, bpm: 96 },
 ];
 
-// Optional tracks selected by individual Story Mode dialogue lines.
-// Reuse existing files for now; add new MP3s and update these paths whenever
-// you have a new story mood/theme ready.
+// Dialogue-specific moods use unique IDs. Add a new MP3 and entry here,
+// then reference its id from a dialogue line's musicTrackId property.
 export const STORY_DIALOGUE_MUSIC_TRACKS = [
-  { id: "story-main", title: "Story — Calm", file: `${MUSIC_BASE}story-theme.mp3`, bpm: 96 },
   { id: "story-training", title: "Story — Training", file: `${MUSIC_BASE}battle-1v1.mp3`, bpm: 140 },
   { id: "story-light", title: "Story — Playful", file: `${MUSIC_BASE}menu-theme.mp3`, bpm: 120 },
 ];
@@ -40,8 +45,23 @@ export const VICTORY_MUSIC_TRACKS = [
 ];
 
 // Set an index to select a different song from each playlist.
-const ACTIVE_TRACKS = { menu: 0, battle: 0, story: 0, victory: 0 };
-const MUSIC_PLAYLISTS = { menu: MENU_MUSIC_TRACKS, battle: BATTLE_MUSIC_TRACKS, story: STORY_MUSIC_TRACKS, victory: VICTORY_MUSIC_TRACKS };
+const ACTIVE_TRACKS = { menu: 0, characterSelect: 0, battle: 0, story: 0, victory: 0 };
+const MUSIC_PLAYLISTS = {
+  menu: MENU_MUSIC_TRACKS,
+  characterSelect: CHARACTER_SELECT_MUSIC_TRACKS,
+  battle: BATTLE_MUSIC_TRACKS,
+  story: STORY_MUSIC_TRACKS,
+  victory: VICTORY_MUSIC_TRACKS,
+};
+const ALL_MUSIC_TRACKS = [
+  ...MENU_MUSIC_TRACKS,
+  ...CHARACTER_SELECT_MUSIC_TRACKS,
+  ...BATTLE_MUSIC_TRACKS,
+  ...STORY_MUSIC_TRACKS,
+  ...STORY_DIALOGUE_MUSIC_TRACKS,
+  ...VICTORY_MUSIC_TRACKS,
+];
+const MUSIC_TRACKS_BY_ID = Object.fromEntries(ALL_MUSIC_TRACKS.map((track) => [track.id, track]));
 
 function normalizeMusicCategory(category) {
   if (category === "battle1v1" || category === "battle2v2") return "battle";
@@ -146,7 +166,12 @@ function playMusicTrack(track, category = "story") {
     stopMusic();
     return;
   }
-  if (audioElement && audioElement.dataset.trackId === track.id && !audioElement.paused) {
+  if (
+    audioElement &&
+    audioElement.dataset.trackId === track.id &&
+    audioElement.src === new URL(track.file, window.location.href).href &&
+    !audioElement.paused
+  ) {
     return;
   }
 
@@ -175,18 +200,15 @@ export function startMusic(category = "menu") {
 // Dialogue lines can request a specific mood by adding musicTrackId.
 // The id is resolved here, keeping StoryCutscene independent of file paths.
 export function startMusicById(trackId) {
-  const track = [
-    ...MENU_MUSIC_TRACKS,
-    ...BATTLE_MUSIC_TRACKS,
-    ...STORY_MUSIC_TRACKS,
-    ...STORY_DIALOGUE_MUSIC_TRACKS,
-    ...VICTORY_MUSIC_TRACKS,
-  ].find((item) => item.id === trackId);
+  const track = MUSIC_TRACKS_BY_ID[trackId];
   if (!track) {
     console.warn(`[Wild Cards Audio] Unknown musicTrackId: ${trackId}`);
     return false;
   }
-  playMusicTrack(track, trackId.startsWith("battle") ? "battle" : trackId.startsWith("victory") ? "victory" : trackId.startsWith("main-menu") ? "menu" : "story");
+
+  const category = Object.entries(MUSIC_PLAYLISTS)
+    .find(([, playlist]) => playlist.some((item) => item.id === trackId))?.[0] ?? "story";
+  playMusicTrack(track, category);
   return true;
 }
 
