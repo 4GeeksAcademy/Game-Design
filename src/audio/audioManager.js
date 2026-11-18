@@ -18,7 +18,7 @@ const MUSIC_BASE = `${import.meta.env.BASE_URL}audio/music/`;
 // Change bpm here when you measure a song's real tempo. The animation clock
 // automatically reads the BPM belonging to whichever id is currently playing.
 export const MENU_MUSIC_TRACKS = [
-  { id: "main-menu", title: "Main Menu", file: `${MUSIC_BASE}menu-theme.mp3`, bpm: 120 },
+  { id: "main-menu", title: "Main Menu", file: `${MUSIC_BASE}menu-theme.mp3`, bpm: 90 },
 ];
 
 export const CHARACTER_SELECT_MUSIC_TRACKS = [
