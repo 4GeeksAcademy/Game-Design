@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { getMusicBeatInfo } from "../../audio/audioManager.js";
 import "./GameIntro.css";
 
 const INTRO_SLIDES = [
@@ -19,42 +20,78 @@ const INTRO_SLIDES = [
   },
 ];
 
-const SLIDE_DURATION = 2600;
-const FINAL_DURATION = 2600;
+// Give each line two beats. At faster tempos, use three beats so the pause
+// stays within the requested 1–2 second range.
+function getIntroBeatTiming() {
+  const { bpm, currentTime = 0 } = getMusicBeatInfo();
+  const safeBpm = Number(bpm) > 0 ? Number(bpm) : 120;
+  const beatDuration = 60 / safeBpm;
+  const beatsPerStep = safeBpm >= 130 ? 3 : 2;
+  const stepDuration = beatDuration * beatsPerStep;
+  const elapsedInStep = currentTime % stepDuration;
+  const delayToNextStep = stepDuration - elapsedInStep;
+
+  return {
+    delay: Math.max(80, delayToNextStep),
+    stepDuration,
+  };
+}
 
 export default function GameIntro({ onComplete }) {
   const [slideIndex, setSlideIndex] = useState(0);
+  const [lineIndex, setLineIndex] = useState(0);
+  const [isFinal, setIsFinal] = useState(false);
+  const [finalWordIndex, setFinalWordIndex] = useState(0);
   const [finished, setFinished] = useState(false);
+
+  const finishIntro = useCallback(() => {
+    if (finished) return;
+    setFinished(true);
+    onComplete();
+  }, [finished, onComplete]);
 
   useEffect(() => {
     if (finished) return undefined;
 
-    const isFinal = slideIndex === INTRO_SLIDES.length;
+    const { delay, stepDuration } = getIntroBeatTiming();
     const timer = window.setTimeout(() => {
       if (isFinal) {
-        onComplete();
-      } else {
-        setSlideIndex((current) => current + 1);
+        if (finalWordIndex < 2) {
+          setFinalWordIndex((current) => current + 1);
+        } else {
+          finishIntro();
+        }
+        return;
       }
-    }, isFinal ? FINAL_DURATION : SLIDE_DURATION);
+
+      const currentSlide = INTRO_SLIDES[slideIndex];
+      if (lineIndex < currentSlide.lines.length - 1) {
+        setLineIndex((current) => current + 1);
+      } else if (slideIndex < INTRO_SLIDES.length - 1) {
+        setSlideIndex((current) => current + 1);
+        setLineIndex(0);
+      } else {
+        setIsFinal(true);
+        setFinalWordIndex(0);
+      }
+    }, isFinal && finalWordIndex === 2 ? stepDuration : delay);
 
     return () => window.clearTimeout(timer);
-  }, [slideIndex, finished, onComplete]);
+  }, [slideIndex, lineIndex, isFinal, finalWordIndex, finished, finishIntro]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Tab") return;
       event.preventDefault();
-      setFinished(true);
-      onComplete();
+      finishIntro();
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onComplete]);
+  }, [finishIntro]);
 
-  const isFinal = slideIndex === INTRO_SLIDES.length;
   const slide = INTRO_SLIDES[slideIndex];
+  const finalWords = ["LET'S", "WILD", "CARD!"];
 
   return (
     <main className={`game-intro ${isFinal ? "is-final" : ""}`} aria-live="polite">
@@ -65,11 +102,9 @@ export default function GameIntro({ onComplete }) {
         <section key={slide.id} className={`game-intro-card ${slide.className}`}>
           <span className="game-intro-index">INTRODUCTION</span>
           <div className="game-intro-copy">
-            {slide.lines.map((line, index) => (
-              <span key={line} style={{ "--line-index": index }}>
-                {line}
-              </span>
-            ))}
+            <span key={`${slide.id}-${lineIndex}`}>
+              {slide.lines[lineIndex]}
+            </span>
           </div>
           <span className="game-intro-progress">
             {String(slideIndex + 1).padStart(2, "0")} / 04
@@ -79,22 +114,22 @@ export default function GameIntro({ onComplete }) {
         <section className="game-intro-finale" aria-label="Let's Wild Card">
           <span className="game-intro-countdown">GET READY</span>
           <h1>
-            <span>LET'S</span>
-            <span>WILD</span>
-            <span className="game-intro-card-word">CARD!</span>
+            {finalWords.slice(0, finalWordIndex + 1).map((word, index) => (
+              <span
+                key={word}
+                className={index === 2 ? "game-intro-card-word" : ""}
+              >
+                {word}
+              </span>
+            ))}
           </h1>
-          <span className="game-intro-impact">THE ARENA IS YOURS.</span>
+          {finalWordIndex === 2 && (
+            <span className="game-intro-impact">THE ARENA IS YOURS.</span>
+          )}
         </section>
       )}
 
-      <button
-        type="button"
-        className="game-intro-skip"
-        onClick={() => {
-          setFinished(true);
-          onComplete();
-        }}
-      >
+      <button type="button" className="game-intro-skip" onClick={finishIntro}>
         PRESS ANY KEY TO SKIP <span>▶</span>
       </button>
     </main>
