@@ -115,7 +115,11 @@ function attemptMusicPlayback(player) {
   player.volume = Math.max(0, Math.min(1, settings.master * settings.music));
   const result = player.play();
   if (result && typeof result.catch === "function") {
-    result.catch(() => {
+    result.then(() => {
+      if (player === audioElement && !player.paused && typeof document !== "undefined") {
+        document.documentElement.classList.add("wc-rhythm-active");
+      }
+    }).catch(() => {
       // Autoplay may be blocked until the user interacts. Keep this player so
       // the AudioDirector can retry it on the next pointer or keyboard gesture.
     });
@@ -126,7 +130,7 @@ function setTempoMetadata(track) {
   if (typeof document === "undefined") return;
   const bpm = Number(track?.bpm) > 0 ? Number(track.bpm) : 120;
   document.documentElement.style.setProperty("--wc-bpm", String(bpm));
-  document.documentElement.classList.add("wc-rhythm-active");
+  document.documentElement.style.setProperty("--wc-beat-duration", `${60 / bpm}s`);
   window.dispatchEvent(new CustomEvent("wildcards:musicchange", { detail: { bpm, trackId: track?.id } }));
 }
 
@@ -206,6 +210,7 @@ export function stopMusic() {
   audioElement.removeAttribute("src");
   audioElement.load();
   audioElement = null;
+  if (typeof document !== "undefined") document.documentElement.classList.remove("wc-rhythm-active");
 }
 
 // Local, file-based sound effects bundled in public/audio/effects/.
@@ -278,6 +283,7 @@ const EXPRESSION_AUDIO = {
     excited: "https://sfxmint.com/dl/man-chuckle-08.mp3",
     determined: "https://sfxmint.com/dl/character-emote-08.mp3",
     serious: "https://sfxmint.com/dl/character-emote-06.mp3",
+    angry: "https://sfxmint.com/dl/character-emote-05.mp3",
     pushups1: "https://sfxmint.com/dl/pain-grunt-06.mp3",
     pushups2: "https://sfxmint.com/dl/pain-grunt-10.mp3",
   },
