@@ -40,6 +40,7 @@ function getIntroBeatTiming() {
 
 export default function GameIntro({ onComplete }) {
   const [slideIndex, setSlideIndex] = useState(0);
+  const [lineIndex, setLineIndex] = useState(0);
   const [isFinal, setIsFinal] = useState(false);
   const [finalWordIndex, setFinalWordIndex] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -53,10 +54,7 @@ export default function GameIntro({ onComplete }) {
   useEffect(() => {
     if (finished) return undefined;
 
-    const { stepDuration } = getIntroBeatTiming();
-    // Keep each information card on screen for four beats so the complete
-    // message can be read naturally before the next card appears.
-    const slideDuration = stepDuration * 2;
+    const { delay, stepDuration } = getIntroBeatTiming();
     const timer = window.setTimeout(() => {
       if (isFinal) {
         if (finalWordIndex < 2) {
@@ -67,16 +65,21 @@ export default function GameIntro({ onComplete }) {
         return;
       }
 
-      if (slideIndex < INTRO_SLIDES.length - 1) {
+      const currentSlide = INTRO_SLIDES[slideIndex];
+      if (lineIndex < currentSlide.lines.length - 1) {
+        // Reveal one additional line; keep the earlier lines on screen.
+        setLineIndex((current) => current + 1);
+      } else if (slideIndex < INTRO_SLIDES.length - 1) {
         setSlideIndex((current) => current + 1);
+        setLineIndex(0);
       } else {
         setIsFinal(true);
         setFinalWordIndex(0);
       }
-    }, isFinal && finalWordIndex === 2 ? stepDuration : slideDuration);
+    }, isFinal && finalWordIndex === 2 ? stepDuration : delay);
 
     return () => window.clearTimeout(timer);
-  }, [slideIndex, isFinal, finalWordIndex, finished, finishIntro]);
+  }, [slideIndex, lineIndex, isFinal, finalWordIndex, finished, finishIntro]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -101,11 +104,8 @@ export default function GameIntro({ onComplete }) {
         <section key={slide.id} className={`game-intro-card ${slide.className}`}>
           <span className="game-intro-index">INTRODUCTION</span>
           <div className="game-intro-copy">
-            {slide.lines.map((line, index) => (
-              <span
-                key={`${slide.id}-${index}`}
-                style={{ animationDelay: `${index * 120}ms` }}
-              >
+            {slide.lines.slice(0, lineIndex + 1).map((line, index) => (
+              <span key={`${slide.id}-${index}`}>
                 {line}
               </span>
             ))}
