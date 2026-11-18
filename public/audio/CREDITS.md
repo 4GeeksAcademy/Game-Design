@@ -44,8 +44,7 @@ All files below are stored locally in this repository. The game loads them from 
 |---|---|---|---|
 | `music/menu-theme.mp3` | Upbeat Loop — BenjaTheMaker | [OpenGameArt](https://opengameart.org/content/upbeat-short-music-loop-vorbis-oog) | CC0 1.0 |
 | `music/story-theme.mp3` | Peaceful Days — Juhani Junkala | [OpenGameArt](https://opengameart.org/content/jrpg-pack-4-calm) | CC0 1.0 |
-| `music/battle-1v1.mp3` | Stage 2 — Juhani Junkala | [OpenGameArt](https://opengameart.org/content/4-chiptunes-adventure) | CC0 1.0 |
-| `music/battle-2v2.mp3` | Head in the Sand — congusbongus | [OpenGameArt](https://opengameart.org/content/head-in-the-sand-seamless-loop) | CC0 1.0 |
+| `music/battle-1v1.mp3` (shared by 1v1 and 2v2) | Stage 2 — Juhani Junkala | [OpenGameArt](https://opengameart.org/content/4-chiptunes-adventure) | CC0 1.0 |
 | `music/victory-theme.mp3` | Kenney Music Jingles — NES stinger | [Kenney — Music Jingles](https://kenney.nl/assets/music-jingles) | CC0 1.0 |
 
 These assets were sourced from the public [S3M1TR4SH asset-library](https://github.com/S3M1TR4SH/asset-library), which documents the individual asset sources and CC0 licenses in its `LICENSES.md`. The punch impact was sourced from [GeorgeQLe/assets-sfx-combat](https://github.com/GeorgeQLe/assets-sfx-combat), which includes Kenney's CC0 license information.
