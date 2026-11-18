@@ -20,21 +20,37 @@ const INTRO_SLIDES = [
   },
 ];
 
-// Give each line a consistent two-beat pause. At faster tempos, use three
-// beats so every reveal stays around 1–2 seconds. We use the track's BPM as
-// timing metadata, but do not depend on its playback clock: the intro must
-// still work while music is loading, muted, or blocked by autoplay.
+// INTRO TIMING TEST SETTINGS
+// Testing only: set useCustomBpm to false to return to the active music track's
+// BPM automatically. Change customBpm to compare intro pacing without editing
+// the music files or their BPM metadata.
+const INTRO_TIMING = {
+  useCustomBpm: true,
+  customBpm: 150,
+  beatsPerLine: 2,
+};
+
+// The intro follows a beat clock derived from either the test BPM above or the
+// active track's BPM. It does not depend on audio currentTime, so it remains
+// reliable while music is loading, muted, or blocked by autoplay.
 function getIntroBeatTiming() {
   const musicInfo = getMusicBeatInfo();
-  const parsedBpm = Number(musicInfo?.bpm);
-  const safeBpm = Number.isFinite(parsedBpm) && parsedBpm > 0 ? parsedBpm : 120;
-  const beatDuration = 60 / safeBpm;
-  const beatsPerStep = safeBpm >= 130 ? 3 : 2;
-  const stepDuration = beatDuration * beatsPerStep;
+  const parsedMusicBpm = Number(musicInfo?.bpm);
+  const musicBpm = Number.isFinite(parsedMusicBpm) && parsedMusicBpm > 0
+    ? parsedMusicBpm
+    : 120;
+  const parsedTestBpm = Number(INTRO_TIMING.customBpm);
+  const testBpm = Number.isFinite(parsedTestBpm) && parsedTestBpm > 0
+    ? parsedTestBpm
+    : musicBpm;
+  const bpm = INTRO_TIMING.useCustomBpm ? testBpm : musicBpm;
+  const beatsPerLine = Math.max(1, Number(INTRO_TIMING.beatsPerLine) || 2);
+  const stepDuration = (60 / bpm) * beatsPerLine * 1000;
 
   return {
-    delay: stepDuration * 1000,
-    stepDuration: stepDuration * 1000,
+    bpm,
+    delay: stepDuration,
+    stepDuration,
   };
 }
 
