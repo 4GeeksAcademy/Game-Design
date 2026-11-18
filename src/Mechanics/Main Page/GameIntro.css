@@ -1,0 +1,233 @@
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&display=swap");
+
+.game-intro {
+  --intro-lime: #c8f36a;
+  --intro-gold: #f2d477;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 28px;
+  isolation: isolate;
+  color: #f5f0df;
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(70, 83, 49, 0.32), transparent 55%),
+    linear-gradient(145deg, #101a1c, #080e14 58%, #171a16);
+  font-family: "Oxanium", sans-serif;
+}
+
+.game-intro-grid,
+.game-intro-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.game-intro-grid {
+  opacity: 0.2;
+  background-image:
+    linear-gradient(rgba(200, 243, 106, 0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 243, 106, 0.11) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse, black, transparent 78%);
+  animation: intro-grid-drift 16s linear infinite;
+}
+
+.game-intro-scanlines {
+  opacity: 0.12;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(0, 0, 0, 0.6) 4px
+  );
+}
+
+.game-intro-card {
+  position: relative;
+  width: min(100%, 900px);
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  padding: clamp(30px, 7vw, 76px);
+  border-top: 1px solid rgba(242, 212, 119, 0.65);
+  border-bottom: 1px solid rgba(200, 243, 106, 0.45);
+  background: linear-gradient(110deg, rgba(11, 20, 22, 0.3), rgba(28, 35, 25, 0.5), rgba(11, 20, 22, 0.3));
+  text-align: center;
+  animation: intro-card-enter 650ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.game-intro-card::before,
+.game-intro-card::after {
+  content: "";
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border-color: var(--intro-lime);
+  border-style: solid;
+  opacity: 0.85;
+}
+.game-intro-card::before {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+}
+.game-intro-card::after {
+  right: 0;
+  bottom: 0;
+  border-width: 0 2px 2px 0;
+}
+
+.game-intro-index,
+.game-intro-progress,
+.game-intro-skip,
+.game-intro-countdown,
+.game-intro-impact {
+  color: #aab69a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.game-intro-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font-size: clamp(19px, 4vw, 38px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: clamp(1px, 0.3vw, 4px);
+  text-wrap: balance;
+}
+
+.game-intro-copy span {
+  display: block;
+  animation: intro-line-enter 500ms cubic-bezier(.16, 1, .3, 1) both;
+  animation-delay: calc(var(--line-index) * 140ms + 120ms);
+}
+
+.game-intro-credit .game-intro-copy span:first-child,
+.game-intro-beta .game-intro-copy span:last-child {
+  color: var(--intro-gold);
+}
+
+.game-intro-community .game-intro-copy span:nth-child(2) {
+  color: var(--intro-lime);
+}
+
+.game-intro-progress {
+  position: absolute;
+  right: 24px;
+  bottom: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-intro-skip {
+  position: absolute;
+  right: 24px;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(200, 243, 106, 0.25);
+  background: rgba(5, 10, 12, 0.55);
+  color: #b9c2ad;
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+.game-intro-skip:hover {
+  color: var(--intro-lime);
+  border-color: var(--intro-lime);
+}
+.game-intro-skip span {
+  color: var(--intro-lime);
+}
+
+.game-intro-finale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  text-align: center;
+  animation: finale-enter 500ms ease-out both;
+}
+
+.game-intro-finale h1 {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: clamp(64px, 14vw, 150px);
+  font-weight: 800;
+  font-style: italic;
+  line-height: 0.82;
+  letter-spacing: -0.055em;
+  text-shadow: 7px 7px 0 rgba(0, 0, 0, 0.5);
+}
+.game-intro-finale h1 span {
+  animation: finale-word 600ms cubic-bezier(.16, 1, .3, 1) both;
+}
+.game-intro-finale h1 span:nth-child(2) {
+  color: var(--intro-gold);
+  animation-delay: 550ms;
+}
+.game-intro-finale h1 span:nth-child(3) {
+  color: var(--intro-lime);
+  animation-delay: 1100ms;
+}
+.game-intro-card-word {
+  text-shadow: 0 0 26px rgba(200, 243, 106, 0.28), 7px 7px 0 rgba(0, 0, 0, 0.5);
+}
+.game-intro-impact {
+  animation: intro-fade-in 500ms ease-out 1550ms both;
+}
+
+@keyframes intro-card-enter {
+  from { opacity: 0; transform: scale(1.035) translateY(16px); filter: blur(5px); }
+  to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+}
+@keyframes intro-line-enter {
+  from { opacity: 0; transform: translateY(18px) skewY(2deg); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0) skewY(0); filter: blur(0); }
+}
+@keyframes finale-enter {
+  from { opacity: 0; transform: scale(.92); filter: blur(8px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+@keyframes finale-word {
+  0% { opacity: 0; transform: translateY(28px) scale(.88); }
+  65% { opacity: 1; transform: translateY(-5px) scale(1.035); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes intro-fade-in {
+  from { opacity: 0; letter-spacing: 8px; }
+  to { opacity: 1; letter-spacing: 3px; }
+}
+@keyframes intro-grid-drift {
+  to { background-position: 46px 46px, 46px 46px; }
+}
+
+@media (max-width: 560px) {
+  .game-intro { padding: 16px; }
+  .game-intro-card { min-height: 300px; gap: 25px; padding: 32px 18px; }
+  .game-intro-index { font-size: 9px; letter-spacing: 1.5px; }
+  .game-intro-copy { gap: 12px; font-size: clamp(18px, 5.2vw, 28px); }
+  .game-intro-skip { right: 12px; bottom: 12px; font-size: 9px; }
+  .game-intro-progress { right: 16px; bottom: 58px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-intro-grid,
+  .game-intro-card,
+  .game-intro-copy span,
+  .game-intro-finale,
+  .game-intro-finale h1 span,
+  .game-intro-impact { animation: none !important; }
+}
