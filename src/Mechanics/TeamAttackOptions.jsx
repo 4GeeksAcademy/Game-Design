@@ -1,6 +1,7 @@
 import React from "react";
 import { getModifiedAttackStat } from "./Modifiers.js";
 import { canUseAttack } from "./Health.js";
+import { playGameSound } from "../audio/audioManager.js";
 
 function getTeamAttackCardType(attack) {
   const hasUses = Number.isInteger(attack.uses);
@@ -113,7 +114,10 @@ export default function TeamAttackOptions({
                     : ""
                 }`}
                 disabled={!usable}
-                onClick={() => onAttack(fighter.id, index)}
+                onClick={() => {
+                  playGameSound("attack");
+                  onAttack(fighter.id, index);
+                }}
               >
                 {isSacrifice && (
                   <span className="team-attack-sacrifice-header">
