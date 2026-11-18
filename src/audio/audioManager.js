@@ -127,6 +127,7 @@ function setTempoMetadata(track) {
   const bpm = Number(track?.bpm) > 0 ? Number(track.bpm) : 120;
   document.documentElement.style.setProperty("--wc-bpm", String(bpm));
   document.documentElement.classList.add("wc-rhythm-active");
+  window.dispatchEvent(new CustomEvent("wildcards:musicchange", { detail: { bpm, trackId: track?.id } }));
 }
 
 function playMusicTrack(track, category = "story") {
