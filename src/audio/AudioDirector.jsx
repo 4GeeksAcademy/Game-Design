@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { initializeAudio, playUISound, startMusic, stopMusic, getMusicBeatInfo } from "./audioManager.js";
+import { initializeAudio, playUISound, startMusic, stopMusic, getMusicBeatInfo, resumeMusic } from "./audioManager.js";
 
 function getTrack(pathname, routeState) {
   // Victory and reward screens get their own one-shot stinger.
@@ -27,7 +27,7 @@ export default function AudioDirector() {
   useEffect(() => {
     const unlock = () => {
       initializeAudio();
-      startMusic(musicCategory);
+      resumeMusic();
     };
 
     // Keep the listener available: some browsers may reject the first play()
