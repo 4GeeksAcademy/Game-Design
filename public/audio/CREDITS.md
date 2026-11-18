@@ -74,3 +74,16 @@ These CC0 1.0 MP3 clips are currently streamed directly from SFXMint. They are n
 | Tenten — relate | Giggle Character Emote 04 | [SFXMint](https://sfxmint.com/sounds/character-emote-04) |
 
 SFXMint states that its library files are CC0 1.0, including commercial use and hotlinking. Neutral expressions intentionally stay silent. The sound URLs are centralized in `EXPRESSION_AUDIO` in `src/audio/audioManager.js`.
+
+
+## Beat-synced logo animation
+
+Each music track declares a `bpm` value in `src/audio/audioManager.js`. These are editable starting values, not automatic tempo detection. Set each value to the track's measured BPM. The CSS beat duration is calculated as `60 / bpm` seconds and starts when the browser reports that the music has begun playing.
+
+The homepage logo and Story Mode logo currently use `wc-beat-animation--bounce`. Replace that class in the corresponding JSX element with one of:
+- `wc-beat-animation--shake`
+- `wc-beat-animation--pulse`
+- `wc-beat-animation--tilt`
+- `wc-beat-animation--pop`
+
+The keyframes and beat-duration styles are in `Homescreen.css` and `StoryCutscene.css`.
