@@ -20,20 +20,30 @@ const INTRO_SLIDES = [
   },
 ];
 
-// INTRO TIMING TEST SETTINGS
-// Testing only: set useCustomBpm to false to return to the active music track's
-// BPM automatically. Change customBpm to compare intro pacing without editing
-// the music files or their BPM metadata.
+// INTRO TIMING SETTINGS
+// Each number is how many beats the currently visible line/word stays on screen
+// before the next one appears. Tune each slide independently.
+// Set useCustomBpm to false to follow the active music track's BPM.
 const INTRO_TIMING = {
   useCustomBpm: true,
   customBpm: 150,
-  beatsPerLine: 2,
+
+  // Per-line pacing, in order, for each slide.
+  lineBeats: {
+    credit: [2, 2, 3],
+    beta: [2, 2, 3],
+    community: [2, 3, 3],
+  },
+
+  // Time each signature word holds before the next word appears.
+  // The final word gets the longest hold for a more dramatic finish.
+  finaleWordBeats: [2, 3, 6],
 };
 
 // The intro follows a beat clock derived from either the test BPM above or the
 // active track's BPM. It does not depend on audio currentTime, so it remains
 // reliable while music is loading, muted, or blocked by autoplay.
-function getIntroBeatTiming() {
+function getIntroBeatTiming(beats = 2) {
   const musicInfo = getMusicBeatInfo();
   const parsedMusicBpm = Number(musicInfo?.bpm);
   const musicBpm = Number.isFinite(parsedMusicBpm) && parsedMusicBpm > 0
@@ -44,8 +54,8 @@ function getIntroBeatTiming() {
     ? parsedTestBpm
     : musicBpm;
   const bpm = INTRO_TIMING.useCustomBpm ? testBpm : musicBpm;
-  const beatsPerLine = Math.max(1, Number(INTRO_TIMING.beatsPerLine) || 2);
-  const stepDuration = (60 / bpm) * beatsPerLine * 1000;
+  const beatCount = Math.max(1, Number(beats) || 2);
+  const stepDuration = (60 / bpm) * beatCount * 1000;
 
   return {
     bpm,
@@ -70,7 +80,14 @@ export default function GameIntro({ onComplete }) {
   useEffect(() => {
     if (finished) return undefined;
 
-    const { delay, stepDuration } = getIntroBeatTiming();
+    const currentSlide = INTRO_SLIDES[slideIndex];
+    const visibleLineBeats = currentSlide
+      ? INTRO_TIMING.lineBeats[currentSlide.id]
+      : null;
+    const beatsToWait = isFinal
+      ? INTRO_TIMING.finaleWordBeats[finalWordIndex] ?? 3
+      : visibleLineBeats?.[lineIndex] ?? 2;
+    const { delay, stepDuration } = getIntroBeatTiming(beatsToWait);
     const timer = window.setTimeout(() => {
       if (isFinal) {
         if (finalWordIndex < 2) {
