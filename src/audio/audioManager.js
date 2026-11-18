@@ -18,11 +18,11 @@ const MUSIC_BASE = `${import.meta.env.BASE_URL}audio/music/`;
 // Change bpm here when you measure a song's real tempo. The animation clock
 // automatically reads the BPM belonging to whichever id is currently playing.
 export const MENU_MUSIC_TRACKS = [
-  { id: "main-menu", title: "Main Menu", file: `${MUSIC_BASE}17. Duelist (Instrumental).mp3`, bpm: 90 },
+  { id: "main-menu", title: "Main Menu", file: `${MUSIC_BASE}17. Duelist (Instrumental).mp3`, bpm: 75 },
 ];
 
 export const CHARACTER_SELECT_MUSIC_TRACKS = [
-  { id: "character-select-main", title: "Character Select", file: `${MUSIC_BASE}character-select-theme.mp3`, bpm: 120 },
+  { id: "character-select-main", title: "Character Select", file: `${MUSIC_BASE}menu-theme.mp3`, bpm: 120 },
 ];
 
 export const BATTLE_MUSIC_TRACKS = [
