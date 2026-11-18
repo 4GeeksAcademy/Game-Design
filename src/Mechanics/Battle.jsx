@@ -899,7 +899,7 @@ const stunOptions = {
                 <div
                   className="story-battle-background"
                   style={{
-                    backgroundImage: `url("${storyBackgrounds.arena}")`,
+                    backgroundImage: `url("${storyBackgrounds[levelConfig.background] || storyBackgrounds.arena}")`,
                   }}
                   aria-hidden="true"
                 />
