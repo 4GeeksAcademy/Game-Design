@@ -3,20 +3,23 @@ import { useLocation } from "react-router-dom";
 import { initializeAudio, playUISound, startMusic, stopMusic, getMusicBeatInfo, resumeMusic } from "./audioManager.js";
 
 function getTrack(pathname, routeState) {
-  // Victory and reward screens get their own one-shot stinger.
+  // Match specific screens before broad Story Mode route state. A story battle
+  // is still a battle and must use the battle soundtrack.
   if (pathname.includes("victory") || pathname.includes("story-reward")) return "victory";
-
-  // Story cutscenes and story-mode fights use the separately configurable
-  // story playlist. Ordinary 1v1 and 2v2 matches share the battle playlist.
-  if (routeState?.gameMode === "story" || pathname.includes("story")) return "story";
 
   if (
     pathname.includes("team-battle") ||
-    pathname.includes("battle") ||
+    pathname === "/battle" ||
+    pathname.endsWith("/battle") ||
     pathname.includes("watch-mode") ||
     pathname.includes("bot-simulator")
   ) return "battle";
 
+  if (pathname.includes("character-select") || pathname.includes("character-selection")) {
+    return "characterSelect";
+  }
+
+  if (routeState?.gameMode === "story" || pathname.includes("story")) return "story";
   return "menu";
 }
 
