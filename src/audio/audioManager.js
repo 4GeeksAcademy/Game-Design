@@ -39,7 +39,8 @@ export const STORY_DIALOGUE_MUSIC_TRACKS = [
   { id: "story-training", title: "Story — Training", file: `${MUSIC_BASE}battle-1v1.mp3`, bpm: 140 },
   { id: "story-light", title: "Story — Playful", file: `${MUSIC_BASE}menu-theme.mp3`, bpm: 120 },
   { id: "story-adventure-naruto", title: "Story — Adventure", file: `${MUSIC_BASE}Naruto Shippuden OP 10 - Newsong [8-bit cover].mp3`, bpm: 128 },
-{ id: "story-wonder-naruto", title: "Story — Wonder", file: `${MUSIC_BASE}Naruto Ending 1 (Wind) 8 bit.mp3`, bpm: 55 },
+  { id: "story-wonder-naruto", title: "Story — Wonder", file: `${MUSIC_BASE}Naruto Ending 1 (Wind) 8 bit.mp3`, bpm: 55 },
+  { id: "story-RockLee-theme", title: "Story — Rock Lee's Theme", file: `${MUSIC_BASE}Rock Lee's Theme.mp3`, bpm: 120 },
 ];
 
 export const VICTORY_MUSIC_TRACKS = [

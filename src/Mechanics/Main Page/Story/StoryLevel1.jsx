@@ -26,7 +26,7 @@ const level1Cutscene1 = [
   {
     speaker: "NARRATOR",
     text: "By the time you reach the Land of Fire, your legs are begging you to stop. You have traveled farther than you intended, and the thought of sleeping beneath another tree is becoming less appealing by the minute.",
-    musicTrackId: "story-main",
+    musicTrackId: null,
     characterId: null,
     expression: "neutral",
     position: "center",
@@ -44,6 +44,7 @@ const level1Cutscene1 = [
   },
   {
     speaker: "NARRATOR",
+    musicTrackId: "story-adventure-naruto",
     text: "Konohagakure, the Hidden Leaf Village!",
     characterId: null,
     expression: "neutral",
@@ -99,7 +100,7 @@ const level1Cutscene1 = [
   {
     speaker: "ROCK LEE",
     text: "ONE THOUSAND! ONE THOUSAND AND ONE! ONE THOUSAND AND TWO!",
-    musicTrackId: "story-adventure-naruto",
+    musicTrackId: "story-RockLee-theme",
     characterId: "rockLee",
     expression: "pushups2",
     position: "center",

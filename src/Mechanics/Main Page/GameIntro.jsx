@@ -30,14 +30,14 @@ const INTRO_TIMING = {
 
   // Per-line pacing, in order, for each slide.
   lineBeats: {
-    credit: [3.5, 1.9, 2.8],
-    beta: [3.2, 2, 2],
-    community: [3, 1, 3],
+    credit: [2.6, 2.4, 3],
+    beta: [2.4, 2.4, 1.4],
+    community: [1.2, 3.8, 2.4],
   },
 
   // Time each signature word holds before the next word appears.
-  // The final word gets the longest hold for a more dramatic finish.
-  finaleWordBeats: [2, 3, 5],
+ 
+  finaleWordBeats: [1.8, 2, 2.2],
 };
 
 // The intro follows a beat clock derived from either the test BPM above or the
