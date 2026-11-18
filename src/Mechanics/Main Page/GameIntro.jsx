@@ -40,7 +40,6 @@ function getIntroBeatTiming() {
 
 export default function GameIntro({ onComplete }) {
   const [slideIndex, setSlideIndex] = useState(0);
-  const [lineIndex, setLineIndex] = useState(0);
   const [isFinal, setIsFinal] = useState(false);
   const [finalWordIndex, setFinalWordIndex] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -54,7 +53,10 @@ export default function GameIntro({ onComplete }) {
   useEffect(() => {
     if (finished) return undefined;
 
-    const { delay, stepDuration } = getIntroBeatTiming();
+    const { stepDuration } = getIntroBeatTiming();
+    // Keep each information card on screen for four beats so the complete
+    // message can be read naturally before the next card appears.
+    const slideDuration = stepDuration * 2;
     const timer = window.setTimeout(() => {
       if (isFinal) {
         if (finalWordIndex < 2) {
@@ -65,20 +67,16 @@ export default function GameIntro({ onComplete }) {
         return;
       }
 
-      const currentSlide = INTRO_SLIDES[slideIndex];
-      if (lineIndex < currentSlide.lines.length - 1) {
-        setLineIndex((current) => current + 1);
-      } else if (slideIndex < INTRO_SLIDES.length - 1) {
+      if (slideIndex < INTRO_SLIDES.length - 1) {
         setSlideIndex((current) => current + 1);
-        setLineIndex(0);
       } else {
         setIsFinal(true);
         setFinalWordIndex(0);
       }
-    }, isFinal && finalWordIndex === 2 ? stepDuration : delay);
+    }, isFinal && finalWordIndex === 2 ? stepDuration : slideDuration);
 
     return () => window.clearTimeout(timer);
-  }, [slideIndex, lineIndex, isFinal, finalWordIndex, finished, finishIntro]);
+  }, [slideIndex, isFinal, finalWordIndex, finished, finishIntro]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -103,9 +101,14 @@ export default function GameIntro({ onComplete }) {
         <section key={slide.id} className={`game-intro-card ${slide.className}`}>
           <span className="game-intro-index">INTRODUCTION</span>
           <div className="game-intro-copy">
-            <span key={`${slide.id}-${lineIndex}`}>
-              {slide.lines[lineIndex]}
-            </span>
+            {slide.lines.map((line, index) => (
+              <span
+                key={`${slide.id}-${index}`}
+                style={{ animationDelay: `${index * 120}ms` }}
+              >
+                {line}
+              </span>
+            ))}
           </div>
           <span className="game-intro-progress">
             {String(slideIndex + 1).padStart(2, "0")} / 04
