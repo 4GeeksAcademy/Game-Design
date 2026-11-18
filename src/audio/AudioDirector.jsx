@@ -3,23 +3,37 @@ import { useLocation } from "react-router-dom";
 import { initializeAudio, playUISound, startMusic, stopMusic, getMusicBeatInfo, resumeMusic } from "./audioManager.js";
 
 function getTrack(pathname, routeState) {
-  // Match specific screens before broad Story Mode route state. A story battle
-  // is still a battle and must use the battle soundtrack.
-  if (pathname.includes("victory") || pathname.includes("story-reward")) return "victory";
+  // Reward and victory screens keep their dedicated victory music.
+  if (pathname.includes("victory") || pathname.includes("story-reward")) {
+    return "victory";
+  }
 
+  // Story mode keeps its active cutscene/dialogue theme through character
+  // selection and into either battle route. Since the category stays "story",
+  // navigation will not restart the track or replace it with battle music.
+  if (routeState?.gameMode === "story") {
+    return "story";
+  }
+
+  // Non-story modes retain their normal screen-specific playlists.
   if (
     pathname.includes("team-battle") ||
     pathname === "/battle" ||
     pathname.endsWith("/battle") ||
     pathname.includes("watch-mode") ||
     pathname.includes("bot-simulator")
-  ) return "battle";
+  ) {
+    return "battle";
+  }
 
-  if (pathname.includes("character-select") || pathname.includes("character-selection")) {
+  if (
+    pathname.includes("character-select") ||
+    pathname.includes("character-selection")
+  ) {
     return "characterSelect";
   }
 
-  if (routeState?.gameMode === "story" || pathname.includes("story")) return "story";
+  if (pathname.includes("story")) return "story";
   return "menu";
 }
 
