@@ -137,18 +137,20 @@ function setTempoMetadata(track) {
 }
 
 function playMusicTrack(track, category = "story") {
-  if (!track?.file || settings.muted || settings.music <= 0 || typeof Audio === "undefined") return;
+  if (!track?.file) return;
+  currentTrack = category;
+  activeMusicTrack = track;
+  setTempoMetadata(track);
+
+  if (settings.muted || settings.music <= 0 || typeof Audio === "undefined") {
+    stopMusic();
+    return;
+  }
   if (audioElement && audioElement.dataset.trackId === track.id && !audioElement.paused) {
-    currentTrack = category;
-    activeMusicTrack = track;
-    setTempoMetadata(track);
     return;
   }
 
   stopMusic();
-  currentTrack = category;
-  activeMusicTrack = track;
-  setTempoMetadata(track);
 
   const player = new Audio(track.file);
   player.dataset.trackId = track.id;
@@ -207,11 +209,12 @@ export function getMusicBeatInfo() {
 }
 
 export function stopMusic() {
-  if (!audioElement) return;
-  audioElement.pause();
-  audioElement.removeAttribute("src");
-  audioElement.load();
-  audioElement = null;
+  if (audioElement) {
+    audioElement.pause();
+    audioElement.removeAttribute("src");
+    audioElement.load();
+    audioElement = null;
+  }
   if (typeof document !== "undefined") document.documentElement.classList.remove("wc-rhythm-active");
 }
 
