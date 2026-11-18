@@ -52,3 +52,22 @@ These assets were sourced from the public [S3M1TR4SH asset-library](https://gith
 ## Replacing audio later
 
 Keep the filenames above and replace the corresponding files in `public/audio/music/` or `public/audio/effects/`. The code does not need to change as long as the filenames remain the same. Music and effects are loaded locally; no external sound-library URL is required.
+
+
+## Character expression reaction sounds
+
+These CC0 1.0 MP3 clips are currently streamed directly from SFXMint. They are not recordings of the anime cast; they are generic game-character vocal reactions selected to match the expression. Replace the URLs in `src/audio/audioManager.js` with local recordings whenever custom voice assets are ready.
+
+| Character / expression | Clip | Source |
+|---|---|---|
+| Rock Lee — happy / excited | Cartoon Man Chuckle 06 | [SFXMint](https://sfxmint.com/sounds/man-chuckle-06) |
+| Rock Lee — determined | Impressed Ooh Character Emote 08 | [SFXMint](https://sfxmint.com/sounds/character-emote-08) |
+| Rock Lee — serious | Thinking Hmm Character Emote 06 | [SFXMint](https://sfxmint.com/sounds/character-emote-06) |
+| Rock Lee — pushups1 | Lifting Effort Pain Grunt 06 | [SFXMint](https://sfxmint.com/sounds/pain-grunt-06) |
+| Rock Lee — pushups2 | Long Strain Pain Grunt 10 | [SFXMint](https://sfxmint.com/sounds/pain-grunt-10) |
+| Tenten — happy | Happy Cheer Character Emote 10 | [SFXMint](https://sfxmint.com/sounds/character-emote-10) |
+| Tenten — angry / exasperated | Grumble Character Emote 05 | [SFXMint](https://sfxmint.com/sounds/character-emote-05) |
+| Tenten — facepalm | Sigh Character Emote 09 | [SFXMint](https://sfxmint.com/sounds/character-emote-09) |
+| Tenten — relate | Confused Huh Character Emote 07 | [SFXMint](https://sfxmint.com/sounds/character-emote-07) |
+
+SFXMint states that its library files are CC0 1.0, including commercial use and hotlinking. The sound URLs are centralized in `EXPRESSION_AUDIO` in `src/audio/audioManager.js`.
