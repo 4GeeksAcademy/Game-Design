@@ -39,7 +39,7 @@ export const STORY_DIALOGUE_MUSIC_TRACKS = [
   { id: "story-training", title: "Story — Training", file: `${MUSIC_BASE}battle-1v1.mp3`, bpm: 140 },
   { id: "story-light", title: "Story — Playful", file: `${MUSIC_BASE}menu-theme.mp3`, bpm: 120 },
   { id: "story-adventure-naruto", title: "Story — Adventure", file: `${MUSIC_BASE}Naruto Shippuden OP 10 - Newsong [8-bit cover].mp3`, bpm: 128 },
-{ id: "story-wonder-naruto", title: "Story — Wonder", file: `${MUSIC_BASE}Naruto Ending 1 (Wind) 8 bit.mp3`, bpm: 120 },
+{ id: "story-wonder-naruto", title: "Story — Wonder", file: `${MUSIC_BASE}Naruto Ending 1 (Wind) 8 bit.mp3`, bpm: 55 },
 ];
 
 export const VICTORY_MUSIC_TRACKS = [
@@ -286,7 +286,7 @@ export function playUISound(kind = "click") {
 // Distinct typewriter timbres for each fighter. These are temporary synthesized
 // voice textures until recorded character-specific clips are placed in public/audio.
 const dialogueProfiles = {
-  rockLee: { base: 510, type: "square", duration: 0.027, volume: 0.025, interval: 3 },
+  rockLee: { base: 440, type: "square", duration: 0.027, volume: 0.025, interval: 3 },
   tenten: { base: 690, type: "triangle", duration: 0.032, volume: 0.021, interval: 3 },
   narrator: { base: 420, type: "sine", duration: 0.025, volume: 0.014, interval: 4 },
   default: { base: 570, type: "triangle", duration: 0.028, volume: 0.018, interval: 3 },

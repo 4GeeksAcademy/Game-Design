@@ -9,7 +9,7 @@ const INTRO_SLIDES = [
   },
   {
     id: "beta",
-    lines: ["YOU'RE PLAYING THE BETA VERSION", "OF THE GAME—", "SO EXPECT MANY BUGS."],
+    lines: ["YOU'RE PLAYING THE BETA VERSION", "OF THE GAME", "SO EXPECT MANY BUGS."],
     className: "game-intro-beta",
   },
   {
@@ -63,7 +63,7 @@ export default function GameIntro({ onComplete }) {
 
       {!isFinal ? (
         <section key={slide.id} className={`game-intro-card ${slide.className}`}>
-          <span className="game-intro-index">WILD CARDS // SYSTEM MESSAGE</span>
+          <span className="game-intro-index">INTRODUCTION</span>
           <div className="game-intro-copy">
             {slide.lines.map((line, index) => (
               <span key={line} style={{ "--line-index": index }}>
@@ -79,11 +79,11 @@ export default function GameIntro({ onComplete }) {
         <section className="game-intro-finale" aria-label="Let's Wild Card">
           <span className="game-intro-countdown">GET READY</span>
           <h1>
-            <span>LET'S—</span>
-            <span>WILD—</span>
+            <span>LET'S</span>
+            <span>WILD</span>
             <span className="game-intro-card-word">CARD!</span>
           </h1>
-          <span className="game-intro-impact">THE GAME IS YOURS.</span>
+          <span className="game-intro-impact">THE ARENA IS YOURS.</span>
         </section>
       )}
 
