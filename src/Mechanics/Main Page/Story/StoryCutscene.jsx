@@ -4,7 +4,7 @@ import { roster } from "../CharacterSelection.jsx";
 import { storyExpressions } from "./StoryExpressions.js";
 import { storyBackgrounds } from "./StoryBackgrounds.js";
 import { preloadStoryImages } from "./PreloadStoryImages.js";
-import { getDialogueProfile, playCharacterExpression, playDialogueBlip } from "../../../audio/audioManager.js";
+import { getDialogueProfile, playCharacterExpression, playDialogueBlip, startMusicById } from "../../../audio/audioManager.js";
 import "./StoryCutscene.css";
 
 function StoryBackground({ backgroundKey }) {
@@ -216,6 +216,12 @@ function StoryCutscene({
     });
   }, [dialogueIndex, dialogueLines]);
 
+  // A dialogue line may optionally request a different soundtrack mood.
+  // Lines without musicTrackId leave the current music playing unchanged.
+  useEffect(() => {
+    if (dialogue?.musicTrackId) startMusicById(dialogue.musicTrackId);
+  }, [dialogueIndex, dialogue?.musicTrackId]);
+
   // Play a one-shot reaction only when a character changes expression.
   useEffect(() => {
     const characterId = dialogue?.characterId;
@@ -331,7 +337,7 @@ function StoryCutscene({
   return (
     <main className="story-cutscene">
       <header className="vn-header">
-        <div className="vn-logo">
+        <div className="vn-logo wc-beat-animation--bounce">
           <span className="vn-logo-mark">VS</span>
           <span>Wild Cards</span>
         </div>
