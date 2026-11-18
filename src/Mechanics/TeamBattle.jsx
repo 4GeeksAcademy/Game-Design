@@ -3026,7 +3026,7 @@ export default function TeamBattle() {
           <div
             className="team-battle-story-background"
             style={{
-              backgroundImage: `url("${storyBackgrounds.arena}")`,
+              backgroundImage: `url("${storyBackgrounds[levelConfig.background] || storyBackgrounds.arena}")`,
             }}
             aria-hidden="true"
           />
