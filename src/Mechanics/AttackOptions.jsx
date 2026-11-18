@@ -123,7 +123,6 @@ function AttackOptions({
       const damage = result.damageReceived ?? 0;
       if (damage > 0) setDamageDealt((previous) => previous + damage);
 
-      if (damage > 0 && result.action === "attack") playGameSound("attack");
       setAttacksUsed((previous) => previous + 1);
       showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
 
@@ -208,6 +207,8 @@ function AttackOptions({
         }
       }
 
+      // A valid attack selection gets its own heavier action sound.
+      playGameSound("attack");
       // Ordinary attacks and other stun types resolve normally.
       handleAttack(index);
     },
