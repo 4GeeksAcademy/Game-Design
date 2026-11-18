@@ -87,3 +87,16 @@ The homepage logo and Story Mode logo currently use `wc-beat-animation--bounce`.
 - `wc-beat-animation--pop`
 
 The keyframes and beat-duration styles are in `Homescreen.css` and `StoryCutscene.css`.
+
+
+## Track registry and BPM
+
+Music IDs and their BPM values are centralized in `src/audio/audioManager.js`. Add or edit a track in its category array; the active track's ID selects its BPM automatically. The beat interval is `60 / bpm` seconds. BPM values currently in the registry are starting values and should be replaced with the measured tempo of each file.
+
+The dedicated Character Select slot is:
+- `public/audio/music/character-select-theme.mp3` — add the original Character Select soundtrack here.
+- Registry ID: `character-select-main`
+
+The Character Select file is a new asset slot and is not bundled yet. Until that MP3 is added, the Character Select screen will report a missing audio file rather than silently reuse the Main Menu theme.
+
+Story dialogue cue IDs `story-training` and `story-light` currently switch to existing local battle and menu MP3s as distinct temporary mood cues. Replace their `file` values with dedicated story-mood MP3s when those tracks are ready.
