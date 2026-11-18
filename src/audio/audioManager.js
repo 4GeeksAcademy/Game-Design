@@ -10,27 +10,58 @@ let masterGain = null;
 let musicGain = null;
 // MUSIC LIBRARY: add tracks here; both battle modes share BATTLE_MUSIC_TRACKS.
 // Story Mode uses its own STORY_MUSIC_TRACKS list. Keep files in public/audio/music/.
+// BPM is editable track metadata (not automatic audio analysis). Set it to the
+// song's measured tempo; the beat clock uses 60 / BPM seconds per beat.
 const MUSIC_BASE = `${import.meta.env.BASE_URL}audio/music/`;
 
+// Central music registry. Every id is unique, and every entry owns its BPM.
+// Change bpm here when you measure a song's real tempo. The animation clock
+// automatically reads the BPM belonging to whichever id is currently playing.
 export const MENU_MUSIC_TRACKS = [
-  { id: "main-menu", title: "Main Menu", file: `${MUSIC_BASE}menu-theme.mp3` },
+  { id: "main-menu", title: "Main Menu", file: `${MUSIC_BASE}menu-theme.mp3`, bpm: 90 },
+];
+
+export const CHARACTER_SELECT_MUSIC_TRACKS = [
+  { id: "character-select-main", title: "Character Select", file: `${MUSIC_BASE}character-select-theme.mp3`, bpm: 120 },
 ];
 
 export const BATTLE_MUSIC_TRACKS = [
-  { id: "battle-main", title: "Stage 2", file: `${MUSIC_BASE}battle-1v1.mp3` },
+  { id: "battle-main", title: "Stage 2", file: `${MUSIC_BASE}battle-1v1.mp3`, bpm: 140 },
 ];
 
 export const STORY_MUSIC_TRACKS = [
-  { id: "story-main", title: "Peaceful Days", file: `${MUSIC_BASE}story-theme.mp3` },
+  { id: "story-main", title: "Peaceful Days", file: `${MUSIC_BASE}story-theme.mp3`, bpm: 96 },
+];
+
+// Dialogue-specific moods use unique IDs. Add a new MP3 and entry here,
+// then reference its id from a dialogue line's musicTrackId property.
+export const STORY_DIALOGUE_MUSIC_TRACKS = [
+  { id: "story-training", title: "Story — Training", file: `${MUSIC_BASE}battle-1v1.mp3`, bpm: 140 },
+  { id: "story-light", title: "Story — Playful", file: `${MUSIC_BASE}menu-theme.mp3`, bpm: 120 },
 ];
 
 export const VICTORY_MUSIC_TRACKS = [
-  { id: "victory-main", title: "Victory", file: `${MUSIC_BASE}victory-theme.mp3` },
+  { id: "victory-main", title: "Victory", file: `${MUSIC_BASE}victory-theme.mp3`, bpm: 120 },
 ];
 
 // Set an index to select a different song from each playlist.
-const ACTIVE_TRACKS = { menu: 0, battle: 0, story: 0, victory: 0 };
-const MUSIC_PLAYLISTS = { menu: MENU_MUSIC_TRACKS, battle: BATTLE_MUSIC_TRACKS, story: STORY_MUSIC_TRACKS, victory: VICTORY_MUSIC_TRACKS };
+const ACTIVE_TRACKS = { menu: 0, characterSelect: 0, battle: 0, story: 0, victory: 0 };
+const MUSIC_PLAYLISTS = {
+  menu: MENU_MUSIC_TRACKS,
+  characterSelect: CHARACTER_SELECT_MUSIC_TRACKS,
+  battle: BATTLE_MUSIC_TRACKS,
+  story: STORY_MUSIC_TRACKS,
+  victory: VICTORY_MUSIC_TRACKS,
+};
+const ALL_MUSIC_TRACKS = [
+  ...MENU_MUSIC_TRACKS,
+  ...CHARACTER_SELECT_MUSIC_TRACKS,
+  ...BATTLE_MUSIC_TRACKS,
+  ...STORY_MUSIC_TRACKS,
+  ...STORY_DIALOGUE_MUSIC_TRACKS,
+  ...VICTORY_MUSIC_TRACKS,
+];
+const MUSIC_TRACKS_BY_ID = Object.fromEntries(ALL_MUSIC_TRACKS.map((track) => [track.id, track]));
 
 function normalizeMusicCategory(category) {
   if (category === "battle1v1" || category === "battle2v2") return "battle";
@@ -43,6 +74,7 @@ function getSelectedMusic(category) {
 }
 
 let currentTrack = "menu";
+let activeMusicTrack = null;
 let audioElement = null;
 let settings = loadSettings();
 function loadSettings() {
@@ -105,48 +137,107 @@ function attemptMusicPlayback(player) {
   player.volume = Math.max(0, Math.min(1, settings.master * settings.music));
   const result = player.play();
   if (result && typeof result.catch === "function") {
-    result.catch(() => {
+    result.then(() => {
+      if (player === audioElement && !player.paused && typeof document !== "undefined") {
+        document.documentElement.classList.add("wc-rhythm-active");
+      }
+    }).catch(() => {
       // Autoplay may be blocked until the user interacts. Keep this player so
       // the AudioDirector can retry it on the next pointer or keyboard gesture.
     });
   }
 }
 
-export function startMusic(category = "menu") {
-  const nextCategory = normalizeMusicCategory(category);
-  const selectedTrack = getSelectedMusic(nextCategory);
-  if (!selectedTrack?.file || settings.muted || settings.music <= 0) return;
+function setTempoMetadata(track) {
+  if (typeof document === "undefined") return;
+  const bpm = Number(track?.bpm) > 0 ? Number(track.bpm) : 120;
+  document.documentElement.style.setProperty("--wc-bpm", String(bpm));
+  document.documentElement.style.setProperty("--wc-beat-duration", `${60 / bpm}s`);
+  window.dispatchEvent(new CustomEvent("wildcards:musicchange", { detail: { bpm, trackId: track?.id } }));
+}
 
-  if (currentTrack !== nextCategory || (audioElement && audioElement.dataset.trackId !== selectedTrack.id)) {
+function playMusicTrack(track, category = "story") {
+  if (!track?.file) return;
+  currentTrack = category;
+  activeMusicTrack = track;
+  setTempoMetadata(track);
+
+  if (settings.muted || settings.music <= 0 || typeof Audio === "undefined") {
     stopMusic();
-    currentTrack = nextCategory;
-  }
-  if (audioElement) {
-    attemptMusicPlayback(audioElement);
     return;
   }
-  if (typeof Audio === "undefined") return;
+  if (
+    audioElement &&
+    audioElement.dataset.trackId === track.id &&
+    audioElement.src === new URL(track.file, window.location.href).href &&
+    !audioElement.paused
+  ) {
+    return;
+  }
 
-  const player = new Audio(selectedTrack.file);
-  player.dataset.trackId = selectedTrack.id;
+  stopMusic();
+
+  const player = new Audio(track.file);
+  player.dataset.trackId = track.id;
   player.preload = "auto";
-  player.loop = nextCategory !== "victory";
+  player.loop = category !== "victory";
   player.volume = Math.max(0, Math.min(1, settings.master * settings.music));
   player.addEventListener("canplay", () => attemptMusicPlayback(player));
   player.addEventListener("error", () => {
     if (audioElement === player) audioElement = null;
-    // Never replace a missing MP3 with synthesized prototype music.
+    console.error("[Wild Cards Audio] Could not load music:", track.file);
   });
   audioElement = player;
   player.load();
 }
 
+export function startMusic(category = "menu") {
+  const nextCategory = normalizeMusicCategory(category);
+  const selectedTrack = getSelectedMusic(nextCategory);
+  playMusicTrack(selectedTrack, nextCategory);
+}
+
+// Dialogue lines can request a specific mood by adding musicTrackId.
+// The id is resolved here, keeping StoryCutscene independent of file paths.
+export function startMusicById(trackId) {
+  const track = MUSIC_TRACKS_BY_ID[trackId];
+  if (!track) {
+    console.warn(`[Wild Cards Audio] Unknown musicTrackId: ${trackId}`);
+    return false;
+  }
+
+  const category = Object.entries(MUSIC_PLAYLISTS)
+    .find(([, playlist]) => playlist.some((item) => item.id === trackId))?.[0] ?? "story";
+  playMusicTrack(track, category);
+  return true;
+}
+
+export function resumeMusic() {
+  if (audioElement) {
+    attemptMusicPlayback(audioElement);
+    return;
+  }
+  if (activeMusicTrack) playMusicTrack(activeMusicTrack, currentTrack);
+  else startMusic(currentTrack);
+}
+
+export function getMusicBeatInfo() {
+  return {
+    bpm: Number(activeMusicTrack?.bpm) > 0 ? Number(activeMusicTrack.bpm) : 120,
+    currentTime: audioElement?.currentTime ?? 0,
+    isPlaying: Boolean(audioElement && !audioElement.paused),
+    trackId: activeMusicTrack?.id ?? null,
+  };
+}
+
 export function stopMusic() {
-  if (!audioElement) return;
-  audioElement.pause();
-  audioElement.removeAttribute("src");
-  audioElement.load();
-  audioElement = null;
+  if (audioElement) {
+    audioElement.pause();
+    audioElement.removeAttribute("src");
+    audioElement.load();
+    audioElement = null;
+  }
+  if (typeof document !== "undefined") document.documentElement.classList.remove("wc-rhythm-active");
 }
 
 // Local, file-based sound effects bundled in public/audio/effects/.
@@ -209,48 +300,37 @@ export function playDialogueBlip(characterId = "narrator") {
   makeTone(profile.base + variation, profile.duration, profile.type, profile.volume, 0, null, "voices");
 }
 
-// One-shot reactions tied to expression changes. File-backed clips can replace
-// these synth prototypes while keeping the same character/expression keys.
-const genericExpressionProfiles = {
-  happy: { notes: [740, 880], duration: 0.075, type: "triangle" },
-  excited: { notes: [660, 880, 990], duration: 0.065, type: "square" },
-  angry: { notes: [220, 165], duration: 0.09, type: "square" },
-  determined: { notes: [392, 494], duration: 0.09, type: "triangle" },
-  serious: { notes: [330], duration: 0.1, type: "sine" },
-  relate: { notes: [587, 659], duration: 0.08, type: "triangle" },
-  facepalm: { notes: [392, 330], duration: 0.12, type: "sine" },
-  exasperated: { notes: [330, 294], duration: 0.13, type: "sine" },
-  pushups1: { notes: [145, 115], duration: 0.12, type: "sawtooth" },
-  pushups2: { notes: [125, 95], duration: 0.14, type: "sawtooth" },
-};
-
-const expressionProfiles = {
+// Recorded CC0 character reactions. Each visible expression used in the
+// current Rock Lee / Tenten story scenes has an explicit sound assignment.
+// Replace any URL with a local /audio/voices/... MP3 later without changing
+// StoryCutscene.jsx.
+const EXPRESSION_AUDIO = {
   rockLee: {
-    happy: { notes: [784, 988], duration: 0.075, type: "triangle" },
-    excited: { notes: [659, 880, 1175], duration: 0.065, type: "square" },
-    determined: { notes: [392, 523], duration: 0.09, type: "triangle" },
-    serious: { notes: [330], duration: 0.1, type: "sine" },
-    pushups1: { notes: [145, 115], duration: 0.12, type: "sawtooth" },
-    pushups2: { notes: [125, 95], duration: 0.14, type: "sawtooth" },
-    angry: { notes: [185, 140], duration: 0.09, type: "square" },
+    happy: "https://sfxmint.com/dl/man-chuckle-06.mp3",
+    excited: "https://sfxmint.com/dl/man-chuckle-08.mp3",
+    determined: "https://sfxmint.com/dl/character-emote-08.mp3",
+    serious: "https://sfxmint.com/dl/character-emote-06.mp3",
+    angry: "https://sfxmint.com/dl/character-emote-05.mp3",
+    pushups1: "https://sfxmint.com/dl/pain-grunt-06.mp3",
+    pushups2: "https://sfxmint.com/dl/pain-grunt-10.mp3",
   },
   tenten: {
-    happy: { notes: [880, 1046], duration: 0.07, type: "triangle" },
-    angry: { notes: [260, 220], duration: 0.09, type: "square" },
-    exasperated: { notes: [330, 294], duration: 0.13, type: "sine" },
-    facepalm: { notes: [392, 330], duration: 0.12, type: "sine" },
-    relate: { notes: [587, 659], duration: 0.08, type: "triangle" },
-    neutral: { notes: [440], duration: 0.045, type: "sine" },
+    happy: "https://sfxmint.com/dl/character-emote-10.mp3",
+    angry: "https://sfxmint.com/dl/pain-grunt-03.mp3",
+    facepalm: "https://sfxmint.com/dl/character-emote-07.mp3",
+    exasperated: "https://sfxmint.com/dl/character-emote-09.mp3",
+    relate: "https://sfxmint.com/dl/character-emote-04.mp3",
   },
 };
 
 export function playCharacterExpression(characterId, expression) {
-  const profile = expressionProfiles[characterId]?.[expression] || genericExpressionProfiles[expression];
-  if (!profile) return;
-  const characterSeed = String(characterId || "").split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  const characterPitch = 1 + ((characterSeed % 9) - 4) * 0.012;
-  profile.notes.forEach((note, index) => {
-    makeTone(note * characterPitch, profile.duration, profile.type, 0.035, index * 0.075, null, "voices");
+  const url = EXPRESSION_AUDIO[characterId]?.[expression];
+  if (!url || typeof Audio === "undefined" || settings.muted || settings.voices <= 0) return;
+  const player = new Audio(url);
+  player.preload = "auto";
+  player.volume = Math.max(0, Math.min(1, settings.master * settings.voices));
+  player.play().catch(() => {
+    // Keep the cutscene moving if a remote voice clip is temporarily unavailable.
   });
 }
 
@@ -263,6 +343,7 @@ export function updateAudioSettings(next) {
   saveSettings();
   applyVolumes();
   if (settings.muted || settings.music <= 0) stopMusic();
+  else if (activeMusicTrack) playMusicTrack(activeMusicTrack, currentTrack);
   else startMusic(currentTrack);
   return getAudioSettings();
 }

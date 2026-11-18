@@ -52,3 +52,51 @@ These assets were sourced from the public [S3M1TR4SH asset-library](https://gith
 ## Replacing audio later
 
 Keep the filenames above and replace the corresponding files in `public/audio/music/` or `public/audio/effects/`. The code does not need to change as long as the filenames remain the same. Music and effects are loaded locally; no external sound-library URL is required.
+
+
+## Character expression reaction sounds
+
+These CC0 1.0 MP3 clips are currently streamed directly from SFXMint. They are not recordings of the anime cast; they are generic game-character vocal reactions selected to match the expression. Replace the URLs in `src/audio/audioManager.js` with local recordings whenever custom voice assets are ready.
+
+| Character / expression | Clip | Source |
+|---|---|---|
+| Rock Lee — happy | Cartoon Man Chuckle 06 | [SFXMint](https://sfxmint.com/sounds/man-chuckle-06) |
+| Rock Lee — excited | Hearty Man Chuckle 08 | [SFXMint](https://sfxmint.com/sounds/man-chuckle-08) |
+| Rock Lee — determined | Impressed Ooh Character Emote 08 | [SFXMint](https://sfxmint.com/sounds/character-emote-08) |
+| Rock Lee — angry | Grumble Character Emote 05 | [SFXMint](https://sfxmint.com/sounds/character-emote-05) |
+| Rock Lee — serious | Thinking Hmm Character Emote 06 | [SFXMint](https://sfxmint.com/sounds/character-emote-06) |
+| Rock Lee — pushups1 | Lifting Effort Pain Grunt 06 | [SFXMint](https://sfxmint.com/sounds/pain-grunt-06) |
+| Rock Lee — pushups2 | Long Strain Pain Grunt 10 | [SFXMint](https://sfxmint.com/sounds/pain-grunt-10) |
+| Tenten — happy | Happy Cheer Character Emote 10 | [SFXMint](https://sfxmint.com/sounds/character-emote-10) |
+| Tenten — angry | Female Hit Pain Grunt 03 | [SFXMint](https://sfxmint.com/sounds/pain-grunt-03) |
+| Tenten — facepalm | Confused Huh Character Emote 07 | [SFXMint](https://sfxmint.com/sounds/character-emote-07) |
+| Tenten — exasperated | Sigh Character Emote 09 | [SFXMint](https://sfxmint.com/sounds/character-emote-09) |
+| Tenten — relate | Giggle Character Emote 04 | [SFXMint](https://sfxmint.com/sounds/character-emote-04) |
+
+SFXMint states that its library files are CC0 1.0, including commercial use and hotlinking. Neutral expressions intentionally stay silent. The sound URLs are centralized in `EXPRESSION_AUDIO` in `src/audio/audioManager.js`.
+
+
+## Beat-synced logo animation
+
+Each music track declares a `bpm` value in `src/audio/audioManager.js`. These are editable starting values, not automatic tempo detection. Set each value to the track's measured BPM. The CSS beat duration is calculated as `60 / bpm` seconds and starts when the browser reports that the music has begun playing.
+
+The homepage logo and Story Mode logo currently use `wc-beat-animation--bounce`. Replace that class in the corresponding JSX element with one of:
+- `wc-beat-animation--shake`
+- `wc-beat-animation--pulse`
+- `wc-beat-animation--tilt`
+- `wc-beat-animation--pop`
+
+The keyframes and beat-duration styles are in `Homescreen.css` and `StoryCutscene.css`.
+
+
+## Track registry and BPM
+
+Music IDs and their BPM values are centralized in `src/audio/audioManager.js`. Add or edit a track in its category array; the active track's ID selects its BPM automatically. The beat interval is `60 / bpm` seconds. BPM values currently in the registry are starting values and should be replaced with the measured tempo of each file.
+
+The dedicated Character Select slot is:
+- `public/audio/music/character-select-theme.mp3` — add the original Character Select soundtrack here.
+- Registry ID: `character-select-main`
+
+The Character Select file is a new asset slot and is not bundled yet. Until that MP3 is added, the Character Select screen will report a missing audio file rather than silently reuse the Main Menu theme.
+
+Story dialogue cue IDs `story-training` and `story-light` currently switch to existing local battle and menu MP3s as distinct temporary mood cues. Replace their `file` values with dedicated story-mood MP3s when those tracks are ready.

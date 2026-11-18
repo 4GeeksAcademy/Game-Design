@@ -123,7 +123,6 @@ function AttackOptions({
       const damage = result.damageReceived ?? 0;
       if (damage > 0) setDamageDealt((previous) => previous + damage);
 
-      if (damage > 0 && result.action === "attack") playGameSound("attack");
       setAttacksUsed((previous) => previous + 1);
       showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
 
@@ -194,6 +193,10 @@ function AttackOptions({
       ) {
         return;
       }
+
+      // Every valid attack selection gets its dedicated impact sound,
+      // including attacks that open the stun-target picker.
+      playGameSound("attack");
 
       // Only selected-type stun attacks need player input.
       if (attack.stun?.type === "selected") {

@@ -2802,3 +2802,59 @@
     width: 100%;
   }
 }
+
+
+/* ==========================================================
+   BEAT-SYNCED LOGO ANIMATIONS
+   Change wc-beat-animation--bounce on the logo element to:
+   --shake | --pulse | --tilt | --pop
+   The beat duration is supplied by the active music track BPM.
+========================================================== */
+.wc-rhythm-active .wc-beat-animation--bounce {
+  animation: wc-logo-bounce var(--wc-beat-duration, 0.5s) ease-in-out infinite;
+}
+.wc-rhythm-active .wc-beat-animation--shake {
+  animation: wc-logo-shake var(--wc-beat-duration, 0.5s) steps(1, end) infinite;
+}
+.wc-rhythm-active .wc-beat-animation--pulse {
+  animation: wc-logo-pulse var(--wc-beat-duration, 0.5s) ease-in-out infinite;
+}
+.wc-rhythm-active .wc-beat-animation--tilt {
+  animation: wc-logo-tilt var(--wc-beat-duration, 0.5s) ease-in-out infinite;
+}
+.wc-rhythm-active .wc-beat-animation--pop {
+  animation: wc-logo-pop var(--wc-beat-duration, 0.5s) cubic-bezier(.2,.8,.2,1) infinite;
+}
+
+@keyframes wc-logo-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  16% { transform: translateY(-8px) scale(1.035); }
+  32% { transform: translateY(0) scale(1); }
+}
+@keyframes wc-logo-shake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  12% { transform: translateX(-3px) rotate(-1deg); }
+  24% { transform: translateX(3px) rotate(1deg); }
+  36% { transform: translateX(-2px) rotate(-.5deg); }
+  48% { transform: translateX(0) rotate(0); }
+}
+@keyframes wc-logo-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  18% { transform: scale(1.055); filter: brightness(1.2); }
+  36% { transform: scale(1); filter: brightness(1); }
+}
+@keyframes wc-logo-tilt {
+  0%, 100% { transform: rotate(0) translateY(0); }
+  18% { transform: rotate(-3deg) translateY(-2px); }
+  36% { transform: rotate(3deg) translateY(0); }
+  54% { transform: rotate(0); }
+}
+@keyframes wc-logo-pop {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.12); }
+  28% { transform: scale(.98); }
+  42% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-rhythm-active [class*="wc-beat-animation--"] { animation: none !important; }
+}
