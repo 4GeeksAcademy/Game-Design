@@ -1,12 +1,13 @@
 import React, { useCallback, useState } from "react";
 import GameIntro from "../Mechanics/Main Page/GameIntro.jsx";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 // Import components from Mechanics folder
 import Achievements from "../Mechanics/Main Page/Achievements.jsx";
 import Inventory from "../Mechanics/Main Page/Inventory.jsx";
 import Battle from "../Mechanics/Battle.jsx";
 import TeamBattle from "../Mechanics/TeamBattle.jsx";
+import LocalPvPBattle from "../Mechanics/LocalPvPBattle.jsx";
 import Character from "../Mechanics/Character.jsx";
 import Opponent from "../Mechanics/Opponent.jsx";
 import VictoryScreen from "../Mechanics/VictoryScreen.jsx";
@@ -19,6 +20,16 @@ import StoryMode from "../Mechanics/Main Page/Story/StoryMode.jsx";
 import Festival from "../Mechanics/Main Page/Festival/Festival.jsx";
 import StoryRewardScreen from "../Mechanics/Main Page/Story/StoryRewardScreen.jsx";
 import StoryLevel1 from "../Mechanics/Main Page/Story/StoryLevel1.jsx";
+
+function BattleRoute() {
+  const location = useLocation();
+  return location.state?.localPvP ? <LocalPvPBattle /> : <Battle />;
+}
+
+function TeamBattleRoute() {
+  const location = useLocation();
+  return location.state?.localPvP ? <LocalPvPBattle /> : <TeamBattle />;
+}
 
 export const AppRoutes = () => {
   const [introComplete, setIntroComplete] = useState(false);
@@ -35,8 +46,8 @@ export const AppRoutes = () => {
       <Route path="/" element={<Homescreen />} />
       <Route path="/shop" element={<Shop />} />
       <Route path="/character-select" element={<CharacterSelection />} />
-      <Route path="/battle" element={<Battle />} />
-      <Route path="/team-battle" element={<TeamBattle />} />
+      <Route path="/battle" element={<BattleRoute />} />
+      <Route path="/team-battle" element={<TeamBattleRoute />} />
       <Route path="/character" element={<Character />} />
       <Route path="/opponent" element={<Opponent />} />
       <Route path="/victory" element={<VictoryScreen />} />
