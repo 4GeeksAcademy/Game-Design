@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection.jsx";
 import { getCharacterImage } from "./SkinManager.js";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
+import { aiChooseStunTargets } from "./AI.js";
 import {
   attackCharacter,
   evadeAttack,
@@ -116,10 +117,10 @@ export default function LocalPvPBattle() {
   const [pendingAttack, setPendingAttack] = useState(null);
   const [combatLog, setCombatLog] = useState(["ROUND 1 — PLAYER 1'S TURN"]);
   const [targetIds, setTargetIds] = useState({});
-  const [knockout, setKnockout] = useState(null);
   const [showRoundIntro, setShowRoundIntro] = useState(true);
   const resolvedRef = useRef(false);
   const turnTimeRef = useRef(TURN_SECONDS);
+  const defenseTimeRef = useRef(DEFENSE_SECONDS);
 
   const activeTeam = teams[activeSide];
   const defendingSide = activeSide === "player" ? "opponent" : "player";
@@ -163,16 +164,16 @@ export default function LocalPvPBattle() {
 
   useEffect(() => {
     if (phase !== "defending" || !pendingAttack) return;
+    defenseTimeRef.current = DEFENSE_SECONDS;
     setDefenseTime(DEFENSE_SECONDS);
     const timer = window.setInterval(() => {
-      setDefenseTime((remaining) => {
-        if (remaining <= 1) {
-          window.clearInterval(timer);
-          resolveAttack("take-damage");
-          return 0;
-        }
-        return remaining - 1;
-      });
+      const remaining = defenseTimeRef.current - 1;
+      defenseTimeRef.current = remaining;
+      setDefenseTime(Math.max(0, remaining));
+      if (remaining <= 0) {
+        window.clearInterval(timer);
+        resolveAttack("take-damage");
+      }
     }, 1000);
     return () => window.clearInterval(timer);
   }, [phase, pendingAttack]);
@@ -276,7 +277,6 @@ export default function LocalPvPBattle() {
     const nextSide = activeSide === "player" ? "opponent" : "player";
     if (nextSide === "player") {
       setTeams((current) => {
-        const all = [...current.player, ...current.opponent];
         const next = { player: current.player.map(cloneFighter), opponent: current.opponent.map(cloneFighter) };
         [...next.player, ...next.opponent].forEach((fighter) => {
           if (!fighter || fighter.health <= 0) return;
@@ -374,20 +374,22 @@ export default function LocalPvPBattle() {
       return;
     }
     const allFighters = [...next.player, ...next.opponent];
+    const selectedAttackIds = aiChooseStunTargets(defender, attack.stun);
+    const stunOptions = { fighters: allFighters, selectedAttackIds };
     let result;
     if (choice === "defend") {
       const defense = getModifiedCharacterStat(defender, "defense");
       result = attackCharacter(attack, attacker, defender, defense, {
         blocked: true,
-        fighters: allFighters,
+        ...stunOptions,
       });
       defender.cooldown = Math.max(0, (Number(defender.cooldown) || 0) - 1);
     } else if (choice === "evade") {
-      result = evadeAttack(attack, attacker, defender, { fighters: allFighters });
+      result = evadeAttack(attack, attacker, defender, stunOptions);
     } else {
       result = attackCharacter(attack, attacker, defender, 0, {
         blocked: false,
-        fighters: allFighters,
+        ...stunOptions,
       });
     }
     if (result) {
@@ -428,7 +430,6 @@ export default function LocalPvPBattle() {
     setTurnTime(TURN_SECONDS);
     setPendingAttack(null);
     setCombatLog(["ROUND 1 — PLAYER 1'S TURN"]);
-    setKnockout(null);
     setShowRoundIntro(true);
   };
 
