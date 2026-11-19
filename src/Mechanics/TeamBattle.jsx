@@ -2034,8 +2034,10 @@ export default function TeamBattle() {
     if (result) {
       if (choice === "defend") {
         recordFestivalEvent("block", 1);
+        recordDailyObjectiveEvent("defense", 1);
       } else if (choice === "evade" && result.evaded) {
         recordFestivalEvent("evade", 1);
+        recordDailyObjectiveEvent("defense", 1);
       }
     }
 
@@ -2407,10 +2409,12 @@ export default function TeamBattle() {
         }
 
         if (choice === "defend") {
+          recordDailyObjectiveEvent("defense", 1);
           addLog(
             `${currentDefender.name} defended ${currentAttacker.name}'s ${attack.name}.`,
           );
         } else if (choice === "evade") {
+          if (result.evaded) recordDailyObjectiveEvent("defense", 1);
           addLog(
             result.evaded
               ? `${currentDefender.name} evaded ${attack.name}.`
@@ -2530,8 +2534,10 @@ export default function TeamBattle() {
       if (result) {
         if (result.action === "defend") {
           recordFestivalEvent("block", 1);
+          recordDailyObjectiveEvent("defense", 1);
         } else if (result.evaded) {
           recordFestivalEvent("evade", 1);
+          recordDailyObjectiveEvent("defense", 1);
         }
 
         defenseResolvedRef.current = true;
