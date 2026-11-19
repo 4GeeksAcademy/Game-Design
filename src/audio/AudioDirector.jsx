@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { initializeAudio, playUISound, startMusic, getMusicBeatInfo, resumeMusic } from "./audioManager.js";
+import { initializeAudio, playUISound, startMusic, startMusicById, getMusicBeatInfo, resumeMusic } from "./audioManager.js";
 
 function getTrack(pathname, routeState) {
   // Reward and victory screens keep their dedicated victory music.
@@ -86,22 +86,26 @@ export default function AudioDirector() {
       location.pathname === "/battle" ||
       location.pathname.endsWith("/battle") ||
       location.pathname.includes("team-battle");
-
-    // Story Mode dialogue chooses its own soundtrack through musicTrackId.
-    // Keep that exact track playing while the player visits character selection
-    // and carries it into the corresponding battle (1v1 or 1v2).
     const isStoryMode = location.state?.gameMode === "story";
-    const isStoryCharacterSelect =
-      isStoryMode &&
-      (location.pathname.includes("character-select") ||
-        location.pathname.includes("character-selection"));
 
-    if (isStoryCharacterSelect || (isBattleRoute && isStoryMode)) {
+    // Story character selection gets its own theme. Once the battle starts,
+    // switch to the exact theme assigned to that encounter.
+    if (isBattleRoute && isStoryMode) {
+      const battleTheme =
+        location.state?.storyPhase === "battle2"
+          ? "story-wonder-naruto"
+          : "story-RockLee-theme";
+      startMusicById(battleTheme);
       return;
     }
 
     startMusic(musicCategory);
-  }, [musicCategory, location.pathname, location.state?.gameMode]);
+  }, [
+    musicCategory,
+    location.pathname,
+    location.state?.gameMode,
+    location.state?.storyPhase,
+  ]);
 
 
   // Keep CSS logo animations locked to the active track's BPM metadata.
