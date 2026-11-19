@@ -522,16 +522,12 @@ export default function LocalPvPBattle() {
         <header className="local-pvp-player-heading">
           <span>{playerKey === "player1" ? "PLAYER 1" : "PLAYER 2"}</span>
           <strong>{isActive ? "YOUR TURN" : "WAITING"}</strong>
-          <b className={turnTime <= 5 && isActive ? "timer-danger" : ""}>{turnTime}s</b>
+          <b className={turnTime <= 5 && isActive ? "timer-danger" : ""}>{isActive ? turnTime + "s" : ""}</b>
+          <button className="local-pvp-finish-rect" disabled={!isActive || owner?.turnFinished || phase !== "fighting" || isPaused} onClick={() => owner && finishFighterTurn(owner.id)}>FINISH TURN →</button>
         </header>
         <div className="local-pvp-screen-fighters">
           <LocalPvPFighterPanel fighter={rival} side="opponent" />
           <LocalPvPFighterPanel fighter={owner} side="player" />
-        </div>
-        <div className="local-pvp-finish-row">
-          <button id="finishTurnButton" disabled={!isActive || owner?.turnFinished || phase !== "fighting"} onClick={() => owner && finishFighterTurn(owner.id)}>
-            <span>Finish</span><span>Turn</span><span id="finishTurnArrow">➜</span>
-          </button>
         </div>
         <div className="local-pvp-existing-attacks">
           {owner && rival && (
@@ -547,15 +543,11 @@ export default function LocalPvPBattle() {
               openingTurnActive={round === 1}
               localPvP
               playerKey={playerKey}
-              canAttack={isActive && phase === "fighting" && !pendingAttack && !owner.turnFinished}
+              canAttack={isActive && phase === "fighting" && !pendingAttack && !owner.turnFinished && !isPaused}
               onPvPAttack={(index, selectedIds) => startAttack(owner.id, index, selectedIds)}
             />
           )}
         </div>
-        <section className="local-pvp-screen-log">
-          <h3>📜 COMBAT LOG</h3>
-          {combatLog.map((message, index) => <p key={index}>{message}</p>)}
-        </section>
       </section>
     );
 
