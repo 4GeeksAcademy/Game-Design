@@ -1963,3 +1963,68 @@
     color: var(--select-gold);
   }
 }
+
+
+/* Local PvP team selection */
+.roster-tile.p2-selected {
+  border-color: #ff3159;
+  box-shadow: 0 0 0 2px rgba(255, 49, 89, 0.35), 0 0 22px rgba(255, 49, 89, 0.22);
+}
+
+.roster-tile.p2-selected .roster-tile-info {
+  border-top-color: #ff3159;
+}
+
+.roster-cursor.p2-cursor {
+  background: #ff3159;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(255, 49, 89, 0.55);
+}
+
+.pvp-team-select {
+  width: 100%;
+  margin: 8px 0;
+  padding: 9px 12px;
+  border: 1px solid #52627c;
+  background: rgba(14, 24, 42, 0.9);
+  color: #cbd5e1;
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.pvp-team-select.is-active {
+  border-color: #13d5ff;
+  color: #13d5ff;
+  box-shadow: 0 0 12px rgba(19, 213, 255, 0.2);
+}
+
+.cpu-side .pvp-team-select.is-active {
+  border-color: #ff3159;
+  color: #ff3159;
+  box-shadow: 0 0 12px rgba(255, 49, 89, 0.2);
+}
+
+.pvp-confirm-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  width: min(100%, 720px);
+  margin: 20px auto;
+}
+
+.pvp-confirm-row > button {
+  flex: 1;
+}
+
+.pvp-confirm-row .p2-confirm-button:not(:disabled) {
+  border-color: #ff3159;
+  background: linear-gradient(135deg, #a91638, #ff3159);
+}
+
+@media (max-width: 640px) {
+  .pvp-confirm-row {
+    flex-direction: column;
+  }
+}
