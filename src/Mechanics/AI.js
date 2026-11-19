@@ -130,51 +130,93 @@ function aiChooseStunTargets(defender, stun) {
 
 function aiTurn(ai, player, showAttack, hideAttack, attacksPerTurn = 2) {
   let attacksResolved = 0;
+  let currentAttack = null;
+  let timer = null;
+  let stopped = false;
+
+  const clearAttackTimer = () => {
+    if (timer !== null) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  };
 
   const finishTurn = () => {
+    if (stopped) return;
+    stopped = true;
+    clearAttackTimer();
+    currentAttack = null;
     aiFinishTurn(ai);
     hideAttack();
   };
 
-  const performNextAttack = () => {
+  const scheduleNextAttack = () => {
     if (attacksResolved >= attacksPerTurn || player.health <= 0) {
       finishTurn();
       return;
     }
 
-    // Re-check resources after every move, then randomly select another usable attack.
+    timer = setTimeout(performNextAttack, 500);
+  };
+
+  const resolveCurrentAttack = () => {
+    if (stopped || !currentAttack) return;
+
+    clearAttackTimer();
+    const attack = currentAttack;
+    currentAttack = null;
+
+    // A successful block or evade resolves the attack early. Otherwise,
+    // the attack lands when the defense window expires.
+    if (player.blocked === false) {
+      const selectedAttackIds = aiChooseStunTargets(player, attack.stun);
+      attackCharacter(attack, ai, player, 0, {
+        selectedAttackIds,
+        fighters: [ai, player],
+      });
+    }
+
+    player.blocked = false;
+    attacksResolved += 1;
+    hideAttack();
+    scheduleNextAttack();
+  };
+
+  const performNextAttack = () => {
+    if (stopped || attacksResolved >= attacksPerTurn || player.health <= 0) {
+      finishTurn();
+      return;
+    }
+
     const attack = aiChooseAttack(ai);
     if (!attack) {
       finishTurn();
       return;
     }
 
+    currentAttack = attack;
     showAttack(attack);
 
-    setTimeout(() => {
-      // Apply damage only if the player did not defend or evade this attack.
-      if (player.blocked === false) {
-        const selectedAttackIds = aiChooseStunTargets(player, attack.stun);
-        attackCharacter(attack, ai, player, 0, {
-          selectedAttackIds,
-          fighters: [ai, player],
-        });
-      }
-
-      player.blocked = false;
-      attacksResolved += 1;
-
-      if (attacksResolved >= attacksPerTurn || player.health <= 0) {
-        finishTurn();
-        return;
-      }
-
-      hideAttack();
-      setTimeout(performNextAttack, 500);
-    }, 7000);
+    // Keep the card visible for the full defensive window. Responding to a
+    // block or evade cancels this timeout and advances immediately.
+    timer = setTimeout(resolveCurrentAttack, 10000);
   };
 
   performNextAttack();
+
+  return {
+    respondToDefense() {
+      if (stopped || !currentAttack) return false;
+      resolveCurrentAttack();
+      return true;
+    },
+    stop() {
+      if (stopped) return;
+      stopped = true;
+      clearAttackTimer();
+      currentAttack = null;
+    },
+  };
 }
 function aiFinishTurn(ai) {
   ai.turnFinished = true;
