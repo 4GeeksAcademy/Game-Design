@@ -551,6 +551,8 @@ function CharacterSelection() {
           difficulty,
           teamControl,
           gameMode: isStoryMode ? "story" : (levelConfig.gameMode ?? "quick"),
+          // Keep the currently playing Story Mode soundtrack when battle opens.
+          preserveMusicOnBattle: isStoryMode,
         },
       },
     );
