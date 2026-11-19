@@ -613,7 +613,7 @@ function CharacterSelection() {
 
         <div className="select-match-info">
           <span>{teamSize} MATCH</span>
-          <span>AI: {difficulty.toUpperCase()}</span>
+          <span>{localPvP ? "LOCAL PVP" : `AI: ${difficulty.toUpperCase()}`}</span>
         </div>
 
         <button
@@ -638,7 +638,7 @@ function CharacterSelection() {
         </p>
       </section>
 
-      <section className="versus-selection">
+      <section className={`versus-selection ${localPvP && teamSize === "2v2" ? "local-pvp-team-order" : ""}`}>
         <section className="roster-side player-side">
           <div className="roster-side-heading">
             <span className="player-label">P1</span>
