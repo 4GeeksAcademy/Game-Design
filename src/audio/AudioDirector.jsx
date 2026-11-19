@@ -87,9 +87,11 @@ export default function AudioDirector() {
       location.pathname.endsWith("/battle") ||
       location.pathname.includes("team-battle");
 
-    // Story Mode can carry the currently playing selection/dialogue track
-    // straight into battle. Other routes still choose their normal playlist.
-    if (isBattleRoute && location.state?.preserveMusicOnBattle) return;
+    // Story battles switch to the Story Mode playlist, never the selection theme.
+    if (isBattleRoute && location.state?.gameMode === "story") {
+      startMusic("story");
+      return;
+    }
 
     startMusic(musicCategory);
   }, [musicCategory, location.pathname, location.state?.preserveMusicOnBattle]);
