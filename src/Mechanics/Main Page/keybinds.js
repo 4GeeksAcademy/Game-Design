@@ -14,6 +14,25 @@ const makePlayerDefaults = (attackKeys, finishTurn, defend, evade, takeDamage) =
 // Defaults are unique across both players and all actions.
 export const DEFAULT_KEYBINDS = {
   player1: makePlayerDefaults(
+    ["u", "i", "o", "j", "k", "l", "m", ",", ".", "p"],
+    "Enter",
+    "[",
+    "]",
+    "\\",
+  ),
+  player2: makePlayerDefaults(
+    ["q", "w", "e", "a", "s", "d", "z", "x", "c", "r"],
+    " ",
+    "1",
+    "2",
+    "3",
+  ),
+};
+
+// Previous built-in defaults. These are migrated automatically, while
+// genuinely customized bindings are preserved.
+const LEGACY_DEFAULT_KEYBINDS = {
+  player1: makePlayerDefaults(
     ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
     "Enter",
     "q",
@@ -46,10 +65,28 @@ function mergeWithDefaults(saved) {
     return structuredClone(DEFAULT_KEYBINDS);
   }
 
+  if (matchesDefaults(saved, LEGACY_DEFAULT_KEYBINDS)) {
+    return structuredClone(DEFAULT_KEYBINDS);
+  }
+
   return {
     player1: mergePlayer(DEFAULT_KEYBINDS.player1, saved.player1),
     player2: mergePlayer(DEFAULT_KEYBINDS.player2, saved.player2),
   };
+}
+
+function matchesDefaults(saved, defaults) {
+  return ["player1", "player2"].every((playerId) => {
+    const player = saved[playerId];
+    const expected = defaults[playerId];
+    return (
+      player &&
+      expected.attacks.every((key, index) => normalizeKey(player.attacks?.[index]) === key) &&
+      ["finishTurn", "defend", "evade", "takeDamage"].every(
+        (action) => normalizeKey(player[action]) === expected[action],
+      )
+    );
+  });
 }
 
 function mergePlayer(defaults, saved) {
