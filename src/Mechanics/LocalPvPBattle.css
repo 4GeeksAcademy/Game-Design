@@ -291,3 +291,41 @@
   .local-pvp-player-screen { min-height: 0; }
   .local-pvp-match-header { flex-wrap: wrap; }
 }
+
+
+/* Specificity overrides for the original character HUD's ID-based grid rules. */
+.local-pvp-player-screen #character.battle-status-panel {
+  grid-template-columns: 108px minmax(0,1fr);
+  grid-template-rows: auto;
+  padding: 24px 10px 9px;
+  min-height: 0;
+}
+.local-pvp-player-screen #character #characterImage {
+  width: 68px !important;
+  height: 116px !important;
+  min-height: 0;
+  flex: 0 0 68px;
+}
+.local-pvp-player-screen #character #characterStats {
+  grid-column: 2;
+  grid-row: 2;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.local-pvp-player-screen #characterSideMeters .verticalMeter {
+  width: 100%;
+  min-width: 14px;
+  height: 116px;
+}
+.local-pvp-player-screen #characterSideMeters .verticalMeterGroup {
+  min-width: 0;
+  gap: 3px;
+}
+.local-pvp-player-screen #character #characterStats .statBarHeader {
+  margin-bottom: 3px;
+  font-size: 10px;
+}
+.local-pvp-player-screen #character #characterStats .statProgress {
+  height: 9px !important;
+}
