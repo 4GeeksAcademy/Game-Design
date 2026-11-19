@@ -87,14 +87,21 @@ export default function AudioDirector() {
       location.pathname.endsWith("/battle") ||
       location.pathname.includes("team-battle");
 
-    // Story battles switch to the Story Mode playlist, never the selection theme.
-    if (isBattleRoute && location.state?.gameMode === "story") {
-      startMusic("story");
+    // Story Mode dialogue chooses its own soundtrack through musicTrackId.
+    // Keep that exact track playing while the player visits character selection
+    // and carries it into the corresponding battle (1v1 or 1v2).
+    const isStoryMode = location.state?.gameMode === "story";
+    const isStoryCharacterSelect =
+      isStoryMode &&
+      (location.pathname.includes("character-select") ||
+        location.pathname.includes("character-selection"));
+
+    if (isStoryCharacterSelect || (isBattleRoute && isStoryMode)) {
       return;
     }
 
     startMusic(musicCategory);
-  }, [musicCategory, location.pathname, location.state?.preserveMusicOnBattle]);
+  }, [musicCategory, location.pathname, location.state?.gameMode]);
 
 
   // Keep CSS logo animations locked to the active track's BPM metadata.
