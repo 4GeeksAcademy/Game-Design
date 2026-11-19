@@ -614,9 +614,9 @@ const renderHome = () => (
 
         <button
           className="arcade-button"
-          onClick={() => openMenu("localMultiplayer")}
+          onClick={() => openMenu("multiplayer")}
         >
-          LOCAL MULTIPLAYER <span>2 PLAYERS</span>
+          MULTIPLAYER <span>▶</span>
         </button>
       </div>
 
@@ -627,6 +627,32 @@ const renderHome = () => (
   );
 
  
+const renderMultiplayer = () => (
+  <>
+    <p className="home-eyebrow">PLAY WITH OTHERS</p>
+    <h2 className="menu-title">MULTIPLAYER</h2>
+    <p className="menu-description">
+      Challenge someone locally or connect online when online play becomes available.
+    </p>
+
+    <div className="home-menu-buttons">
+      <button
+        className="arcade-button primary-button"
+        onClick={() => openMenu("localMultiplayer")}
+      >
+        LOCAL <span>2 PLAYERS · SAME KEYBOARD</span>
+      </button>
+      <button className="arcade-button" disabled title="Online multiplayer is not available yet.">
+        ONLINE <span>COMING SOON</span>
+      </button>
+    </div>
+
+    <button className="back-button" onClick={goBack}>
+      ← BACK
+    </button>
+  </>
+);
+
 const renderLocalMultiplayer = () => (
   <>
     <p className="home-eyebrow">LOCAL HEAD-TO-HEAD</p>
@@ -869,6 +895,8 @@ const renderSinglePlayer = () => (
         return renderPlay();
       case "singlePlayer":
         return renderSinglePlayer();
+      case "multiplayer":
+        return renderMultiplayer();
       case "localMultiplayer":
         return renderLocalMultiplayer();
       case "battleSetup":
