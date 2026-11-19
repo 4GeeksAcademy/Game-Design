@@ -150,14 +150,13 @@ export default function LocalPvPBattle() {
   useEffect(() => {
     if (phase !== "fighting" || pendingAttack || isFinal) return;
     const timer = window.setInterval(() => {
-      setTurnTime((remaining) => {
-        if (remaining <= 1) {
-          window.clearInterval(timer);
-          endTeamTurn(true);
-          return TURN_SECONDS;
-        }
-        return remaining - 1;
-      });
+      const remaining = turnTimeRef.current - 1;
+      turnTimeRef.current = remaining;
+      setTurnTime(Math.max(0, remaining));
+      if (remaining <= 0) {
+        window.clearInterval(timer);
+        endTeamTurn(true);
+      }
     }, 1000);
     return () => window.clearInterval(timer);
   }, [phase, activeSide, pendingAttack, round]);
@@ -187,7 +186,9 @@ export default function LocalPvPBattle() {
         const defenderIndex = teams[defendingSide].findIndex(
           (fighter) => fighter?.id === pendingAttack.targetId,
         );
-        const playerKey = defendingSide === "player"\n          ? (defenderIndex === 1 ? "player2" : "player1")\n          : "player2";
+        const playerKey = defendingSide === "player"
+          ? (defenderIndex === 1 ? "player2" : "player1")
+          : "player2";
         const defenseBinds = binds[playerKey];
         if (key === normalizeKey(defenseBinds.defend)) {
           event.preventDefault();
@@ -207,12 +208,28 @@ export default function LocalPvPBattle() {
       const finishKey = normalizeKey(playerBinds.finishTurn);
       if (key === finishKey) {
         event.preventDefault();
-        endTeamTurn(false);
+        const nextFighter = activeTeam.find(
+          (fighter) => fighter && fighter.health > 0 && !fighter.turnFinished,
+        );
+        if (nextFighter) finishFighterTurn(nextFighter.id);
+        return;
+      }
+      const attackIndex = playerBinds.attacks.findIndex(
+        (boundKey) => normalizeKey(boundKey) === key,
+      );
+      if (attackIndex >= 0) {
+        const nextFighter = activeTeam.find(
+          (fighter) => fighter && fighter.health > 0 && !fighter.turnFinished,
+        );
+        if (nextFighter) {
+          event.preventDefault();
+          startAttack(nextFighter.id, attackIndex);
+        }
       }
     };
     window.addEventListener("keydown", handleKeys);
     return () => window.removeEventListener("keydown", handleKeys);
-  }, [phase, pendingAttack, teams, activeSide, defendingSide, isFinal]);
+  }, [phase, pendingAttack, teams, activeSide, activeTeam, defendingSide, isFinal]);
 
   useEffect(() => {
     if (phase !== "fighting") return;
@@ -285,6 +302,7 @@ export default function LocalPvPBattle() {
       addLog("PLAYER 2'S TURN");
     }
     setActiveSide(nextSide);
+    turnTimeRef.current = TURN_SECONDS;
     setTurnTime(TURN_SECONDS);
   };
 
@@ -406,6 +424,7 @@ export default function LocalPvPBattle() {
     setActiveSide("player");
     setPhase("fighting");
     setRound(1);
+    turnTimeRef.current = TURN_SECONDS;
     setTurnTime(TURN_SECONDS);
     setPendingAttack(null);
     setCombatLog(["ROUND 1 — PLAYER 1'S TURN"]);
