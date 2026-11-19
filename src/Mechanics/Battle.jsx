@@ -13,22 +13,6 @@ import GameOverScreen from "./GameOverScreen.jsx";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
 import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
-import mina from "./All_Character_Stats/Mina_AshidoStats.js";
-import rockLee from "./All_Character_Stats/Rock_LeeStats.js";
-import Usopp from "./All_Character_Stats/UsoppStats.js";
-import Chad from "./All_Character_Stats/ChadStats.js";
-import Picolo from "./All_Character_Stats/PicoloStats.js";
-import TenTen from "./All_Character_Stats/TenTenStats.js";
-import Kirishima from "./All_Character_Stats/KirishimaStats.js";
-import Ochaco from "./All_Character_Stats/OchacoStats.js";
-import Luffy from "./All_Character_Stats/LuffyStats.js";
-import Ichigo from "./All_Character_Stats/IchigoStats.js";
-import Naruto from "./All_Character_Stats/NarutoStats.js";
-import Yoruichi from "./All_Character_Stats/YoruichiStats.js";
-import Goku from "./All_Character_Stats/GokuStats.js";
-import Toga from "./All_Character_Stats/TogaStats.js";
-import { Kenpachi } from "./All_Character_Stats/KempachiStats.js";
-import Hinata from "./All_Character_Stats/HinataStats.js";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
@@ -36,6 +20,62 @@ import { addCoins } from "./Currency.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback } from "react";
+
+function createBattleFighter(characterId, battleId) {
+  const selected = roster.find((fighter) => fighter.id === characterId);
+  if (!selected?.data) return null;
+
+  const data = selected.data;
+  const attacks = (data.attacks ?? []).map((attack) => {
+    const remainingUses = Number.isInteger(attack.uses)
+      ? attack.uses
+      : attack.remainingUses;
+    const cooldownRemaining = attack.cooldownRemaining ?? 0;
+
+    return {
+      ...attack,
+      remainingUses,
+      cooldownRemaining,
+      cooldownStartedThisRound: false,
+      state:
+        (remainingUses == null || remainingUses > 0) &&
+        cooldownRemaining <= 0,
+      buff: attack.buff ? { ...attack.buff } : attack.buff,
+      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+      heal: attack.heal
+        ? {
+            ...attack.heal,
+            buff: attack.heal.buff ? { ...attack.heal.buff } : attack.heal.buff,
+          }
+        : attack.heal,
+      activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+        ...effect,
+        effects: { ...effect.effects },
+      })),
+    };
+  });
+
+  return {
+    ...data,
+    id: battleId,
+    image: getCharacterImage(selected.id, selected.image ?? data.image),
+    activeModifiers: (data.activeModifiers ?? []).map((modifier) => ({
+      ...modifier,
+    })),
+    health: data.health,
+    maximumHealth: data.maximumHealth ?? data.health,
+    mana: data.mana,
+    maximumMana: data.maximumMana ?? data.mana,
+    manaRegen: data.manaRegen,
+    defense:
+      typeof data.defense === "object" && data.defense
+        ? { ...data.defense }
+        : data.defense,
+    attacks,
+    turnFinished: false,
+    blocked: false,
+  };
+}
 
 function RoundIntroHealthBar({ fighter }) {
   const maximumHealth = Number(fighter.maximumHealth) || 1;
@@ -71,79 +111,26 @@ function App() {
   const levelConfig = location.state ?? {};
   const isStoryMode = levelConfig.gameMode === "story";
 
-  const fighterData = {
-    mina: mina,
-    rockLee: rockLee,
-    usopp: Usopp,
-    chad: Chad,
-    picolo: Picolo,
-    tenten: TenTen,
-    kirishima: Kirishima,
-    ochaco: Ochaco,
-    luffy: Luffy,
-    ichigo: Ichigo,
-    naruto: Naruto,
-    yoruichi: Yoruichi,
-    goku: Goku,
-    toga: Toga,
-    kenpachi: Kenpachi,
-    hinata: Hinata,
-  };
-
-  // Resolve the selected fighter IDs, including safe fallbacks.
+  // Resolve both fighters directly from CharacterSelection's shared roster.
   const requestedPlayerId = location.state?.playerId;
-  const playerId = fighterData[requestedPlayerId] ? requestedPlayerId : "mina";
+  const playerId = roster.some((fighter) => fighter.id === requestedPlayerId)
+    ? requestedPlayerId
+    : "mina";
 
   const requestedOpponentId = location.state?.opponentId;
-  const opponentId = fighterData[requestedOpponentId]
+  const opponentId = roster.some((fighter) => fighter.id === requestedOpponentId)
     ? requestedOpponentId
     : playerId === "mina"
       ? "rockLee"
       : "mina";
 
-  const playerData = fighterData[playerId];
-  const opponentData = fighterData[opponentId];
-
-  // Find the original roster artwork for each fighter.
-  const playerRosterEntry = roster.find((fighter) => fighter.id === playerId);
-
-  const opponentRosterEntry = roster.find(
-    (fighter) => fighter.id === opponentId,
+  const [character, setCharacter] = useState(() =>
+    createBattleFighter(playerId, "player"),
   );
 
-  const [character, setCharacter] = useState(() => ({
-    ...playerData,
-    image: getCharacterImage(
-      playerId,
-      playerRosterEntry?.image ?? playerData.image,
-    ),
-    id: "player",
-    attacks: playerData.attacks.map((attack) => ({ ...attack })),
-    health: playerData.health,
-    maximumHealth: playerData.health,
-    mana: playerData.mana,
-    maximumMana: playerData.maximumMana,
-    manaRegen: playerData.manaRegen,
-    turnFinished: false,
-    blocked: false,
-  }));
-
-  const [opponent, setOpponent] = useState(() => ({
-    ...opponentData,
-    image: getCharacterImage(
-      opponentId,
-      opponentRosterEntry?.image ?? opponentData.image,
-    ),
-    id: "opponent",
-    attacks: opponentData.attacks.map((attack) => ({ ...attack })),
-    health: opponentData.health,
-    maximumHealth: opponentData.health,
-    mana: opponentData.mana,
-    maximumMana: opponentData.maximumMana,
-    manaRegen: opponentData.manaRegen,
-    turnFinished: false,
-    blocked: false,
-  }));
+  const [opponent, setOpponent] = useState(() =>
+    createBattleFighter(opponentId, "opponent"),
+  );
 
   const [damageDealt, setDamageDealt] = useState(0);
   const lastRewardedDamage = useRef(0);
