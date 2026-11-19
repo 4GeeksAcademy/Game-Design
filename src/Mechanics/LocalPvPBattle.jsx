@@ -187,7 +187,7 @@ export default function LocalPvPBattle() {
         const defenderIndex = teams[defendingSide].findIndex(
           (fighter) => fighter?.id === pendingAttack.targetId,
         );
-        const playerKey = defenderIndex === 1 ? "player2" : "player1";
+        const playerKey = defendingSide === "player"\n          ? (defenderIndex === 1 ? "player2" : "player1")\n          : "player2";
         const defenseBinds = binds[playerKey];
         if (key === normalizeKey(defenseBinds.defend)) {
           event.preventDefault();
@@ -232,6 +232,18 @@ export default function LocalPvPBattle() {
       }
     }
   }, [phase]);
+
+  const finishFighterTurn = (fighterId) => {
+    if (phase !== "fighting" || pendingAttack) return;
+    setTeams((current) => ({
+      ...current,
+      [activeSide]: current[activeSide].map((fighter) =>
+        fighter?.id === fighterId ? { ...fighter, turnFinished: true } : fighter,
+      ),
+    }));
+    const fighter = activeTeam.find((member) => member?.id === fighterId);
+    if (fighter) addLog(`${fighter.name} finished their turn.`);
+  };
 
   const endTeamTurn = (timedOut) => {
     if (phase !== "fighting" || pendingAttack || isFinal) return;
@@ -454,7 +466,7 @@ export default function LocalPvPBattle() {
 
       <section className="local-pvp-attacks">
         <div className="local-pvp-player2-panels">
-          {teams.opponent.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive={activeSide === "opponent"} phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={() => endTeamTurn(false)} />)}
+          {teams.opponent.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive={activeSide === "opponent"} phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={finishFighterTurn} />)}
         </div>
         <div className="local-pvp-player1-panels">
           {teams.player.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive={activeSide === "player"} phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={() => endTeamTurn(false)} />)}
