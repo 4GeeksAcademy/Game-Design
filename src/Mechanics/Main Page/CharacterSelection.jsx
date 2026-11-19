@@ -365,7 +365,7 @@ function CharacterSelection() {
     .filter(({ fighter }) => !fighter.isFestivalSecret || isUnlocked(fighter));
 
   const changeFighter = (direction, playerId = "player1") => {
-    if (phase !== "player") return;
+    if (phase !== "player" || (localPvP && pvpConfirmed[playerId])) return;
     const currentIndex = playerId === "player2" ? player2SelectedIndex : selectedIndex;
     const otherTeam = playerId === "player2" ? selectedIndices : player2Indices;
     let nextIndex = currentIndex;
