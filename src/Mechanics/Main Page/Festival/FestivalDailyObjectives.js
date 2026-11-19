@@ -40,7 +40,7 @@ const DAILY_OBJECTIVE_POOL = [
   {
     id: "defense-200",
     title: "I Just Love Dodging!",
-    description: "Successfully block or evade 100 attacks.",
+    description: "Successfully block or evade 200 attacks.",
     type: "defense",
     target: 200,
     points: 200,
@@ -49,15 +49,42 @@ const DAILY_OBJECTIVE_POOL = [
   },
 ];
 
-const createDefaultObjectives = () => ({
-  startedAt: Date.now(),
-  expiresAt: Date.now() + DAILY_OBJECTIVE_INTERVAL,
-  objectives: DAILY_OBJECTIVE_POOL.map((objective) => ({
+// Show three of the four available objectives each day. On the next
+// rotation, keep two of yesterday's objectives and replace the third.
+const chooseDailyObjectiveSet = (previousObjectives = []) => {
+  const previousIds = previousObjectives.map((objective) => objective.id);
+  const previousSet = previousIds.length === 3
+    ? previousIds.map((id) => DAILY_OBJECTIVE_POOL.find((item) => item.id === id)).filter(Boolean)
+    : [];
+
+  let selected;
+  if (previousSet.length === 3) {
+    const previouslyHidden = DAILY_OBJECTIVE_POOL.find(
+      (item) => !previousIds.includes(item.id),
+    );
+    const retained = [...previousSet].sort(() => Math.random() - 0.5).slice(0, 2);
+    selected = [...retained, previouslyHidden];
+  } else {
+    selected = [...DAILY_OBJECTIVE_POOL]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+  }
+
+  return selected.map((objective) => ({
     ...objective,
     progress: 0,
     completed: false,
-  })),
-});
+  }));
+};
+
+const createDefaultObjectives = (previousObjectives = []) => {
+  const now = Date.now();
+  return {
+    startedAt: now,
+    expiresAt: now + DAILY_OBJECTIVE_INTERVAL,
+    objectives: chooseDailyObjectiveSet(previousObjectives),
+  };
+};
 
 const saveDailyObjectives = (data) => {
   try {
@@ -94,9 +121,21 @@ export const getDailyObjectives = () => {
       typeof parsed.expiresAt === "number";
 
     if (!isValid || Date.now() >= parsed.expiresAt) {
-      const freshObjectives = createDefaultObjectives();
+      const freshObjectives = createDefaultObjectives(
+        Array.isArray(parsed?.objectives) ? parsed.objectives : [],
+      );
       saveDailyObjectives(freshObjectives);
       return freshObjectives;
+    }
+
+    // Migrate existing saves that still contain all four objectives.
+    if (parsed.objectives.length !== 3) {
+      const migrated = {
+        ...parsed,
+        objectives: chooseDailyObjectiveSet(parsed.objectives.slice(0, 3)),
+      };
+      saveDailyObjectives(migrated);
+      return migrated;
     }
 
     return parsed;
