@@ -40,14 +40,14 @@ export default function LocalPvPFighterPanel({ fighter, side = "player" }) {
             </div>
           </div>
         </div>
-        <div id={isPlayer ? "characterInfo" : "opponentInfo"}>
+        <div id={isPlayer ? "characterInfo" : "opponentInfo"} className="local-pvp-fighter-info">
           <p id={isPlayer ? "characterHeader" : "opponentHeader"}>{isPlayer ? "YOUR FIGHTER" : "OPPONENT"}</p>
           <h2 id={nameId}>{fighter.name}</h2>
-          <div id={statsId}>
+          <div id={statsId} className="local-pvp-fighter-statbars">
             <StatBar label="Defense" icon="🛡️" current={fighter.defense?.amount ?? fighter.defense ?? 0} maximum={100} color="secondary" />
             <StatBar label="Agility" icon="⚡" current={fighter.agility ?? 0} maximum={100} color="warning" />
           </div>
-          <div id={compactId}>
+          <div id={compactId} className="local-pvp-fighter-compact">
             <div className="compactStat"><span>⏳ Cooldown</span><strong>{fighter.cooldown ?? 0}/{fighter.maximumCooldown ?? 3}</strong></div>
             <div className="compactStat"><span>🔄 Recovery</span><strong>{fighter.recovery ?? 0}</strong></div>
           </div>
