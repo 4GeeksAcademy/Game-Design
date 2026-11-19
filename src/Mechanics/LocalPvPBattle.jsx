@@ -117,6 +117,7 @@ export default function LocalPvPBattle() {
   const [pendingAttack, setPendingAttack] = useState(null);
   const [combatLog, setCombatLog] = useState(["ROUND 1 — PLAYER 1'S TURN"]);
   const [targetIds, setTargetIds] = useState({});
+  const [healTargetIds, setHealTargetIds] = useState({});
   const [showRoundIntro, setShowRoundIntro] = useState(true);
   const resolvedRef = useRef(false);
   const turnTimeRef = useRef(TURN_SECONDS);
@@ -334,6 +335,8 @@ export default function LocalPvPBattle() {
         };
         const caster = next[activeSide].find((fighter) => fighter.id === fighterId);
         const otherLivingAlly = next[activeSide].find(
+          (member) => member.id === healTargetIds[fighterId] && member.health > 0,
+        ) ?? next[activeSide].find(
           (member) => member.id !== fighterId && member.health > 0,
         );
         const recipients = attack.heal.target === "all"
@@ -409,10 +412,13 @@ export default function LocalPvPBattle() {
         const livingAllies = next[attackerSide].filter(
           (fighter) => fighter.health > 0 && fighter.id !== attacker.id,
         );
+        const selectedAlly = livingAllies.find(
+          (fighter) => fighter.id === healTargetIds[attacker.id],
+        ) ?? livingAllies[0];
         const recipients = attack.heal.target === "all"
           ? next[attackerSide].filter((fighter) => fighter.health > 0)
           : attack.heal.target === "selected"
-            ? livingAllies.slice(0, 1)
+            ? [selectedAlly].filter(Boolean)
             : [attacker];
         recipients.forEach((recipient) => applyHeal(attack, recipient));
       }
