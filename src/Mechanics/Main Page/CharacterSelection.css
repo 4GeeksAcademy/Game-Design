@@ -2028,3 +2028,14 @@
     flex-direction: column;
   }
 }
+
+/* In local 2v2, P2 is displayed on the left and P1 on the right. */
+.versus-selection.local-pvp-team-order {
+  flex-direction: row-reverse;
+}
+
+@media (max-width: 760px) {
+  .versus-selection.local-pvp-team-order {
+    flex-direction: column;
+  }
+}
