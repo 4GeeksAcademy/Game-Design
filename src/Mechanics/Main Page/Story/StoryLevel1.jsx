@@ -26,7 +26,7 @@ const level1Cutscene1 = [
   {
     speaker: "NARRATOR",
     text: "By the time you reach the Land of Fire, your legs are begging you to stop. You have traveled farther than you intended, and the thought of sleeping beneath another tree is becoming less appealing by the minute.",
-    musicTrackId: null,
+    musicTrackId: "none",
     characterId: null,
     expression: "neutral",
     position: "center",
