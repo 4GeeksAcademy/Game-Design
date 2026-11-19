@@ -392,7 +392,7 @@ export default function TeamBattle() {
   const isLocalCoop = teamControl === "local-coop";
   const isCpuAssist = teamControl === "cpu-assist";
   const teammateAttackLimit =
-    difficulty === "Easy" ? 1 : Number.POSITIVE_INFINITY;
+    difficulty === "Easy" ? 2 : Number.POSITIVE_INFINITY;
 
   const [teams, setTeams] = useState(() =>
     createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist),
@@ -1092,7 +1092,7 @@ export default function TeamBattle() {
 
       const cpuMustFinish =
         !hasUsableAttack ||
-        (difficulty === "Easy" && attacksUsedAfter >= 1) ||
+        (difficulty === "Easy" && attacksUsedAfter >= 2) ||
         (roundNumber === 1 && attacksUsedAfter >= 4);
 
       // Save the updated resources and attacks on the actual team fighter.
@@ -1226,7 +1226,7 @@ export default function TeamBattle() {
           activeModifiers: attacker.activeModifiers ?? [],
           turnFinished:
             !hasUsableAttack ||
-            (difficulty === "Easy" && attacksUsedThisTurn >= 1),
+            (difficulty === "Easy" && attacksUsedThisTurn >= 2),
         };
       }
 
@@ -1434,7 +1434,7 @@ export default function TeamBattle() {
       return;
     }
 
-    if (difficulty === "Easy" && attacksUsedThisTurn >= 1) {
+    if (difficulty === "Easy" && attacksUsedThisTurn >= 2) {
       finishPlayerTurn(ally.id);
       return;
     }
