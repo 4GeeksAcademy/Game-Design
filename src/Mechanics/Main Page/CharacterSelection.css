@@ -1976,6 +1976,8 @@
 }
 
 .roster-cursor.p2-cursor {
+  left: auto;
+  right: 0;
   background: #ff3159;
   color: #fff;
   box-shadow: 0 0 14px rgba(255, 49, 89, 0.55);
