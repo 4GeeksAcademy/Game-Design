@@ -859,14 +859,14 @@ function CharacterSelection() {
           </button>
 
           <p>
-            {phase === "player"
-              ? requiredFighters === 2
-                ? "SELECT TWO UNLOCKED FIGHTERS FROM THE ROSTER"
-                : "SELECT AN UNLOCKED FIGHTER OR USE THE ARROWS"
-              : phase === "cpu"
-                ? "CPU IS SELECTING..."
-                : localPvP
-                  ? "P1: ARROWS / ENTER · P2: WASD / SPACE"
+            {localPvP
+              ? "P1: ARROWS + ENTER · P2: WASD + SPACE"
+              : phase === "player"
+                ? requiredFighters === 2
+                  ? "SELECT TWO UNLOCKED FIGHTERS FROM THE ROSTER"
+                  : "SELECT AN UNLOCKED FIGHTER OR USE THE ARROWS"
+                : phase === "cpu"
+                  ? "CPU IS SELECTING..."
                   : "BOTH FIGHTERS ARE READY"}
           </p>
 
