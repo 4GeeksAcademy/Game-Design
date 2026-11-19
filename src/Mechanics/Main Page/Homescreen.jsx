@@ -402,8 +402,8 @@ function Homescreen() {
       {
         id: "pvp",
         title: "PLAYER VS PLAYER",
-        description: "Coming soon.",
-        disabled: true,
+        description: "Two local players face off, each controlling a full team.",
+        disabled: false,
         playerCount: 2,
         allyCpuCount: 0,
         enemyCpuCount: 2,
@@ -463,10 +463,10 @@ function Homescreen() {
                 <span className="matchup-side">
                   {Array.from({ length: option.enemyCpuCount }, (_, index) => (
                     <span
-                      className="matchup-rectangle cpu"
+                      className={`matchup-rectangle ${option.id === "pvp" ? "player" : "cpu"}`}
                       key={`cpu-${index}`}
                     >
-                      <i className="fa-solid fa-robot" />
+                      <i className={option.id === "pvp" ? "fa-solid fa-circle-user" : "fa-solid fa-robot"} />
                     </span>
                   ))}
                 </span>
@@ -481,9 +481,25 @@ function Homescreen() {
 
         <button
           className="arcade-button primary-button continue-button"
-          onClick={() => openMenu("difficulty")}
+          onClick={() => {
+            if (teamControl === "pvp") {
+              navigate("/character-select", {
+                state: {
+                  gameMode: "quick",
+                  teamSize: "2v2",
+                  difficulty: "Normal",
+                  teamControl: "pvp",
+                  localPvP: true,
+                  playerCount: 2,
+                },
+              });
+              return;
+            }
+
+            openMenu("difficulty");
+          }}
         >
-          CONTINUE <span>▶</span>
+          {teamControl === "pvp" ? "SELECT TEAMS" : "CONTINUE"} <span>▶</span>
         </button>
 
         <button className="back-button" onClick={goBack}>
