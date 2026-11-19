@@ -265,6 +265,7 @@ function CharacterSelection() {
   const teamSize = levelConfig.teamSize ?? "1v1";
   const difficulty = levelConfig.difficulty ?? "Normal";
   const teamControl = levelConfig.teamControl ?? "single-player";
+  const localPvP = Boolean(levelConfig.localPvP);
 
   const storyOpponentIds = isStoryMode
     ? (levelConfig.opponentTeamIds ??
@@ -290,6 +291,14 @@ function CharacterSelection() {
   const cpuFighterCount = isStoryOneVsTwo ? 2 : requiredFighters;
 
   const [selectedIndices, setSelectedIndices] = useState([]);
+  const [player2Indices, setPlayer2Indices] = useState([]);
+  const [player2SelectedIndex, setPlayer2SelectedIndex] = useState(() => {
+    const unlocked = getUnlockedCharacters();
+    const index = roster.findIndex((fighter) => unlocked.includes(fighter.id));
+    return index >= 0 ? index : 0;
+  });
+  const [activeSelectingPlayer, setActiveSelectingPlayer] = useState("player1");
+  const [pvpConfirmed, setPvpConfirmed] = useState({ player1: false, player2: false });
 
   const [cpuIndices, setCpuIndices] = useState(() => {
     if (levelConfig.gameMode !== "story" || !levelConfig.opponentId) {
@@ -326,6 +335,7 @@ function CharacterSelection() {
   const [phase, setPhase] = useState("player");
 
   const selectedFighters = selectedIndices.map((index) => roster[index]);
+  const player2Fighters = player2Indices.map((index) => roster[index]);
 
   // const selectedFighter = roster[selectedIndex];
 
@@ -354,33 +364,57 @@ function CharacterSelection() {
     .map((fighter, index) => ({ fighter, index }))
     .filter(({ fighter }) => !fighter.isFestivalSecret || isUnlocked(fighter));
 
-  const changeFighter = (direction) => {
+  const changeFighter = (direction, playerId = "player1") => {
     if (phase !== "player") return;
-
-    let nextIndex = selectedIndex;
-
-    // Move through the roster until we find an unlocked character.
+    const currentIndex = playerId === "player2" ? player2SelectedIndex : selectedIndex;
+    const otherTeam = playerId === "player2" ? selectedIndices : player2Indices;
+    let nextIndex = currentIndex;
     for (let step = 0; step < roster.length; step += 1) {
       nextIndex = (nextIndex + direction + roster.length) % roster.length;
-
-      const candidate = roster[nextIndex];
-
-      if (
-        isUnlocked(candidate) &&
-        (!isStoryMode || !storyOpponentIds.includes(candidate.id))
-      ) {
-        break;
-      }
+      const fighter = roster[nextIndex];
+      if (isUnlocked(fighter) && !otherTeam.includes(nextIndex) &&
+        (!isStoryMode || !storyOpponentIds.includes(fighter.id))) break;
     }
-
-    // Update the character highlighted by the arrows.
-    setSelectedIndex(nextIndex);
+    if (playerId === "player2") {
+      setPlayer2SelectedIndex(nextIndex);
+      if (localPvP && requiredFighters === 1 && !pvpConfirmed.player2) setPlayer2Indices([nextIndex]);
+    } else {
+      setSelectedIndex(nextIndex);
+      if (requiredFighters === 1 && (!localPvP || !pvpConfirmed.player1)) setSelectedIndices([nextIndex]);
+    }
     setPlayerAnimationKey((key) => key + 1);
+  };
 
-    // In 1v1, the highlighted character is automatically selected.
-    if (requiredFighters === 1) {
-      setSelectedIndices([nextIndex]);
+  const togglePvpFighter = (index, playerId) => {
+    if (phase !== "player" || pvpConfirmed[playerId]) return;
+    const fighter = roster[index];
+    if (!isUnlocked(fighter)) { navigate("/shop"); return; }
+    if (playerId === "player1") {
+      if (player2Indices.includes(index)) return;
+      setSelectedIndex(index);
+      setSelectedIndices((current) => current.includes(index)
+        ? current.filter((item) => item !== index)
+        : current.length < requiredFighters ? [...current, index] : current);
+    } else {
+      if (selectedIndices.includes(index)) return;
+      setPlayer2SelectedIndex(index);
+      setPlayer2Indices((current) => current.includes(index)
+        ? current.filter((item) => item !== index)
+        : current.length < requiredFighters ? [...current, index] : current);
     }
+    setActiveSelectingPlayer(playerId);
+    setPlayerAnimationKey((key) => key + 1);
+  };
+
+  const confirmPvpSelection = (playerId) => {
+    const selection = playerId === "player1" ? selectedIndices : player2Indices;
+    if (!localPvP || phase !== "player" || pvpConfirmed[playerId] ||
+      selection.length !== requiredFighters) return;
+    setPvpConfirmed((current) => {
+      const next = { ...current, [playerId]: true };
+      if (next.player1 && next.player2) setPhase("ready");
+      return next;
+    });
   };
 
   // Handle keyboard arrows and Enter.
@@ -396,22 +430,28 @@ function CharacterSelection() {
         return;
       }
 
+      if (localPvP) {
+        const p1 = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -1, ArrowDown: 1 };
+        const p2 = { a: -1, d: 1, w: -1, s: 1 };
+        if (Object.prototype.hasOwnProperty.call(p1, event.key)) {
+          event.preventDefault(); changeFighter(p1[event.key], "player1");
+        } else if (Object.prototype.hasOwnProperty.call(p2, event.key.toLowerCase())) {
+          event.preventDefault(); changeFighter(p2[event.key.toLowerCase()], "player2");
+        } else if (event.key === "Enter") {
+          event.preventDefault(); confirmPvpSelection("player1");
+        } else if (event.key === " " || event.code === "Space") {
+          event.preventDefault(); confirmPvpSelection("player2");
+        }
+        return;
+      }
       if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        changeFighter(-1);
+        event.preventDefault(); changeFighter(-1);
       } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        changeFighter(1);
+        event.preventDefault(); changeFighter(1);
       } else if (event.key === "Enter") {
         event.preventDefault();
-
-        if (requiredFighters === 2) {
-          // In 2v2, Enter selects or deselects the highlighted fighter.
-          togglePlayerFighter(selectedIndex);
-        } else {
-          // In 1v1, Enter confirms the selected fighter.
-          confirmSelection();
-        }
+        if (requiredFighters === 2) togglePlayerFighter(selectedIndex);
+        else confirmSelection();
       }
     };
 
@@ -420,7 +460,7 @@ function CharacterSelection() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [phase, selectedIndex, selectedIndices, unlockedIds, requiredFighters]);
+  }, [phase, selectedIndex, selectedIndices, player2SelectedIndex, player2Indices, unlockedIds, requiredFighters, localPvP, pvpConfirmed]);
 
   const togglePlayerFighter = (index) => {
     if (phase !== "player") return;
@@ -457,6 +497,7 @@ function CharacterSelection() {
   };
 
   const confirmSelection = () => {
+    if (localPvP) { confirmPvpSelection("player1"); return; }
     if (phase !== "player") return;
 
     if (selectedIndices.length !== requiredFighters) return;
@@ -477,7 +518,7 @@ function CharacterSelection() {
   };
 
   useEffect(() => {
-    if (phase !== "cpu" || isStoryMode) return;
+    if (phase !== "cpu" || isStoryMode || localPvP) return;
 
     const playerIds = selectedIndices.map((index) => roster[index].id);
 
@@ -524,14 +565,13 @@ function CharacterSelection() {
     if (
       phase !== "ready" ||
       selectedIndices.length !== requiredFighters ||
-      cpuIndices.length !== cpuFighterCount
+      (localPvP ? player2Indices.length !== requiredFighters : cpuIndices.length !== cpuFighterCount)
     ) {
       return;
     }
 
     const playerTeamIds = selectedIndices.map((index) => roster[index].id);
-
-    const opponentTeamIds = cpuIndices.map((index) => roster[index].id);
+    const opponentTeamIds = (localPvP ? player2Indices : cpuIndices).map((index) => roster[index].id);
 
     navigate(
       isStoryOneVsTwo || teamSize === "2v2" ? "/team-battle" : "/battle",
@@ -550,6 +590,8 @@ function CharacterSelection() {
           teamSize,
           difficulty,
           teamControl,
+          localPvP,
+          playerCount: localPvP ? 2 : 1,
           gameMode: isStoryMode ? "story" : (levelConfig.gameMode ?? "quick"),
           // Keep the currently playing Story Mode soundtrack when battle opens.
           preserveMusicOnBattle: isStoryMode,
