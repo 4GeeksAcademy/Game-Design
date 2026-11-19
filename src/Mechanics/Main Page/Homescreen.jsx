@@ -18,6 +18,11 @@ import {
 } from "./keybinds.js";
 import "./Homescreen.css";
 
+// TEMPORARY FEATURE SWITCH:
+// Set to true to show the LOCAL 2 PLAYERS button in the Multiplayer menu.
+// Set to false to hide it while the local PvP interface is being polished.
+const ENABLE_LOCAL_MULTIPLAYER = false;
+
 function Homescreen() {
   const navigate = useNavigate();
   const [teamControl, setTeamControl] = useState("single-player");
@@ -107,6 +112,9 @@ function Homescreen() {
   }, [listeningFor, keybinds]);
 
   const openMenu = (nextMenu) => {
+    // Keep the temporary feature switch effective even if this menu is
+    // reached programmatically while local multiplayer is disabled.
+    if (nextMenu === "localMultiplayer" && !ENABLE_LOCAL_MULTIPLAYER) return;
     setMenuHistory((history) => [...history, nextMenu]);
   };
 
@@ -682,12 +690,14 @@ const renderMultiplayer = () => (
     </p>
 
     <div className="home-menu-buttons">
-      <button
-        className="arcade-button primary-button"
-        onClick={() => openMenu("localMultiplayer")}
-      >
-        LOCAL <span>2 PLAYERS · SAME KEYBOARD</span>
-      </button>
+      {ENABLE_LOCAL_MULTIPLAYER && (
+        <button
+          className="arcade-button primary-button"
+          onClick={() => openMenu("localMultiplayer")}
+        >
+          LOCAL <span>2 PLAYERS · SAME KEYBOARD</span>
+        </button>
+      )}
       <button className="arcade-button" disabled title="Online multiplayer is not available yet.">
         ONLINE <span>COMING SOON</span>
       </button>
@@ -944,7 +954,7 @@ const renderSinglePlayer = () => (
       case "multiplayer":
         return renderMultiplayer();
       case "localMultiplayer":
-        return renderLocalMultiplayer();
+        return ENABLE_LOCAL_MULTIPLAYER ? renderLocalMultiplayer() : renderMultiplayer();
       case "battleSetup":
         return renderBattleSetup();
       case "difficulty":
