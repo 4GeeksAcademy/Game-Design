@@ -570,7 +570,7 @@ export default function LocalPvPBattle() {
         </div>
         {showRoundIntro && <div className="local-pvp-round-intro">ROUND {round}<span>PLAYER 1 VS PLAYER 2</span></div>}
         {phase === "defending" && pendingAttack && (
-          <section id="aiAttackSection" className="incoming-attack-card local-pvp-incoming" role="dialog" aria-live="assertive">
+          <section id="aiAttackSection" className={"incoming-attack-card local-pvp-incoming " + (defendingSide === "player" ? "local-pvp-incoming-player-one" : "local-pvp-incoming-player-two") } role="dialog" aria-live="assertive">
             <div id="aiAttackCard">
               <div id="aiAttackHeader"><span>⚠ INCOMING ATTACK</span><span className="attack-warning-dot" /></div>
               <div id="defenseTimer" className={defenseTime <= 3 ? "timer-critical" : defenseTime <= 5 ? "timer-warning" : ""}>
