@@ -198,7 +198,11 @@ export default function LocalPvPBattle() {
           ? (defenderIndex === 1 ? "player2" : "player1")
           : "player2";
         const defenseBinds = binds[playerKey];
+        const defendingFighter = teams[defendingSide].find(
+          (fighter) => fighter?.id === pendingAttack.targetId,
+        );
         if (key === normalizeKey(defenseBinds.defend)) {
+          if ((Number(defendingFighter?.cooldown) || 0) <= 0) return;
           event.preventDefault();
           resolveAttack("defend");
         } else if (key === normalizeKey(defenseBinds.evade)) {
@@ -399,7 +403,8 @@ export default function LocalPvPBattle() {
     const attacker = next[attackerSide].find((fighter) => fighter.id === pendingAttack.attackerId);
     const defender = next[defenderSide].find((fighter) => fighter.id === pendingAttack.targetId);
     const attack = attacker?.attacks?.[pendingAttack.attackIndex];
-    if (!attacker || !defender || !attack || !canUseAttack(attack)) {
+    if (!attacker || !defender || !attack || !canUseAttack(attack) ||
+        (choice === "defend" && (Number(defender.cooldown) || 0) <= 0)) {
       setPendingAttack(null);
       setPhase("fighting");
       return;
