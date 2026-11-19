@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { initializeAudio, playUISound, startMusic, stopMusic, getMusicBeatInfo, resumeMusic } from "./audioManager.js";
+import { initializeAudio, playUISound, startMusic, getMusicBeatInfo, resumeMusic } from "./audioManager.js";
 
 function getTrack(pathname, routeState) {
   // Reward and victory screens keep their dedicated victory music.
@@ -82,9 +82,17 @@ export default function AudioDirector() {
   }, [musicCategory]);
 
   useEffect(() => {
+    const isBattleRoute =
+      location.pathname === "/battle" ||
+      location.pathname.endsWith("/battle") ||
+      location.pathname.includes("team-battle");
+
+    // Story Mode can carry the currently playing selection/dialogue track
+    // straight into battle. Other routes still choose their normal playlist.
+    if (isBattleRoute && location.state?.preserveMusicOnBattle) return;
+
     startMusic(musicCategory);
-    return () => stopMusic();
-  }, [musicCategory]);
+  }, [musicCategory, location.pathname, location.state?.preserveMusicOnBattle]);
 
 
   // Keep CSS logo animations locked to the active track's BPM metadata.
