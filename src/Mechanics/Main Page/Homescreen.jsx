@@ -115,6 +115,58 @@ function Homescreen() {
     });
   };
 
+  // Keyboard navigation for the home screen and its submenus.
+  // Arrow keys move focus; Enter/Space use the focused button's native action.
+  useEffect(() => {
+    const handleMenuNavigation = (event) => {
+      if (listeningFor || showStarterPopup) return;
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+
+      const directionByKey = {
+        ArrowDown: 1,
+        ArrowRight: 1,
+        ArrowUp: -1,
+        ArrowLeft: -1,
+      };
+      const direction = directionByKey[event.key];
+      if (!direction) return;
+
+      const menuRoot = document.querySelector(".home-content");
+      if (!menuRoot) return;
+
+      const buttons = Array.from(
+        menuRoot.querySelectorAll("button:not(:disabled)"),
+      ).filter((button) => button.getClientRects().length > 0);
+
+      if (!buttons.length) return;
+
+      event.preventDefault();
+
+      const activeIndex = buttons.indexOf(document.activeElement);
+      const nextIndex =
+        activeIndex === -1
+          ? direction > 0
+            ? 0
+            : buttons.length - 1
+          : (activeIndex + direction + buttons.length) % buttons.length;
+
+      buttons[nextIndex].focus();
+    };
+
+    window.addEventListener("keydown", handleMenuNavigation);
+    return () => window.removeEventListener("keydown", handleMenuNavigation);
+  }, [listeningFor, showStarterPopup]);
+
   const startBattle = () => {
     if (teamSize === "2v2" && !canPlay2v2) {
       setTeamSize("1v1");
