@@ -329,3 +329,327 @@
 .local-pvp-player-screen #character #characterStats .statProgress {
   height: 9px !important;
 }
+
+
+/* 1v1 local PvP: fixed viewport layout, no page scrolling. */
+html:has(.local-pvp-1v1), body:has(.local-pvp-1v1), #app:has(.local-pvp-1v1) {
+  height: 100%;
+  overflow: hidden;
+}
+.local-pvp-1v1 {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: 5px 7px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.local-pvp-match-header {
+  flex: 0 0 42px;
+  width: 100%;
+  max-width: none;
+  min-height: 42px;
+  margin: 0;
+  padding: 3px 12px;
+}
+.local-pvp-match-header > div { gap: 0; }
+.local-pvp-match-header > div strong { font-size: 1rem; line-height: 1.1; }
+.local-pvp-match-header > div span,
+.local-pvp-match-header small { font-size: .58rem; }
+.local-pvp-match-header .local-pvp-active-clock strong { font-size: 1.15rem; }
+.local-pvp-pause-trigger {
+  width: 38px;
+  height: 32px;
+  padding: 0 !important;
+  border: 1px solid #13d5ff80 !important;
+  border-radius: 5px;
+  color: #eafaff;
+  background: #102b40;
+  font-size: 1.1rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.local-pvp-split-screen {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+  overflow: hidden;
+}
+.local-pvp-player-screen {
+  min-height: 0;
+  height: 100%;
+  padding: 5px;
+  gap: 4px;
+  overflow: hidden;
+}
+.local-pvp-player-heading {
+  flex: 0 0 30px;
+  min-height: 30px;
+  margin: 0;
+  padding: 3px 7px;
+  font-size: .68rem;
+}
+.local-pvp-player-heading strong { font-size: .62rem; }
+.local-pvp-player-heading b { font-size: .8rem; }
+.local-pvp-finish-rect {
+  margin-left: auto;
+  min-width: 96px;
+  height: 25px;
+  padding: 3px 9px;
+  border: 1px solid #e5d58b;
+  border-radius: 4px;
+  color: #201b0a;
+  background: linear-gradient(90deg,#e9d77d,#cbb34e);
+  font: 900 .62rem Oxanium,sans-serif;
+  letter-spacing: .4px;
+  cursor: pointer;
+}
+.local-pvp-finish-rect:disabled { opacity: .28; cursor: not-allowed; }
+.local-pvp-screen-fighters {
+  flex: 0 0 auto;
+  min-height: 0;
+  gap: 4px;
+}
+.local-pvp-player-screen .battle-status-panel,
+.local-pvp-player-screen #character.battle-status-panel {
+  box-sizing: border-box;
+  grid-template-columns: 76px minmax(0,1fr);
+  grid-template-rows: 18px minmax(0,1fr) 22px;
+  gap: 0 7px;
+  height: clamp(112px, 18vh, 158px);
+  min-height: 0;
+  padding: 17px 7px 5px;
+  overflow: hidden;
+}
+.local-pvp-player-screen #characterPortraitWrapper,
+.local-pvp-player-screen #opponentPortraitWrapper {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  width: 76px;
+  height: 100%;
+  gap: 4px;
+  align-items: stretch;
+}
+.local-pvp-player-screen #characterImage,
+.local-pvp-player-screen #opponentImage,
+.local-pvp-player-screen #character #characterImage {
+  box-sizing: border-box;
+  width: 50px !important;
+  height: 100% !important;
+  max-height: 112px;
+  flex: 0 0 50px;
+  object-fit: cover;
+}
+.local-pvp-player-screen #characterSideMeters,
+.local-pvp-player-screen #opponentSideMeters {
+  flex-direction: row;
+  gap: 3px;
+  min-width: 0;
+}
+.local-pvp-player-screen .verticalMeterGroup { flex: 1; gap: 1px; }
+.local-pvp-player-screen .verticalMeter {
+  height: 78px;
+  min-height: 0;
+  width: 100%;
+  min-width: 10px;
+}
+.local-pvp-player-screen .verticalMeterValue { font-size: 6px; line-height: 1; }
+.local-pvp-player-screen .verticalMeterGroup small { font-size: 6px; line-height: 1; }
+.local-pvp-player-screen #characterName,
+.local-pvp-player-screen #opponentName {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  margin: 0;
+  font-size: .72rem;
+  line-height: 1;
+}
+.local-pvp-player-screen #characterStats,
+.local-pvp-player-screen #opponentStats {
+  grid-column: 2;
+  grid-row: 2;
+  gap: 5px;
+  min-width: 0;
+  align-self: center;
+}
+.local-pvp-player-screen #character #characterStats { grid-column: 2; grid-row: 2; }
+.local-pvp-player-screen #characterStats .statBarHeader,
+.local-pvp-player-screen #opponentStats .statBarHeader { margin: 0 0 2px; font-size: 8px; }
+.local-pvp-player-screen #characterStats .statProgress,
+.local-pvp-player-screen #opponentStats .statProgress { height: 7px !important; }
+.local-pvp-player-screen #characterCompactStats,
+.local-pvp-player-screen #opponentCompactStats {
+  grid-column: 2;
+  grid-row: 3;
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  margin: 2px 0 0;
+}
+.local-pvp-player-screen .compactStat {
+  min-width: 0;
+  padding: 3px 4px;
+  font-size: .48rem;
+  line-height: 1;
+}
+.local-pvp-player-screen .compactStat strong { font-size: .55rem; }
+.local-pvp-existing-attacks {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.local-pvp-existing-attacks #attackSection {
+  height: 100%;
+  min-height: 0;
+  margin: 0 !important;
+}
+.local-pvp-existing-attacks #attack {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.local-pvp-existing-attacks #attackHeader {
+  flex: 0 0 25px;
+  padding: 4px;
+  font-size: .65rem;
+  line-height: 1.2;
+}
+.local-pvp-existing-attacks #attackBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 5px;
+  overflow: hidden;
+}
+.local-pvp-existing-attacks #attackList {
+  height: 100%;
+  align-items: stretch;
+  gap: 5px !important;
+  padding-bottom: 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.local-pvp-existing-attacks .attack-card-wrapper {
+  flex: 0 0 clamp(102px, 12vw, 150px);
+  min-width: 0;
+  height: 100%;
+}
+.local-pvp-existing-attacks .attack-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0 !important;
+  height: 100%;
+  min-height: 0;
+  padding: 5px !important;
+  gap: 3px;
+}
+.local-pvp-existing-attacks .attack-card[style] { min-width: 0 !important; }
+.local-pvp-existing-attacks .attack-image,
+.local-pvp-existing-attacks [id^="attackImage"] {
+  flex: 0 0 clamp(48px, 8vh, 78px);
+  width: 100%;
+  height: clamp(48px, 8vh, 78px);
+  margin: 0 0 2px;
+  object-fit: cover;
+}
+.local-pvp-existing-attacks [id^="attackName"] {
+  min-height: 24px;
+  margin: 0;
+  font-size: .65rem;
+  line-height: 1.1;
+}
+.local-pvp-existing-attacks [id^="attackStats"] {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 2px 0;
+}
+.local-pvp-existing-attacks .attack-damage,
+.local-pvp-existing-attacks .attack-speed,
+.local-pvp-existing-attacks .attack-mana-cost { font-size: .56rem; line-height: 1.15; }
+.local-pvp-existing-attacks .attack-cost {
+  min-height: 32px;
+  margin-top: auto;
+  padding: 4px;
+  gap: 2px;
+}
+.local-pvp-existing-attacks .attack-availability-info { font-size: .5rem; }
+.local-pvp-screen-log { display: none !important; }
+.local-pvp-incoming {
+  position: fixed !important;
+  z-index: 200000 !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(2,7,15,.86);
+  backdrop-filter: blur(5px);
+}
+.local-pvp-incoming #aiAttackCard {
+  width: min(92vw, 520px);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.local-pvp-pause-overlay {
+  position: fixed;
+  z-index: 300000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(2,7,15,.88);
+  backdrop-filter: blur(7px);
+}
+.local-pvp-pause-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: min(92vw, 390px);
+  padding: 28px;
+  border: 1px solid #13d5ff;
+  background: linear-gradient(145deg,#14243a,#080e19);
+  box-shadow: 0 0 28px #13d5ff30;
+}
+.local-pvp-pause-panel > span { color: #13d5ff; font: 800 .75rem Oxanium,sans-serif; letter-spacing: 3px; }
+.local-pvp-pause-panel h2 { margin: 0 0 8px; font: 900 2rem Oxanium,sans-serif; }
+.local-pvp-pause-panel button {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #13d5ff80;
+  color: white;
+  background: #102b40;
+  font: 800 .78rem Oxanium,sans-serif;
+  cursor: pointer;
+}
+.local-pvp-pause-panel button:first-of-type { color: #171608; border-color: #e5d58b; background: #d5bd5e; }
+.local-pvp-pause-panel button:hover { filter: brightness(1.15); }
+@media (max-height: 720px) {
+  .local-pvp-player-screen .battle-status-panel,
+  .local-pvp-player-screen #character.battle-status-panel { height: clamp(92px, 15vh, 115px); }
+  .local-pvp-player-screen .verticalMeter { height: 62px; }
+  .local-pvp-existing-attacks .attack-image,
+  .local-pvp-existing-attacks [id^="attackImage"] { height: 46px; flex-basis: 46px; }
+}
+@media (max-width: 700px) {
+  .local-pvp-player-heading { flex-wrap: wrap; }
+  .local-pvp-player-screen { padding: 3px; }
+  .local-pvp-player-screen .battle-status-panel,
+  .local-pvp-player-screen #character.battle-status-panel { grid-template-columns: 60px minmax(0,1fr); }
+  .local-pvp-player-screen #characterPortraitWrapper,
+  .local-pvp-player-screen #opponentPortraitWrapper { width: 60px; }
+  .local-pvp-player-screen #characterImage,
+  .local-pvp-player-screen #opponentImage,
+  .local-pvp-player-screen #character #characterImage { width: 40px !important; flex-basis: 40px; }
+  .local-pvp-finish-rect { min-width: 78px; font-size: .5rem; }
+}
