@@ -415,7 +415,6 @@ export default function LocalPvPBattle() {
       return;
     }
     setPhase("fighting");
-    setTurnTime((remaining) => remaining);
   };
 
   const resetMatch = () => {
@@ -489,7 +488,7 @@ export default function LocalPvPBattle() {
           {teams.opponent.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive={activeSide === "opponent"} phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={finishFighterTurn} />)}
         </div>
         <div className="local-pvp-player1-panels">
-          {teams.player.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive={activeSide === "player"} phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={() => endTeamTurn(false)} />)}
+          {teams.player.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive={activeSide === "player"} phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={finishFighterTurn} />)}
         </div>
       </section>
 
