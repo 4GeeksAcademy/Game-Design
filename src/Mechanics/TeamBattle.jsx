@@ -1272,7 +1272,7 @@ export default function TeamBattle() {
       const canAttackAgain =
         nextAttackIndex !== -1 &&
         assignedTargetAlive &&
-        !(difficulty === "Easy" && attacksUsedThisTurn >= 1);
+        !(difficulty === "Easy" && attacksUsedThisTurn >= 2);
 
       if (canAttackAgain) {
         setDefenseOutcome(null);
