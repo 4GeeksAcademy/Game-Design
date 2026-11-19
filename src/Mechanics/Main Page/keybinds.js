@@ -3,8 +3,9 @@
 export const ATTACK_SLOT_COUNT = 10;
 export const KEYBINDS_STORAGE_KEY = "fightersArena.keybinds";
 
-const makePlayerDefaults = (attackKeys, finishTurn, defend, evade, takeDamage) => ({
+const makePlayerDefaults = (attackKeys, finishTurn, defend, evade, takeDamage, navigation) => ({
   attacks: attackKeys,
+  navigation,
   finishTurn,
   defend,
   evade,
@@ -19,6 +20,7 @@ export const DEFAULT_KEYBINDS = {
     "[",
     "]",
     "\\",
+    { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" },
   ),
   player2: makePlayerDefaults(
     ["q", "w", "e", "a", "s", "d", "z", "x", "c", "r"],
@@ -26,6 +28,7 @@ export const DEFAULT_KEYBINDS = {
     "1",
     "2",
     "3",
+    { up: "w", down: "s", left: "a", right: "d" },
   ),
 };
 
@@ -38,6 +41,7 @@ const LEGACY_DEFAULT_KEYBINDS = {
     "q",
     "w",
     "e",
+    { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" },
   ),
   player2: makePlayerDefaults(
     ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"],
@@ -45,6 +49,7 @@ const LEGACY_DEFAULT_KEYBINDS = {
     "u",
     "i",
     "o",
+    { up: "w", down: "s", left: "a", right: "d" },
   ),
 };
 
@@ -100,6 +105,12 @@ function mergePlayer(defaults, saved) {
     defend: normalizeKey(saved.defend) || defaults.defend,
     evade: normalizeKey(saved.evade) || defaults.evade,
     takeDamage: normalizeKey(saved.takeDamage) || defaults.takeDamage,
+    navigation: {
+      up: normalizeKey(saved.navigation?.up) || defaults.navigation.up,
+      down: normalizeKey(saved.navigation?.down) || defaults.navigation.down,
+      left: normalizeKey(saved.navigation?.left) || defaults.navigation.left,
+      right: normalizeKey(saved.navigation?.right) || defaults.navigation.right,
+    },
   };
 }
 
