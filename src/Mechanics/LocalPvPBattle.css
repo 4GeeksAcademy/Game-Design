@@ -653,3 +653,332 @@ html:has(.local-pvp-1v1), body:has(.local-pvp-1v1), #app:has(.local-pvp-1v1) {
   .local-pvp-player-screen #character #characterImage { width: 40px !important; flex-basis: 40px; }
   .local-pvp-finish-rect { min-width: 78px; font-size: .5rem; }
 }
+
+
+/* Refine the split-screen proportions: preserve the familiar Battle UI card layout. */
+.local-pvp-1v1 {
+  gap: 7px;
+  padding: 7px 9px;
+}
+.local-pvp-split-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+}
+.local-pvp-player-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  min-width: 0;
+}
+.local-pvp-player-heading {
+  flex: 0 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+.local-pvp-player-heading > span { flex: 0 0 auto; }
+.local-pvp-player-heading > strong { flex: 1 1 auto; text-align: center; }
+.local-pvp-screen-fighters {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  gap: 6px;
+  overflow: visible;
+}
+.local-pvp-fighter-status {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.local-pvp-player-screen .battle-status-panel {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0 10px;
+  width: 100%;
+  height: 150px;
+  min-height: 150px;
+  padding: 10px 9px;
+  overflow: visible;
+}
+.local-pvp-player-screen #characterPortraitWrapper,
+.local-pvp-player-screen #opponentPortraitWrapper {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 5px;
+  width: 112px;
+  height: 100%;
+  min-width: 0;
+}
+.local-pvp-player-screen #characterImage,
+.local-pvp-player-screen #opponentImage,
+.local-pvp-player-screen #character #characterImage {
+  width: 76px !important;
+  height: 128px !important;
+  max-height: 128px;
+  flex: 0 0 76px;
+  object-fit: cover;
+  object-position: top center;
+}
+.local-pvp-player-screen #characterSideMeters,
+.local-pvp-player-screen #opponentSideMeters {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 0;
+}
+.local-pvp-player-screen .verticalMeterGroup {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  min-width: 0;
+}
+.local-pvp-player-screen .verticalMeter {
+  width: 100%;
+  height: 90px;
+  min-height: 90px;
+  min-width: 12px;
+}
+.local-pvp-player-screen .verticalMeterValue {
+  font-size: 7px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.local-pvp-player-screen .verticalMeterGroup small {
+  font-size: 6px;
+  line-height: 1;
+}
+.local-pvp-player-screen #characterInfo,
+.local-pvp-player-screen #opponentInfo {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  height: 100%;
+}
+.local-pvp-player-screen #characterHeader,
+.local-pvp-player-screen #opponentHeader {
+  display: none;
+}
+.local-pvp-player-screen #characterName,
+.local-pvp-player-screen #opponentName {
+  margin: 0 0 4px;
+  font-size: .82rem;
+  line-height: 1.1;
+}
+.local-pvp-player-screen #characterStats,
+.local-pvp-player-screen #opponentStats {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  min-width: 0;
+}
+.local-pvp-player-screen #characterStats .statBar,
+.local-pvp-player-screen #opponentStats .statBar { min-width: 0; margin: 0; }
+.local-pvp-player-screen #characterStats .statBarHeader,
+.local-pvp-player-screen #opponentStats .statBarHeader {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 3px;
+  font-size: 10px;
+}
+.local-pvp-player-screen #characterStats .statProgress,
+.local-pvp-player-screen #opponentStats .statProgress { height: 9px !important; }
+.local-pvp-player-screen #characterCompactStats,
+.local-pvp-player-screen #opponentCompactStats {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  margin: 5px 0 0;
+}
+.local-pvp-player-screen .compactStat {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 4px 6px;
+  font-size: .57rem;
+  line-height: 1.1;
+}
+.local-pvp-player-screen .compactStat span,
+.local-pvp-player-screen .compactStat strong { font-size: inherit; }
+.local-pvp-existing-attacks {
+  flex: 1 1 0;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+.local-pvp-existing-attacks #attackSection {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0 !important;
+  align-items: stretch;
+}
+.local-pvp-existing-attacks #attack {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.local-pvp-existing-attacks #attackHeader {
+  flex: 0 0 27px;
+  padding: 5px;
+  font-size: .7rem;
+}
+.local-pvp-existing-attacks #attackBody {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 8px;
+  overflow: hidden;
+}
+.local-pvp-existing-attacks #attackList {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px !important;
+  height: 100%;
+  padding: 0 0 5px !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.local-pvp-existing-attacks .attack-card-wrapper {
+  display: block;
+  flex: 0 0 132px;
+  width: 132px;
+  height: 226px;
+  min-width: 132px;
+  max-width: 132px;
+}
+.local-pvp-existing-attacks .attack-card-wrapper > .attack-card,
+.local-pvp-existing-attacks .attack-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0 !important;
+  max-width: 100%;
+  height: 226px;
+  min-height: 226px;
+  max-height: 226px;
+  padding: 7px !important;
+  gap: 5px;
+  overflow: hidden;
+}
+.local-pvp-existing-attacks .attack-card .attack-image,
+.local-pvp-existing-attacks .attack-card [id^="attackImage"] {
+  display: block;
+  flex: 0 0 88px;
+  width: 100%;
+  height: 88px;
+  min-height: 88px;
+  max-height: 88px;
+  margin: 0;
+  object-fit: cover;
+}
+.local-pvp-existing-attacks .attack-card h5,
+.local-pvp-existing-attacks .attack-card [id^="attackName"] {
+  flex: 0 0 auto;
+  min-height: 27px;
+  max-height: 34px;
+  margin: 0;
+  font-size: .68rem;
+  line-height: 1.15;
+  overflow: hidden;
+}
+.local-pvp-existing-attacks .attack-card .attack-stats,
+.local-pvp-existing-attacks .attack-card [id^="attackStats"] {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+}
+.local-pvp-existing-attacks .attack-card .attack-damage,
+.local-pvp-existing-attacks .attack-card .attack-speed {
+  min-height: 21px;
+  padding: 4px;
+  font-size: .58rem;
+  line-height: 1.1;
+}
+.local-pvp-existing-attacks .attack-card .attack-cost {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 34px;
+  margin-top: auto;
+  padding: 4px;
+  gap: 2px;
+}
+.local-pvp-existing-attacks .attack-card .attack-mana-cost,
+.local-pvp-existing-attacks .attack-card .attack-availability-info { font-size: .52rem; }
+.local-pvp-incoming {
+  position: fixed !important;
+  z-index: 200000 !important;
+  top: 50% !important;
+  bottom: auto !important;
+  width: 50% !important;
+  height: auto !important;
+  max-height: 90vh;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 12px !important;
+  background: rgba(2,7,15,.78) !important;
+  backdrop-filter: blur(4px);
+  transform: translateY(-50%);
+}
+.local-pvp-incoming-player-two { left: 0 !important; right: auto !important; }
+.local-pvp-incoming-player-one { left: 50% !important; right: 0 !important; }
+.local-pvp-incoming #aiAttackCard {
+  width: min(94%, 500px);
+  max-height: 86vh;
+  overflow-y: auto;
+}
+@media (max-height: 800px) {
+  .local-pvp-player-screen .battle-status-panel { height: 138px; min-height: 138px; }
+  .local-pvp-player-screen #characterImage,
+  .local-pvp-player-screen #opponentImage,
+  .local-pvp-player-screen #character #characterImage { height: 116px !important; max-height: 116px; }
+  .local-pvp-player-screen .verticalMeter { height: 80px; min-height: 80px; }
+  .local-pvp-existing-attacks .attack-card-wrapper,
+  .local-pvp-existing-attacks .attack-card-wrapper > .attack-card,
+  .local-pvp-existing-attacks .attack-card { height: 210px; min-height: 210px; max-height: 210px; }
+  .local-pvp-existing-attacks .attack-card .attack-image,
+  .local-pvp-existing-attacks .attack-card [id^="attackImage"] { height: 76px; min-height: 76px; max-height: 76px; flex-basis: 76px; }
+}
+@media (max-width: 900px) {
+  .local-pvp-player-screen .battle-status-panel { grid-template-columns: 88px minmax(0,1fr); gap: 0 7px; }
+  .local-pvp-player-screen #characterPortraitWrapper,
+  .local-pvp-player-screen #opponentPortraitWrapper { width: 88px; }
+  .local-pvp-player-screen #characterImage,
+  .local-pvp-player-screen #opponentImage,
+  .local-pvp-player-screen #character #characterImage { width: 58px !important; flex-basis: 58px; }
+  .local-pvp-existing-attacks .attack-card-wrapper { flex-basis: 116px; width: 116px; min-width: 116px; }
+  .local-pvp-incoming { width: 100% !important; left: 0 !important; right: 0 !important; }
+}
