@@ -23,6 +23,7 @@ import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges.js";
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives.js";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup.jsx";
+import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import "./Teambattle.css";
 import "./BattleUI.css";
 import "./LocalPvPBattle.css";
@@ -122,6 +123,7 @@ export default function LocalPvPBattle() {
   const [targetIds, setTargetIds] = useState({});
   const [healTargetIds, setHealTargetIds] = useState({});
   const [showRoundIntro, setShowRoundIntro] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
   const resolvedRef = useRef(false);
   const turnTimeRef = useRef(TURN_SECONDS);
   const defenseTimeRef = useRef(DEFENSE_SECONDS);
@@ -153,7 +155,7 @@ export default function LocalPvPBattle() {
   }, []);
 
   useEffect(() => {
-    if (phase !== "fighting" || pendingAttack || isFinal) return;
+    if (phase !== "fighting" || pendingAttack || isFinal || isPaused) return;
     const timer = window.setInterval(() => {
       const remaining = turnTimeRef.current - 1;
       turnTimeRef.current = remaining;
@@ -164,10 +166,10 @@ export default function LocalPvPBattle() {
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [phase, activeSide, pendingAttack, round]);
+  }, [phase, activeSide, pendingAttack, round, isPaused]);
 
   useEffect(() => {
-    if (phase !== "defending" || !pendingAttack) return;
+    if (phase !== "defending" || !pendingAttack || isPaused) return;
     defenseTimeRef.current = DEFENSE_SECONDS;
     setDefenseTime(DEFENSE_SECONDS);
     const timer = window.setInterval(() => {
@@ -180,7 +182,7 @@ export default function LocalPvPBattle() {
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [phase, pendingAttack]);
+  }, [phase, pendingAttack, isPaused]);
 
   useEffect(() => {
     const handleKeys = (event) => {
@@ -192,6 +194,8 @@ export default function LocalPvPBattle() {
           ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
       ) return;
       const key = normalizeKey(event.key);
+      if (key === "escape") { event.preventDefault(); setIsPaused((value) => !value); return; }
+      if (isPaused) return;
       const binds = loadKeybinds();
       if (phase === "defending" && pendingAttack) {
         const defenderIndex = teams[defendingSide].findIndex(
@@ -253,7 +257,7 @@ export default function LocalPvPBattle() {
     };
     window.addEventListener("keydown", handleKeys);
     return () => window.removeEventListener("keydown", handleKeys);
-  }, [phase, pendingAttack, teams, activeSide, activeTeam, defendingSide, isFinal]);
+  }, [phase, pendingAttack, teams, activeSide, activeTeam, defendingSide, isFinal, isPaused]);
 
   useEffect(() => {
     if (phase !== "fighting") return;
@@ -398,6 +402,10 @@ export default function LocalPvPBattle() {
       targetId,
       attackIndex,
       attackName: attack.name,
+      attackImage: attack.image,
+      damage: getModifiedAttackStat(attack, attacker, "damage"),
+      speed: getModifiedAttackStat(attack, attacker, "speed"),
+      cost,
       hasHeal: Boolean(attack.heal),
       selectedAttackIds,
     });
