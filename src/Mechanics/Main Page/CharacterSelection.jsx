@@ -438,9 +438,19 @@ function CharacterSelection() {
         } else if (Object.prototype.hasOwnProperty.call(p2, event.key.toLowerCase())) {
           event.preventDefault(); changeFighter(p2[event.key.toLowerCase()], "player2");
         } else if (event.key === "Enter") {
-          event.preventDefault(); confirmPvpSelection("player1");
+          event.preventDefault();
+          if (requiredFighters === 2 && selectedIndices.length < requiredFighters) {
+            togglePvpFighter(selectedIndex, "player1");
+          } else {
+            confirmPvpSelection("player1");
+          }
         } else if (event.key === " " || event.code === "Space") {
-          event.preventDefault(); confirmPvpSelection("player2");
+          event.preventDefault();
+          if (requiredFighters === 2 && player2Indices.length < requiredFighters) {
+            togglePvpFighter(player2SelectedIndex, "player2");
+          } else {
+            confirmPvpSelection("player2");
+          }
         }
         return;
       }
@@ -770,9 +780,10 @@ function CharacterSelection() {
             }
             const isPlayerSelected = selectedIndices.includes(index);
             const isP2Selected = player2Indices.includes(index);
-            const isKeyboardHighlighted = localPvP
-              ? (activeSelectingPlayer === "player2" ? player2SelectedIndex : selectedIndex) === index
-              : selectedIndex === index;
+            const isP1KeyboardHighlighted = selectedIndex === index;
+            const isP2KeyboardHighlighted = localPvP && player2SelectedIndex === index;
+            const isKeyboardHighlighted =
+              isP1KeyboardHighlighted || isP2KeyboardHighlighted;
             const isCpuSelected = cpuIndices.includes(index);
             const fighterUnlocked = isUnlocked(fighter);
 
@@ -805,11 +816,11 @@ function CharacterSelection() {
                     : `${fighter.data.name} is locked. Open the shop to unlock.`
                 }
               >
-                {(isPlayerSelected || isP2Selected ||
-                  (isKeyboardHighlighted && phase === "player")) && (
-                  <span className={`roster-cursor ${isP2Selected || (localPvP && activeSelectingPlayer === "player2") ? "p2-cursor" : "p1-cursor"}`}>
-                    {isP2Selected ? "P2 ▼" : isPlayerSelected ? "P1 ▼" : localPvP && activeSelectingPlayer === "player2" ? "P2 ▼" : "P1 ▼"}
-                  </span>
+                {(isPlayerSelected || (isP1KeyboardHighlighted && phase === "player")) && (
+                  <span className="roster-cursor p1-cursor">P1 ▼</span>
+                )}
+                {localPvP && (isP2Selected || (isP2KeyboardHighlighted && phase === "player")) && (
+                  <span className="roster-cursor p2-cursor">P2 ▼</span>
                 )}
 
                 <span className="roster-portrait">
