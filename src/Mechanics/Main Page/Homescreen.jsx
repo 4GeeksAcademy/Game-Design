@@ -67,7 +67,11 @@ function Homescreen() {
     const key = normalizeKey(event.key);
     if (!key) return;
 
-    const conflict = findKeybindConflict(keybinds, key, listeningFor);
+    const [playerId, action, slot] = listeningFor.split(".");
+    const isNavigationBinding = action === "navigation";
+    const conflict = isNavigationBinding
+      ? null
+      : findKeybindConflict(keybinds, key, listeningFor);
 
     if (conflict) {
       const playerName =
@@ -79,10 +83,11 @@ function Homescreen() {
       return;
     }
 
-    const [playerId, action, slot] = listeningFor.split(".");
     const updated = JSON.parse(JSON.stringify(keybinds));
 
-    if (action === "attack") {
+    if (action === "navigation") {
+      updated[playerId].navigation[slot] = key;
+    } else if (action === "attack") {
       updated[playerId].attacks[Number(slot)] = key;
     } else {
       updated[playerId][action] = key;
@@ -132,17 +137,23 @@ function Homescreen() {
         return;
       }
 
-      const directionByKey = {
-        ArrowDown: 1,
-        ArrowRight: 1,
-        ArrowUp: -1,
-        ArrowLeft: -1,
-        s: 1,
-        d: 1,
-        w: -1,
-        a: -1,
-      };
-      const direction = directionByKey[event.key] ?? directionByKey[event.key.toLowerCase()];
+      const currentKeybinds = loadKeybinds();
+      const p1Navigation = currentKeybinds.player1.navigation;
+      const p2Navigation = currentKeybinds.player2.navigation;
+      const pressedKey = normalizeKey(event.key);
+      const navigationKeys = [
+        [p1Navigation.up, -1],
+        [p1Navigation.left, -1],
+        [p1Navigation.down, 1],
+        [p1Navigation.right, 1],
+        [p2Navigation.up, -1],
+        [p2Navigation.left, -1],
+        [p2Navigation.down, 1],
+        [p2Navigation.right, 1],
+      ];
+      const direction = navigationKeys.find(
+        ([boundKey]) => normalizeKey(boundKey) === pressedKey,
+      )?.[1];
       if (!direction) return;
 
       const menuRoot = document.querySelector(".home-content");
@@ -267,14 +278,33 @@ function Homescreen() {
         <p className="home-eyebrow">CUSTOMIZE CONTROLS</p>
         <h2 className="menu-title">KEYBINDS</h2>
         <p className="menu-description">
-          Select a binding, then press the key you want. Keys must be unique
-          across both players.
+          Choose a binding and press the key you want. Navigation keys may
+          overlap with any other binding; attacks and combat actions must remain unique.
         </p>
 
         <div className="keybind-player-grid">
           {players.map(([playerId, title]) => (
             <section className="keybind-player" key={playerId}>
               <h3>{title}</h3>
+
+              <div className="keybind-navigation-group">
+                <h4>NAVIGATION</h4>
+                {[
+                  ["up", "Move up"],
+                  ["down", "Move down"],
+                  ["left", "Move left"],
+                  ["right", "Move right"],
+                ].map(([direction, label]) => (
+                  <div className="keybind-row" key={`${playerId}.navigation.${direction}`}>
+                    <span>{label}</span>
+                    {renderBindingButton(
+                      playerId,
+                      `${playerId}.navigation.${direction}`,
+                      keybinds[playerId].navigation[direction],
+                    )}
+                  </div>
+                ))}
+              </div>
 
               {Array.from({ length: ATTACK_SLOT_COUNT }, (_, index) => (
                 <div
