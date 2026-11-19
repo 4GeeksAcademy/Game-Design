@@ -170,8 +170,7 @@ export default function LocalPvPBattle() {
 
   useEffect(() => {
     if (phase !== "defending" || !pendingAttack || isPaused) return;
-    defenseTimeRef.current = DEFENSE_SECONDS;
-    setDefenseTime(DEFENSE_SECONDS);
+    setDefenseTime(defenseTimeRef.current);
     const timer = window.setInterval(() => {
       const remaining = defenseTimeRef.current - 1;
       defenseTimeRef.current = remaining;
@@ -397,6 +396,8 @@ export default function LocalPvPBattle() {
       return;
     }
     resolvedRef.current = false;
+    defenseTimeRef.current = DEFENSE_SECONDS;
+    setDefenseTime(DEFENSE_SECONDS);
     setPendingAttack({
       attackerId: fighterId,
       targetId,
@@ -502,6 +503,9 @@ export default function LocalPvPBattle() {
     turnTimeRef.current = TURN_SECONDS;
     setTurnTime(TURN_SECONDS);
     setPendingAttack(null);
+    setIsPaused(false);
+    defenseTimeRef.current = DEFENSE_SECONDS;
+    setDefenseTime(DEFENSE_SECONDS);
     setCombatLog(["ROUND 1 — PLAYER 1'S TURN"]);
     setShowRoundIntro(true);
   };
