@@ -182,6 +182,12 @@ export default function LocalPvPBattle() {
   useEffect(() => {
     const handleKeys = (event) => {
       if (event.repeat || isFinal) return;
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+      ) return;
       const key = normalizeKey(event.key);
       const binds = loadKeybinds();
       if (phase === "defending" && pendingAttack) {
