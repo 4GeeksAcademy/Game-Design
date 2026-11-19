@@ -207,6 +207,9 @@ function aiTurn(ai, player, showAttack, hideAttack, attacksPerTurn = 2) {
   return {
     respondToDefense() {
       if (stopped || !currentAttack) return false;
+      // Battle.jsx has already applied the selected defense outcome. Mark
+      // this attack as handled so it cannot deal damage a second time.
+      player.blocked = true;
       resolveCurrentAttack();
       return true;
     },
