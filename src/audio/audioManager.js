@@ -79,6 +79,7 @@ function getSelectedMusic(category) {
 let currentTrack = "menu";
 let activeMusicTrack = null;
 let audioElement = null;
+let musicSuppressed = false;
 let settings = loadSettings();
 function loadSettings() {
   try {
@@ -161,6 +162,7 @@ function setTempoMetadata(track) {
 
 function playMusicTrack(track, category = "story") {
   if (!track?.file) return;
+  musicSuppressed = false;
   currentTrack = category;
   activeMusicTrack = track;
   setTempoMetadata(track);
@@ -203,6 +205,14 @@ export function startMusic(category = "menu") {
 // Dialogue lines can request a specific mood by adding musicTrackId.
 // The id is resolved here, keeping StoryCutscene independent of file paths.
 export function startMusicById(trackId) {
+  // A dialogue line can explicitly silence background music without needing
+  // a dedicated audio asset or changing the active playlist.
+  if (trackId === "none") {
+    musicSuppressed = true;
+    stopMusic();
+    return true;
+  }
+
   const track = MUSIC_TRACKS_BY_ID[trackId];
   if (!track) {
     console.warn(`[Wild Cards Audio] Unknown musicTrackId: ${trackId}`);
@@ -216,6 +226,7 @@ export function startMusicById(trackId) {
 }
 
 export function resumeMusic() {
+  if (musicSuppressed) return;
   if (audioElement) {
     attemptMusicPlayback(audioElement);
     return;
@@ -348,7 +359,7 @@ export function updateAudioSettings(next) {
   applyVolumes();
   if (settings.muted || settings.music <= 0) stopMusic();
   else if (activeMusicTrack) playMusicTrack(activeMusicTrack, currentTrack);
-  else startMusic(currentTrack);
+  else if (!musicSuppressed) startMusic(currentTrack);
   return getAudioSettings();
 }
 
