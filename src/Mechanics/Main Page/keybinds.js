@@ -12,7 +12,7 @@ const makePlayerDefaults = (attackKeys, finishTurn, defend, evade, takeDamage, n
   takeDamage,
 });
 
-// Defaults are unique across both players and all actions.
+// Combat actions stay unique. Navigation is intentionally allowed to overlap.
 export const DEFAULT_KEYBINDS = {
   player1: makePlayerDefaults(
     ["u", "i", "o", "j", "k", "l", "m", ",", ".", "p"],
@@ -89,6 +89,11 @@ function matchesDefaults(saved, defaults) {
       expected.attacks.every((key, index) => normalizeKey(player.attacks?.[index]) === key) &&
       ["finishTurn", "defend", "evade", "takeDamage"].every(
         (action) => normalizeKey(player[action]) === expected[action],
+      ) &&
+      ["up", "down", "left", "right"].every(
+        (direction) =>
+          normalizeKey(player.navigation?.[direction] ?? expected.navigation[direction]) ===
+          expected.navigation[direction],
       )
     );
   });
