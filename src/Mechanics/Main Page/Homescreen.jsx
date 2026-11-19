@@ -608,8 +608,11 @@ const renderHome = () => (
           SINGLE PLAYER <span>▶</span>
         </button>
 
-        <button className="arcade-button" disabled>
-          MULTIPLAYER <span>LOCKED</span>
+        <button
+          className="arcade-button"
+          onClick={() => openMenu("localMultiplayer")}
+        >
+          LOCAL MULTIPLAYER <span>2 PLAYERS</span>
         </button>
       </div>
 
@@ -620,6 +623,55 @@ const renderHome = () => (
   );
 
  
+const renderLocalMultiplayer = () => (
+  <>
+    <p className="home-eyebrow">LOCAL HEAD-TO-HEAD</p>
+    <h2 className="menu-title">TWO PLAYER BATTLE</h2>
+    <p className="menu-description">
+      Choose the match format. Both players use the same keyboard.
+    </p>
+
+    <div className="choice-grid">
+      <button
+        className={`choice-button ${teamSize === "1v1" ? "selected" : ""}`}
+        onClick={() => setTeamSize("1v1")}
+      >
+        <strong>1v1</strong>
+        <span>ONE FIGHTER EACH</span>
+      </button>
+      <button
+        className={`choice-button ${teamSize === "2v2" ? "selected" : ""}`}
+        onClick={() => setTeamSize("2v2")}
+      >
+        <strong>2v2</strong>
+        <span>TWO FIGHTERS EACH</span>
+      </button>
+    </div>
+
+    <button
+      className="arcade-button primary-button continue-button"
+      onClick={() =>
+        navigate("/character-select", {
+          state: {
+            gameMode: "quick",
+            teamSize,
+            difficulty: "Normal",
+            teamControl: "pvp",
+            localPvP: true,
+            playerCount: 2,
+          },
+        })
+      }
+    >
+      SELECT FIGHTERS <span>▶</span>
+    </button>
+
+    <button className="back-button" onClick={goBack}>
+      ← BACK
+    </button>
+  </>
+);
+
 const renderSinglePlayer = () => (
   <div className="single-player-screen">
     <div className="single-player-heading">
@@ -813,6 +865,8 @@ const renderSinglePlayer = () => (
         return renderPlay();
       case "singlePlayer":
         return renderSinglePlayer();
+      case "localMultiplayer":
+        return renderLocalMultiplayer();
       case "battleSetup":
         return renderBattleSetup();
       case "difficulty":
