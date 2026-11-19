@@ -1,5 +1,10 @@
 import minaArenaImage from "../../assets/img/MinaAshidoArena.jpg";
 
+import Attack1 from "../../assets/img/Attack_IMAGES/Acid Shot.jpeg"
+import Attack2 from "../../assets/img/Attack_IMAGES/Acid Blast.webp"
+import Attack3 from "../../assets/img/Attack_IMAGES/Acid Bomb.jpeg"
+import Attack4 from "../../assets/img/Attack_IMAGES/Acid Corrosion.webp"
+
 const mina = {
   name: "Mina Ashido",
   image: minaArenaImage,
@@ -20,6 +25,7 @@ const mina = {
   attacks: [
     {
       name: "Acid Shot",
+      image: Attack1,
       damage: 15,
       speed: 45,
       cost: 12,
@@ -37,6 +43,7 @@ const mina = {
 
     {
       name: "Acid Blast",
+      image: Attack2,
       damage: 25,
       speed: 30,
       cost: 15,
@@ -51,6 +58,7 @@ const mina = {
 
     {
       name: "Acid Bomb",
+      image: Attack3,
       damage: 40,
       speed: 20,
       cost: 40,
@@ -71,6 +79,7 @@ const mina = {
 
     {
       name: "Acid Corrosion",
+      image: Attack4,
       damage: 10,
       speed: 20,
       cost: 25,
