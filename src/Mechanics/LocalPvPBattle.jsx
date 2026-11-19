@@ -24,6 +24,7 @@ import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges.js"
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives.js";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup.jsx";
 import "./Teambattle.css";
+import "./BattleUI.css";
 import "./LocalPvPBattle.css";
 
 const TURN_SECONDS = 20;
