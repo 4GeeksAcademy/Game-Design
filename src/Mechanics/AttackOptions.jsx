@@ -188,6 +188,9 @@ function AttackOptions({
       showCombatMessage,
       openingTurnAttackLimitReached,
       difficulty,
+      localPvP,
+      canAttack,
+      onPvPAttack,
     ],
   );
 
@@ -231,12 +234,16 @@ function AttackOptions({
       currentTurn,
       openingTurnAttackLimitReached,
       handleAttack,
+      localPvP,
+      canAttack,
     ],
   );
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (currentTurn !== "player" || pendingStunAttack !== null) return;
+      if ((!localPvP && currentTurn !== "player") ||
+          (localPvP && !canAttack) ||
+          pendingStunAttack !== null) return;
 
       const key = normalizeKey(event.key);
       if (localPvP && !canAttack) return;
@@ -266,6 +273,9 @@ function AttackOptions({
     startAttack,
     openingTurnAttackLimitReached,
     pendingStunAttack,
+    localPvP,
+    playerKey,
+    canAttack,
   ]);
 
   return (
