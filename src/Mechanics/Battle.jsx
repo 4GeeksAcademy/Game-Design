@@ -506,8 +506,10 @@ const stunOptions = {
       // Record successful defensive actions for Festival challenges.
       if (choice === "defend") {
         recordFestivalEvent("block", 1);
+        recordDailyObjectiveEvent("defense", 1);
       } else if (choice === "evade" && result.evaded) {
         recordFestivalEvent("evade", 1);
+        recordDailyObjectiveEvent("defense", 1);
       }
 
      if (choice === "defend" || choice === "evade") {
