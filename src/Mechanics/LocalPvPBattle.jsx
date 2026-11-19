@@ -321,19 +321,25 @@ export default function LocalPvPBattle() {
       addLog(`${attacker.name} does not have enough mana.`);
       return;
     }
-    if (attack.heal) {
+    const modifiedDamage = getModifiedAttackStat(attack, attacker, "damage");
+    if (attack.heal && modifiedDamage <= 0) {
+      if (activeTeam.length === 1 && attack.heal.target !== "self") {
+        addLog("This fighter has no teammate to receive that healing effect.");
+        return;
+      }
       setTeams((current) => {
         const next = {
           player: current.player.map(cloneFighter),
           opponent: current.opponent.map(cloneFighter),
         };
         const caster = next[activeSide].find((fighter) => fighter.id === fighterId);
+        const otherLivingAlly = next[activeSide].find(
+          (member) => member.id !== fighterId && member.health > 0,
+        );
         const recipients = attack.heal.target === "all"
           ? next[activeSide].filter((fighter) => fighter.health > 0)
           : attack.heal.target === "selected"
-            ? [next[activeSide].find((fighter) =>
-                fighter.id === (targetIds[fighterId] || next[activeSide].find((member) => member.id !== fighterId && member.health > 0)?.id),
-              )].filter(Boolean)
+            ? [otherLivingAlly].filter(Boolean)
             : [caster];
         if (!recipients.length) return current;
         caster.mana -= cost;
@@ -351,7 +357,13 @@ export default function LocalPvPBattle() {
       return;
     }
     resolvedRef.current = false;
-    setPendingAttack({ attackerId: fighterId, targetId, attackIndex, attackName: attack.name });
+    setPendingAttack({
+      attackerId: fighterId,
+      targetId,
+      attackIndex,
+      attackName: attack.name,
+      hasHeal: Boolean(attack.heal),
+    });
     setPhase("defending");
     addLog(`${attacker.name} used ${attack.name}. ${target.name}, defend!`);
   };
@@ -393,6 +405,17 @@ export default function LocalPvPBattle() {
       });
     }
     if (result) {
+      if (attack.heal) {
+        const livingAllies = next[attackerSide].filter(
+          (fighter) => fighter.health > 0 && fighter.id !== attacker.id,
+        );
+        const recipients = attack.heal.target === "all"
+          ? next[attackerSide].filter((fighter) => fighter.health > 0)
+          : attack.heal.target === "selected"
+            ? livingAllies.slice(0, 1)
+            : [attacker];
+        recipients.forEach((recipient) => applyHeal(attack, recipient));
+      }
       setTeams(next);
       const damage = Math.max(0, result.damageReceived ?? 0);
       if (damage > 0 && attackerSide === "player") {
