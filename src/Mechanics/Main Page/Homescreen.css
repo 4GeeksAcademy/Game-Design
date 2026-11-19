@@ -2858,3 +2858,35 @@
 @media (prefers-reduced-motion: reduce) {
   .wc-rhythm-active [class*="wc-beat-animation--"] { animation: none !important; }
 }
+
+
+/* Keep keyboard focus visible while navigating menus with arrows or WASD. */
+.home-screen button:focus-visible {
+  outline: 3px solid var(--arcade-cyan);
+  outline-offset: 5px;
+  box-shadow:
+    0 0 0 2px rgba(8, 13, 28, 0.95),
+    0 0 22px rgba(19, 213, 255, 0.5);
+  filter: brightness(1.16);
+  position: relative;
+  z-index: 5;
+}
+
+.home-screen .main-menu-button:focus-visible {
+  border-color: var(--arcade-cyan);
+  transform: translateX(5px);
+  background-color: rgba(19, 213, 255, 0.12);
+}
+
+.home-screen .arcade-button:focus-visible,
+.home-screen .mode-card:focus-visible,
+.home-screen .choice-button:focus-visible,
+.home-screen .difficulty-button:focus-visible,
+.home-screen .team-control-card:focus-visible {
+  border-color: var(--arcade-cyan);
+}
+
+.home-screen button:disabled:focus-visible {
+  outline-color: rgba(19, 213, 255, 0.35);
+  filter: none;
+}
