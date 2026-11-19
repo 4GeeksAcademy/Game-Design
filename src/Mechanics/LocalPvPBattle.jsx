@@ -323,6 +323,13 @@ export default function LocalPvPBattle() {
     const attack = attacker?.attacks?.[attackIndex];
     if (!attacker || attacker.health <= 0 || attacker.turnFinished ||
         !attack || !canUseAttack(attack)) return;
+    const attacksUsedThisRound = attacker.attacks.filter(
+      (move) => move.state === false,
+    ).length;
+    if (round === 1 && attacksUsedThisRound >= 4) {
+      addLog(`${attacker.name} has reached the 4-attack opening limit.`);
+      return;
+    }
     const cost = getModifiedAttackStat(attack, attacker, "cost");
     if (attacker.mana < cost) {
       addLog(`${attacker.name} does not have enough mana.`);
@@ -359,7 +366,10 @@ export default function LocalPvPBattle() {
       addLog(`${attacker.name} used ${attack.name}.`);
       return;
     }
-    const targetId = targetIds[fighterId] || defendingLiving[0]?.id;
+    const selectedTarget = defendingLiving.some(
+      (fighter) => fighter.id === targetIds[fighterId],
+    ) ? targetIds[fighterId] : defendingLiving[0]?.id;
+    const targetId = selectedTarget;
     const target = opposingTeam.find((fighter) => fighter?.id === targetId && fighter.health > 0);
     if (!target) {
       addLog("Choose a living opponent first.");
@@ -497,7 +507,7 @@ export default function LocalPvPBattle() {
       <div className="local-pvp-targets">
         {activeTeam.filter((fighter) => fighter?.health > 0).map((fighter) => (
           <label key={fighter.id}>{fighter.name} TARGET
-            <select value={targetIds[fighter.id] || defendingLiving[0]?.id || ""} onChange={(event) => chooseTarget(fighter.id, event.target.value)}>
+            <select value={defendingLiving.some((target) => target.id === targetIds[fighter.id]) ? targetIds[fighter.id] : (defendingLiving[0]?.id || "")} onChange={(event) => chooseTarget(fighter.id, event.target.value)}>
               {defendingLiving.map((target) => <option key={target.id} value={target.id}>{target.name}</option>)}
             </select>
           </label>
