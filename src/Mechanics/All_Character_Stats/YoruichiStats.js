@@ -62,7 +62,7 @@ const Yoruichi = {
       buff: {
         agility: 7,
         mana: 4,
-        manaRegen: 3,
+        manaRegen: 4,
         cooldown: 1,
       },
     },
@@ -94,6 +94,7 @@ const Yoruichi = {
       cost: 24,
       speed: 50,
       state: true,
+      buffRequiresHit: true,
 
       buff: {
         agility: 5,
@@ -109,10 +110,10 @@ const Yoruichi = {
       state: true,
       turnCooldown: 3,
       uses: 3,
+      buffRequiresHit: true,
 
       buff: {
         recovery: 1,
-        cooldown: 1,
       },
     },
 
