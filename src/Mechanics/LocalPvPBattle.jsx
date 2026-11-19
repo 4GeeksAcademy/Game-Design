@@ -367,6 +367,7 @@ export default function LocalPvPBattle() {
         consumeAttack(caster.attacks[attackIndex]);
         return next;
       });
+      recordFestivalEvent("attack", 1);
       addLog(`${attacker.name} used ${attack.name}.`);
       return;
     }
@@ -535,10 +536,10 @@ export default function LocalPvPBattle() {
 
       <section className="local-pvp-attacks">
         <div className="local-pvp-player2-panels">
-          {teams.opponent.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive={activeSide === "opponent"} phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={finishFighterTurn} />)}
+          {activeSide === "opponent" && teams.opponent.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={finishFighterTurn} />)}
         </div>
         <div className="local-pvp-player1-panels">
-          {teams.player.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive={activeSide === "player"} phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={finishFighterTurn} />)}
+          {activeSide === "player" && teams.player.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={finishFighterTurn} />)}
         </div>
       </section>
 
