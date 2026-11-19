@@ -137,8 +137,12 @@ function Homescreen() {
         ArrowRight: 1,
         ArrowUp: -1,
         ArrowLeft: -1,
+        s: 1,
+        d: 1,
+        w: -1,
+        a: -1,
       };
-      const direction = directionByKey[event.key];
+      const direction = directionByKey[event.key] ?? directionByKey[event.key.toLowerCase()];
       if (!direction) return;
 
       const menuRoot = document.querySelector(".home-content");
