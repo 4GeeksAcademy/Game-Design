@@ -128,38 +128,54 @@ function aiChooseStunTargets(defender, stun) {
 //   return result;
 // }
 
-function aiTurn(ai, player, showAttack, hideAttack) {
-  const attack = aiChooseAttack(ai);
+function aiTurn(ai, player, showAttack, hideAttack, attacksPerTurn = 2) {
+  let attacksResolved = 0;
 
-  // No usable attack: finish immediately.
-  if (!attack) {
-    console.log(`${ai.name} has no available attacks. Ending turn.`);
-
+  const finishTurn = () => {
     aiFinishTurn(ai);
     hideAttack();
-    return;
-  }
+  };
 
-  showAttack(attack);
-
-  setTimeout(() => {
-    // Apply damage only if the player did not defend or evade.
-    if (player.blocked === false) {
-      const selectedAttackIds = aiChooseStunTargets(player, attack.stun);
-
-      attackCharacter(attack, ai, player, 0, {
-        selectedAttackIds,
-        fighters: [ai, player],
-      });
+  const performNextAttack = () => {
+    if (attacksResolved >= attacksPerTurn || player.health <= 0) {
+      finishTurn();
+      return;
     }
 
-    player.blocked = false;
+    // Re-check resources after every move, then randomly select another usable attack.
+    const attack = aiChooseAttack(ai);
+    if (!attack) {
+      finishTurn();
+      return;
+    }
 
-    aiFinishTurn(ai);
-    hideAttack();
-  }, 7000);
+    showAttack(attack);
+
+    setTimeout(() => {
+      // Apply damage only if the player did not defend or evade this attack.
+      if (player.blocked === false) {
+        const selectedAttackIds = aiChooseStunTargets(player, attack.stun);
+        attackCharacter(attack, ai, player, 0, {
+          selectedAttackIds,
+          fighters: [ai, player],
+        });
+      }
+
+      player.blocked = false;
+      attacksResolved += 1;
+
+      if (attacksResolved >= attacksPerTurn || player.health <= 0) {
+        finishTurn();
+        return;
+      }
+
+      hideAttack();
+      setTimeout(performNextAttack, 500);
+    }, 7000);
+  };
+
+  performNextAttack();
 }
-
 function aiFinishTurn(ai) {
   ai.turnFinished = true;
 }
