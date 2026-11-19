@@ -563,13 +563,13 @@ export default function LocalPvPBattle() {
       <main className="local-pvp-screen local-pvp-1v1">
         <FestivalChallengePopup />
         <header className="local-pvp-header local-pvp-match-header">
-          <button onClick={() => navigate("/character-select")}>← CHARACTER SELECT</button>
+          <button className="local-pvp-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match">Ⅱ</button>
           <div><strong>ROUND {round}</strong><span>1 VS 1 LOCAL PVP</span></div>
           <div className="local-pvp-active-clock"><small>{activeSide === "player" ? "PLAYER 1 TURN" : "PLAYER 2 TURN"}</small><strong>{turnTime}s</strong></div>
         </header>
         <div className="local-pvp-split-screen">
           {renderPlayerPane(playerTwo, playerOne, "player2", playerTwoActive, "local-pvp-player-two")}
-          <div className="local-pvp-split-divider"><span>VS</span></div>
+          
           {renderPlayerPane(playerOne, playerTwo, "player1", playerOneActive, "local-pvp-player-one")}
         </div>
         {showRoundIntro && <div className="local-pvp-round-intro">ROUND {round}<span>PLAYER 1 VS PLAYER 2</span></div>}
