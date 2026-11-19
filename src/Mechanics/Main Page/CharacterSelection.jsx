@@ -645,11 +645,18 @@ function CharacterSelection() {
             <div>
               <h2>PLAYER 1</h2>
               <p>
-                {phase === "player" ? "SELECT YOUR FIGHTER" : "FIGHTER LOCKED"}
+                {localPvP
+                  ? pvpConfirmed.player1 ? "READY" : "ARROWS TO MOVE · ENTER TO CONFIRM"
+                  : phase === "player" ? "SELECT YOUR FIGHTER" : "FIGHTER LOCKED"}
               </p>
             </div>
           </div>
 
+          {localPvP && (
+            <button type="button" className={`pvp-team-select ${activeSelectingPlayer === "player1" ? "is-active" : ""}`} onClick={() => setActiveSelectingPlayer("player1")}>
+              P1 TEAM · CLICK TO SELECT
+            </button>
+          )}
           <div className={teamSize === "2v2" ? "roster-team-preview" : ""}>
             {selectedFighters.map((fighter) => (
               <FighterStats
@@ -664,30 +671,43 @@ function CharacterSelection() {
 
         <section className="roster-side cpu-side">
           <div className="roster-side-heading">
-            <span className="cpu-label">CPU</span>
+            <span className="cpu-label">{localPvP ? "P2" : "CPU"}</span>
             <div>
               <h2>
-                {isStoryMode
+                {localPvP ? "PLAYER 2" : isStoryMode
                   ? "STORY OPPONENT"
                   : teamControl === "cpu-assist"
                     ? "CPU TEAM"
                     : "CPU OPPONENT"}
               </h2>
               <p>
-                {isStoryMode
-                  ? "STORY OPPONENT ASSIGNED"
-                  : phase === "player"
-                    ? "WAITING FOR PLAYER"
-                    : phase === "cpu"
-                      ? "SELECTING TEAM..."
-                      : teamControl === "cpu-assist"
-                        ? "ALLY + OPPONENTS LOCKED"
-                        : "OPPONENT LOCKED"}
+                {localPvP
+                  ? pvpConfirmed.player2 ? "READY" : "WASD TO MOVE · SPACE TO CONFIRM"
+                  : isStoryMode
+                    ? "STORY OPPONENT ASSIGNED"
+                    : phase === "player"
+                      ? "WAITING FOR PLAYER"
+                      : phase === "cpu"
+                        ? "SELECTING TEAM..."
+                        : teamControl === "cpu-assist"
+                          ? "ALLY + OPPONENTS LOCKED"
+                          : "OPPONENT LOCKED"}
               </p>
             </div>
           </div>
 
-          {cpuFighters.length > 0 ? (
+          {localPvP ? (
+            <>
+              <button type="button" className={`pvp-team-select ${activeSelectingPlayer === "player2" ? "is-active" : ""}`} onClick={() => setActiveSelectingPlayer("player2")}>
+                P2 TEAM · CLICK TO SELECT
+              </button>
+              <div className={teamSize === "2v2" ? "roster-team-preview" : ""}>
+                {player2Fighters.map((fighter) => (
+                  <FighterStats key={`p2-${fighter.id}-${playerAnimationKey}`} fighter={fighter} />
+                ))}
+              </div>
+            </>
+          ) : cpuFighters.length > 0 ? (
             <div className={teamSize === "2v2" ? "roster-team-preview" : ""}>
               {cpuFighters.map((fighter) => (
                 <FighterStats
@@ -706,7 +726,16 @@ function CharacterSelection() {
         </section>
       </section>
 
-      {phase === "player" ? (
+      {localPvP && phase === "player" ? (
+        <div className="pvp-confirm-row">
+          <button className="confirm-fighter-button" onClick={() => confirmPvpSelection("player1")} disabled={pvpConfirmed.player1 || selectedIndices.length !== requiredFighters}>
+            {pvpConfirmed.player1 ? "P1 READY ✓" : "P1 CONFIRM"} <span>▶</span>
+          </button>
+          <button className="confirm-fighter-button p2-confirm-button" onClick={() => confirmPvpSelection("player2")} disabled={pvpConfirmed.player2 || player2Indices.length !== requiredFighters}>
+            {pvpConfirmed.player2 ? "P2 READY ✓" : "P2 CONFIRM"} <span>▶</span>
+          </button>
+        </div>
+      ) : phase === "player" ? (
         <button className="confirm-fighter-button" onClick={confirmSelection}>
           {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
           <span>▶</span>
@@ -718,7 +747,7 @@ function CharacterSelection() {
           disabled={
             phase !== "ready" ||
             selectedIndices.length !== requiredFighters ||
-            cpuIndices.length !== cpuFighterCount
+            (localPvP ? player2Indices.length !== requiredFighters : cpuIndices.length !== cpuFighterCount)
           }
         >
           {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
@@ -740,7 +769,10 @@ function CharacterSelection() {
               return null;
             }
             const isPlayerSelected = selectedIndices.includes(index);
-            const isKeyboardHighlighted = selectedIndex === index;
+            const isP2Selected = player2Indices.includes(index);
+            const isKeyboardHighlighted = localPvP
+              ? (activeSelectingPlayer === "player2" ? player2SelectedIndex : selectedIndex) === index
+              : selectedIndex === index;
             const isCpuSelected = cpuIndices.includes(index);
             const fighterUnlocked = isUnlocked(fighter);
 
@@ -755,41 +787,28 @@ function CharacterSelection() {
                     : "",
                   fighter.color,
                   isPlayerSelected ? "p1-selected" : "",
+                  isP2Selected ? "p2-selected" : "",
                   isCpuSelected ? "cpu-selected" : "",
                   !fighterUnlocked ? "fighter-unavailable" : "",
                   phase !== "player" ? "roster-locked" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                onClick={() => togglePlayerFighter(index)}
-                disabled={phase !== "player"}
-                aria-pressed={isPlayerSelected}
+                onClick={() => localPvP
+                  ? togglePvpFighter(index, activeSelectingPlayer)
+                  : togglePlayerFighter(index)}
+                disabled={phase !== "player" || (localPvP && pvpConfirmed[activeSelectingPlayer])}
+                aria-pressed={isPlayerSelected || isP2Selected}
                 aria-label={
                   fighterUnlocked
                     ? `Select ${fighter.data.name}`
                     : `${fighter.data.name} is locked. Open the shop to unlock.`
                 }
               >
-                {(isPlayerSelected ||
+                {(isPlayerSelected || isP2Selected ||
                   (isKeyboardHighlighted && phase === "player")) && (
-                  <span
-                    className={`roster-cursor ${
-                      isPlayerSelected
-                        ? selectedIndices[0] === index
-                          ? "p1-cursor"
-                          : "p2-cursor"
-                        : requiredFighters === 2 && selectedIndices.length === 1
-                          ? "p2-cursor"
-                          : "p1-cursor"
-                    }`}
-                  >
-                    {isPlayerSelected
-                      ? selectedIndices[0] === index
-                        ? "P1 ▼"
-                        : "P2 ▼"
-                      : requiredFighters === 2 && selectedIndices.length === 1
-                        ? "P2 ▼"
-                        : "P1 ▼"}
+                  <span className={`roster-cursor ${isP2Selected || (localPvP && activeSelectingPlayer === "player2") ? "p2-cursor" : "p1-cursor"}`}>
+                    {isP2Selected ? "P2 ▼" : isPlayerSelected ? "P1 ▼" : localPvP && activeSelectingPlayer === "player2" ? "P2 ▼" : "P1 ▼"}
                   </span>
                 )}
 
@@ -835,7 +854,9 @@ function CharacterSelection() {
                 : "SELECT AN UNLOCKED FIGHTER OR USE THE ARROWS"
               : phase === "cpu"
                 ? "CPU IS SELECTING..."
-                : "BOTH FIGHTERS ARE READY"}
+                : localPvP
+                  ? "P1: ARROWS / ENTER · P2: WASD / SPACE"
+                  : "BOTH FIGHTERS ARE READY"}
           </p>
 
           <button
@@ -859,9 +880,9 @@ function CharacterSelection() {
               .join(" + ") || "NONE SELECTED"}
           </strong>
           {" VS "}
-          CPU:{" "}
+          {localPvP ? "P2: " : "CPU: "}
           <strong>
-            {cpuFighters
+            {(localPvP ? player2Fighters : cpuFighters)
               .map((fighter) => fighter.data.name.toUpperCase())
               .join(" + ") || "???"}
           </strong>
