@@ -379,12 +379,21 @@ function App() {
       };
     }
 
-    // Preserve Easy difficulty's existing behavior.
-    aiTurn(opponent, character, setAiAttack, () => {
+    // Easy AI uses the same visible defense window, but can advance
+    // immediately when the player blocks or evades.
+    const controller = aiTurn(opponent, character, setAiAttack, () => {
       setOpponent({ ...opponent });
       setCharacter({ ...character });
       setAiAttack(null);
     });
+    aiControllerRef.current = controller;
+
+    return () => {
+      controller.stop();
+      if (aiControllerRef.current === controller) {
+        aiControllerRef.current = null;
+      }
+    };
   }, [currentTurn]);
 
   // Display the round announcement before allowing combat.
