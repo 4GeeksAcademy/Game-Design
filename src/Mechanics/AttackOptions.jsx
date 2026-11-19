@@ -84,6 +84,10 @@ function AttackOptions({
   showCombatMessage,
   openingTurnActive = false,
   difficulty = "Easy",
+  localPvP = false,
+  playerKey = "player1",
+  canAttack = true,
+  onPvPAttack,
 }) {
   const [pendingStunAttack, setPendingStunAttack] = useState(null);
   const openingTurnAttackLimitReached =
@@ -95,10 +99,16 @@ function AttackOptions({
 
       if (
         !attack ||
-        currentTurn !== "player" ||
+        (!localPvP && currentTurn !== "player") ||
+        (localPvP && !canAttack) ||
         !isAttackAvailable(attack) ||
         openingTurnAttackLimitReached
       ) {
+        return;
+      }
+
+      if (localPvP) {
+        onPvPAttack?.(index, selectedAttackIds);
         return;
       }
 
@@ -187,7 +197,8 @@ function AttackOptions({
 
       if (
         !attack ||
-        currentTurn !== "player" ||
+        (!localPvP && currentTurn !== "player") ||
+        (localPvP && !canAttack) ||
         !isAttackAvailable(attack) ||
         openingTurnAttackLimitReached
       ) {
@@ -198,7 +209,7 @@ function AttackOptions({
       // including attacks that open the stun-target picker.
       playGameSound("attack");
 
-      // Only selected-type stun attacks need player input.
+      // In PvP, selected-type stun attacks still open the existing target picker.
       if (attack.stun?.type === "selected") {
         const eligibleAttacks = (opponent.attacks ?? []).filter(
           (enemyAttack) => (enemyAttack.stunned?.remainingRounds ?? 0) <= 0,
@@ -228,9 +239,10 @@ function AttackOptions({
       if (currentTurn !== "player" || pendingStunAttack !== null) return;
 
       const key = normalizeKey(event.key);
-      const player1Binds = loadKeybinds().player1;
+      if (localPvP && !canAttack) return;
+      const playerBinds = loadKeybinds()[playerKey];
 
-      const index = player1Binds.attacks.findIndex(
+      const index = playerBinds.attacks.findIndex(
         (boundKey) => normalizeKey(boundKey) === key,
       );
 
@@ -304,7 +316,8 @@ function AttackOptions({
 ${(attack.stunned?.remainingRounds ?? 0) > 0 ? "attack-stunned" : ""}`}
                       style={{ minWidth: "200px" }}
                       disabled={
-                        currentTurn !== "player" ||
+                        (!localPvP && currentTurn !== "player") ||
+                        (localPvP && !canAttack) ||
                         !isAttackAvailable(attack) ||
                         openingTurnAttackLimitReached
                       }
