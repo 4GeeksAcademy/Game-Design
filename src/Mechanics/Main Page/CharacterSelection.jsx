@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getCharacterImage } from "../SkinManager.js";
+import { loadKeybinds, normalizeKey } from "./keybinds.js";
 import Toga from "../All_Character_Stats/TogaStats.js";
 import TogaImage from "../../assets/img/Toga.png";
 import { Kenpachi } from "../All_Character_Stats/KempachiStats.js";
@@ -430,13 +431,21 @@ function CharacterSelection() {
         return;
       }
 
+      const currentKeybinds = loadKeybinds();
+      const pressedKey = normalizeKey(event.key);
+      const getNavigationDirection = (navigation) => {
+        if (pressedKey === normalizeKey(navigation.left) || pressedKey === normalizeKey(navigation.up)) return -1;
+        if (pressedKey === normalizeKey(navigation.right) || pressedKey === normalizeKey(navigation.down)) return 1;
+        return null;
+      };
+
       if (localPvP) {
-        const p1 = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -1, ArrowDown: 1 };
-        const p2 = { a: -1, d: 1, w: -1, s: 1 };
-        if (Object.prototype.hasOwnProperty.call(p1, event.key)) {
-          event.preventDefault(); changeFighter(p1[event.key], "player1");
-        } else if (Object.prototype.hasOwnProperty.call(p2, event.key.toLowerCase())) {
-          event.preventDefault(); changeFighter(p2[event.key.toLowerCase()], "player2");
+        const p1Direction = getNavigationDirection(currentKeybinds.player1.navigation);
+        const p2Direction = getNavigationDirection(currentKeybinds.player2.navigation);
+        if (p1Direction !== null) {
+          event.preventDefault(); changeFighter(p1Direction, "player1");
+        } else if (p2Direction !== null) {
+          event.preventDefault(); changeFighter(p2Direction, "player2");
         } else if (event.key === "Enter") {
           event.preventDefault();
           if (requiredFighters === 2 && selectedIndices.length < requiredFighters) {
@@ -454,10 +463,9 @@ function CharacterSelection() {
         }
         return;
       }
-      if (event.key === "ArrowLeft") {
-        event.preventDefault(); changeFighter(-1);
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault(); changeFighter(1);
+      const p1Direction = getNavigationDirection(currentKeybinds.player1.navigation);
+      if (p1Direction !== null) {
+        event.preventDefault(); changeFighter(p1Direction);
       } else if (event.key === "Enter") {
         event.preventDefault();
         if (requiredFighters === 2) togglePlayerFighter(selectedIndex);
