@@ -574,18 +574,31 @@ export default function LocalPvPBattle() {
         </div>
         {showRoundIntro && <div className="local-pvp-round-intro">ROUND {round}<span>PLAYER 1 VS PLAYER 2</span></div>}
         {phase === "defending" && pendingAttack && (
-          <section className="local-pvp-defense" role="dialog" aria-live="assertive">
-            <p>INCOMING ATTACK</p>
-            <h2>{pendingAttack.attackName}</h2>
-            <span>{teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.name} — CHOOSE YOUR DEFENSE</span>
-            <div className="local-pvp-defense-timer">{defenseTime}s</div>
-            <div>
-              <button onClick={() => resolveAttack("defend")} disabled={(Number(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.cooldown) || 0) <= 0}>DEFEND</button>
-              <button onClick={() => resolveAttack("evade")}>EVADE</button>
-              <button onClick={() => resolveAttack("take-damage")}>TAKE DAMAGE</button>
+          <section id="aiAttackSection" className="incoming-attack-card local-pvp-incoming" role="dialog" aria-live="assertive">
+            <div id="aiAttackCard">
+              <div id="aiAttackHeader"><span>⚠ INCOMING ATTACK</span><span className="attack-warning-dot" /></div>
+              <div id="defenseTimer" className={defenseTime <= 3 ? "timer-critical" : defenseTime <= 5 ? "timer-warning" : ""}>
+                <div id="defenseTimerText"><span>DEFENSE WINDOW</span><strong>{defenseTime}s</strong></div>
+                <div id="defenseTimerTrack"><div id="defenseTimerFill" style={{ width: defenseTime * 10 + "%" }} /></div>
+              </div>
+              <div id="aiAttackInfo">
+                <h5 id="aiAttackName">{pendingAttack.attackName}</h5>
+                {pendingAttack.attackImage && <div className="incoming-attack-image"><img src={pendingAttack.attackImage} alt={pendingAttack.attackName} /></div>}
+                <div id="aiAttackStats">
+                  <div className={"attack-threat-badge " + getDamageThreat(pendingAttack.damage).className}><span className="threat-label">DAMAGE</span><strong>{pendingAttack.damage}</strong><span className="threat-rating">{getDamageThreat(pendingAttack.damage).label}</span></div>
+                  <div className={"attack-threat-badge " + getSpeedThreat(pendingAttack.speed).className}><span className="threat-label">SPEED</span><strong>{pendingAttack.speed}</strong><span className="threat-rating">{getSpeedThreat(pendingAttack.speed).label}</span></div>
+                  <div className="attack-cost-badge"><span className="threat-label">MANA COST</span><strong>◆ {pendingAttack.cost}</strong></div>
+                </div>
+              </div>
+              <div id="defensiveActions">
+                <button id="defendButton" disabled={(Number(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.cooldown) || 0) <= 0 || defenseTime <= 0} onClick={() => resolveAttack("defend")}><span id="defendButtonIcon">🛡</span><span>DEFEND</span></button>
+                <button id="evadeButton" disabled={defenseTime <= 0} onClick={() => resolveAttack("evade")}><span id="evadeButtonIcon">💨</span><span>EVADE</span></button>
+                <button id="takeDamageButton" disabled={defenseTime <= 0} onClick={() => resolveAttack("take-damage")}><span>💥</span><span>TAKE FULL DAMAGE</span></button>
+              </div>
             </div>
           </section>
         )}
+        {isPaused && !isFinal && <section className="local-pvp-pause-overlay" role="dialog" aria-modal="true"><div className="local-pvp-pause-panel"><span>WILD CARDS</span><h2>PAUSED</h2><button onClick={() => setIsPaused(false)}>RESUME MATCH</button><button onClick={resetMatch}>RESTART MATCH</button><button onClick={() => navigate("/character-select")}>CHARACTER SELECT</button><button onClick={() => navigate("/")}>MAIN MENU</button></div></section>}
         {isFinal && <div className="local-pvp-result"><p>{phase === "victory" ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!"}</p><button onClick={resetMatch}>REMATCH</button><button onClick={() => navigate("/")}>MAIN MENU</button></div>}
       </main>
     );
