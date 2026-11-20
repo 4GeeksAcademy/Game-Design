@@ -15,7 +15,7 @@ export function getAttackDisplayName(attack) {
 }
 
 export function getAttackSlotLimit(attacks = []) {
-  return attacks.filter((attack) => !attack.locked && !attack.requiresPurchase && !(Number(attack.unlockCost ?? attack.coinCost ?? attack.price) > 0)).length;
+  return attacks.length;
 }
 
 function readObject(key) {
