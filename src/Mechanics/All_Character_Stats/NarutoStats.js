@@ -98,6 +98,8 @@ const Naruto = {
     },
     {
       name: "Tailed Beast Bomb Rasenshuriken",
+      locked: true,
+      unlockCost: 300,
       image: Attack5,
       damage: 135,
       uses: 1,
