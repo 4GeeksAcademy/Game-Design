@@ -6,10 +6,14 @@ import "./BattleUI.css";
 function GameOverScreen({
   damageDealt = 0,
   attacksUsed = 0,
+  combatDefense = 0,
+  difficulty = "Easy",
   onRematch,
   message = "You have been defeated. Get back up and fight again!",
 }) {
   const navigate = useNavigate();
+  const difficultyMultiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[difficulty] ?? 1;
+  const totalScore = Math.floor((Number(damageDealt) + Number(combatDefense)) * difficultyMultiplier);
 
   const handleRematch = () => {
     if (onRematch) {
@@ -45,13 +49,18 @@ function GameOverScreen({
           </div>
 
           <div className="gameOverStat">
-            <span>❤️ Your Health</span>
-            <strong>0</strong>
+            <span>🛡️ Combat Defense</span>
+            <strong>{combatDefense}</strong>
+          </div>
+
+          <div className="gameOverStat">
+            <span>✦ Difficulty Multiplier</span>
+            <strong>{difficultyMultiplier}x</strong>
           </div>
 
           <div className="gameOverStat">
             <span>◈ Coins Earned</span>
-            <strong>+{Math.max(0, Math.floor(damageDealt))}</strong>
+            <strong>+{Math.max(0, totalScore)}</strong>
           </div>
         </div>
 
