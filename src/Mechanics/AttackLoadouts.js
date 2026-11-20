@@ -14,8 +14,14 @@ export function getAttackDisplayName(attack) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase()) || "Unnamed Attack";
 }
 
-export function getAttackSlotLimit(attacks = []) {
-  return attacks.length;
+export function getAttackSlotLimit(characterOrAttacks = []) {
+  // Character stat objects own their equip capacity through the "slot" property.
+  // Passing an attacks array remains supported for older callers.
+  if (Array.isArray(characterOrAttacks)) return characterOrAttacks.length;
+  const configuredSlots = Number(characterOrAttacks?.slot);
+  return Number.isFinite(configuredSlots) && configuredSlots >= 0
+    ? Math.floor(configuredSlots)
+    : (characterOrAttacks?.attacks?.length ?? 0);
 }
 
 function readObject(key) {
