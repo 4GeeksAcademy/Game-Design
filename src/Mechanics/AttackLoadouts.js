@@ -33,7 +33,7 @@ export function getUnlockedAttackKeys(characterId) {
 }
 
 export function isAttackUnlocked(characterId, attack) {
-  if (!attack.locked && !attack.requiresPurchase && !(Number(attack.unlockCost) > 0)) return true;
+  if (!attack.locked && !attack.requiresPurchase && !(Number(attack.unlockCost ?? attack.coinCost ?? attack.price) > 0)) return true;
   return getUnlockedAttackKeys(characterId).includes(getAttackKey(attack));
 }
 
