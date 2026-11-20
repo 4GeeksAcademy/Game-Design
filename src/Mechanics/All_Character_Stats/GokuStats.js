@@ -12,6 +12,8 @@ import Attack8 from "../../assets/img/Attack_IMAGES/Spirit Bomb.jpeg";
 const Goku = {
   name: "Goku",
   image: GokuImage,
+
+  slot: 8, // Maximum attacks this character can equip.
   // Base Stats
   health: 170,
   maximumHealth: 170,
