@@ -126,6 +126,8 @@ const Toga = {
       name: "Deadly Strike: Gory Stab",
       locked: true,
       unlockCost: 300,
+      locked: true,
+      unlockCost: 300,
       image: Attack6,
       damage: 45,
       speed: 70,
