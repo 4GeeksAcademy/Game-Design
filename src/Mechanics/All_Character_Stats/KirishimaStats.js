@@ -56,7 +56,7 @@ const Kirishima = {
         targetAttackIds: null, // or attack id
         stats: {
           damage: {
-            multiplier: 1.2, // or amount: 25
+            multiplier: 1.15, // or amount: 25
           },
           speed: {
             multiplier: 1.2, // you can add amount along with multiplier too for aditional effect
@@ -160,38 +160,39 @@ const Kirishima = {
       state: true,
       uses: 1,
       buff: {
-        health: 70,
+        health: 155,
+        maximumHealth: 30,
         defense: 50,
-        agility: 5,
         maximumCooldown: 5,
         cooldown: 5, 
         recovery: 2, 
-        manaRegen: 21,
       },
-       duration: 7, // this modifies the attackModifiers and characterModifiers where it temporarily increases/decreases the stats for each attack applied.
+       duration: 2, // this modifies the attackModifiers and characterModifiers where it temporarily increases/decreases the stats for each attack applied.
       // Not to be confused with turnCooldown where it disables the attack after use.
 
       attackModifiers: {
         targetAttackIds: null, // or attack id
         stats: {
           damage: {
-            multiplier: 1.5, // or amount: 25
+            multiplier: 1.6, // or amount: 25
           },
           speed: {
-            multiplier: 1.3, // you can add amount along with multiplier too for aditional effect
+            multiplier: 0.8, // you can add amount along with multiplier too for aditional effect
           },
-        
+        cost: {
+            multiplier: 1.35,
+          },
         },
 
         characterModifiers: {
         agility: {
-          multiplier: 1.3,
+          multiplier: 0.8,
         },
         defense: {
           multiplier: 2.1,
         },
         manaRegen: {
-          multiplier: 1.4,
+          multiplier: 0.7,
         },
         
       },
