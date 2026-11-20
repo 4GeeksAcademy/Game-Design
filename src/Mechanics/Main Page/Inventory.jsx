@@ -246,16 +246,16 @@ function AttackDetails({ attack, characterName, onClose }) {
   return (
     <div className="inventory-attack-modal-backdrop" onClick={onClose}>
       <section className="inventory-attack-modal" role="dialog" aria-modal="true"
-        aria-label={attack.name + " details"} onClick={(event) => event.stopPropagation()}>
+        aria-label={getAttackDisplayName(attack) + " details"} onClick={(event) => event.stopPropagation()}>
         <button type="button" className="inventory-attack-close" onClick={onClose}
           aria-label="Close attack details">×</button>
         <div className="inventory-attack-modal-heading">
-          {attack.image ? <img src={attack.image} alt={attack.name} /> : (
+          {attack.image ? <img src={attack.image} alt={getAttackDisplayName(attack)} /> : (
             <div className="inventory-attack-no-image">NO ARTWORK</div>
           )}
           <div>
             <p>{characterName} · MOVE BREAKDOWN</p>
-            <h2>{attack.name}</h2>
+            <h2>{getAttackDisplayName(attack)}</h2>
             {attack.description && <span>{attack.description}</span>}
           </div>
         </div>
@@ -356,7 +356,7 @@ function Inventory() {
   const selectedCharacter =
     ownedCharacters.find((fighter) => fighter.id === selectedCharacterId) ??
     null;
-  const loadoutCharacter = roster.find(f => f.id === loadoutCharacterId) ?? ownedCharacters[0] ?? null;
+  const loadoutCharacter = ownedCharacters.find(f => f.id === loadoutCharacterId) ?? ownedCharacters[0] ?? null;
 
   // Automatically select the first owned character.
   useEffect(() => {
