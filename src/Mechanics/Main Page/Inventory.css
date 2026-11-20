@@ -978,3 +978,25 @@
 .loadout-attack-card.is-locked .loadout-attack-art img { filter:grayscale(.65) brightness(.58); }
 .loadout-attack-art b { top:12px;bottom:auto;left:auto;right:-27px;width:112px;padding:6px 0;transform:rotate(38deg);border-top:1px solid #ffb3ba;border-bottom:1px solid #ffb3ba;color:#fff;background:#9e2637;font:900 9px Oxanium,sans-serif;letter-spacing:1.5px; }
 @media(max-width:600px){.inventory-attacks-list,.loadout-attack-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.inventory-attack-item{min-height:235px}.inventory-attack-item .inventory-attack-thumb{height:125px;flex-basis:125px}.loadout-attack-art{height:125px;min-height:125px;flex-basis:125px}.loadout-attack-info{padding:9px}.inventory-attack-name{padding:9px 9px 5px}.inventory-attack-name strong,.loadout-attack-info strong{font-size:11px}}
+
+
+/* WILD CARDS — full fighter cards in the Attack Loadouts collection */
+.loadout-character-collection { display:flex;flex-direction:column;gap:34px;max-width:1320px;margin:0 auto; }
+.loadout-character-collection .attack-loadout-editor { width:100%;max-width:none;margin:0;padding:22px 20px 28px;background:linear-gradient(145deg,#17231fdd,#0b1115f2);border:1px solid rgba(255,228,92,.36);border-radius:16px;box-shadow:0 12px 30px #0005,inset 0 0 0 3px #ffe45c0a; }
+.loadout-character-banner { display:grid;grid-template-columns:150px minmax(0,1fr) auto;align-items:center;gap:22px;padding:0 0 20px;border-bottom:1px solid #ffe45c44; }
+.loadout-character-portrait { width:150px;height:185px;overflow:hidden;border:3px solid var(--inv-gold);border-radius:9px;background:#080e12;box-shadow:0 0 18px #ffe45c22; }
+.loadout-character-portrait img { width:100%;height:100%;object-fit:cover;object-position:center top; }
+.loadout-character-heading p { margin:0 0 7px;color:var(--inv-lime);font:800 10px Oxanium,sans-serif;letter-spacing:2px; }
+.loadout-character-heading h2 { margin:0;color:var(--inv-gold);font:900 clamp(25px,4vw,38px) Oxanium,sans-serif;text-transform:uppercase; }
+.loadout-character-heading span { display:block;margin-top:8px;color:var(--inv-sage);font-size:12px;letter-spacing:1px; }
+.loadout-character-banner .loadout-slot-counter { flex-direction:column;align-items:flex-end;gap:4px;margin:0;white-space:nowrap; }
+.loadout-character-banner .loadout-slot-counter strong { font-size:30px; }
+.loadout-character-banner .loadout-slot-counter span { text-align:right; }
+.loadout-character-collection .loadout-section { margin:18px 0 0;padding:14px;background:#080e12a8;border-radius:10px; }
+@media(max-width:700px) {
+  .loadout-character-collection .attack-loadout-editor { padding:14px 10px 20px; }
+  .loadout-character-banner { grid-template-columns:100px minmax(0,1fr);gap:13px; }
+  .loadout-character-portrait { width:100px;height:130px; }
+  .loadout-character-banner .loadout-slot-counter { grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:space-between; }
+  .loadout-character-banner .loadout-slot-counter span { text-align:left; }
+}
