@@ -692,7 +692,9 @@ function CharacterSelection() {
               type="button"
               className="customize-loadout-button"
               onClick={() => {
-                const selected = activeSelectingPlayer === "player2"\n                  ? roster[player2Indices[0] ?? player2SelectedIndex]\n                  : roster[selectedIndices[0] ?? selectedIndex];
+                const selected = activeSelectingPlayer === "player2"
+                  ? roster[player2Indices[0] ?? player2SelectedIndex]
+                  : roster[selectedIndices[0] ?? selectedIndex];
                 navigate("/inventory", { state: {
                   activeTab: "attacks",
                   characterId: selected?.id,
