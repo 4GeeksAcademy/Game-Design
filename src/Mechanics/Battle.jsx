@@ -17,6 +17,7 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
+import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback } from "react";
@@ -26,7 +27,8 @@ function createBattleFighter(characterId, battleId) {
   if (!selected?.data) return null;
 
   const data = selected.data;
-  const attacks = (data.attacks ?? []).map((attack) => {
+  const sourceAttacks = battleId === "player" ? getEquippedAttacks(selected.id, data.attacks ?? []) : (data.attacks ?? []);
+  const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)
       ? attack.uses
       : attack.remainingUses;
@@ -133,7 +135,8 @@ function App() {
   );
 
   const [damageDealt, setDamageDealt] = useState(0);
-  const lastRewardedDamage = useRef(0);
+  const [combatDefense, setCombatDefense] = useState(0);
+  const rewardPaidRef = useRef(false);
 
   const aiControllerRef = useRef(null);
 
@@ -144,14 +147,13 @@ function App() {
     lastRewardedDamage.current = damageDealt;
 
     if (damageSinceLastUpdate > 0) {
-      // Preserve the existing coin reward system.
-      addCoins(Math.floor(damageSinceLastUpdate));
+      if (isStoryMode) addCoins(Math.floor(damageSinceLastUpdate));
 
       // Update Festival damage challenges.
       recordFestivalEvent("damage", damageSinceLastUpdate);
       recordDailyObjectiveEvent("damage", damageSinceLastUpdate);
     }
-  }, [damageDealt]);
+  }, [damageDealt, isStoryMode]);
 
   const [attacksUsed, setAttacksUsed] = useState(0);
   const lastRecordedAttacks = useRef(0);
@@ -396,6 +398,14 @@ function App() {
     };
   }, [currentTurn]);
 
+  useEffect(() => {
+    if (!isStoryMode && showResults && knockout && !rewardPaidRef.current) {
+      rewardPaidRef.current = true;
+      const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[levelConfig.difficulty ?? "Easy"] ?? 1;
+      addCoins(Math.floor((damageDealt + combatDefense) * multiplier));
+    }
+  }, [showResults, knockout, isStoryMode, levelConfig.difficulty, damageDealt, combatDefense]);
+
   // Display the round announcement before allowing combat.
   useEffect(() => {
     if (!showRoundIntro) return;
@@ -505,9 +515,11 @@ const stunOptions = {
       if (!result) return;
       // Record successful defensive actions for Festival challenges.
       if (choice === "defend") {
+        setCombatDefense((value) => value + 1);
         recordFestivalEvent("block", 1);
         recordDailyObjectiveEvent("defense", 1);
       } else if (choice === "evade" && result.evaded) {
+        setCombatDefense((value) => value + 1);
         recordFestivalEvent("evade", 1);
         recordDailyObjectiveEvent("defense", 1);
       }
@@ -763,10 +775,10 @@ const stunOptions = {
         />
       ) : knockout && !showResults ? null : !isStoryMode &&
         character.health <= 0 ? (
-        <GameOverScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
+        <GameOverScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} />
       ) : !isStoryMode && opponent.health <= 0 ? (
         <div id="victorySection">
-          <VictoryScreen damageDealt={damageDealt} attacksUsed={attacksUsed} />
+          <VictoryScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} />
         </div>
       ) : knockout ? null : (
         <>
