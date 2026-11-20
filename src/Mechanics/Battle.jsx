@@ -136,6 +136,7 @@ function App() {
 
   const [damageDealt, setDamageDealt] = useState(0);
   const [combatDefense, setCombatDefense] = useState(0);
+  const lastRewardedDamage = useRef(0);
   const rewardPaidRef = useRef(false);
 
   const aiControllerRef = useRef(null);
