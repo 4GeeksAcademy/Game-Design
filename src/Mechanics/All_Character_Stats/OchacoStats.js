@@ -91,6 +91,8 @@ const Ochaco = {
 
     {
       name: "Meteor Fafrotskies",
+      locked: true,
+      unlockCost: 300,
       image: Attack4,
       damage: 55,
       speed: 44,
