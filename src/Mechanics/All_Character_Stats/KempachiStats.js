@@ -13,6 +13,8 @@ import Attack6 from "../../assets/img/Attack_IMAGES/Relentless Cleeve.jpeg";
 const Kenpachi = {
   name: "Kenpachi Zaraki",
   image: KenpachiImage,
+
+  slot: 6, // Maximum attacks this character can equip.
   health: 300,
   maximumHealth: 300,
 
