@@ -294,7 +294,7 @@ function StatBar({ label, value, maximum, color }) {
 
 function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist) {
   const player = playerTeamIds.map((id, index) => {
-    const fighter = createBattleFighter(id);
+    const fighter = createBattleFighter(id, true);
 
     if (!fighter) return null;
 
@@ -2423,6 +2423,7 @@ export default function TeamBattle() {
         }
 
         if (choice === "defend") {
+          setCombatDefense((value) => value + 1);
           recordDailyObjectiveEvent("defense", 1);
           addLog(
             `${currentDefender.name} defended ${currentAttacker.name}'s ${attack.name}.`,
@@ -2673,6 +2674,8 @@ export default function TeamBattle() {
     return won ? (
       <VictoryScreen
         damageDealt={damageDealt}
+        combatDefense={combatDefense}
+        difficulty={difficulty}
         attacksUsed={attacksUsed}
         message="Your team has defeated the opposing team!"
         onRematch={resetBattle}
