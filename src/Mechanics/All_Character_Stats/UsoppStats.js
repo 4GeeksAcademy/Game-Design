@@ -10,6 +10,8 @@ const Usopp = {
   name: "Ussop",
   image: UsoppArenaImage,
 
+  slot: 5, // Maximum attacks this character can equip.
+
   health: 100,
   mana: 65,
   maximumMana: 65,
