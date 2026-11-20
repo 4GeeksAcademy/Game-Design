@@ -161,7 +161,7 @@ export const roster = [
     description: "THE GENTLE FIST",
     isFestivalSecret: true,
   },
-].map((fighter) => ({ ...fighter, attackSlots: getAttackSlotLimit(fighter.data.attacks ?? []) }));
+].map((fighter) => ({ ...fighter, attackSlots: getAttackSlotLimit(fighter.data) }));
 
 function FighterStats({ fighter }) {
   const stats = fighter.data;
