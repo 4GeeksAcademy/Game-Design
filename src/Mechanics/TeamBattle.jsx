@@ -18,6 +18,8 @@ import {
   tickSelfModifiers,
 } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
+import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
+import { addCoins } from "./Currency.js";
 import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
 import VictoryScreen from "./VictoryScreen.jsx";
@@ -40,7 +42,7 @@ import {
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import "./Teambattle.css";
 
-function createBattleFighter(id) {
+function createBattleFighter(id, applyLoadout = false) {
   const selected = roster.find((fighter) => fighter.id === id);
   if (!selected?.data) return null;
 
@@ -61,7 +63,7 @@ function createBattleFighter(id) {
       typeof data.defense === "object" && data.defense
         ? { ...data.defense }
         : data.defense,
-    attacks: (data.attacks ?? []).map((attack) => {
+    attacks: (applyLoadout ? getEquippedAttacks(selected.id, data.attacks ?? []) : (data.attacks ?? [])).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
         ? attack.uses
         : attack.remainingUses;
@@ -303,7 +305,7 @@ function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist) {
 
   return {
     player,
-    opponent: opponentTeamIds.map(createBattleFighter),
+    opponent: opponentTeamIds.map((id) => createBattleFighter(id, false)),
   };
 }
 
@@ -462,7 +464,7 @@ export default function TeamBattle() {
   ]);
   const [damageDealt, setDamageDealt] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
-  // Prevent previously recorded damage from being counted again.
+  useEffect(() => {\n    if (!isStoryMode && (phase === "victory" || phase === "defeat") && !teamRewardPaidRef.current) {\n      teamRewardPaidRef.current = true;\n      const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[difficulty] ?? 1;\n      addCoins(Math.floor((damageDealt + combatDefense) * multiplier));\n    }\n  }, [phase, isStoryMode, difficulty, damageDealt, combatDefense]);\n\n  // Prevent previously recorded damage from being counted again.
   const lastFestivalDamage = useRef(0);
 
   // Prevent previously recorded attacks from being counted again.
@@ -2414,7 +2416,7 @@ export default function TeamBattle() {
             `${currentDefender.name} defended ${currentAttacker.name}'s ${attack.name}.`,
           );
         } else if (choice === "evade") {
-          if (result.evaded) recordDailyObjectiveEvent("defense", 1);
+          if (result.evaded) { setCombatDefense((value) => value + 1); recordDailyObjectiveEvent("defense", 1); }
           addLog(
             result.evaded
               ? `${currentDefender.name} evaded ${attack.name}.`
