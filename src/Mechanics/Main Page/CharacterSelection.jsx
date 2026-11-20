@@ -291,11 +291,12 @@ function CharacterSelection() {
   // A 1v2 story encounter has one player fighter and two opponents.
   const cpuFighterCount = isStoryOneVsTwo ? 2 : requiredFighters;
 
-  const [selectedIndices, setSelectedIndices] = useState([]);
-  const [player2Indices, setPlayer2Indices] = useState([]);
+  const [selectedIndices, setSelectedIndices] = useState(() => (location.state?.resumePlayerIds ?? []).map(id => roster.findIndex(f => f.id === id)).filter(index => index >= 0));
+  const [player2Indices, setPlayer2Indices] = useState(() => (location.state?.resumePlayer2Ids ?? []).map(id => roster.findIndex(f => f.id === id)).filter(index => index >= 0));
   const [player2SelectedIndex, setPlayer2SelectedIndex] = useState(() => {
     const unlocked = getUnlockedCharacters();
-    const index = roster.findIndex((fighter) => unlocked.includes(fighter.id));
+    const resumed = roster.findIndex((fighter) => fighter.id === location.state?.resumePlayer2SelectedId && unlocked.includes(fighter.id));
+    const index = resumed >= 0 ? resumed : roster.findIndex((fighter) => unlocked.includes(fighter.id));
     return index >= 0 ? index : 0;
   });
   const [activeSelectingPlayer, setActiveSelectingPlayer] = useState("player1");
@@ -319,6 +320,8 @@ function CharacterSelection() {
   const [selectedIndex, setSelectedIndex] = useState(() => {
     const unlocked = getUnlockedCharacters();
 
+    const resumedIndex = roster.findIndex((fighter) => fighter.id === location.state?.resumeSelectedId && unlocked.includes(fighter.id));
+    if (resumedIndex >= 0) return resumedIndex;
     const firstSelectable = roster.findIndex(
       (fighter) =>
         unlocked.includes(fighter.id) &&
@@ -683,6 +686,29 @@ function CharacterSelection() {
               />
             ))}
           </div>
+          {!localPvP && phase === "player" && (
+            <button
+              type="button"
+              className="customize-loadout-button"
+              onClick={() => {
+                const selected = roster[selectedIndices[0] ?? selectedIndex];
+                navigate("/inventory", { state: {
+                  activeTab: "attacks",
+                  characterId: selected?.id,
+                  returnTo: "/character-select",
+                  selectionState: {
+                    ...levelConfig,
+                    resumePlayerIds: selectedIndices.map(index => roster[index].id),
+                    resumePlayer2Ids: player2Indices.map(index => roster[index].id),
+                    resumeSelectedId: roster[selectedIndex]?.id,
+                    resumePlayer2SelectedId: roster[player2SelectedIndex]?.id,
+                  },
+                }});
+              }}
+            >
+              ⚔ CUSTOMIZE ATTACK LOADOUT
+            </button>
+          )}
         </section>
 
         <div className="versus-divider">VS</div>
