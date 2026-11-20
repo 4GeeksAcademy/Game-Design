@@ -9,6 +9,8 @@ const mina = {
   name: "Mina Ashido",
   image: minaArenaImage,
 
+  slot: 4, // Maximum attacks this character can equip.
+
   health: 95,
   mana: 80,
   maximumMana: 80,
