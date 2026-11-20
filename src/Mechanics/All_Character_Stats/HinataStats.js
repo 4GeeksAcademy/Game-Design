@@ -133,6 +133,8 @@ const Hinata = {
     // 6. Eight Trigrams: Sixty-Four Palms
     {
       name: "Sixty-Four Palms",
+      locked: true,
+      unlockCost: 300,
       image: SixtyFourPalmsImage,
       damage: 29,
       speed: 30,
