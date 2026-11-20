@@ -10,6 +10,8 @@ import Attack6 from "../../assets/img/Attack_IMAGES/Deadly Waltz.png";
 const Toga = {
   name: "Himiko Toga",
   image: TogaImage,
+
+  slot: 6, // Maximum attacks this character can equip.
   // Base Stats
   health: 65,
   maximumHealth: 65,
