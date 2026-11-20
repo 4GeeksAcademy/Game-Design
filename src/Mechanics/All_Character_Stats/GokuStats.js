@@ -3,7 +3,7 @@ import GokuImage from "../../assets/img/Goku.jpeg";
 import Attack1 from "../../assets/img/Attack_IMAGES/GokuKamekameha.jpeg";
 import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
 import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
+import Attack4 from "../../assets/img/Attack_IMAGES/Meteor Knuckle";
 import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
 
 
@@ -49,23 +49,30 @@ image: GokuImage,
       state: true,
     },
     {
-      name: "Kaio-ken Rush",
+      name: "Kaio-ken",
       damage: 65,
       speed: 34,
       cost: 17,
       state: true,
     },
     {
-      name: "Meteor Combination",
-      damage: 75,
-      speed: 30,
+      name: "Meteor Knuckle",
+      damage: 55,
+      speed: 40,
+      cost: 20,
+      state: true,
+    },
+    {
+      name: "Meteor Knuckle",
+      damage: 55,
+      speed: 40,
       cost: 20,
       state: true,
     },
     {
       name: "Dragon Fist",
-      damage: 82,
-      speed: 27,
+      damage: 92,
+      speed: 57,
       cost: 25,
       state: true,
     },

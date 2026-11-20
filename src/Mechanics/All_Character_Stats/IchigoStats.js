@@ -1,104 +1,111 @@
+
 import IchigoArenaImage from "../../assets/img/Ichigo.png";
 
-import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
-import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
-import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
-import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
+// Attack Images
+import Attack1 from "../../assets/img/Attack_IMAGES/Flash Step.jpeg";
+import Attack2 from "../../assets/img/Attack_IMAGES/Zangetsu Slash.jpeg";
+import Attack3 from "../../assets/img/Attack_IMAGES/Getsuga Tensho.jpeg";
+import Attack4 from "../../assets/img/Attack_IMAGES/Getsuga Jūjishō.jpeg";
+import Attack5 from "../../assets/img/Attack_IMAGES/Ichigo's Bankai.jpeg";
 
 const Ichigo = {
   name: "Ichigo Kurosaki",
   image: IchigoArenaImage,
 
+  // Stats
   health: 115,
-mana: 200,
-maximumMana: 200,
-manaRegen: 70,
-cooldown: 3,
-maximumCooldown: 3,
-recovery: 1,
-agility: 50,
-defense: {
-amount: 25,
-active: true,
-},
+  mana: 200,
+  maximumMana: 200,
+  manaRegen: 70,
+  cooldown: 3,
+  maximumCooldown: 3,
+  recovery: 1,
+  agility: 50,
 
-attacks: [
-
-{
-  name: "Flash Step",
-  damage: 5,
-  speed: 50,
-  cost: 14,
-  state: true,
-  buff: {
-    agility: 15,
+  defense: {
+    amount: 25,
+    active: true,
   },
-  debuff: {
-    agility: 6,
-  },
-},
 
-{
-name: "Zangetsu Slash",
-damage: 55,
-speed: 40,
-cost: 21,
-state: true,
-buff: {
-agility: 3,
-},
-debuff: {
-defense: 3,
-},
-},
+  // Attacks
+  attacks: [
+    {
+      name: "Flash Step",
+      image: Attack1,
+      damage: 5,
+      speed: 50,
+      cost: 14,
+      state: true,
+      buff: {
+        agility: 15,
+      },
+      debuff: {
+        agility: 6,
+      },
+    },
 
+    {
+      name: "Zangetsu Slash",
+      image: Attack2,
+      damage: 55,
+      speed: 40,
+      cost: 21,
+      state: true,
+      buff: {
+        agility: 3,
+      },
+      debuff: {
+        defense: 3,
+      },
+    },
 
-{
-  name: "Getsuga Tenshō",
-  damage: 60,
-  speed: 40,
-  cost: 35,
-  state: true,
-  buff: {
-    mana: 15,
-  },
-  debuff: {
-    health: 5,
-    agility: 3,
-  },
-},
+    {
+      name: "Getsuga Tenshō",
+      image: Attack3,
+      damage: 60,
+      speed: 40,
+      cost: 35,
+      state: true,
+      buff: {
+        mana: 15,
+      },
+      debuff: {
+        health: 5,
+        agility: 3,
+      },
+    },
 
-{
-  name: "Gran Rey Cero",
-  damage: 45,
-  speed: 45,
-  cost: 40,
-  state: true,
-  debuff: {
-    agility: 2,
-  },
-},
+    {
+      name: "Getsuga Jūjishō",
+      image: Attack4,
+      damage: 65,
+      speed: 75,
+      cost: 45,
+      state: true,
+      debuff: {
+        defense: 10,
+      },
+    },
 
-{
-  name: "Bankai: Tensa Zangetsu",
-  damage: 10,
-  speed: 40,
-  cost: 130,
-  state: true,
-  turnCooldown: 5,
-  buff: {
-    health: 40,
-    mana: 200,
-    agility: 50,
-    defense: 5,
-    maximumCooldown: 2,
-    cooldown: 2,
-    recovery: 2
-  },
-},
-
-],
+    {
+      name: "Bankai: Tensa Zangetsu",
+      image: Attack5,
+      damage: 10,
+      speed: 40,
+      cost: 130,
+      state: true,
+      turnCooldown: 5,
+      buff: {
+        health: 40,
+        mana: 200,
+        agility: 50,
+        defense: 5,
+        maximumCooldown: 2,
+        cooldown: 2,
+        recovery: 2,
+      },
+    },
+  ],
 };
 
 export default Ichigo;

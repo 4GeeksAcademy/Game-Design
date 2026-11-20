@@ -1,10 +1,12 @@
 import KenpachiImage from "../../assets/img/Kenpachi.png";
 
-import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
-import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
-import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
-import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
+import Attack1 from "../../assets/img/Attack_IMAGES/Overwhelming Slash.webp";
+import Attack2 from "../../assets/img/Attack_IMAGES/Head-on Assault.jpeg";
+import Attack3 from "../../assets/img/Attack_IMAGES/Battle Lust.jpeg";
+import Attack4 from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
+import Attack5 from "../../assets/img/Attack_IMAGES/Kendo Strike.jpeg";
+import Attack6 from "../../assets/img/Attack_IMAGES/Relentless Cleeve.jpeg";
+
 
 
 
@@ -34,78 +36,119 @@ const Kenpachi = {
     // 1. Overwhelming Slash
     {
       name: "Overwhelming Slash",
-      damage: 40,
+      image: Attack1,
+      damage: 50,
       speed: 35,
       cost: 20,
       state: true,
       debuffRequiresHit: true,
       debuff: {
-        health: 20,
+        health: 30,
       }
     },
 
     // 2. Head-On Assault
     {
       name: "Head-On Assault",
-      damage: 45,
+      image: Attack2,
+      damage: 65,
       speed: 60,
       cost: 30,
+      debuffRequiresHit: true,
+      debuff: {
+        defense: 20,
+        mana: 10,
+
+      },
       state: true,
     },
 
-    // 3. Nozarashi
     {
-      name: "Nozarashi",
-      damage: 90,
-      speed: 25,
-      cost: 80,
+      name: "Relentless Cleave",
+      image: Attack6,
+      damage: 60,
+      speed: 40,
+      cost: 31,
       state: true,
+      debuffRequiresHit: true,
       debuff: {
-        defense: 5,
+        defense: 15,
       },
     },
 
-    // 4. Battle Lust
+    
+
+    // 3. Battle Lust
     {
       name: "Battle Lust",
+      image: Attack3,
       damage: 0,
-      speed: 45,
+      speed: 0,
       cost: 35,
       state: true,
+      duration: 2,
       buff: {
         agility: 20,
         manaRegen: 15,
+        cooldown: 1,
+      },
+      characterModifiers: {
+        agility: {
+          multiplier: 1.2,
+        },
+        
+        manaRegen: {
+          multiplier: 1.4,
+        },
+        recovery: {
+          amount: 1
+        },
+
+       maximumCooldown: {
+        amount: 1
+       },
+        cooldown: {
+          amount: 1,
+        }
       },
     },
 
     // 5. Kendo Strike
     {
       name: "Kendo Strike",
+      image: Attack4,
       damage: 70,
-      speed: 20,
+      speed: 30,
       cost: 60,
       state: true,
     },
 
-    // 6. Uncontrollable Power
+  // 6. Nozarashi
     {
-      name: "Uncontrollable Power",
-      damage: 115,
-      speed: 15,
-      cost: 120,
+      name: "Nozarashi",
+      image: Attack5,
+      damage: 0,
+      speed: 0,
+      cost: 80,
+      uses: 1,
       state: true,
-      turnCooldown: 2,
-      buff: {
-        mana: 30,
-        agility: 11,
-        cooldown: 1,
-        maximumCooldown: 1,
-        manaRegen: 20,
-        maximumMana: 50,
-      },
-      debuff: {
-        defense: 5,
-        agility: 5,
+      duration: 3, // this modifies the attackModifiers and characterModifiers where it temporarily increases/decreases the stats for each attack applied.
+      // Not to be confused with turnCooldown where it disables the attack after use.
+
+      attackModifiers: {
+        targetAttackIds: null, // or attack id
+        stats: {
+          damage: {
+            multiplier: 2.2,
+            amount: 25,
+          },
+          speed: {
+            multiplier: 1.2, // you can add amount along with multiplier too for aditional effect
+          },
+          cost: {
+            multiplier: 1.2,
+          },
+        },
       },
     },
 

@@ -1,10 +1,13 @@
+
 import HinataImage from "../../assets/img/Hinata.png";
 
-import ExplodingPineconeImage from "../../assets/img/Attack_IMAGES/ExplodingPinecone.jpeg";
-import TabascoStarImage from "../../assets/img/Attack_IMAGES/TabascoStar.jpeg";
-import FireBirdStarImage from "../../assets/img/Attack_IMAGES/FireBirdStar.jpeg";
-import GasStarImage from "../../assets/img/Attack_IMAGES/GasStar.jpeg";
-import FakeHammerImage from "../../assets/img/Attack_IMAGES/FakeHammer.jpeg";
+import ByakuganImage from "../../assets/img/Attack_IMAGES/Hinata's Byakugan.jpeg";
+import GentleFistImage from "../../assets/img/Attack_IMAGES/Gentle Fists.jpeg";
+import PalmRotationImage from "../../assets/img/Attack_IMAGES/Palm Rotation Strike.webp";
+import TwinLionFistsImage from "../../assets/img/Attack_IMAGES/Twin Lion Fists.jpeg";
+import ThirtyTwoPalmsImage from "../../assets/img/Attack_IMAGES/Thirty-Two Palms.jpeg";
+import EightTrigramsVacuumPalm from "../../assets/img/Attack_IMAGESEight Trigrams Vacuum Palm.jpeg";
+import SixtyFourPalmsImage from "../../assets/img/Attack_IMAGES/Sixty-Four Palms.jpeg";
 
 const Hinata = {
   name: "Hinata Hyuga",
@@ -32,6 +35,7 @@ const Hinata = {
 
     {
       name: "Byakugan",
+      image: ByakuganImage,
       damage: 0,
       speed: 0,
       cost: 5,
@@ -49,6 +53,7 @@ const Hinata = {
     // 1. Gentle Fist
     {
       name: "Gentle Fist",
+      image: GentleFistImage,
       damage: 19,
       speed: 44,
       cost: 9,
@@ -63,6 +68,7 @@ const Hinata = {
     // 2. Eight Trigrams: Palm Rotation Strike
     {
       name: "Palm Rotation Strike",
+      image: PalmRotationImage,
       damage: 21,
       speed: 33,
       cost: 10,
@@ -77,15 +83,23 @@ const Hinata = {
     // 3. Twin Lion Fists
     {
       name: "Twin Lion Fists",
+      image: TwinLionFistsImage,
       damage: 47,
-      speed: 42,
+      speed: 57,
       cost: 13,
       state: true,
+      debuffRequiresHit: true,
+      debuff: {
+        health: 15,
+        mana: 50,
+        manaRegen: 15,
+      }
     },
 
     // 4. Eight Trigrams: Thirty-Two Palms
     {
       name: "Thirty-Two Palms",
+      image: ThirtyTwoPalmsImage,
       damage: 23,
       speed: 44,
       cost: 11,
@@ -108,7 +122,8 @@ const Hinata = {
 
     // 5. Protective Eight Trigrams
     {
-      name: "Protective Eight Trigrams",
+      name: "Eight Trigrams Vacuum Palm",
+      image: EightTrigramsVacuumPalm,
       damage: 20,
       speed: 27,
       cost: 9,
@@ -118,6 +133,7 @@ const Hinata = {
     // 6. Eight Trigrams: Sixty-Four Palms
     {
       name: "Sixty-Four Palms",
+      image: SixtyFourPalmsImage,
       damage: 29,
       speed: 30,
       cost: 17,
