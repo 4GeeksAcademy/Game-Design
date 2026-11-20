@@ -27,7 +27,7 @@ function createBattleFighter(characterId, battleId) {
   if (!selected?.data) return null;
 
   const data = selected.data;
-  const sourceAttacks = battleId === "player" ? getEquippedAttacks(selected.id, data.attacks ?? []) : (data.attacks ?? []);
+  const sourceAttacks = battleId === "player" ? getEquippedAttacks(selected.id, data.attacks ?? [], data.slot) : (data.attacks ?? []);
   const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)
       ? attack.uses
