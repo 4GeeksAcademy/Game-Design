@@ -72,6 +72,9 @@ window.dispatchEvent(new Event("unlocksUpdated"));
 
 console.log("Goku unlocked!");
 
+
+
+
 // Reset character unlocks to the starter roster:
 localStorage.removeItem("fightersArenaUnlockedCharacters");
 

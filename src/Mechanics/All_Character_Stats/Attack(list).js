@@ -79,11 +79,15 @@ const attacklist = {
           multiplier: 0.8,
         },
         recovery: {
-          multiplier: 0.75,
+         amount: 1,
         },
 
-        // maximumCooldown
-        // cooldown
+         maximumCooldown: {
+          amount: 1,
+         },
+         cooldown: {
+          amount: 1,
+         }
       },
 
       // STUN CONFIGURATION

@@ -6,7 +6,7 @@
 // FESTIVAL CONFIGURATION
 // ==========================================
 
-export const FESTIVAL_TOTAL_POINTS = 50000;
+export const FESTIVAL_TOTAL_POINTS = 20000;
 export const FESTIVAL_TOTAL_TIERS = 20;
 
 // Points required to unlock each tier.
@@ -28,9 +28,9 @@ export const FESTIVAL_TIER_REQUIREMENTS = [
   3000,  // 15
   5000,  // 16
   7500,  // 17
-  14000, // 18
-  25000, // 19
-  50000, // 20
+  11000, // 18
+  15000, // 19
+  20000, // 20
 ];
 
 // Give this festival its own ID.

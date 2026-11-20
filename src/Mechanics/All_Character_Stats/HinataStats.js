@@ -6,7 +6,7 @@ import GentleFistImage from "../../assets/img/Attack_IMAGES/Gentle Fists.jpeg";
 import PalmRotationImage from "../../assets/img/Attack_IMAGES/Palm Rotation Strike.webp";
 import TwinLionFistsImage from "../../assets/img/Attack_IMAGES/Twin Lion Fists.jpeg";
 import ThirtyTwoPalmsImage from "../../assets/img/Attack_IMAGES/Thirty-Two Palms.jpeg";
-import EightTrigramsVacuumPalm from "../../assets/img/Attack_IMAGESEight Trigrams Vacuum Palm.jpeg";
+import EightTrigramsVacuumPalm from "../../assets/img/Attack_IMAGES/Eight Trigrams Vacuum Palm.jpeg";
 import SixtyFourPalmsImage from "../../assets/img/Attack_IMAGES/Sixty-Four Palms.jpeg";
 
 const Hinata = {
