@@ -89,6 +89,8 @@ const Usopp = {
 
   {
     name: "Green Star: Gas Star",
+      locked: true,
+      unlockCost: 300,
     image: GasStarImage,
     damage: 20,
     speed: 25,
