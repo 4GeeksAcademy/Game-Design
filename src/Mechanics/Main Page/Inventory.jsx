@@ -438,7 +438,7 @@ function Inventory() {
           SKIN GALLERY
         </button>
 
-        <button className={`inventory-tab ${activeTab === "attacks" ? "active" : ""}`} onClick={() => setActiveTab("attacks")}>ATTACK LOADOUTS</button>
+        <button className={`inventory-tab ${activeTab === "attacks" ? "active" : ""}`} onClick={() => { setLoadoutCharacterId(selectedCharacterId ?? ownedCharacters[0]?.id ?? null); setActiveTab("attacks"); }}>ATTACK LOADOUTS</button>
       </nav>
 
       <section className="inventory-content">
