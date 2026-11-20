@@ -12,6 +12,8 @@ const TenTen = {
   name: "Tenten",
   image: TenTenArenaImage,
 
+  slot: 7, // Maximum attacks this character can equip.
+
   health: 95,
   mana: 100,
   maximumMana: 100,
