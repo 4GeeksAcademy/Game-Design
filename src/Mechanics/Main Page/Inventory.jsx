@@ -297,22 +297,107 @@ function AttackDetails({ attack, characterName, characterId, onClose, onUnlock }
 }
 
 
-function AttackLoadoutEditor({ character, characters, onCharacterChange }) {
+function AttackLoadoutEditor({ character }) {
   const [equipped, setEquipped] = useState([]);
   const [notice, setNotice] = useState("");
   const attacks = character?.data?.attacks ?? [];
-  const slots = getAttackSlotLimit(attacks);
-  useEffect(() => { setEquipped(character ? getEquippedAttackKeys(character.id, attacks) : []); setNotice(""); }, [character?.id]);
-  const change = (attack, add) => { const key = getAttackKey(attack); setEquipped(current => add ? (current.length >= slots || current.includes(key) ? current : [...current, key]) : current.filter(item => item !== key)); setNotice(""); };
-  const save = () => { saveEquippedAttackKeys(character.id, equipped, attacks); setNotice("LOADOUT SAVED — READY FOR BATTLE"); };
-  const unlock = attack => { if (unlockAttack(character.id, attack)) setNotice(`${getAttackDisplayName(attack)} UNLOCKED`); else setNotice("NOT ENOUGH COINS"); };
-  if (!character) return <div className="inventory-empty">NO CHARACTER SELECTED</div>;
-  const available = attacks.filter(a => isAttackUnlocked(character.id, a));
-  const locked = attacks.filter(a => !isAttackUnlocked(character.id, a));
-  const equippedAttacks = available.filter(a => equipped.includes(getAttackKey(a)));
-  const unequipped = available.filter(a => !equipped.includes(getAttackKey(a)));
-  const card = (attack, mode) => <article className={`loadout-attack-card ${mode === "locked" ? "is-locked" : ""}`} key={getAttackKey(attack)}><div className="loadout-attack-art">{attack.image ? <img src={attack.image} alt={getAttackDisplayName(attack)} /> : <span>⚔</span>}{mode === "locked" && <b>LOCKED</b>}</div><div className="loadout-attack-info"><strong>{getAttackDisplayName(attack)}</strong><span>{attack.damage ?? 0} DMG · {attack.cost ?? 0} MANA</span>{mode === "locked" ? <button onClick={() => unlock(attack)}>UNLOCK · ◈ {attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}</button> : mode === "equipped" ? <button className="loadout-remove" onClick={() => change(attack, false)}>UNEQUIP</button> : <button disabled={equipped.length >= slots} onClick={() => change(attack, true)}>EQUIP +</button>}</div></article>;
-  return <section className="attack-loadout-editor"><div className="loadout-intro"><p>FIGHTER CUSTOMIZATION</p><h2>ATTACK LOADOUTS</h2><span>Choose the moves your fighter brings into battle. Base character stats remain unchanged.</span></div><label className="loadout-character-picker">SELECT FIGHTER<select value={character.id} onChange={e => onCharacterChange(e.target.value)}>{characters.map(f => <option key={f.id} value={f.id}>{f.data.name}</option>)}</select></label><div className="loadout-slot-counter"><strong>{equipped.length} / {slots}</strong><span>ATTACK SLOTS EQUIPPED</span></div><section className="loadout-section equipped"><header><h3>EQUIPPED ATTACKS</h3><span>{equippedAttacks.length} / {slots}</span></header><div className="loadout-attack-grid">{equippedAttacks.length ? equippedAttacks.map(a => card(a,"equipped")) : <p className="loadout-empty">No attacks equipped.</p>}</div></section><section className="loadout-section unequipped"><header><h3>UNEQUIPPED ATTACKS</h3><span>{unequipped.length} AVAILABLE</span></header><div className="loadout-attack-grid">{unequipped.length ? unequipped.map(a => card(a,"available")) : <p className="loadout-empty">All unlocked attacks are equipped.</p>}</div></section><section className="loadout-section locked"><header><h3>LOCKED ATTACKS</h3><span>{locked.length} TO UNLOCK</span></header><div className="loadout-attack-grid">{locked.length ? locked.map(a => card(a,"locked")) : <p className="loadout-empty">No locked attacks currently released.</p>}</div></section>{notice && <p className="loadout-save-message">{notice}</p>}<button className="loadout-save-button" onClick={save}>SAVE LOADOUT</button></section>;
+  const slots = getAttackSlotLimit(character?.data ?? attacks);
+
+  useEffect(() => {
+    setEquipped(character ? getEquippedAttackKeys(character.id, attacks) : []);
+    setNotice("");
+  }, [character?.id]);
+
+  const change = (attack, add) => {
+    const key = getAttackKey(attack);
+    setEquipped((current) => add
+      ? (current.length >= slots || current.includes(key) ? current : [...current, key])
+      : current.filter((item) => item !== key));
+    setNotice("");
+  };
+
+  const save = () => {
+    saveEquippedAttackKeys(character.id, equipped, attacks);
+    setNotice("LOADOUT SAVED — READY FOR BATTLE");
+  };
+
+  const unlock = (attack) => {
+    if (unlockAttack(character.id, attack)) {
+      setNotice(`${getAttackDisplayName(attack)} UNLOCKED`);
+    } else {
+      setNotice("NOT ENOUGH COINS");
+    }
+  };
+
+  if (!character) return null;
+
+  const available = attacks.filter((attack) => isAttackUnlocked(character.id, attack));
+  const locked = attacks.filter((attack) => !isAttackUnlocked(character.id, attack));
+  const equippedAttacks = available.filter((attack) => equipped.includes(getAttackKey(attack)));
+  const unequipped = available.filter((attack) => !equipped.includes(getAttackKey(attack)));
+
+  const renderAttackCard = (attack, mode) => (
+    <article className={`loadout-attack-card ${mode === "locked" ? "is-locked" : ""}`} key={getAttackKey(attack)}>
+      <div className="loadout-attack-art">
+        {attack.image ? <img src={attack.image} alt={getAttackDisplayName(attack)} /> : <span>⚔</span>}
+        {mode === "locked" && <b>LOCKED</b>}
+      </div>
+      <div className="loadout-attack-info">
+        <strong>{getAttackDisplayName(attack)}</strong>
+        <span>{attack.damage ?? 0} DMG · {attack.cost ?? 0} MANA</span>
+        {mode === "locked" ? (
+          <button onClick={() => unlock(attack)}>UNLOCK · ◈ {attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}</button>
+        ) : mode === "equipped" ? (
+          <button className="loadout-remove" onClick={() => change(attack, false)}>UNEQUIP</button>
+        ) : (
+          <button disabled={equipped.length >= slots} onClick={() => change(attack, true)}>EQUIP +</button>
+        )}
+      </div>
+    </article>
+  );
+
+  return (
+    <section className="attack-loadout-editor">
+      <header className="loadout-character-banner">
+        <div className="loadout-character-portrait">
+          <img src={character.image} alt={character.data.name} />
+        </div>
+        <div className="loadout-character-heading">
+          <p>FIGHTER CUSTOMIZATION</p>
+          <h2>{character.data.name}</h2>
+          <span>{character.description}</span>
+        </div>
+        <div className="loadout-slot-counter">
+          <strong>{equipped.length} / {slots}</strong>
+          <span>ATTACK SLOTS EQUIPPED</span>
+        </div>
+      </header>
+
+      <section className="loadout-section equipped">
+        <header><h3>EQUIPPED ATTACKS</h3><span>{equippedAttacks.length} / {slots}</span></header>
+        <div className="loadout-attack-grid">
+          {equippedAttacks.length ? equippedAttacks.map((attack) => renderAttackCard(attack, "equipped")) : <p className="loadout-empty">No attacks equipped.</p>}
+        </div>
+      </section>
+
+      <section className="loadout-section unequipped">
+        <header><h3>AVAILABLE ATTACKS</h3><span>{unequipped.length} AVAILABLE</span></header>
+        <div className="loadout-attack-grid">
+          {unequipped.length ? unequipped.map((attack) => renderAttackCard(attack, "available")) : <p className="loadout-empty">All unlocked attacks are equipped.</p>}
+        </div>
+      </section>
+
+      <section className="loadout-section locked">
+        <header><h3>LOCKED ATTACKS</h3><span>{locked.length} TO UNLOCK</span></header>
+        <div className="loadout-attack-grid">
+          {locked.length ? locked.map((attack) => renderAttackCard(attack, "locked")) : <p className="loadout-empty">No locked attacks currently released.</p>}
+        </div>
+      </section>
+
+      {notice && <p className="loadout-save-message">{notice}</p>}
+      <button className="loadout-save-button" onClick={save}>SAVE {character.data.name.toUpperCase()} LOADOUT</button>
+    </section>
+  );
 }
 
 function Inventory() {
@@ -332,7 +417,6 @@ function Inventory() {
   const [equippedSkins, setEquippedSkins] = useState(() => getEquippedSkins());
 
   const [activeTab, setActiveTab] = useState(location.state?.activeTab ?? "characters");
-  const [loadoutCharacterId, setLoadoutCharacterId] = useState(location.state?.characterId ?? null);
   const [selectedAttack, setSelectedAttack] = useState(null);
   const [, setAttackUnlockVersion] = useState(0);
 
@@ -365,7 +449,6 @@ function Inventory() {
   const selectedCharacter =
     ownedCharacters.find((fighter) => fighter.id === selectedCharacterId) ??
     null;
-  const loadoutCharacter = ownedCharacters.find(f => f.id === loadoutCharacterId) ?? ownedCharacters[0] ?? null;
 
   // Automatically select the first owned character.
   useEffect(() => {
@@ -447,7 +530,7 @@ function Inventory() {
           SKIN GALLERY
         </button>
 
-        <button className={`inventory-tab ${activeTab === "attacks" ? "active" : ""}`} onClick={() => { setLoadoutCharacterId(selectedCharacterId ?? ownedCharacters[0]?.id ?? null); setActiveTab("attacks"); }}>ATTACK LOADOUTS</button>
+        <button className={`inventory-tab ${activeTab === "attacks" ? "active" : ""}`} onClick={() => setActiveTab("attacks")}>ATTACK LOADOUTS</button>
       </nav>
 
       <section className="inventory-content">
@@ -696,7 +779,7 @@ function Inventory() {
             )}
           </>
         ) : activeTab === "attacks" ? (
-          <AttackLoadoutEditor character={loadoutCharacter} characters={ownedCharacters} onCharacterChange={setLoadoutCharacterId} />
+          <div className="loadout-character-collection">{ownedCharacters.map((fighter) => <AttackLoadoutEditor key={fighter.id} character={fighter} />)}</div>
         ) : (
           <SkinGallery
             ownedSkinIds={ownedSkinIds}
