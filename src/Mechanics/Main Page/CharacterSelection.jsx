@@ -703,7 +703,8 @@ function CharacterSelection() {
                     ...levelConfig,
                     resumePlayerIds: selectedIndices.map(index => roster[index].id),
                     resumePlayer2Ids: player2Indices.map(index => roster[index].id),
-                    resumeSelectedId: roster[selectedIndex]?.id,\n                    resumeActiveSelectingPlayer: activeSelectingPlayer,
+                    resumeSelectedId: roster[selectedIndex]?.id,
+                    resumeActiveSelectingPlayer: activeSelectingPlayer,
                     resumePlayer2SelectedId: roster[player2SelectedIndex]?.id,
                   },
                 }});
