@@ -79,6 +79,8 @@ const mina = {
 
     {
       name: "Acid Corrosion",
+      locked: true,
+      unlockCost: 300,
       image: Attack4,
       damage: 10,
       speed: 20,
