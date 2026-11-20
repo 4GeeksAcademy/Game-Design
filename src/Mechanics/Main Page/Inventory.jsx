@@ -567,6 +567,7 @@ function Inventory() {
                             aria-label={`View ${getAttackDisplayName(attack)} effects and details`}
                           >
                             {attack.image && <img className="inventory-attack-thumb" src={attack.image} alt="" />}
+                            {!isAttackUnlocked(selectedCharacter.id, attack) && <b className="inventory-attack-lock-ribbon">LOCKED</b>}
                             <span className="inventory-attack-name"><strong>{getAttackDisplayName(attack)}</strong><small>VIEW MOVE DETAILS</small></span>
                             <span>{isAttackUnlocked(selectedCharacter.id, attack) ? `${attack.damage ?? 0} DAMAGE` : `◈ ${attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}`} <b>↗</b></span>
                           </button>
