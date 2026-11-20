@@ -114,6 +114,8 @@ const Picolo = {
     {
       id: "masenko",
       name: "Masenko",
+      locked: true,
+      unlockCost: 300,
       uses: 1,
       image: Attack7,
       damage: 60,
