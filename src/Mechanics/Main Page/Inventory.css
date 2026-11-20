@@ -1000,3 +1000,28 @@
   .loadout-character-banner .loadout-slot-counter { grid-column:1 / -1;flex-direction:row;align-items:center;justify-content:space-between; }
   .loadout-character-banner .loadout-slot-counter span { text-align:left; }
 }
+
+
+/* Attack loadout: select a fighter first, then open that fighter's cards */
+.loadout-character-browser { width:100%;max-width:1320px;margin:0 auto; }
+.loadout-roster-heading { margin:6px 0 24px;text-align:center; }
+.loadout-roster-heading p { margin:0 0 6px;color:var(--inv-lime);font:800 11px Oxanium,sans-serif;letter-spacing:3px; }
+.loadout-roster-heading h2 { margin:0;color:var(--inv-gold);font:900 clamp(24px,4vw,36px) Oxanium,sans-serif; }
+.loadout-roster-heading span { display:block;margin-top:8px;color:var(--inv-sage);font-size:13px; }
+.loadout-character-select-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:18px; }
+.loadout-character-select-card { min-width:0;padding:0;overflow:hidden;text-align:left;cursor:pointer;color:inherit;background:linear-gradient(155deg,#1b2b25,#090f13);border:1px solid rgba(255,228,92,.38);border-radius:11px;box-shadow:0 7px 20px #0005;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease; }
+.loadout-character-select-card:hover,.loadout-character-select-card:focus-visible { transform:translateY(-5px);border-color:var(--inv-gold);box-shadow:0 0 18px #ffe45c33,0 12px 24px #0007;outline:none; }
+.loadout-character-select-art { position:relative;height:220px;overflow:hidden;background:#080e12; }
+.loadout-character-select-art img { display:block;width:100%;height:100%;object-fit:cover;object-position:center top;transition:transform .25s ease; }
+.loadout-character-select-card:hover .loadout-character-select-art img { transform:scale(1.045); }
+.loadout-character-select-art span { position:absolute;right:0;bottom:0;left:0;padding:9px 8px;text-align:center;color:#10140d;background:linear-gradient(90deg,#f4d65b,#fff0a1,#d8ae36);font:900 11px Oxanium,sans-serif;letter-spacing:1.2px;opacity:0;transform:translateY(100%);transition:opacity .18s ease,transform .18s ease; }
+.loadout-character-select-card:hover .loadout-character-select-art span,.loadout-character-select-card:focus-visible .loadout-character-select-art span { opacity:1;transform:translateY(0); }
+.loadout-character-select-info { display:flex;flex-direction:column;gap:5px;padding:12px 13px 14px; }
+.loadout-character-select-info strong { color:var(--inv-gold);font:900 17px Oxanium,sans-serif;text-transform:uppercase; }
+.loadout-character-select-info small { color:var(--inv-sage);font:700 10px Oxanium,sans-serif;letter-spacing:1px; }
+.loadout-back-to-roster { display:inline-flex;align-items:center;gap:8px;margin:0 0 16px;padding:10px 15px;color:var(--inv-gold);background:#101b18;border:1px solid #ffe45c66;border-radius:7px;font:800 12px Oxanium,sans-serif;letter-spacing:1px;cursor:pointer; }
+.loadout-back-to-roster:hover { background:#26352a;border-color:var(--inv-gold); }
+@media(max-width:560px) {
+ .loadout-character-select-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:11px; }
+ .loadout-character-select-art { height:175px; }
+}
