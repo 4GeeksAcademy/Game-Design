@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { roster } from "./CharacterSelection.jsx";
 import { getUnlockedCharacters } from "../Currency.js";
 import { skins } from "../Skins.js";
+import { getAttackKey, getAttackDisplayName, getAttackSlotLimit, getEquippedAttackKeys, saveEquippedAttackKeys, isAttackUnlocked, unlockAttack } from "../AttackLoadouts.js";
 
 import {
   getOwnedSkins,
@@ -287,8 +288,28 @@ function AttackDetails({ attack, characterName, onClose }) {
   );
 }
 
+
+function AttackLoadoutEditor({ character, characters, onCharacterChange }) {
+  const [equipped, setEquipped] = useState([]);
+  const [notice, setNotice] = useState("");
+  const attacks = character?.data?.attacks ?? [];
+  const slots = getAttackSlotLimit(attacks);
+  useEffect(() => { setEquipped(character ? getEquippedAttackKeys(character.id, attacks) : []); setNotice(""); }, [character?.id]);
+  const change = (attack, add) => { const key = getAttackKey(attack); setEquipped(current => add ? (current.length >= slots || current.includes(key) ? current : [...current, key]) : current.filter(item => item !== key)); setNotice(""); };
+  const save = () => { saveEquippedAttackKeys(character.id, equipped, attacks); setNotice("LOADOUT SAVED — READY FOR BATTLE"); };
+  const unlock = attack => { if (unlockAttack(character.id, attack)) setNotice(`${getAttackDisplayName(attack)} UNLOCKED`); else setNotice("NOT ENOUGH COINS"); };
+  if (!character) return <div className="inventory-empty">NO CHARACTER SELECTED</div>;
+  const available = attacks.filter(a => isAttackUnlocked(character.id, a));
+  const locked = attacks.filter(a => !isAttackUnlocked(character.id, a));
+  const equippedAttacks = available.filter(a => equipped.includes(getAttackKey(a)));
+  const unequipped = available.filter(a => !equipped.includes(getAttackKey(a)));
+  const card = (attack, mode) => <article className={`loadout-attack-card ${mode === "locked" ? "is-locked" : ""}`} key={getAttackKey(attack)}><div className="loadout-attack-art">{attack.image ? <img src={attack.image} alt={getAttackDisplayName(attack)} /> : <span>⚔</span>}{mode === "locked" && <b>LOCKED</b>}</div><div className="loadout-attack-info"><strong>{getAttackDisplayName(attack)}</strong><span>{attack.damage ?? 0} DMG · {attack.cost ?? 0} MANA</span>{mode === "locked" ? <button onClick={() => unlock(attack)}>UNLOCK · ◈ {attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}</button> : mode === "equipped" ? <button className="loadout-remove" onClick={() => change(attack, false)}>UNEQUIP</button> : <button disabled={equipped.length >= slots} onClick={() => change(attack, true)}>EQUIP +</button>}</div></article>;
+  return <section className="attack-loadout-editor"><div className="loadout-intro"><p>FIGHTER CUSTOMIZATION</p><h2>ATTACK LOADOUTS</h2><span>Choose the moves your fighter brings into battle. Base character stats remain unchanged.</span></div><label className="loadout-character-picker">SELECT FIGHTER<select value={character.id} onChange={e => onCharacterChange(e.target.value)}>{characters.map(f => <option key={f.id} value={f.id}>{f.data.name}</option>)}</select></label><div className="loadout-slot-counter"><strong>{equipped.length} / {slots}</strong><span>ATTACK SLOTS EQUIPPED</span></div><section className="loadout-section equipped"><header><h3>EQUIPPED ATTACKS</h3><span>{equippedAttacks.length} / {slots}</span></header><div className="loadout-attack-grid">{equippedAttacks.length ? equippedAttacks.map(a => card(a,"equipped")) : <p className="loadout-empty">No attacks equipped.</p>}</div></section><section className="loadout-section unequipped"><header><h3>UNEQUIPPED ATTACKS</h3><span>{unequipped.length} AVAILABLE</span></header><div className="loadout-attack-grid">{unequipped.length ? unequipped.map(a => card(a,"available")) : <p className="loadout-empty">All unlocked attacks are equipped.</p>}</div></section><section className="loadout-section locked"><header><h3>LOCKED ATTACKS</h3><span>{locked.length} TO UNLOCK</span></header><div className="loadout-attack-grid">{locked.length ? locked.map(a => card(a,"locked")) : <p className="loadout-empty">No locked attacks currently released.</p>}</div></section>{notice && <p className="loadout-save-message">{notice}</p>}<button className="loadout-save-button" onClick={save}>SAVE LOADOUT</button></section>;
+}
+
 function Inventory() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Load the player's unlocked characters.
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
@@ -301,7 +322,8 @@ function Inventory() {
 
   const [equippedSkins, setEquippedSkins] = useState(() => getEquippedSkins());
 
-  const [activeTab, setActiveTab] = useState("characters");
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab ?? "characters");
+  const [loadoutCharacterId, setLoadoutCharacterId] = useState(location.state?.characterId ?? null);
   const [selectedAttack, setSelectedAttack] = useState(null);
 
   // Refresh character and skin data.
@@ -333,6 +355,7 @@ function Inventory() {
   const selectedCharacter =
     ownedCharacters.find((fighter) => fighter.id === selectedCharacterId) ??
     null;
+  const loadoutCharacter = roster.find(f => f.id === loadoutCharacterId) ?? ownedCharacters[0] ?? null;
 
   // Automatically select the first owned character.
   useEffect(() => {
@@ -414,10 +437,7 @@ function Inventory() {
           SKIN GALLERY
         </button>
 
-        <button className="inventory-tab" disabled>
-          ATTACKS
-          <span>COMING SOON</span>
-        </button>
+        <button className={`inventory-tab ${activeTab === "attacks" ? "active" : ""}`} onClick={() => setActiveTab("attacks")}>ATTACK LOADOUTS</button>
       </nav>
 
       <section className="inventory-content">
@@ -534,10 +554,10 @@ function Inventory() {
                             className="inventory-attack-item"
                             key={attack.id ?? attack.name}
                             onClick={() => setSelectedAttack(attack)}
-                            aria-label={`View ${attack.name} effects and details`}
+                            aria-label={`View ${getAttackDisplayName(attack)} effects and details`}
                           >
                             {attack.image && <img className="inventory-attack-thumb" src={attack.image} alt="" />}
-                            <span className="inventory-attack-name"><strong>{attack.name}</strong><small>VIEW MOVE DETAILS</small></span>
+                            <span className="inventory-attack-name"><strong>{getAttackDisplayName(attack)}</strong><small>VIEW MOVE DETAILS</small></span>
                             <span>{attack.damage ?? 0} DAMAGE <b>↗</b></span>
                           </button>
                         ))}
@@ -662,6 +682,8 @@ function Inventory() {
               </section>
             )}
           </>
+        ) : activeTab === "attacks" ? (
+          <AttackLoadoutEditor character={loadoutCharacter} characters={ownedCharacters} onCharacterChange={setLoadoutCharacterId} />
         ) : (
           <SkinGallery
             ownedSkinIds={ownedSkinIds}
