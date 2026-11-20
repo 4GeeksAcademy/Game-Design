@@ -36,6 +36,7 @@ import Yoruichi from "../All_Character_Stats/YoruichiStats.js";
 import YoruichiArenaImage from "../../assets/img/Yoruichi.png";
 
 import { getUnlockedCharacters } from "../Currency.js";
+import { getAttackSlotLimit } from "../AttackLoadouts.js";
 
 import "./CharacterSelection.css";
 
@@ -160,7 +161,7 @@ export const roster = [
     description: "THE GENTLE FIST",
     isFestivalSecret: true,
   },
-];
+].map((fighter) => ({ ...fighter, attackSlots: getAttackSlotLimit(fighter.data.attacks ?? []) }));
 
 function FighterStats({ fighter }) {
   const stats = fighter.data;
@@ -246,7 +247,7 @@ function FighterStats({ fighter }) {
       </div>
 
       <div className="roster-moves">
-        <p>SPECIAL MOVES</p>
+        <p>SPECIAL MOVES · {fighter.attackSlots} ATTACK SLOTS</p>
         {stats.attacks.map((attack) => (
           <span key={attack.name}>{attack.name}</span>
         ))}
