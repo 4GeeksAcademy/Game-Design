@@ -2683,6 +2683,8 @@ export default function TeamBattle() {
     ) : (
       <GameOverScreen
         damageDealt={damageDealt}
+        combatDefense={combatDefense}
+        difficulty={difficulty}
         attacksUsed={attacksUsed}
         message="Your entire team has been defeated."
         onRematch={resetBattle}
