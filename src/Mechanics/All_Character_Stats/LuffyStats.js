@@ -11,6 +11,8 @@ const Luffy = {
   name: "Monkey D. Luffy",
   image: LuffyArenaImage,
 
+  slot: 6, // Maximum attacks this character can equip.
+
   health: 140,
   mana: 120,
   maximumMana: 120,
