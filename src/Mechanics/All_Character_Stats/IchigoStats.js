@@ -12,6 +12,8 @@ const Ichigo = {
   name: "Ichigo Kurosaki",
   image: IchigoArenaImage,
 
+  slot: 5, // Maximum attacks this character can equip.
+
   // Stats
   health: 115,
   mana: 200,
