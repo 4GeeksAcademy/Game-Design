@@ -318,7 +318,7 @@ function AttackLoadoutEditor({ character, characters, onCharacterChange }) {
 function Inventory() {
   const navigate = useNavigate();
   const location = useLocation();
-  const location = useLocation();
+
 
   // Load the player's unlocked characters.
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
