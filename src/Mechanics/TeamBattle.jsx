@@ -102,7 +102,7 @@ function createBattleFighter(id, applyLoadout = false) {
 }
 
 // function createTeammateFighter(id) {
-//   const fighter = createBattleFighter(id);
+//   const fighter = createBattleFighter(id, true);
 //   if (!fighter) return null;
 
 //   return {
@@ -463,8 +463,18 @@ export default function TeamBattle() {
     "Choose your fighters' targets.",
   ]);
   const [damageDealt, setDamageDealt] = useState(0);
+  const [combatDefense, setCombatDefense] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
-  useEffect(() => {\n    if (!isStoryMode && (phase === "victory" || phase === "defeat") && !teamRewardPaidRef.current) {\n      teamRewardPaidRef.current = true;\n      const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[difficulty] ?? 1;\n      addCoins(Math.floor((damageDealt + combatDefense) * multiplier));\n    }\n  }, [phase, isStoryMode, difficulty, damageDealt, combatDefense]);\n\n  // Prevent previously recorded damage from being counted again.
+  const teamRewardPaidRef = useRef(false);
+  useEffect(() => {
+    if (!isStoryMode && (phase === "victory" || phase === "defeat") && !teamRewardPaidRef.current) {
+      teamRewardPaidRef.current = true;
+      const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[difficulty] ?? 1;
+      addCoins(Math.floor((damageDealt + combatDefense) * multiplier));
+    }
+  }, [phase, isStoryMode, difficulty, damageDealt, combatDefense]);
+
+  // Prevent previously recorded damage from being counted again.
   const lastFestivalDamage = useRef(0);
 
   // Prevent previously recorded attacks from being counted again.
@@ -2035,9 +2045,11 @@ export default function TeamBattle() {
     // Record successful defensive actions.
     if (result) {
       if (choice === "defend") {
+        setCombatDefense((value) => value + 1);
         recordFestivalEvent("block", 1);
         recordDailyObjectiveEvent("defense", 1);
       } else if (choice === "evade" && result.evaded) {
+        setCombatDefense((value) => value + 1);
         recordFestivalEvent("evade", 1);
         recordDailyObjectiveEvent("defense", 1);
       }
@@ -2585,7 +2597,9 @@ export default function TeamBattle() {
     setCpuActionIndex(0);
     setDefenseTimeLeft(10);
     setDamageDealt(0);
+    setCombatDefense(0);
     setAttacksUsed(0);
+    teamRewardPaidRef.current = false;
     setCombatLog(["Choose your fighters' targets."]);
     setCombatMessage("Choose your fighters' targets.");
     setPhase("selecting");
