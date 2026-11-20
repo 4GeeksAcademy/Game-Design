@@ -1,3 +1,5 @@
+import { spendCoins } from "./Currency.js";
+
 const LOADOUT_KEY = "wildCardsAttackLoadouts";
 const UNLOCKED_ATTACKS_KEY = "wildCardsUnlockedAttacks";
 
@@ -62,8 +64,7 @@ export function unlockAttack(characterId, attack) {
   const current = Array.isArray(unlocked[characterId]) ? unlocked[characterId] : [];
   if (current.includes(key)) return true;
   if (cost > 0) {
-    const { spendCoins } = window.__wildCardsCurrency ?? {};
-    if (typeof spendCoins !== "function" || !spendCoins(cost)) return false;
+    if (!spendCoins(cost)) return false;
   }
   unlocked[characterId] = [...current, key];
   localStorage.setItem(UNLOCKED_ATTACKS_KEY, JSON.stringify(unlocked));
