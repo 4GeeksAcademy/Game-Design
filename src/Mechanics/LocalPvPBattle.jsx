@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection.jsx";
 import { getCharacterImage } from "./SkinManager.js";
+import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import LocalPvPFighterPanel from "./LocalPvPFighterPanel.jsx";
@@ -31,7 +32,7 @@ import "./LocalPvPBattle.css";
 const TURN_SECONDS = 20;
 const DEFENSE_SECONDS = 10;
 
-function createFighter(id) {
+function createFighter(id, applyLoadout = true) {
   const selected = roster.find((entry) => entry.id === id);
   if (!selected?.data) return null;
   const data = selected.data;
@@ -47,7 +48,7 @@ function createFighter(id) {
       ? { ...data.defense }
       : data.defense,
     activeModifiers: (data.activeModifiers ?? []).map((item) => ({ ...item })),
-    attacks: (data.attacks ?? []).map((attack) => ({
+    attacks: (applyLoadout ? getEquippedAttacks(selected.id, data.attacks ?? []) : (data.attacks ?? [])).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => ({
       ...attack,
       remainingUses: Number.isInteger(attack.uses)
         ? (attack.remainingUses ?? attack.uses)
@@ -110,8 +111,8 @@ export default function LocalPvPBattle() {
     : [config.opponentId].filter(Boolean);
   const isTeamMatch = playerIds.length === 2 && opponentIds.length === 2;
   const [teams, setTeams] = useState(() => ({
-    player: playerIds.map(createFighter),
-    opponent: opponentIds.map(createFighter),
+    player: playerIds.map((id) => createFighter(id, true)),
+    opponent: opponentIds.map((id) => createFighter(id, true)),
   }));
   const [activeSide, setActiveSide] = useState("player");
   const [phase, setPhase] = useState("fighting");
