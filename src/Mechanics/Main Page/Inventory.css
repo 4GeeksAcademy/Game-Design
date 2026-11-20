@@ -910,3 +910,41 @@
   .inventory-attack-item { gap: 8px; }
   .inventory-attack-thumb { width: 46px; height: 46px; flex-basis: 46px; }
 }
+
+/* WILD CARDS — attack cards and loadout editor */
+.inventory-attack-item { cursor:pointer;min-width:0;border:1px solid rgba(255,228,92,.18);border-left:3px solid var(--inv-lime);border-radius:5px;transition:transform .18s,border-color .18s,background .18s; }
+.inventory-attack-item:hover,.inventory-attack-item:focus-visible { transform:translateY(-2px);border-color:var(--inv-gold);background:rgba(255,228,92,.09);outline:none; }
+.inventory-attack-item .inventory-attack-thumb { width:64px;height:64px;object-fit:cover;border-radius:4px;flex:0 0 64px; }
+.inventory-attack-name { display:flex;flex:1;min-width:0;flex-direction:column;gap:4px; }
+.inventory-attack-name small { color:var(--inv-lime);font-size:9px;letter-spacing:1px; }
+.attack-loadout-editor { max-width:1250px;margin:0 auto;padding:10px 0 40px; }
+.loadout-intro { margin:25px 0;text-align:center; }
+.loadout-intro p,.loadout-character-picker,.loadout-section header,.loadout-slot-counter span { color:var(--inv-lime);font-family:Oxanium,sans-serif;font-size:10px;font-weight:800;letter-spacing:2px; }
+.loadout-intro h2 { color:var(--inv-gold);font-family:Oxanium,sans-serif;font-size:clamp(26px,4vw,42px);font-weight:900; }
+.loadout-intro span { color:var(--inv-sage); }
+.loadout-character-picker { display:flex;align-items:center;gap:15px;flex-wrap:wrap;margin:20px 0; }
+.loadout-character-picker select { min-width:220px;padding:11px 14px;color:var(--inv-ivory);background:#101820;border:1px solid #ffe45c66;font:700 13px Oxanium,sans-serif; }
+.loadout-character-picker option { background:#101820; }
+.loadout-slot-counter { display:flex;align-items:center;gap:15px;padding:14px 18px;margin:18px 0;background:linear-gradient(90deg,#24341d,#111a1b);border:1px solid #c8ff5255; }
+.loadout-slot-counter strong { color:var(--inv-gold);font:900 28px Oxanium,sans-serif; }
+.loadout-section { margin:22px 0;padding:18px;background:#0a1215b8;border:1px solid #ffe45c2e; }
+.loadout-section header { display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px; }
+.loadout-section header h3 { margin:0;color:var(--inv-gold);font:800 14px Oxanium,sans-serif; }
+.loadout-section header span { color:var(--inv-sage);font-size:9px; }
+.loadout-attack-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px; }
+.loadout-attack-card { display:grid;grid-template-columns:88px minmax(0,1fr);min-height:112px;overflow:hidden;background:linear-gradient(135deg,#1b2926,#101720);border:1px solid #ffe45c44; }
+.loadout-attack-art { position:relative;min-height:112px;background:#080e12; }
+.loadout-attack-art img { width:100%;height:100%;position:absolute;inset:0;object-fit:cover; }
+.loadout-attack-art>span { display:grid;place-items:center;height:100%;font-size:28px;color:var(--inv-gold); }
+.loadout-attack-art b { position:absolute;left:0;right:0;bottom:8px;text-align:center;background:#8e1c2b;color:#fff;font:800 10px Oxanium,sans-serif;padding:5px; }
+.loadout-attack-info { display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;padding:10px;min-width:0; }
+.loadout-attack-info strong { color:var(--inv-ivory);font:800 12px Oxanium,sans-serif;overflow-wrap:anywhere; }
+.loadout-attack-info span { color:var(--inv-sage);font-size:10px; }
+.loadout-attack-info button,.loadout-save-button { padding:7px 10px;color:#111a10;background:var(--inv-lime);border:0;font:800 9px Oxanium,sans-serif;letter-spacing:1px;cursor:pointer; }
+.loadout-attack-info button:disabled { opacity:.35;cursor:not-allowed; }
+.loadout-attack-info .loadout-remove { color:#fff;background:#922c3a; }
+.loadout-attack-card.is-locked { filter:saturate(.45);border-color:#ff647466; }
+.loadout-empty { color:var(--inv-sage);font-size:13px; }
+.loadout-save-message { color:var(--inv-lime);font:800 12px Oxanium,sans-serif;text-align:center; }
+.loadout-save-button { display:block;min-width:220px;margin:24px auto;padding:15px 25px;background:var(--inv-gold);font-size:12px;box-shadow:0 5px 0 #8d782b; }
+@media(max-width:600px){.inventory-attack-item{gap:8px;padding:9px}.inventory-attack-item .inventory-attack-thumb{width:48px;height:48px;flex-basis:48px}.loadout-attack-grid{grid-template-columns:1fr}.loadout-character-picker{align-items:flex-start;flex-direction:column}.loadout-character-picker select{width:100%}}
