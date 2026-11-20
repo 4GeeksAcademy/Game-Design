@@ -110,6 +110,8 @@ const rockLee = {
 
     {
       name: "Ultra Wind Wave",
+      locked: true,
+      unlockCost: 300,
       image: Attack6,
       uses: 2,
       turnCooldown: 5,
