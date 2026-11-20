@@ -14,6 +14,8 @@ const Kirishima = {
   name: "Kirishima Eijiro",
   image: KirishimaArenaImage,
 
+  slot: 8, // Maximum attacks this character can equip.
+
   health: 125,
   maximumHealth: 125,
 
