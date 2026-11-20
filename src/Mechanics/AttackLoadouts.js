@@ -43,17 +43,17 @@ export function isAttackUnlocked(characterId, attack) {
   return getUnlockedAttackKeys(characterId).includes(getAttackKey(attack));
 }
 
-export function getEquippedAttackKeys(characterId, attacks = []) {
+export function getEquippedAttackKeys(characterId, attacks = [], configuredSlot) {
   const saved = readObject(LOADOUT_KEY)[characterId];
   const available = attacks.filter((attack) => isAttackUnlocked(characterId, attack));
-  const defaultKeys = attacks.filter((attack) => !attack.locked && !attack.requiresPurchase && !(Number(attack.unlockCost ?? attack.coinCost ?? attack.price) > 0)).slice(0, getAttackSlotLimit(attacks)).map(getAttackKey);
+  const defaultKeys = attacks.filter((attack) => !attack.locked && !attack.requiresPurchase && !(Number(attack.unlockCost ?? attack.coinCost ?? attack.price) > 0)).slice(0, getAttackSlotLimit(configuredSlot ?? attacks)).map(getAttackKey);
   if (!Array.isArray(saved)) return defaultKeys;
   const allowed = new Set(available.map(getAttackKey));
-  return [...new Set(saved.filter((key) => allowed.has(key)))].slice(0, getAttackSlotLimit(attacks));
+  return [...new Set(saved.filter((key) => allowed.has(key)))].slice(0, getAttackSlotLimit(configuredSlot ?? attacks));
 }
 
-export function saveEquippedAttackKeys(characterId, keys, attacks = []) {
-  const slotLimit = getAttackSlotLimit(attacks);
+export function saveEquippedAttackKeys(characterId, keys, attacks = [], configuredSlot) {
+  const slotLimit = getAttackSlotLimit(configuredSlot ?? attacks);
   const allowed = new Set(attacks.filter((attack) => isAttackUnlocked(characterId, attack)).map(getAttackKey));
   const clean = [...new Set((keys ?? []).filter((key) => allowed.has(key)))].slice(0, slotLimit);
   const saved = readObject(LOADOUT_KEY);
@@ -78,7 +78,7 @@ export function unlockAttack(characterId, attack) {
   return true;
 }
 
-export function getEquippedAttacks(characterId, attacks = []) {
-  const keys = new Set(getEquippedAttackKeys(characterId, attacks));
+export function getEquippedAttacks(characterId, attacks = [], configuredSlot) {
+  const keys = new Set(getEquippedAttackKeys(characterId, attacks, configuredSlot));
   return attacks.filter((attack) => keys.has(getAttackKey(attack))).map((attack) => ({ ...attack }));
 }
