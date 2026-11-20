@@ -200,6 +200,8 @@ const Kirishima = {
     },
     {
       name: "Red Riot: Unbreakable Smash",
+      locked: true,
+      unlockCost: 300,
       image: Attack8,
       damage: 81,
       speed: 53,
