@@ -111,6 +111,8 @@ const TenTen = {
 
     {
       name: "Bashōsen: Coil of Wind",
+      locked: true,
+      unlockCost: 300,
       image: Attack7,
       description:
         "Attacks with a chained sickle, dealing damage and weakening the opponent's defense.",
