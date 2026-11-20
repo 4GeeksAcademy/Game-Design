@@ -304,7 +304,7 @@ function AttackLoadoutEditor({ character }) {
   const slots = getAttackSlotLimit(character?.data ?? attacks);
 
   useEffect(() => {
-    setEquipped(character ? getEquippedAttackKeys(character.id, attacks) : []);
+    setEquipped(character ? getEquippedAttackKeys(character.id, attacks, character.data.slot) : []);
     setNotice("");
   }, [character?.id]);
 
@@ -317,7 +317,7 @@ function AttackLoadoutEditor({ character }) {
   };
 
   const save = () => {
-    saveEquippedAttackKeys(character.id, equipped, attacks);
+    saveEquippedAttackKeys(character.id, equipped, attacks, character.data.slot);
     setNotice("LOADOUT SAVED — READY FOR BATTLE");
   };
 
