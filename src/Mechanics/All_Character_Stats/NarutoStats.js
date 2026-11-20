@@ -10,6 +10,8 @@ const Naruto = {
   name: "Naruto Uzumaki",
   image: NarutoArenaImage,
 
+  slot: 5, // Maximum attacks this character can equip.
+
   health: 120,
   mana: 170,
   maximumMana: 170,
