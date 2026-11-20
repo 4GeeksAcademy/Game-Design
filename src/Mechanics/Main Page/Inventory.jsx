@@ -310,6 +310,7 @@ function AttackLoadoutEditor({ character, characters, onCharacterChange }) {
 function Inventory() {
   const navigate = useNavigate();
   const location = useLocation();
+  const location = useLocation();
 
   // Load the player's unlocked characters.
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
@@ -410,7 +411,7 @@ function Inventory() {
   return (
     <main className="inventory-screen">
       <header className="inventory-header">
-        <button className="inventory-back-button" onClick={() => navigate("/")}>
+        <button className="inventory-back-button" onClick={() => location.state?.returnTo ? navigate(location.state.returnTo, { state: location.state.selectionState }) : navigate("/")}>
           ← BACK
         </button>
 
