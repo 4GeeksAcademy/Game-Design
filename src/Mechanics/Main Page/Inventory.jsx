@@ -169,6 +169,124 @@ function SkinGallery({
   );
 }
 
+
+const EFFECT_LABELS = {
+  maximumHealth: "MAX HEALTH", maximumMana: "MAX MANA",
+  manaRegen: "MANA REGEN", health: "HEALTH", mana: "MANA",
+  defense: "DEFENSE", agility: "AGILITY", cooldown: "COOLDOWN",
+  maximumCooldown: "MAX COOLDOWN", recovery: "RECOVERY",
+  damage: "DAMAGE", speed: "SPEED", cost: "MANA COST",
+};
+
+function formatEffectValue(value) {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "boolean") return value ? "YES" : "NO";
+  if (typeof value === "number") return value > 0 ? `+${value}` : String(value);
+  return String(value);
+}
+
+function EffectDetails({ title, value, tone = "neutral" }) {
+  if (value === null || value === undefined || value === false) return null;
+  if (typeof value !== "object") {
+    return (
+      <div className={`inventory-effect-card ${tone}`}>
+        <strong>{title}</strong><span>{formatEffectValue(value)}</span>
+      </div>
+    );
+  }
+
+  const entries = Object.entries(value).filter(([, item]) =>
+    item !== null && item !== undefined && item !== false
+  );
+  if (!entries.length) return null;
+
+  return (
+    <section className={`inventory-effect-group ${tone}`}>
+      <h4>{title}</h4>
+      <div className="inventory-effect-grid">
+        {entries.map(([key, item]) => {
+          const label = EFFECT_LABELS[key] ?? key.replace(/([A-Z])/g, " $1").toUpperCase();
+          if (item && typeof item === "object" && !Array.isArray(item)) {
+            return <EffectDetails key={key} title={label} value={item} tone={tone} />;
+          }
+          if (Array.isArray(item)) {
+            return (
+              <div className="inventory-effect-card" key={key}>
+                <strong>{label}</strong><span>{item.map(String).join(", ")}</span>
+              </div>
+            );
+          }
+          return (
+            <div className="inventory-effect-card" key={key}>
+              <strong>{label}</strong><span>{formatEffectValue(item)}</span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function AttackDetails({ attack, characterName, onClose }) {
+  if (!attack) return null;
+  const hasEffects = ["buff", "debuff", "heal", "stun", "sacrifice",
+    "attackModifiers", "characterModifiers"].some((key) => attack[key]);
+  const knownKeys = new Set(["id", "name", "image", "description", "damage",
+    "speed", "cost", "state", "buff", "debuff", "heal", "stun", "sacrifice",
+    "attackModifiers", "characterModifiers", "duration", "uses", "remainingUses",
+    "turnCooldown", "cooldownRemaining", "buffRequiresHit", "debuffRequiresHit",
+    "stunRequiresHit"]);
+  const extraDetails = Object.fromEntries(
+    Object.entries(attack).filter(([key, value]) =>
+      !knownKeys.has(key) && value !== undefined && value !== null && value !== false
+    )
+  );
+
+  return (
+    <div className="inventory-attack-modal-backdrop" onClick={onClose}>
+      <section className="inventory-attack-modal" role="dialog" aria-modal="true"
+        aria-label={attack.name + " details"} onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="inventory-attack-close" onClick={onClose}
+          aria-label="Close attack details">×</button>
+        <div className="inventory-attack-modal-heading">
+          {attack.image ? <img src={attack.image} alt={attack.name} /> : (
+            <div className="inventory-attack-no-image">NO ARTWORK</div>
+          )}
+          <div>
+            <p>{characterName} · MOVE BREAKDOWN</p>
+            <h2>{attack.name}</h2>
+            {attack.description && <span>{attack.description}</span>}
+          </div>
+        </div>
+
+        <div className="inventory-attack-core-stats">
+          <div><span>DAMAGE</span><strong>{attack.damage ?? 0}</strong></div>
+          <div><span>SPEED</span><strong>{attack.speed ?? 0}</strong></div>
+          <div><span>MANA COST</span><strong>{attack.cost ?? 0}</strong></div>
+          {attack.uses !== undefined && <div><span>USES</span><strong>{attack.uses}</strong></div>}
+          {attack.turnCooldown > 0 && <div><span>COOLDOWN</span><strong>{attack.turnCooldown} TURNS</strong></div>}
+          {attack.duration > 0 && <div><span>DURATION</span><strong>{attack.duration} TURNS</strong></div>}
+        </div>
+
+        {attack.buff && <EffectDetails title="BUFFS · SELF ENHANCEMENTS" value={attack.buff} tone="positive" />}
+        {attack.debuff && <EffectDetails title="DEBUFFS · OPPONENT PENALTIES" value={attack.debuff} tone="negative" />}
+        {attack.heal && <EffectDetails title="HEALING · SUPPORT EFFECTS" value={attack.heal} tone="positive" />}
+        {attack.stun && <EffectDetails title="STUN · DISABLED OPPONENT ATTACKS" value={attack.stun} tone="warning" />}
+        {attack.sacrifice && <EffectDetails title="SACRIFICE · USER COST" value={attack.sacrifice} tone="negative" />}
+        {attack.attackModifiers && <EffectDetails title="ATTACK MODIFIERS" value={attack.attackModifiers} tone="modifier" />}
+        {attack.characterModifiers && <EffectDetails title="CHARACTER STAT MODIFIERS" value={attack.characterModifiers} tone="modifier" />}
+        {attack.buffRequiresHit && <p className="inventory-effect-note">Self-buffs only activate when this attack successfully connects.</p>}
+        {attack.debuffRequiresHit && <p className="inventory-effect-note">Debuffs only apply when this attack successfully connects.</p>}
+        {attack.stunRequiresHit && <p className="inventory-effect-note">Stun only applies when this attack successfully connects.</p>}
+        {Object.keys(extraDetails).length > 0 && <EffectDetails title="ADDITIONAL ATTACK EFFECTS" value={extraDetails} />}
+        {!hasEffects && Object.keys(extraDetails).length === 0 && (
+          <p className="inventory-no-effects">This move has no additional buffs, debuffs, healing, stun, or stat modifiers.</p>
+        )}
+      </section>
+    </div>
+  );
+}
+
 function Inventory() {
   const navigate = useNavigate();
 
@@ -184,6 +302,7 @@ function Inventory() {
   const [equippedSkins, setEquippedSkins] = useState(() => getEquippedSkins());
 
   const [activeTab, setActiveTab] = useState("characters");
+  const [selectedAttack, setSelectedAttack] = useState(null);
 
   // Refresh character and skin data.
   useEffect(() => {
@@ -410,16 +529,27 @@ function Inventory() {
                     <div className="inventory-attacks-list">
                       {Array.isArray(selectedCharacter.data.attacks) &&
                         selectedCharacter.data.attacks.map((attack) => (
-                          <div
+                          <button
+                            type="button"
                             className="inventory-attack-item"
-                            key={attack.name}
+                            key={attack.id ?? attack.name}
+                            onClick={() => setSelectedAttack(attack)}
+                            aria-label={`View ${attack.name} effects and details`}
                           >
-                            <strong>{attack.name}</strong>
-
-                            <span>{attack.damage ?? 0} DAMAGE</span>
-                          </div>
+                            {attack.image && <img className="inventory-attack-thumb" src={attack.image} alt="" />}
+                            <span className="inventory-attack-name"><strong>{attack.name}</strong><small>VIEW MOVE DETAILS</small></span>
+                            <span>{attack.damage ?? 0} DAMAGE <b>↗</b></span>
+                          </button>
                         ))}
                     </div>
+
+                    {selectedAttack && (
+                      <AttackDetails
+                        attack={selectedAttack}
+                        characterName={selectedCharacter.data.name}
+                        onClose={() => setSelectedAttack(null)}
+                      />
+                    )}
 
                     {/* CHARACTER SKINS */}
                     <section className="inventory-skins-section">
