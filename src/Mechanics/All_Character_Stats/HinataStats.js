@@ -12,6 +12,8 @@ import SixtyFourPalmsImage from "../../assets/img/Attack_IMAGES/Sixty-Four Palms
 const Hinata = {
   name: "Hinata Hyuga",
   image: HinataImage,
+
+  slot: 7, // Maximum attacks this character can equip.
   // Base Stats
   health: 125,
   maximumHealth: 125,
