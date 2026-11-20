@@ -48,7 +48,7 @@ function createFighter(id, applyLoadout = true) {
       ? { ...data.defense }
       : data.defense,
     activeModifiers: (data.activeModifiers ?? []).map((item) => ({ ...item })),
-    attacks: (applyLoadout ? getEquippedAttacks(selected.id, data.attacks ?? []) : (data.attacks ?? [])).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => ({
+    attacks: (applyLoadout ? getEquippedAttacks(selected.id, data.attacks ?? [], data.slot) : (data.attacks ?? [])).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => ({
       ...attack,
       remainingUses: Number.isInteger(attack.uses)
         ? (attack.remainingUses ?? attack.uses)
