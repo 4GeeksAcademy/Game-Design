@@ -300,7 +300,7 @@ function CharacterSelection() {
     const index = resumed >= 0 ? resumed : roster.findIndex((fighter) => unlocked.includes(fighter.id));
     return index >= 0 ? index : 0;
   });
-  const [activeSelectingPlayer, setActiveSelectingPlayer] = useState("player1");
+  const [activeSelectingPlayer, setActiveSelectingPlayer] = useState(location.state?.resumeActiveSelectingPlayer ?? "player1");
   const [pvpConfirmed, setPvpConfirmed] = useState({ player1: false, player2: false });
 
   const [cpuIndices, setCpuIndices] = useState(() => {
@@ -687,12 +687,12 @@ function CharacterSelection() {
               />
             ))}
           </div>
-          {!localPvP && phase === "player" && (
+          {phase === "player" && (
             <button
               type="button"
               className="customize-loadout-button"
               onClick={() => {
-                const selected = roster[selectedIndices[0] ?? selectedIndex];
+                const selected = activeSelectingPlayer === "player2"\n                  ? roster[player2Indices[0] ?? player2SelectedIndex]\n                  : roster[selectedIndices[0] ?? selectedIndex];
                 navigate("/inventory", { state: {
                   activeTab: "attacks",
                   characterId: selected?.id,
@@ -701,7 +701,7 @@ function CharacterSelection() {
                     ...levelConfig,
                     resumePlayerIds: selectedIndices.map(index => roster[index].id),
                     resumePlayer2Ids: player2Indices.map(index => roster[index].id),
-                    resumeSelectedId: roster[selectedIndex]?.id,
+                    resumeSelectedId: roster[selectedIndex]?.id,\n                    resumeActiveSelectingPlayer: activeSelectingPlayer,
                     resumePlayer2SelectedId: roster[player2SelectedIndex]?.id,
                   },
                 }});
