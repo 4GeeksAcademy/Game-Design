@@ -2548,9 +2548,11 @@ export default function TeamBattle() {
 
       if (result) {
         if (result.action === "defend") {
+          setCombatDefense((value) => value + 1);
           recordFestivalEvent("block", 1);
           recordDailyObjectiveEvent("defense", 1);
         } else if (result.evaded) {
+          setCombatDefense((value) => value + 1);
           recordFestivalEvent("evade", 1);
           recordDailyObjectiveEvent("defense", 1);
         }
