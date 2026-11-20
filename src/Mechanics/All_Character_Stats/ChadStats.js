@@ -13,6 +13,8 @@ const Chad = {
   name: "Yasutora Sado",
   image: ChadImage,
 
+  slot: 4, // Maximum attacks this character can equip.
+
   health: 120,
   mana: 85,
   maximumMana: 85,
