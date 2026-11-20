@@ -115,6 +115,8 @@ const Luffy = {
     {
       id: "Gum-Gum Red Hawk",
       name: "Gum-Gum Red Hawk",
+      locked: true,
+      unlockCost: 300,
       image: Attack6,
       damage: 80,
       speed: 55,
