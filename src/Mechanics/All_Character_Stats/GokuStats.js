@@ -156,6 +156,8 @@ const Goku = {
 
     {
       name: "Spirit Bomb",
+      locked: true,
+      unlockCost: 300,
       id: "Spirit-Bomb",
       image: Attack8,
       damage: 110,
