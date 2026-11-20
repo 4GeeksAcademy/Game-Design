@@ -228,7 +228,7 @@ function EffectDetails({ title, value, tone = "neutral" }) {
   );
 }
 
-function AttackDetails({ attack, characterName, onClose }) {
+function AttackDetails({ attack, characterName, characterId, onClose, onUnlock }) {
   if (!attack) return null;
   const hasEffects = ["buff", "debuff", "heal", "stun", "sacrifice",
     "attackModifiers", "characterModifiers"].some((key) => attack[key]);
@@ -236,7 +236,7 @@ function AttackDetails({ attack, characterName, onClose }) {
     "speed", "cost", "state", "buff", "debuff", "heal", "stun", "sacrifice",
     "attackModifiers", "characterModifiers", "duration", "uses", "remainingUses",
     "turnCooldown", "cooldownRemaining", "buffRequiresHit", "debuffRequiresHit",
-    "stunRequiresHit"]);
+    "stunRequiresHit", "locked", "unlockCost", "coinCost", "price"]);
   const extraDetails = Object.fromEntries(
     Object.entries(attack).filter(([key, value]) =>
       !knownKeys.has(key) && value !== undefined && value !== null && value !== false
@@ -283,6 +283,14 @@ function AttackDetails({ attack, characterName, onClose }) {
         {!hasEffects && Object.keys(extraDetails).length === 0 && (
           <p className="inventory-no-effects">This move has no additional buffs, debuffs, healing, stun, or stat modifiers.</p>
         )}
+        {!isAttackUnlocked(characterId, attack) && (
+          <div className="inventory-attack-unlock-panel">
+            <span>LOCKED MOVE · PERMANENT UNLOCK</span>
+            <button type="button" onClick={() => {
+              if (unlockAttack(characterId, attack)) onUnlock?.();
+            }}>UNLOCK FOR ◈ {attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}</button>
+          </div>
+        )}
       </section>
     </div>
   );
@@ -326,6 +334,7 @@ function Inventory() {
   const [activeTab, setActiveTab] = useState(location.state?.activeTab ?? "characters");
   const [loadoutCharacterId, setLoadoutCharacterId] = useState(location.state?.characterId ?? null);
   const [selectedAttack, setSelectedAttack] = useState(null);
+  const [, setAttackUnlockVersion] = useState(0);
 
   // Refresh character and skin data.
   useEffect(() => {
@@ -552,14 +561,14 @@ function Inventory() {
                         selectedCharacter.data.attacks.map((attack) => (
                           <button
                             type="button"
-                            className="inventory-attack-item"
+                            className={`inventory-attack-item ${isAttackUnlocked(selectedCharacter.id, attack) ? "" : "is-locked"}`}
                             key={attack.id ?? attack.name}
                             onClick={() => setSelectedAttack(attack)}
                             aria-label={`View ${getAttackDisplayName(attack)} effects and details`}
                           >
                             {attack.image && <img className="inventory-attack-thumb" src={attack.image} alt="" />}
                             <span className="inventory-attack-name"><strong>{getAttackDisplayName(attack)}</strong><small>VIEW MOVE DETAILS</small></span>
-                            <span>{attack.damage ?? 0} DAMAGE <b>↗</b></span>
+                            <span>{isAttackUnlocked(selectedCharacter.id, attack) ? `${attack.damage ?? 0} DAMAGE` : `◈ ${attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}`} <b>↗</b></span>
                           </button>
                         ))}
                     </div>
@@ -568,6 +577,8 @@ function Inventory() {
                       <AttackDetails
                         attack={selectedAttack}
                         characterName={selectedCharacter.data.name}
+                        characterId={selectedCharacter.id}
+                        onUnlock={() => setAttackUnlockVersion(value => value + 1)}
                         onClose={() => setSelectedAttack(null)}
                       />
                     )}
