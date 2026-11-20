@@ -11,6 +11,8 @@ const rockLee = {
   name: "Rock Lee",
   image: RockLeeArena,
 
+  slot: 6, // Maximum attacks this character can equip.
+
   health: 80,
   mana: 50,
   maximumMana: 50,
