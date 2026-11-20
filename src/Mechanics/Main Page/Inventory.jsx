@@ -418,6 +418,7 @@ function Inventory() {
 
   const [activeTab, setActiveTab] = useState(location.state?.activeTab ?? "characters");
   const [selectedAttack, setSelectedAttack] = useState(null);
+  const [selectedLoadoutCharacterId, setSelectedLoadoutCharacterId] = useState(null);
   const [, setAttackUnlockVersion] = useState(0);
 
   // Refresh character and skin data.
@@ -779,7 +780,51 @@ function Inventory() {
             )}
           </>
         ) : activeTab === "attacks" ? (
-          <div className="loadout-character-collection">{ownedCharacters.map((fighter) => <AttackLoadoutEditor key={fighter.id} character={fighter} />)}</div>
+          <div className="loadout-character-browser">
+            {selectedLoadoutCharacterId ? (
+              <>
+                <button
+                  type="button"
+                  className="loadout-back-to-roster"
+                  onClick={() => setSelectedLoadoutCharacterId(null)}
+                >
+                  ← ALL CHARACTERS
+                </button>
+                {ownedCharacters
+                  .filter((fighter) => fighter.id === selectedLoadoutCharacterId)
+                  .map((fighter) => (
+                    <AttackLoadoutEditor key={fighter.id} character={fighter} />
+                  ))}
+              </>
+            ) : (
+              <>
+                <div className="loadout-roster-heading">
+                  <p>BUILD YOUR FIGHTER DECK</p>
+                  <h2>SELECT A CHARACTER</h2>
+                  <span>Choose a fighter to view and customize their attacks.</span>
+                </div>
+                <div className="loadout-character-select-grid">
+                  {ownedCharacters.map((fighter) => (
+                    <button
+                      type="button"
+                      className="loadout-character-select-card"
+                      key={fighter.id}
+                      onClick={() => setSelectedLoadoutCharacterId(fighter.id)}
+                    >
+                      <div className="loadout-character-select-art">
+                        <img src={getCharacterImage(fighter.id, fighter.image)} alt={fighter.data.name} />
+                        <span>VIEW ATTACKS ↗</span>
+                      </div>
+                      <div className="loadout-character-select-info">
+                        <strong>{fighter.data.name}</strong>
+                        <small>{fighter.data.slot ?? fighter.data.attacks?.length ?? 0} ATTACK SLOTS</small>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         ) : (
           <SkinGallery
             ownedSkinIds={ownedSkinIds}
