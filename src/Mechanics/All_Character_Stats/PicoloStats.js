@@ -12,6 +12,8 @@ const Picolo = {
   name: "Piccolo",
   image: PicoloArenaImage,
 
+  slot: 7, // Maximum attacks this character can equip.
+
   health: 150,
   mana: 90,
   maximumMana: 90,
