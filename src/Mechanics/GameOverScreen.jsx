@@ -59,6 +59,11 @@ function GameOverScreen({
           </div>
 
           <div className="gameOverStat">
+            <span>✦ Total Score</span>
+            <strong>{Math.max(0, totalScore)}</strong>
+          </div>
+
+          <div className="gameOverStat">
             <span>◈ Coins Earned</span>
             <strong>+{Math.max(0, totalScore)}</strong>
           </div>
