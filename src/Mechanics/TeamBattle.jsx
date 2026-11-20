@@ -63,7 +63,7 @@ function createBattleFighter(id, applyLoadout = false) {
       typeof data.defense === "object" && data.defense
         ? { ...data.defense }
         : data.defense,
-    attacks: (applyLoadout ? getEquippedAttacks(selected.id, data.attacks ?? []) : (data.attacks ?? [])).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
+    attacks: (applyLoadout ? getEquippedAttacks(selected.id, data.attacks ?? [], data.slot) : (data.attacks ?? [])).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
         ? attack.uses
         : attack.remainingUses;
