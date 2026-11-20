@@ -63,6 +63,12 @@ function VictoryScreen({
           </div>
 
           <div className="victoryStat">
+            <span className="victoryStatIcon">✦</span>
+            <span className="victoryStatLabel">Total Score</span>
+            <strong>{Math.max(0, totalScore)}</strong>
+          </div>
+
+          <div className="victoryStat">
             <span className="victoryStatIcon">◈</span>
             <span className="victoryStatLabel">Coins Earned</span>
             <strong>+{Math.max(0, totalScore)}</strong>
