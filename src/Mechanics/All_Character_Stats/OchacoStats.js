@@ -10,6 +10,8 @@ const Ochaco = {
   name: "Ochaco Uraraka",
   image: OchacoArenaImage,
 
+  slot: 5, // Maximum attacks this character can equip.
+
   health: 90,
   mana: 120,
   maximumMana: 120,
