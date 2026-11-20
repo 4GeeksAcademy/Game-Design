@@ -10,6 +10,8 @@ const Yoruichi = {
   name: "Yoruichi Shihōin",
   image: YoruichiArenaImage,
 
+  slot: 6, // Maximum attacks this character can equip.
+
   health: 70,
   maximumHealth: 70,
 
