@@ -119,6 +119,8 @@ const Yoruichi = {
 
     {
       name: "Shunko: Lightning Release",
+      locked: true,
+      unlockCost: 300,
       image: Attack3,
       damage: 12,
       cost: 37,
