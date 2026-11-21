@@ -1,3 +1,5 @@
+import { addCoins } from "../../Currency.js";
+
 // ==========================================
 // FESTIVAL CONFIGURATION
 // ==========================================
@@ -49,6 +51,8 @@ const createDefaultProgress = () => ({
   elitePassOwned: false,
   claimedFreeRewards: [],
   claimedEliteRewards: [],
+  claimedAttackRewards: [],
+  rewardMigrationVersion: 1,
 });
 
 // ==========================================
@@ -65,7 +69,7 @@ export const getFestivalProgress = () => {
 
     const parsed = JSON.parse(savedProgress);
 
-    return {
+    const progress = {
       ...createDefaultProgress(),
       ...parsed,
       points: Math.max(
@@ -78,7 +82,24 @@ export const getFestivalProgress = () => {
       claimedEliteRewards: Array.isArray(parsed.claimedEliteRewards)
         ? parsed.claimedEliteRewards
         : [],
+      claimedAttackRewards: Array.isArray(parsed.claimedAttackRewards)
+        ? parsed.claimedAttackRewards
+        : [],
     };
+
+    // Preserve existing players' progress when coin rewards move to later
+    // free tiers, and allow newly-added attack rewards at previously-claimed
+    // tiers to be claimed once without resetting the festival.
+    if ((Number(parsed.rewardMigrationVersion) || 0) < 1) {
+      const coinCompensation =
+        (progress.claimedFreeRewards.includes(15) ? 15000 : 0) +
+        (progress.claimedFreeRewards.includes(19) ? 6500 : 0);
+      if (coinCompensation > 0) addCoins(coinCompensation);
+      progress.rewardMigrationVersion = 1;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    }
+
+    return progress;
   } catch (error) {
     console.error("Could not load Festival progress:", error);
     return createDefaultProgress();
@@ -154,7 +175,7 @@ export const isFestivalTierUnlocked = (tierNumber, points) => {
   return points >= requiredPoints;
 };
 
-export const claimFestivalReward = (tierNumber, rewardTrack) => {
+export const claimFestivalReward = (tierNumber, rewardTrack, attackRewardId = null) => {
   if (
     !Number.isInteger(tierNumber) ||
     tierNumber < 1 ||
@@ -165,18 +186,23 @@ export const claimFestivalReward = (tierNumber, rewardTrack) => {
   }
 
   const progress = getFestivalProgress();
-
   const claimedKey =
     rewardTrack === "free" ? "claimedFreeRewards" : "claimedEliteRewards";
 
-  if (progress[claimedKey].includes(tierNumber)) {
-    return false;
+  if (attackRewardId) {
+    if (progress.claimedAttackRewards.includes(attackRewardId)) return false;
+    return saveFestivalProgress({
+      ...progress,
+      [claimedKey]: progress[claimedKey].includes(tierNumber)
+        ? progress[claimedKey]
+        : [...progress[claimedKey], tierNumber],
+      claimedAttackRewards: [...progress.claimedAttackRewards, attackRewardId],
+    });
   }
 
-  const updatedProgress = {
+  if (progress[claimedKey].includes(tierNumber)) return false;
+  return saveFestivalProgress({
     ...progress,
     [claimedKey]: [...progress[claimedKey], tierNumber],
-  };
-
-  return saveFestivalProgress(updatedProgress);
+  });
 };
