@@ -285,10 +285,19 @@ function AttackDetails({ attack, characterName, characterId, onClose, onUnlock }
         )}
         {!isAttackUnlocked(characterId, attack) && (
           <div className="inventory-attack-unlock-panel">
-            <span>LOCKED MOVE · PERMANENT UNLOCK</span>
-            <button type="button" onClick={() => {
-              if (unlockAttack(characterId, attack)) onUnlock?.();
-            }}>UNLOCK FOR ◈ {attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}</button>
+            {attack.festivalExclusive ? (
+              <>
+                <span>FESTIVAL EXCLUSIVE · LIMITED REWARD TRACK</span>
+                <p>This attack cannot be purchased with coins. It is only obtainable by claiming its reward in the Combat Festival.</p>
+              </>
+            ) : (
+              <>
+                <span>LOCKED MOVE · PERMANENT UNLOCK</span>
+                <button type="button" onClick={() => {
+                  if (unlockAttack(characterId, attack)) onUnlock?.();
+                }}>UNLOCK FOR ◈ {attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}</button>
+              </>
+            )}
           </div>
         )}
       </section>
@@ -346,7 +355,11 @@ function AttackLoadoutEditor({ character }) {
         <strong>{getAttackDisplayName(attack)}</strong>
         <span>{attack.damage ?? 0} DMG · {attack.cost ?? 0} MANA</span>
         {mode === "locked" ? (
+          attack.festivalExclusive ? (
+            <span className="loadout-festival-exclusive">FESTIVAL EXCLUSIVE · CLAIM IN FESTIVAL</span>
+          ) : (
           <button onClick={() => unlock(attack)}>UNLOCK · ◈ {attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}</button>
+          )
         ) : mode === "equipped" ? (
           <button className="loadout-remove" onClick={() => change(attack, false)}>UNEQUIP</button>
         ) : (
@@ -657,7 +670,7 @@ function Inventory() {
                             {attack.image && <img className="inventory-attack-thumb" src={attack.image} alt="" />}
                             {!isAttackUnlocked(selectedCharacter.id, attack) && <b className="inventory-attack-lock-ribbon">LOCKED</b>}
                             <span className="inventory-attack-name"><strong>{getAttackDisplayName(attack)}</strong><small>VIEW MOVE DETAILS</small></span>
-                            <span>{isAttackUnlocked(selectedCharacter.id, attack) ? `${attack.damage ?? 0} DAMAGE` : `◈ ${attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}`} <b>↗</b></span>
+                            <span>{isAttackUnlocked(selectedCharacter.id, attack) ? `${attack.damage ?? 0} DAMAGE` : attack.festivalExclusive ? "FESTIVAL EXCLUSIVE" : `◈ ${attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}`} <b>↗</b></span>
                           </button>
                         ))}
                     </div>
