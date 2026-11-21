@@ -159,11 +159,6 @@ function FighterPreview({
   onClick,
   canSelect = false,
 }) {
-  const getDefense = (currentFighter) =>
-    typeof currentFighter.defense === "object" && currentFighter.defense
-      ? (currentFighter.defense.amount ?? 0)
-      : (currentFighter.defense ?? 0);
-
   const percent = (value, maximum) =>
     maximum > 0
       ? Math.max(0, Math.min(100, (Number(value) / maximum) * 100))
