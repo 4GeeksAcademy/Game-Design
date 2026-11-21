@@ -280,6 +280,7 @@ function App() {
     setDamageDealt(0); setCombatDefense(0); setAttacksUsed(0);
     lastRewardedDamage.current = 0; lastRecordedAttacks.current = 0;
     rewardPaidRef.current = false;
+    festivalBattleRecorded.current = false;
     setDefenseTimeLeft(10); setCurrentTurn("intro"); setShowIncomingAttack(false);
     setRoundNumber(1); setShowRoundIntro(true); setKnockout(null); setShowResults(false);
     setIsRoundIntroFadingOut(false); setShowFinishOverlay(false); setIsFinishFadingOut(false);
@@ -934,6 +935,7 @@ const stunOptions = {
       {isStoryMode && knockout && showResults ? (
         <StoryResultsScreen
           won={knockout.defeatedTeam === "opponent"}
+          onRematch={resetBattle}
           playerName={character.name}
           opponentName={opponent.name}
           damageDealt={damageDealt}
