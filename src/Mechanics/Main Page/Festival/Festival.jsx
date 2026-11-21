@@ -308,7 +308,9 @@ function Festival() {
         ? currentProgress.claimedFreeRewards
         : currentProgress.claimedEliteRewards;
 
-    if (claimedRewards.includes(tierNumber)) return;
+    if (reward.type === "attack"
+      ? currentProgress.claimedAttackRewards.includes(reward.attackId)
+      : claimedRewards.includes(tierNumber)) return;
 
     // Prevent duplicate character unlocks.
     // Prevent claiming characters already owned.
@@ -327,7 +329,11 @@ function Festival() {
     if (reward.type === "attack" && !getFestivalAttack(reward.characterId, reward.attackId)) return;
 
     // Record the claim before granting the reward.
-    const saved = claimFestivalReward(tierNumber, rewardTrack);
+    const saved = claimFestivalReward(
+      tierNumber,
+      rewardTrack,
+      reward.type === "attack" ? reward.attackId : null,
+    );
 
     if (!saved) return;
 
@@ -517,9 +523,9 @@ function Festival() {
                 const reward = FESTIVAL_REWARDS[tier.number]?.free;
                 const unlocked = playerPoints >= tier.points;
 
-                const claimed = festivalProgress.claimedFreeRewards.includes(
-                  tier.number,
-                );
+                const claimed = reward?.type === "attack"
+                  ? festivalProgress.claimedAttackRewards.includes(reward.attackId)
+                  : festivalProgress.claimedFreeRewards.includes(tier.number);
 
                 return (
                   <div
@@ -602,9 +608,9 @@ function Festival() {
                 const unlocked =
                   tierUnlocked && festivalProgress.elitePassOwned;
 
-                const claimed = festivalProgress.claimedEliteRewards.includes(
-                  tier.number,
-                );
+                const claimed = reward?.type === "attack"
+                  ? festivalProgress.claimedAttackRewards.includes(reward.attackId)
+                  : festivalProgress.claimedEliteRewards.includes(tier.number);
 
                 return (
                   <div
