@@ -21,7 +21,7 @@ import "./Homescreen.css";
 // TEMPORARY FEATURE SWITCH:
 // Set to true to show the LOCAL 2 PLAYERS button in the Multiplayer menu.
 // Set to false to hide it while the local PvP interface is being polished.
-const ENABLE_LOCAL_MULTIPLAYER = false;
+const ENABLE_LOCAL_MULTIPLAYER = true;
 
 function Homescreen() {
   const navigate = useNavigate();
