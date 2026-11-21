@@ -53,6 +53,13 @@ function getFighterWithEquippedAttacks(fighter) {
   };
 }
 
+function getEquippedAttackLabel(fighter) {
+  if (!fighter) return "No fighter";
+  const data = getFighterData(fighter);
+  const attacks = getEquippedAttacks(fighter.id, data.attacks ?? [], data.slot);
+  return attacks.map((attack) => attack.name ?? getAttackKey(attack)).join(" · ") || "No attacks equipped";
+}
+
 function buildAttackCombinations(attacks, slotLimit, maxCandidates, currentKeys = []) {
   const size = Math.min(slotLimit, attacks.length);
   if (size <= 0) return [];
@@ -2331,6 +2338,7 @@ function BotSimulator() {
                 <tr>
                   <th>RANK</th>
                   <th>{results.battleType === "2v2" ? "TEAM" : "FIGHTER"}</th>
+                  <th>EQUIPPED ATTACKS</th>
                   <th>OVERALL SCORE</th>
                   <th>WIN RATE</th>
                   <th>WINS</th>
@@ -2361,6 +2369,19 @@ function BotSimulator() {
 
                     <td>
                       <strong>{fighter.name}</strong>
+                    </td>
+
+                    <td className="ranked-loadout-cell">
+                      {results.battleType === "2v2"
+                        ? fighter.team.map((member) => (
+                            <div key={member.id}>
+                              <strong>{getFighterName(member)}:</strong>{" "}
+                              {getEquippedAttackLabel(member)}
+                            </div>
+                          ))
+                        : getEquippedAttackLabel(
+                            availableFighters.find((member) => member.id === fighter.id),
+                          )}
                     </td>
 
                     <td className="overall-score-cell">
