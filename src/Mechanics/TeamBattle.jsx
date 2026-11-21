@@ -222,31 +222,31 @@ function FighterPreview({
       <div className="fighter-stat-bars">
         <StatBar
           label="DEF"
-          value={getDefense(fighter)}
+          value={getModifiedCharacterStat(fighter, "defense")}
           maximum={fighter.maximumDefense ?? 100}
           color="defense"
         />
         <StatBar
           label="AGI"
-          value={fighter.agility ?? 0}
+          value={getModifiedCharacterStat(fighter, "agility")}
           maximum={fighter.maximumAgility ?? 100}
           color="agility"
         />
         <StatBar
           label="REGEN"
-          value={fighter.manaRegen ?? 0}
+          value={getModifiedCharacterStat(fighter, "manaRegen")}
           maximum={fighter.maximumManaRegen ?? 100}
           color="regen"
         />
         <StatBar
           label="REC"
-          value={fighter.recovery ?? 0}
+          value={getModifiedCharacterStat(fighter, "recovery")}
           maximum={fighter.maximumRecovery ?? 10}
           color="recovery"
         />
         <StatBar
           label="CD"
-          value={fighter.cooldown ?? 0}
+          value={getModifiedCharacterStat(fighter, "cooldown")}
           maximum={fighter.maximumCooldown ?? 10}
           color="cooldown"
         />
