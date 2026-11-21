@@ -20,7 +20,7 @@ import { addCoins } from "./Currency.js";
 import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 function createBattleFighter(characterId, battleId) {
   const selected = roster.find((fighter) => fighter.id === characterId);
@@ -76,6 +76,85 @@ function createBattleFighter(characterId, battleId) {
     attacks,
     turnFinished: false,
     blocked: false,
+  };
+}
+
+function cloneBattleFighterForPreview(fighter) {
+  return {
+    ...fighter,
+    defense:
+      typeof fighter?.defense === "object" && fighter.defense
+        ? { ...fighter.defense }
+        : fighter?.defense,
+    activeModifiers: (fighter?.activeModifiers ?? []).map((modifier) => ({
+      ...modifier,
+    })),
+    attacks: (fighter?.attacks ?? []).map((attack) => ({
+      ...attack,
+      buff: attack.buff ? { ...attack.buff } : attack.buff,
+      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+      heal: attack.heal
+        ? {
+            ...attack.heal,
+            buff: attack.heal.buff ? { ...attack.heal.buff } : attack.heal.buff,
+          }
+        : attack.heal,
+      activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+        ...effect,
+        effects: { ...effect.effects },
+      })),
+      stunned: attack.stunned ? { ...attack.stunned } : attack.stunned,
+    })),
+  };
+}
+
+function IncomingResourceBar({ label, value, maximum, kind, before }) {
+  const safeMaximum = Math.max(1, Number(maximum) || 1);
+  const safeValue = Math.max(0, Number(value) || 0);
+  const percentage = Math.max(0, Math.min(100, (safeValue / safeMaximum) * 100));
+  const difference =
+    before === undefined ? null : safeValue - (Number(before) || 0);
+
+  return (
+    <div className={`incoming-resource incoming-resource-${kind}`}>
+      <div className="incoming-resource-heading">
+        <span>{label}</span>
+        <strong>
+          {safeValue}
+          <small> / {safeMaximum}</small>
+          {difference !== null && difference !== 0 && (
+            <em className={difference < 0 ? "resource-loss" : "resource-gain"}>
+              {difference > 0 ? "+" : ""}
+              {difference}
+            </em>
+          )}
+        </strong>
+      </div>
+      <div
+        className="incoming-resource-track"
+        role="img"
+        aria-label={`${label}: ${safeValue} of ${safeMaximum}`}
+      >
+        <div
+          className="incoming-resource-fill"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function getIncomingResourceSnapshot(fighter) {
+  return {
+    health: Math.max(0, Number(fighter?.health) || 0),
+    maximumHealth: Math.max(1, Number(fighter?.maximumHealth) || Number(fighter?.health) || 1),
+    cooldown: Math.max(0, Number(fighter?.cooldown) || 0),
+    maximumCooldown: Math.max(
+      1,
+      Number(fighter?.maximumCooldown) || Number(fighter?.cooldown) || 1,
+    ),
+    mana: Math.max(0, Number(fighter?.mana) || 0),
+    maximumMana: Math.max(1, Number(fighter?.maximumMana) || Number(fighter?.mana) || 1),
   };
 }
 
@@ -186,6 +265,64 @@ function App() {
   const [combatMessages, setCombatMessages] = useState([]);
   const [combatLog, setCombatLog] = useState([]);
   const [aiAttack, setAiAttack] = useState(null);
+
+  // Preview each response on cloned fighters so the card never mutates live combat state.
+  const incomingAttackPreviews = useMemo(() => {
+    if (!aiAttack) return null;
+
+    const selectedAttackIds = aiChooseStunTargets(character, aiAttack.stun);
+    const createPreview = (choice) => {
+      const previewAttacker = cloneBattleFighterForPreview(opponent);
+      const previewDefender = cloneBattleFighterForPreview(character);
+      const stunOptions = {
+        fighters: [previewAttacker, previewDefender],
+        selectedAttackIds,
+      };
+
+      const result =
+        choice === "defend"
+          ? attackCharacter(
+              { ...aiAttack },
+              previewAttacker,
+              previewDefender,
+              getModifiedCharacterStat(previewDefender, "defense"),
+              { ...stunOptions, blocked: true },
+            )
+          : choice === "evade"
+            ? evadeAttack(
+                { ...aiAttack },
+                previewAttacker,
+                previewDefender,
+                stunOptions,
+              )
+            : attackCharacter(
+                { ...aiAttack },
+                previewAttacker,
+                previewDefender,
+                0,
+                { ...stunOptions, blocked: false },
+              );
+
+      if (!result) return null;
+
+      // Match the extra cooldown reduction applied by the live block handler.
+      if (choice === "defend") {
+        result.defender.cooldown = Math.max(
+          0,
+          (result.defender.cooldown ?? 0) - 1,
+        );
+      }
+
+      return getIncomingResourceSnapshot(result.defender);
+    };
+
+    return {
+      current: getIncomingResourceSnapshot(character),
+      defend: createPreview("defend"),
+      evade: createPreview("evade"),
+      takeDamage: createPreview("take-damage"),
+    };
+  }, [aiAttack, character, opponent]);
 
   const characterRef = useRef(character);
   const opponentRef = useRef(opponent);
@@ -871,6 +1008,80 @@ const stunOptions = {
                       </div>
                     </div>
                   </div>
+
+                  {incomingAttackPreviews && (
+                    <section className="incoming-player-status" aria-label="Your resources and incoming attack aftermath">
+                      <div className="incoming-status-heading">
+                        <span>YOUR CURRENT RESOURCES</span>
+                        <small>BEFORE IMPACT</small>
+                      </div>
+
+                      <div className="incoming-current-resources">
+                        <IncomingResourceBar
+                          label="HEALTH"
+                          value={incomingAttackPreviews.current.health}
+                          maximum={incomingAttackPreviews.current.maximumHealth}
+                          kind="health"
+                        />
+                        <IncomingResourceBar
+                          label="COOLDOWN"
+                          value={incomingAttackPreviews.current.cooldown}
+                          maximum={incomingAttackPreviews.current.maximumCooldown}
+                          kind="cooldown"
+                        />
+                        <IncomingResourceBar
+                          label="MANA"
+                          value={incomingAttackPreviews.current.mana}
+                          maximum={incomingAttackPreviews.current.maximumMana}
+                          kind="mana"
+                        />
+                      </div>
+
+                      <div className="incoming-status-heading incoming-aftermath-heading">
+                        <span>AFTERMATH PREVIEW</span>
+                        <small>IF YOU CHOOSE</small>
+                      </div>
+
+                      <div className="incoming-aftermath-grid">
+                        {[
+                          { key: "defend", label: "BLOCK", result: incomingAttackPreviews.defend },
+                          { key: "evade", label: "EVADE", result: incomingAttackPreviews.evade },
+                          { key: "takeDamage", label: "TAKE HIT", result: incomingAttackPreviews.takeDamage },
+                        ].map(({ key, label, result }) => (
+                          <div className={`incoming-aftermath-option aftermath-${key}`} key={key}>
+                            <strong>{label}</strong>
+                            {result ? (
+                              <>
+                                <IncomingResourceBar
+                                  label="HP"
+                                  value={result.health}
+                                  maximum={result.maximumHealth}
+                                  before={incomingAttackPreviews.current.health}
+                                  kind="health"
+                                />
+                                <IncomingResourceBar
+                                  label="CD"
+                                  value={result.cooldown}
+                                  maximum={result.maximumCooldown}
+                                  before={incomingAttackPreviews.current.cooldown}
+                                  kind="cooldown"
+                                />
+                                <IncomingResourceBar
+                                  label="MP"
+                                  value={result.mana}
+                                  maximum={result.maximumMana}
+                                  before={incomingAttackPreviews.current.mana}
+                                  kind="mana"
+                                />
+                              </>
+                            ) : (
+                              <span className="incoming-preview-unavailable">UNAVAILABLE</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
 
                   <div id="defensiveActions">
                     <button
