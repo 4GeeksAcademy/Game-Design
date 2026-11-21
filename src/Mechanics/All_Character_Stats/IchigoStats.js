@@ -160,6 +160,17 @@ const Ichigo = {
           speed: { multiplier: 1.5 },
         },
       },
+      characterModifiers: {
+        agility: {
+          multiplier: 1.7,
+        },
+        defense: {
+          multiplier: 1.15,
+        },
+        manaRegen: {
+          multiplier: 1.2,
+        },
+      },
       sacrifice: { health: 50 },
     },
   ],
