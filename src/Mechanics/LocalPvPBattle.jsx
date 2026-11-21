@@ -5,6 +5,8 @@ import { getCharacterImage } from "./SkinManager.js";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import LocalPvPFighterPanel from "./LocalPvPFighterPanel.jsx";
+import Opponent from "./Opponent.jsx";
+import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
 import { aiChooseStunTargets } from "./AI.js";
 import {
   attackCharacter,
@@ -529,8 +531,20 @@ export default function LocalPvPBattle() {
           <b className={turnTime <= 5 && isActive ? "timer-danger" : ""}>{isActive ? turnTime + "s" : ""}</b>
           <button className="local-pvp-finish-rect" disabled={!isActive || owner?.turnFinished || phase !== "fighting" || isPaused} onClick={() => owner && finishFighterTurn(owner.id)}>FINISH TURN →</button>
         </header>
-        <div className="local-pvp-screen-fighters">
-          <LocalPvPFighterPanel fighter={owner} side="player" />
+        <div
+          className="local-pvp-battle-arena"
+          style={{
+            backgroundImage: `linear-gradient(115deg, rgba(5, 12, 22, 0.48), rgba(5, 12, 22, 0.30)), url("${config.backgroundImage || storyBackgrounds.leafVillage}")`,
+          }}
+        >
+          <div className="local-pvp-screen-fighters">
+            {rival && (
+              <div className="local-pvp-rival-panel">
+                <Opponent opponent={rival} setOpponent={noOp} />
+              </div>
+            )}
+            <LocalPvPFighterPanel fighter={owner} side="player" />
+          </div>
         </div>
         <div className="local-pvp-existing-attacks">
           {owner && rival && (
