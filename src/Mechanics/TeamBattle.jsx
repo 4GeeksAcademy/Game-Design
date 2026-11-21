@@ -2750,6 +2750,8 @@ export default function TeamBattle() {
   return (
     <main className="team-battle">
       <FestivalChallengePopup />
+      <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match">Ⅱ</button>
+      {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: levelConfig })} onMainMenu={() => navigate("/")} />}
       {isFinalTeamPhase && (
         <div
           className={`team-finish-overlay ${
