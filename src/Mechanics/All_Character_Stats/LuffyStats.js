@@ -1,4 +1,3 @@
-import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 import LuffyArenaImage from "../../assets/img/Luffy.png";
 
 import Attack2 from "../../assets/img/Attack_IMAGES/third gear.jpeg";
@@ -129,7 +128,18 @@ const Luffy = {
         agility: 8,
       },
     },
-    ...FESTIVAL_ATTACKS_BY_CHARACTER.luffy,
+    {
+      id: "luffy-festival-elephant-gun",
+      name: "Gum-Gum Elephant Gun",
+      description: "Luffy enlarges and hardens his arm with Haki before delivering a crushing punch.",
+      festivalExclusive: true,
+      locked: true,
+      damage: 70,
+      speed: 25,
+      cost: 35,
+      turnCooldown: 2,
+      state: true,
+    },
   ],
 };
 
