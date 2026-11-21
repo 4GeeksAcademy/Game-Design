@@ -36,7 +36,7 @@ import Yoruichi from "../All_Character_Stats/YoruichiStats.js";
 import YoruichiArenaImage from "../../assets/img/Yoruichi.png";
 
 import { getUnlockedCharacters } from "../Currency.js";
-import { getAttackSlotLimit } from "../AttackLoadouts.js";
+import { getAttackSlotLimit, getEquippedAttacks } from "../AttackLoadouts.js";
 
 import "./CharacterSelection.css";
 
@@ -302,6 +302,7 @@ function CharacterSelection() {
   });
   const [activeSelectingPlayer, setActiveSelectingPlayer] = useState(location.state?.resumeActiveSelectingPlayer ?? "player1");
   const [pvpConfirmed, setPvpConfirmed] = useState({ player1: false, player2: false });
+  const [attackGateNotice, setAttackGateNotice] = useState(null);
 
   const [cpuIndices, setCpuIndices] = useState(() => {
     if (levelConfig.gameMode !== "story" || !levelConfig.opponentId) {
@@ -411,10 +412,35 @@ function CharacterSelection() {
     setPlayerAnimationKey((key) => key + 1);
   };
 
+  const getFightersMissingAttacks = (indices) => indices
+    .map((index) => roster[index])
+    .filter((fighter) => {
+      if (!fighter?.data) return true;
+      return getEquippedAttacks(fighter.id, fighter.data.attacks ?? [], fighter.data.slot).length < 3;
+    });
+
+  const showAttackRequirement = (indices, playerLabel = "PLAYER") => {
+    const missing = getFightersMissingAttacks(indices);
+    if (missing.length === 0) return false;
+    const names = missing.map((fighter) => fighter?.data?.name ?? "Selected fighter");
+    setAttackGateNotice({
+      title: "YOUR DECK ISN'T READY!",
+      message: `${playerLabel}: ${names.join(", ")} ${names.length === 1 ? "needs" : "need"} at least 3 equipped attacks before entering the arena.`,
+    });
+    return true;
+  };
+
+  useEffect(() => {
+    if (!attackGateNotice) return undefined;
+    const timer = window.setTimeout(() => setAttackGateNotice(null), 4200);
+    return () => window.clearTimeout(timer);
+  }, [attackGateNotice]);
+
   const confirmPvpSelection = (playerId) => {
     const selection = playerId === "player1" ? selectedIndices : player2Indices;
     if (!localPvP || phase !== "player" || pvpConfirmed[playerId] ||
       selection.length !== requiredFighters) return;
+    if (showAttackRequirement(selection, playerId === "player1" ? "PLAYER 1" : "PLAYER 2")) return;
     setPvpConfirmed((current) => {
       const next = { ...current, [playerId]: true };
       if (next.player1 && next.player2) setPhase("ready");
@@ -523,6 +549,7 @@ function CharacterSelection() {
     if (phase !== "player") return;
 
     if (selectedIndices.length !== requiredFighters) return;
+    if (showAttackRequirement(selectedIndices, "PLAYER 1")) return;
 
     if (!selectedIndices.every((index) => isUnlocked(roster[index]))) {
       navigate("/shop");
@@ -591,6 +618,9 @@ function CharacterSelection() {
     ) {
       return;
     }
+    // Final safety check: never enter a match with an incomplete player loadout.
+    if (showAttackRequirement(selectedIndices, "PLAYER 1")) return;
+    if (localPvP && showAttackRequirement(player2Indices, "PLAYER 2")) return;
 
     const playerTeamIds = selectedIndices.map((index) => roster[index].id);
     const opponentTeamIds = (localPvP ? player2Indices : cpuIndices).map((index) => roster[index].id);
@@ -800,6 +830,19 @@ function CharacterSelection() {
         >
           {phase === "cpu" ? "CPU SELECTING..." : "FIGHT! ▶"}
         </button>
+      )}
+
+      {attackGateNotice && (
+        <div className="attack-gate-backdrop" role="presentation" onClick={() => setAttackGateNotice(null)}>
+          <section className="attack-gate-popup" role="alertdialog" aria-modal="true" aria-labelledby="attack-gate-title" onClick={(event) => event.stopPropagation()}>
+            <div className="attack-gate-emblem" aria-hidden="true">⚔</div>
+            <p className="attack-gate-eyebrow">ARENA ENTRY DENIED</p>
+            <h2 id="attack-gate-title">{attackGateNotice.title}</h2>
+            <p>{attackGateNotice.message}</p>
+            <strong className="attack-gate-requirement">3 EQUIPPED ATTACKS REQUIRED</strong>
+            <button type="button" onClick={() => setAttackGateNotice(null)}>GOT IT · FIX LOADOUT</button>
+          </section>
+        </div>
       )}
 
       <section className="roster-section">
