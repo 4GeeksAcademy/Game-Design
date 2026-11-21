@@ -1453,3 +1453,305 @@ html:has(.local-pvp-1v1), body:has(.local-pvp-1v1), #app:has(.local-pvp-1v1) {
   .local-pvp-player-screen .local-pvp-fighter-statbars { gap: 7px; }
   .local-pvp-player-screen .local-pvp-fighter-statbars .statBarHeader { font-size: 10px; }
 }
+
+
+/* FINAL 1v1 SPLIT-SCREEN LAYOUT
+   Keep the viewport full-screen, but let the attack panel size itself to its cards.
+   The unused lower area remains background space instead of stretching the cards. */
+.local-pvp-1v1 {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: 6px 8px;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.local-pvp-match-header {
+  flex: 0 0 42px;
+  min-height: 42px;
+  margin: 0;
+}
+
+.local-pvp-split-screen {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  overflow: hidden;
+}
+
+.local-pvp-player-screen {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 6px;
+  overflow: hidden;
+}
+
+.local-pvp-player-heading {
+  flex: 0 0 32px;
+  min-height: 32px;
+  margin: 0;
+}
+
+.local-pvp-screen-fighters {
+  flex: 0 0 auto;
+  display: block;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.local-pvp-fighter-status {
+  display: block;
+  width: 100%;
+  height: auto;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+}
+
+.local-pvp-player-screen .battle-status-panel,
+.local-pvp-player-screen #character.battle-status-panel,
+.local-pvp-player-screen #opponent.battle-status-panel {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0 12px;
+  width: 100%;
+  height: 158px;
+  min-height: 158px;
+  max-height: 158px;
+  margin: 0;
+  padding: 10px 12px;
+  overflow: hidden;
+}
+
+.local-pvp-player-screen .local-pvp-fighter-info {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 8px;
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.local-pvp-player-screen .local-pvp-fighter-statbars {
+  display: flex !important;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.local-pvp-player-screen .local-pvp-fighter-statbars .statBar {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.local-pvp-player-screen .local-pvp-fighter-statbars .statBarHeader {
+  margin: 0 0 3px;
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+.local-pvp-player-screen .local-pvp-fighter-statbars .statProgress {
+  height: 9px !important;
+  min-height: 9px;
+  margin: 0;
+}
+
+.local-pvp-player-screen .local-pvp-fighter-compact {
+  flex: 0 0 auto;
+  margin: 0;
+  gap: 6px;
+}
+
+.local-pvp-existing-attacks {
+  flex: 0 0 auto !important;
+  display: block;
+  width: 100%;
+  height: auto !important;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.local-pvp-existing-attacks #attackSection {
+  display: block !important;
+  width: 100%;
+  height: auto !important;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 0;
+}
+
+.local-pvp-existing-attacks #attack {
+  display: block !important;
+  width: 100%;
+  height: auto !important;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.local-pvp-existing-attacks #attackHeader {
+  display: block;
+  height: 27px;
+  min-height: 27px;
+  padding: 5px 8px;
+  line-height: 1.2;
+}
+
+.local-pvp-existing-attacks #attackBody {
+  display: block;
+  height: auto !important;
+  min-height: 0;
+  padding: 7px;
+  overflow: hidden;
+}
+
+.local-pvp-existing-attacks #attackList {
+  display: flex !important;
+  flex-flow: row nowrap;
+  align-items: flex-start !important;
+  justify-content: flex-start;
+  width: 100%;
+  height: auto !important;
+  min-height: 0;
+  gap: 7px !important;
+  padding: 0 0 4px !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.local-pvp-existing-attacks .attack-card-wrapper {
+  display: block;
+  flex: 0 0 132px !important;
+  width: 132px;
+  min-width: 132px;
+  max-width: 132px;
+  height: 218px !important;
+  min-height: 218px;
+  max-height: 218px;
+  margin: 0;
+}
+
+.local-pvp-existing-attacks .attack-card-wrapper > .attack-card,
+.local-pvp-existing-attacks .attack-card {
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0 !important;
+  max-width: 100%;
+  height: 218px !important;
+  min-height: 218px;
+  max-height: 218px;
+  margin: 0;
+  padding: 6px !important;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.local-pvp-existing-attacks .attack-card .attack-image,
+.local-pvp-existing-attacks .attack-card [id^="attackImage"] {
+  display: block;
+  flex: 0 0 76px;
+  width: 100%;
+  height: 76px;
+  min-height: 76px;
+  max-height: 76px;
+  margin: 0;
+  object-fit: cover;
+}
+
+.local-pvp-existing-attacks .attack-card h5,
+.local-pvp-existing-attacks [id^="attackName"] {
+  flex: 0 0 auto;
+  min-height: 26px;
+  margin: 0;
+  font-size: .66rem;
+  line-height: 1.1;
+}
+
+@media (max-height: 800px) {
+  .local-pvp-player-screen .battle-status-panel,
+  .local-pvp-player-screen #character.battle-status-panel,
+  .local-pvp-player-screen #opponent.battle-status-panel {
+    height: 148px;
+    min-height: 148px;
+    max-height: 148px;
+  }
+  .local-pvp-existing-attacks .attack-card-wrapper,
+  .local-pvp-existing-attacks .attack-card-wrapper > .attack-card,
+  .local-pvp-existing-attacks .attack-card {
+    height: 206px !important;
+    min-height: 206px;
+    max-height: 206px;
+  }
+}
+
+@media (max-width: 900px) {
+  .local-pvp-split-screen { gap: 5px; }
+  .local-pvp-player-screen { padding: 4px; }
+  .local-pvp-player-screen .battle-status-panel,
+  .local-pvp-player-screen #character.battle-status-panel,
+  .local-pvp-player-screen #opponent.battle-status-panel {
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 0 7px;
+  }
+  .local-pvp-player-screen #characterPortraitWrapper,
+  .local-pvp-player-screen #opponentPortraitWrapper { width: 92px; }
+  .local-pvp-player-screen #characterImage,
+  .local-pvp-player-screen #opponentImage,
+  .local-pvp-player-screen #character #characterImage {
+    flex-basis: 56px;
+    width: 56px !important;
+  }
+  .local-pvp-existing-attacks .attack-card-wrapper {
+    flex-basis: 112px !important;
+    width: 112px;
+    min-width: 112px;
+    max-width: 112px;
+  }
+}
+
+@media (max-width: 650px) {
+  .local-pvp-1v1 { overflow-y: auto; }
+  .local-pvp-split-screen {
+    flex: 0 0 auto;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+  .local-pvp-player-screen { height: auto; }
+}
