@@ -1013,18 +1013,34 @@ const stunOptions = {
                     </div>
                   </div>
 
-                  <section className="incoming-player-status" aria-label="Your current health">
-                    <div className="incoming-status-heading">
-                      <span>YOUR CURRENT HEALTH</span>
-                      <strong>{Math.max(0, character.health)} / {character.maximumHealth}</strong>
+                  <section className="incoming-player-status" aria-label="Your current health and mana">
+                    <div className="incoming-resource-line">
+                      <div className="incoming-status-heading">
+                        <span>HEALTH</span>
+                        <strong>{Math.max(0, character.health)} / {character.maximumHealth}</strong>
+                      </div>
+                      <div className="incoming-health-track">
+                        <div
+                          className="incoming-health-fill"
+                          style={{
+                            width: `${Math.max(0, Math.min(100, (character.health / Math.max(1, character.maximumHealth)) * 100))}%`,
+                          }}
+                        />
+                      </div>
                     </div>
-                    <div className="incoming-health-track">
-                      <div
-                        className="incoming-health-fill"
-                        style={{
-                          width: `${Math.max(0, Math.min(100, (character.health / Math.max(1, character.maximumHealth)) * 100))}%`,
-                        }}
-                      />
+                    <div className="incoming-resource-line">
+                      <div className="incoming-status-heading incoming-mana-heading">
+                        <span>MANA</span>
+                        <strong>{Math.max(0, character.mana)} / {character.maximumMana}</strong>
+                      </div>
+                      <div className="incoming-health-track incoming-mana-track">
+                        <div
+                          className="incoming-mana-fill"
+                          style={{
+                            width: `${Math.max(0, Math.min(100, (character.mana / Math.max(1, character.maximumMana)) * 100))}%`,
+                          }}
+                        />
+                      </div>
                     </div>
                   </section>
 
