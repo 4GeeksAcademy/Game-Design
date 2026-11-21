@@ -19,6 +19,7 @@ import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
 import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
+import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
@@ -256,6 +257,7 @@ function App() {
   const [showIncomingAttack, setShowIncomingAttack] = useState(false);
   const [roundNumber, setRoundNumber] = useState(1);
   const [showRoundIntro, setShowRoundIntro] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
   const [knockout, setKnockout] = useState(null);
   const [showResults, setShowResults] = useState(false);
@@ -269,6 +271,29 @@ function App() {
   const [combatMessages, setCombatMessages] = useState([]);
   const [combatLog, setCombatLog] = useState([]);
   const [aiAttack, setAiAttack] = useState(null);
+
+  const resetBattle = useCallback(() => {
+    aiControllerRef.current?.stop();
+    aiControllerRef.current = null;
+    setCharacter(createBattleFighter(playerId, "player"));
+    setOpponent(createBattleFighter(opponentId, "opponent"));
+    setDamageDealt(0); setCombatDefense(0); setAttacksUsed(0);
+    lastRewardedDamage.current = 0; lastRecordedAttacks.current = 0;
+    rewardPaidRef.current = false;
+    setDefenseTimeLeft(10); setCurrentTurn("intro"); setShowIncomingAttack(false);
+    setRoundNumber(1); setShowRoundIntro(true); setKnockout(null); setShowResults(false);
+    setIsRoundIntroFadingOut(false); setShowFinishOverlay(false); setIsFinishFadingOut(false);
+    setCombatMessages([]); setCombatLog([]); setAiAttack(null); setIsPaused(false);
+  }, [playerId, opponentId]);
+
+  useEffect(() => {
+    if (isPaused || knockout || isStoryMode) return undefined;
+    const handlePauseKey = (event) => {
+      if (event.key === "Escape" && !event.repeat) { event.preventDefault(); setIsPaused(true); }
+    };
+    window.addEventListener("keydown", handlePauseKey);
+    return () => window.removeEventListener("keydown", handlePauseKey);
+  }, [isPaused, knockout, isStoryMode]);
 
   // Preview each response on cloned fighters so the card never mutates live combat state.
   const incomingAttackPreviews = useMemo(() => {
@@ -478,7 +503,7 @@ function App() {
 
   // Run the AI turn.
   useEffect(() => {
-    if (currentTurn !== "ai") return;
+    if (currentTurn !== "ai" || isPaused) return;
 
     const difficulty = location.state?.difficulty ?? "Easy";
 
@@ -538,7 +563,7 @@ function App() {
         aiControllerRef.current = null;
       }
     };
-  }, [currentTurn]);
+  }, [currentTurn, isPaused]);
 
   useEffect(() => {
     if (!isStoryMode && showResults && knockout && !rewardPaidRef.current) {
@@ -597,7 +622,7 @@ function App() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [aiAttack, knockout, character.health, opponent.health]);
+  }, [aiAttack, knockout, character.health, opponent.health, isPaused]);
 
   // Add messages to the popup queue and permanent combat log.
   function showCombatMessage(text, type) {
@@ -621,7 +646,7 @@ function App() {
 
   const resolveIncomingAttack = useCallback(
     (choice) => {
-      if (!aiAttack || defenseTimeLeft <= 0) return;
+      if (isPaused || !aiAttack || defenseTimeLeft <= 0) return;
 
       if (choice === "defend" && character.cooldown <= 0) return;
 
@@ -740,7 +765,7 @@ const stunOptions = {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [aiAttack, defenseTimeLeft, character.cooldown, resolveIncomingAttack]);
+  }, [aiAttack, defenseTimeLeft, character.cooldown, resolveIncomingAttack, isPaused]);
 
   useEffect(() => {
     if (!aiAttack) {
@@ -917,10 +942,10 @@ const stunOptions = {
         />
       ) : knockout && !showResults ? null : !isStoryMode &&
         character.health <= 0 ? (
-        <GameOverScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} />
+        <GameOverScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} onRematch={resetBattle} />
       ) : !isStoryMode && opponent.health <= 0 ? (
         <div id="victorySection">
-          <VictoryScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} />
+          <VictoryScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} onRematch={resetBattle} />
         </div>
       ) : knockout ? null : (
         <>
