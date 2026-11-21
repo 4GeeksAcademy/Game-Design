@@ -107,6 +107,20 @@ export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect
         </div>
         {message && <p className="battle-pause-message" role="status">{message}</p>}
         <button className="battle-pause-reset" onClick={resetBinds}>RESTORE DEFAULT KEYBINDS</button>
+        <section className="battle-pause-audio-section">
+          <h3> AUDIO SETTINGS </h3>
+          <p>These settings are shared with the Home Screen and save automatically.</p>
+          {[
+            ["master", "Master volume", "Controls all game audio."],
+            ["music", "Background music", "Menu, story, and battle themes."],
+            ["effects", "Sound effects", "Buttons, impacts, and action sounds."],
+            ["voices", "Character voices", "Dialogue and character reactions."],
+          ].map(([key, label, description]) => <label className="battle-pause-audio-row" key={key}>
+            <span><strong>{label}</strong><small>{description}</small></span>
+            <span><input type="range" min="0" max="1" step="0.05" value={audio[key]} onChange={(event) => changeAudio(key, Number(event.target.value))}/><output>{Math.round(audio[key] * 100)}%</output></span>
+          </label>)}
+          <label className="battle-pause-mute"><span><strong>Mute all audio</strong><small>Silence music, effects, and voices.</small></span><input type="checkbox" checked={audio.muted} onChange={(event) => changeAudio("muted", event.target.checked)}/></label>
+        </section>
       </div>}
       {false && <div className="battle-pause-settings">
         <p>These settings are shared with the Home Screen and save automatically.</p>
