@@ -1,9 +1,10 @@
+import TogaMedicSkinGIF from "../assets/Skins/Animated/Mischievous Anime Medic with Syringe.gif";
 import TogaMedicSkin from "../assets/Skins/Mischievous Anime Medic with Syringe.png";
-import GokuElegantSkin from "../assets/Skins/Elegant Drip Goku.jpeg";
-import HinataWeddingSkin from "../assets/Skins/Hinata’s Enchanted Bridal Portrait.png"
-import NarutoHokageSkin from "../assets/Skins/Naruto’s Hokage Sunset Charge.png"
-import UsoppGangstaSkin from "../assets/Skins/Usopp in a Golden Graffiti Alley.png"
-import MinaMaidSkin from "../assets/Skins/Mina Ashido’s Playful Maid Card.png"
+import GokuElegantSkin from "../assets/Skins/Animated/Elegant Drip Goku.gif";
+import HinataWeddingSkin from "../assets/Skins/Animated/Hinata’s Enchanted Bridal Portrait.gif"
+import NarutoHokageSkin from "../assets/Skins/Animated/Naruto’s Hokage Sunset Charge.gif"
+import UsoppGangstaSkin from "../assets/Skins/Animated/Usopp in a Golden Graffiti Alley.gif"
+import MinaMaidSkin from "../assets/Skins/Animated/Mina Ashido’s Playful Maid Card.gif"
 
 
 
@@ -15,10 +16,10 @@ export const skins = [
     id: "toga-mischievous-medic",
     characterId: "toga",
     name: "Mischievous Medic",
-    image: TogaMedicSkin,
+    image:  TogaMedicSkinGIF,
     rarity: "rare",
     unlockSource: "festival",
-    description: "A mischievous alternate look for Himiko Toga.",
+    description: "A mischievous alternate look for Himiko Toga. Who knows what she might do to you...",
   },
   {
     id: "goku-elegant-drip",

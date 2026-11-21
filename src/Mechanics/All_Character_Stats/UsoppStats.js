@@ -33,6 +33,7 @@ const Usopp = {
     locked: true,
     unlockCost: 5000,
     image: FakeHammerImage,
+    turnCooldown: 3,
     damage: 1,
     speed: 45,
     cost: 3,

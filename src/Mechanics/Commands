@@ -98,7 +98,7 @@ const progress = JSON.parse(
 );
 
 progress.points = Math.min(
-  50000,
+  20000,
   (Number(progress.points) || 0) + 1000
 );
 
