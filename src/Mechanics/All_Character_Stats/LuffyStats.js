@@ -1,3 +1,4 @@
+import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 import LuffyArenaImage from "../../assets/img/Luffy.png";
 
 import Attack2 from "../../assets/img/Attack_IMAGES/third gear.jpeg";
@@ -128,6 +129,7 @@ const Luffy = {
         agility: 8,
       },
     },
+    ...FESTIVAL_ATTACKS_BY_CHARACTER.luffy,
   ],
 };
 
