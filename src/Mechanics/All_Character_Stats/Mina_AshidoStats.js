@@ -3,7 +3,8 @@ import minaArenaImage from "../../assets/img/MinaAshidoArena.jpg";
 import Attack1 from "../../assets/img/Attack_IMAGES/Acid Shot.jpeg"
 import Attack2 from "../../assets/img/Attack_IMAGES/Acid Blast.webp"
 import Attack3 from "../../assets/img/Attack_IMAGES/Acid Bomb.jpeg"
-import Attack4 from "../../assets/img/Attack_IMAGES/Acid Corrosion.webp"
+import Attack4 from "../../assets/img/Attack_IMAGES/Acid Corrosion.webp";
+import AlmaImage from "../../assets/img/Attack_IMAGES/Alma.jpeg"
 
 const mina = {
   name: "Mina Ashido",
@@ -128,6 +129,7 @@ const mina = {
     {
       id: "mina-festival-alma",
       name: "Alma",
+      image: AlmaImage,
       description: "Mina raises her acid's solubility to its maximum and hurls the corrosive mass at her opponent.",
       festivalExclusive: true,
       locked: true,
