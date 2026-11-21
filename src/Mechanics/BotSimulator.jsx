@@ -809,8 +809,8 @@ function BotSimulator() {
     );
     setLoadoutAttackKeys(unlockedAttacks.map(getAttackKey));
     setLoadoutOpponentIds(
-      availableFighters
-        .filter((opponent) => opponent.id !== fighter.id)
+      roster
+        .filter((opponent) => unlockedIds.includes(opponent.id) && opponent.id !== fighter.id)
         .map((opponent) => opponent.id),
     );
     setLoadoutResults(null);
@@ -2008,7 +2008,8 @@ function BotSimulator() {
 
             <p>
               The simulator tests each unique pair of unlocked fighters in both
-              starting positions.
+              starting positions. Every fighter uses only their unlocked, equipped
+              attacks, limited by their character's slot capacity.
             </p>
 
             <p>
@@ -2031,7 +2032,8 @@ function BotSimulator() {
             <p>
               The simulator creates every unique pair of unlocked fighters, then
               tests each team against every other team in both starting
-              positions.
+              positions. Every fighter uses only their unlocked, equipped attacks,
+              limited by their character's slot capacity.
             </p>
 
             <p>
