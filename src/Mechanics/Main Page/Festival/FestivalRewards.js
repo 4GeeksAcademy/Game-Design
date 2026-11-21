@@ -72,7 +72,7 @@ const FESTIVAL_REWARDS = {
   },
   15: {
     free: { type: "coins", amount: 20000 },
-    elite: { type: "attack", characterId: "goku", attackId: "goku-festival-super-kamehameha", name: "Super Kamehameha" },
+    elite: { type: "attack", characterId: "ichigo", attackId: "ichigo-festival-mugetsu", name: "Mugetsu" },
   },
   16: {
     free: { type: "coins", amount: 1000 },
@@ -98,7 +98,7 @@ const FESTIVAL_REWARDS = {
   },
   19: {
     free: { type: "coins", amount: 10000 },
-    elite: { type: "attack", characterId: "ichigo", attackId: "ichigo-festival-hollow-getsuga", name: "Hollowfied Getsuga Tensho" },
+    elite: { type: "attack", characterId: "goku", attackId: "goku-festival-super-kamehameha", name: "Super Kamehameha" },
   },
   20: {
     free: { type: "character",
