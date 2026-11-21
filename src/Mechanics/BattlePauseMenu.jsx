@@ -75,18 +75,15 @@ export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect
   return <section className="battle-pause-overlay" role="dialog" aria-modal="true" aria-label="Game paused">
     <div className="battle-pause-panel">
       <header className="battle-pause-header"><span>WILD CARDS</span><h2>PAUSED</h2></header>
-      <nav className="battle-pause-tabs">
-        <button className={tab === "pause" ? "active" : ""} onClick={() => setTab("pause")}>MATCH</button>
-        <button className={tab === "controls" ? "active" : ""} onClick={() => setTab("controls")}>KEYBINDS</button>
-        <button className={tab === "audio" ? "active" : ""} onClick={() => setTab("audio")}>AUDIO</button>
-      </nav>
+      {tab === "settings" && <button className="battle-pause-back" onClick={() => setTab("pause")}>← BACK TO PAUSE MENU</button>}
       {tab === "pause" && <div className="battle-pause-actions">
         <button className="primary" onClick={onResume}>RESUME MATCH</button>
+        <button onClick={() => setTab("settings")}>SETTINGS</button>
         <button onClick={onRestart}>RESTART MATCH</button>
         <button onClick={onCharacterSelect}>CHARACTER SELECT</button>
         <button className="danger" onClick={onMainMenu}>MAIN MENU</button>
       </div>}
-      {tab === "controls" && <div className="battle-pause-settings">
+      {tab === "settings" && <div className="battle-pause-settings battle-pause-all-settings">
         <p>Choose a binding and press the key you want. Navigation keys may overlap; attacks and combat actions must remain unique.</p>
         <div className="battle-pause-player-grid">
           {["player1", "player2"].map((playerId, playerIndex) => <section className="battle-pause-player" key={playerId}>
@@ -111,7 +108,7 @@ export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect
         {message && <p className="battle-pause-message" role="status">{message}</p>}
         <button className="battle-pause-reset" onClick={resetBinds}>RESTORE DEFAULT KEYBINDS</button>
       </div>}
-      {tab === "audio" && <div className="battle-pause-settings">
+      {false && <div className="battle-pause-settings">
         <p>These settings are shared with the Home Screen and save automatically.</p>
         {[
           ["master", "Master volume", "Controls all game audio."],
@@ -124,7 +121,8 @@ export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect
         </label>)}
         <label className="battle-pause-mute"><span><strong>Mute all audio</strong><small>Silence music, effects, and voices.</small></span><input type="checkbox" checked={audio.muted} onChange={(event) => changeAudio("muted", event.target.checked)}/></label>
       </div>}
-      <button className="battle-pause-close" onClick={onResume}>BACK TO MATCH</button>
+      {tab === "settings" && <button className="battle-pause-close" onClick={onResume}>SAVE SETTINGS & RESUME</button>}
+      {tab === "pause" && <button className="battle-pause-close" onClick={onResume}>BACK TO MATCH</button>}
     </div>
   </section>;
 }
