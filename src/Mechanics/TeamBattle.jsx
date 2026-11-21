@@ -1327,7 +1327,7 @@ export default function TeamBattle() {
 
       setAllyAttackOutcome(outcomeText);
     }
-    addLog(`${attacker.name} used ${attack.name} on ${defender.name}.`);
+    
 
     describeEffects(result.buffsApplied, attacker.name, "buff").forEach(
       (message) => addLog(message, "buff"),
@@ -1798,7 +1798,6 @@ export default function TeamBattle() {
       setRoundNumber((round) => round + 1);
       setShowRoundIntro(true);
       setPhase("selecting");
-      addLog("A new round begins. Choose your targets.");
       return;
     }
 
@@ -1826,7 +1825,6 @@ export default function TeamBattle() {
       targetId: target.id,
       attackIndex: action.attackIndex,
     });
-    addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
   }, [
     phase,
     isPaused,
@@ -2437,16 +2435,9 @@ export default function TeamBattle() {
         if (choice === "defend") {
           setCombatDefense((value) => value + 1);
           recordDailyObjectiveEvent("defense", 1);
-          addLog(
-            `${currentDefender.name} defended ${currentAttacker.name}'s ${attack.name}.`,
-          );
+          
         } else if (choice === "evade") {
           if (result.evaded) { setCombatDefense((value) => value + 1); recordDailyObjectiveEvent("defense", 1); }
-          addLog(
-            result.evaded
-              ? `${currentDefender.name} evaded ${attack.name}.`
-              : `${currentDefender.name} failed to evade ${attack.name}.`,
-          );
         } else if (choice === "timeout") {
           addLog(`Time ran out. ${attack.name} hit ${currentDefender.name}.`);
         } else {

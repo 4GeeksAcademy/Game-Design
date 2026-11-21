@@ -20,7 +20,7 @@ const Usopp = {
   cooldown: 4,
   maximumCooldown: 4,
   recovery: 1,
-  agility: 15,
+  agility: 40,
   defense: {
     amount: 15,
     active: true,
@@ -60,13 +60,20 @@ const Usopp = {
     damage: 0,
     speed: 0,
     cost: 14,
+    duration: 1,
     state: true,
     buff: {
-      mana: 30,
+      mana: 40,
       cooldown: 3,
       maximumCooldown: 3,
-      agility: 40,
+      
     },
+    characterModifiers: {
+      agility: {
+        multiplier: 1.4,
+        amount: 80,
+      }
+    }
   },
   {
     name: "Green Star: Exploding Pinecone",
