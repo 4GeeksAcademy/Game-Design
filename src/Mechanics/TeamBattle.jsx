@@ -368,7 +368,8 @@ function assignUniqueCpuTargets(opponents, players, previousCpuAttackers = []) {
 }
 
 export default function TeamBattle() {
-  const location = useLocation();\n  const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
   const levelConfig = location.state ?? {};
   const isStoryMode = levelConfig.gameMode === "story";
   const {
@@ -2600,7 +2601,24 @@ export default function TeamBattle() {
 
   resolveCPUDefenseRef.current = resolveCPUDefense;
 
-  const resetBattle = () => {\n    setIsPaused(false);\n    setKnockout(null);\n    setIsKnockoutFadingOut(false);\n    setTeamFinishComplete(false);\n    setIsTeamFinishFadingOut(false);\n    setPendingHealSelection(null);\n    setPendingAllyAttack(null);\n    setAllyAttackOutcome(null);\n    setDefenseOutcome(null);\n    setLocalCoopDefenses([]);\n    setLocalCoopDefenseTimers({});\n    setCpuQueueReady(false);\n    localCoopTimeoutsRef.current.forEach(clearTimeout);\n    localCoopTimeoutsRef.current = [];\n    if (popupTimerRef.current) clearTimeout(popupTimerRef.current);\n    if (teammateTargetTimerRef.current) clearTimeout(teammateTargetTimerRef.current);\n    if (allyAttackTimerRef.current) clearTimeout(allyAttackTimerRef.current);
+  const resetBattle = () => {
+    setIsPaused(false);
+    setKnockout(null);
+    setIsKnockoutFadingOut(false);
+    setTeamFinishComplete(false);
+    setIsTeamFinishFadingOut(false);
+    setPendingHealSelection(null);
+    setPendingAllyAttack(null);
+    setAllyAttackOutcome(null);
+    setDefenseOutcome(null);
+    setLocalCoopDefenses([]);
+    setLocalCoopDefenseTimers({});
+    setCpuQueueReady(false);
+    localCoopTimeoutsRef.current.forEach(clearTimeout);
+    localCoopTimeoutsRef.current = [];
+    if (popupTimerRef.current) clearTimeout(popupTimerRef.current);
+    if (teammateTargetTimerRef.current) clearTimeout(teammateTargetTimerRef.current);
+    if (allyAttackTimerRef.current) clearTimeout(allyAttackTimerRef.current);
     setTeams(createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist));
     setRoundNumber(1);
     setRoundTargets({});
