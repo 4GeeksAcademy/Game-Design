@@ -49,7 +49,7 @@ export default function LocalPvPFighterPanel({ fighter, side = "player" }) {
             <StatBar label="Agility" icon="⚡" current={getModifiedCharacterStat(fighter, "agility")} maximum={100} color="warning" />
           </div>
           <div id={compactId} className="local-pvp-fighter-compact">
-            <div className="compactStat"><span>⏳ Cooldown</span><strong>{fighter.cooldown ?? 0}/{getModifiedCharacterStat(fighter, "maximumCooldown") || 3}</strong></div>
+            <div className="compactStat"><span>⏳ Cooldown</span><strong>{getModifiedCharacterStat(fighter, "cooldown")}/{getModifiedCharacterStat(fighter, "maximumCooldown") || 3}</strong></div>
             <div className="compactStat"><span>🔄 Recovery</span><strong>{getModifiedCharacterStat(fighter, "recovery")}</strong></div>
           </div>
         </div>
