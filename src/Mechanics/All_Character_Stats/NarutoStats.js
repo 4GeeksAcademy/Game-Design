@@ -1,3 +1,4 @@
+import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 import NarutoArenaImage from "../../assets/img/Naruto.png";
 
 import Attack1 from "../../assets/img/Attack_IMAGES/Rasengan.jpeg";
@@ -122,6 +123,7 @@ const Naruto = {
       // Only apply stun if the attack successfully hits.
       stunRequiresHit: true,
     },
+    ...FESTIVAL_ATTACKS_BY_CHARACTER.naruto,
   ],
 };
 
