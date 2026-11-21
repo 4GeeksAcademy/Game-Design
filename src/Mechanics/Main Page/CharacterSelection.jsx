@@ -303,6 +303,7 @@ function CharacterSelection() {
   const [activeSelectingPlayer, setActiveSelectingPlayer] = useState(location.state?.resumeActiveSelectingPlayer ?? "player1");
   const [pvpConfirmed, setPvpConfirmed] = useState({ player1: false, player2: false });
   const [attackGateNotice, setAttackGateNotice] = useState(null);
+  const [attackGateClosing, setAttackGateClosing] = useState(false);
 
   const [cpuIndices, setCpuIndices] = useState(() => {
     if (levelConfig.gameMode !== "story" || !levelConfig.opponentId) {
@@ -430,10 +431,25 @@ function CharacterSelection() {
     return true;
   };
 
+  const dismissAttackGate = () => {
+    if (attackGateClosing) return;
+    setAttackGateClosing(true);
+    window.setTimeout(() => {
+      setAttackGateNotice(null);
+      setAttackGateClosing(false);
+    }, 360);
+  };
+
   useEffect(() => {
     if (!attackGateNotice) return undefined;
-    const timer = window.setTimeout(() => setAttackGateNotice(null), 4200);
-    return () => window.clearTimeout(timer);
+    const closeTimer = window.setTimeout(() => {
+      setAttackGateClosing(true);
+      window.setTimeout(() => {
+        setAttackGateNotice(null);
+        setAttackGateClosing(false);
+      }, 360);
+    }, 3840);
+    return () => window.clearTimeout(closeTimer);
   }, [attackGateNotice]);
 
   const confirmPvpSelection = (playerId) => {
@@ -833,14 +849,14 @@ function CharacterSelection() {
       )}
 
       {attackGateNotice && (
-        <div className="attack-gate-backdrop" role="presentation" onClick={() => setAttackGateNotice(null)}>
-          <section className="attack-gate-popup" role="alertdialog" aria-modal="true" aria-labelledby="attack-gate-title" onClick={(event) => event.stopPropagation()}>
+        <div className={`attack-gate-backdrop ${attackGateClosing ? "is-closing" : ""}`} role="presentation" onClick={dismissAttackGate}>
+          <section className={`attack-gate-popup ${attackGateClosing ? "is-closing" : ""}`} role="alertdialog" aria-modal="true" aria-labelledby="attack-gate-title" onClick={(event) => event.stopPropagation()}>
             <div className="attack-gate-emblem" aria-hidden="true">⚔</div>
             <p className="attack-gate-eyebrow">ARENA ENTRY DENIED</p>
             <h2 id="attack-gate-title">{attackGateNotice.title}</h2>
             <p>{attackGateNotice.message}</p>
             <strong className="attack-gate-requirement">3 EQUIPPED ATTACKS REQUIRED</strong>
-            <button type="button" onClick={() => setAttackGateNotice(null)}>GOT IT · FIX LOADOUT</button>
+            <button type="button" onClick={dismissAttackGate}>GOT IT · FIX LOADOUT</button>
           </section>
         </div>
       )}
