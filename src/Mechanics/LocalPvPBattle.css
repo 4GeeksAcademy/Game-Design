@@ -1755,3 +1755,81 @@ html:has(.local-pvp-1v1), body:has(.local-pvp-1v1), #app:has(.local-pvp-1v1) {
   }
   .local-pvp-player-screen { height: auto; }
 }
+
+
+/* Shared battle arena in each local 1v1 player's half.
+   Both fighter cards sit over one image, matching the regular Battle arena. */
+.local-pvp-battle-arena {
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 9px;
+  overflow: hidden;
+  background-color: #101a24;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid #13d5ff;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(19, 213, 255, 0.22), inset 0 0 12px rgba(0, 0, 0, 0.35);
+}
+
+.local-pvp-player-two .local-pvp-battle-arena {
+  border-color: #ff3159;
+  box-shadow: 0 0 8px rgba(255, 49, 89, 0.18), inset 0 0 12px rgba(0, 0, 0, 0.35);
+}
+
+.local-pvp-battle-arena .local-pvp-screen-fighters {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.local-pvp-battle-arena .local-pvp-rival-panel,
+.local-pvp-battle-arena .local-pvp-fighter-status {
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.local-pvp-battle-arena .local-pvp-rival-panel #opponentSection {
+  display: flex;
+  justify-content: stretch;
+  width: 100%;
+  margin: 0 !important;
+  padding: 0;
+}
+
+.local-pvp-battle-arena .local-pvp-rival-panel #opponent {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.local-pvp-battle-arena .local-pvp-fighter-status .battle-status-panel {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .local-pvp-battle-arena { padding: 6px; }
+  .local-pvp-battle-arena .local-pvp-screen-fighters { gap: 6px; }
+}
