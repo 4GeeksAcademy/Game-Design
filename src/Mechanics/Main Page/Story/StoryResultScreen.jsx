@@ -9,6 +9,8 @@ function StoryResultsScreen({
   damageDealt,
   attacksUsed,
   levelConfig,
+  onRematch,
+  battlePath = "/battle",
 }) {
   const navigate = useNavigate();
 
