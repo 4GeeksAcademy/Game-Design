@@ -3,6 +3,14 @@ import { useNavigate } from "react-router-dom";
 
 import { roster } from "./Main Page/CharacterSelection.jsx";
 import { getUnlockedCharacters } from "./Currency.js";
+import {
+  getAttackKey,
+  getAttackSlotLimit,
+  getEquippedAttackKeys,
+  getEquippedAttacks,
+  isAttackUnlocked,
+  saveEquippedAttackKeys,
+} from "./AttackLoadouts.js";
 import { simulateBattle, simulateTeamBattle } from "./BattleSimulator.js";
 
 import "./BotSimulator.css";
@@ -35,6 +43,70 @@ function getTeamMaximumHealth(team) {
     const data = getFighterData(fighter);
     return total + (data.maximumHealth ?? data.health ?? 100);
   }, 0);
+}
+
+function getFighterWithEquippedAttacks(fighter) {
+  const data = getFighterData(fighter);
+  return {
+    ...data,
+    attacks: getEquippedAttacks(fighter.id, data.attacks ?? [], data.slot),
+  };
+}
+
+function buildAttackCombinations(attacks, slotLimit, maxCandidates, currentKeys = []) {
+  const size = Math.min(slotLimit, attacks.length);
+  if (size <= 0) return [];
+
+  const combinations = [];
+  const seen = new Set();
+  const add = (items) => {
+    if (items.length !== size) return;
+    const keys = items.map(getAttackKey);
+    const signature = [...keys].sort().join("|");
+    if (seen.has(signature)) return;
+    seen.add(signature);
+    combinations.push(items);
+  };
+
+  const current = currentKeys
+    .map((key) => attacks.find((attack) => getAttackKey(attack) === key))
+    .filter(Boolean);
+  if (current.length === size) add(current);
+
+  const chooseCount = (n, r) => {
+    let value = 1;
+    for (let i = 1; i <= Math.min(r, n - r); i += 1) {
+      value = (value * (n - i + 1)) / i;
+    }
+    return Math.round(value);
+  };
+
+  const total = chooseCount(attacks.length, size);
+  if (total <= maxCandidates) {
+    const walk = (start, chosen) => {
+      if (combinations.length >= maxCandidates) return;
+      if (chosen.length === size) {
+        add(chosen);
+        return;
+      }
+      for (let i = start; i <= attacks.length - (size - chosen.length); i += 1) {
+        walk(i + 1, [...chosen, attacks[i]]);
+        if (combinations.length >= maxCandidates) return;
+      }
+    };
+    walk(0, []);
+  } else {
+    // Sample unique legal loadouts instead of blocking the page by enumerating
+    // thousands of possible combinations.
+    let attempts = 0;
+    while (combinations.length < maxCandidates && attempts < maxCandidates * 80) {
+      attempts += 1;
+      const shuffled = [...attacks].sort(() => Math.random() - 0.5);
+      add(shuffled.slice(0, size));
+    }
+  }
+
+  return combinations.slice(0, maxCandidates);
 }
 
 function chooseRandom(candidates) {
@@ -110,8 +182,8 @@ async function runStartingOrderSeries(
 
   for (let i = 0; i < requestedCount; i++) {
     const result = simulateBattle(
-      getFighterData(firstFighter),
-      getFighterData(secondFighter),
+      getFighterWithEquippedAttacks(firstFighter),
+      getFighterWithEquippedAttacks(secondFighter),
       {
         difficultyOne: firstDifficulty,
         difficultyTwo: secondDifficulty,
@@ -416,8 +488,8 @@ async function runTeamStartingOrderSeries(
 
   for (let i = 0; i < requestedCount; i++) {
     const result = simulateTeamBattle(
-      firstTeam.map(getFighterData),
-      secondTeam.map(getFighterData),
+      firstTeam.map(getFighterWithEquippedAttacks),
+      secondTeam.map(getFighterWithEquippedAttacks),
       {
         difficultyOne: firstDifficulty,
         difficultyTwo: secondDifficulty,
@@ -647,6 +719,16 @@ function BotSimulator() {
   );
   const [battleType, setBattleType] = useState("1v1");
   const [mode, setMode] = useState("custom");
+  const [activeTab, setActiveTab] = useState("1v1");
+
+  const [loadoutFighterId, setLoadoutFighterId] = useState(
+    () => getUnlockedCharacters()[0] ?? roster[0]?.id ?? "",
+  );
+  const [loadoutAttackKeys, setLoadoutAttackKeys] = useState([]);
+  const [loadoutOpponentIds, setLoadoutOpponentIds] = useState([]);
+  const [loadoutCandidateLimit, setLoadoutCandidateLimit] = useState("12");
+  const [loadoutRepeats, setLoadoutRepeats] = useState("2");
+  const [loadoutResults, setLoadoutResults] = useState(null);
 
   const [fighterOneId, setFighterOneId] = useState("random");
   const [fighterTwoId, setFighterTwoId] = useState("random");
@@ -699,6 +781,205 @@ function BotSimulator() {
   const analysisFighters = availableFighters.filter((fighter) =>
     selectedFighterIds.includes(fighter.id),
   );
+  const loadoutFighter = availableFighters.find((fighter) => fighter.id === loadoutFighterId);
+  const loadoutAttackPool = (loadoutFighter?.data?.attacks ?? []).filter((attack) =>
+    isAttackUnlocked(loadoutFighterId, attack),
+  );
+  const loadoutSelectedAttacks = loadoutAttackPool.filter((attack) =>
+    loadoutAttackKeys.includes(getAttackKey(attack)),
+  );
+  const loadoutOpponents = availableFighters.filter(
+    (fighter) => fighter.id !== loadoutFighterId && loadoutOpponentIds.includes(fighter.id),
+  );
+  const loadoutSlotLimit = getAttackSlotLimit(loadoutFighter?.data?.slot ?? 0);
+
+  useEffect(() => {
+    if (!loadoutFighterId) return;
+    const fighter = roster.find((entry) => entry.id === loadoutFighterId);
+    if (!fighter) return;
+    const unlockedAttacks = (fighter.data?.attacks ?? []).filter((attack) =>
+      isAttackUnlocked(fighter.id, attack),
+    );
+    setLoadoutAttackKeys(unlockedAttacks.map(getAttackKey));
+    setLoadoutOpponentIds(
+      availableFighters
+        .filter((opponent) => opponent.id !== fighter.id)
+        .map((opponent) => opponent.id),
+    );
+    setLoadoutResults(null);
+  }, [loadoutFighterId, unlockedIds]);
+
+  function toggleLoadoutAttack(key) {
+    setLoadoutAttackKeys((previous) =>
+      previous.includes(key)
+        ? previous.filter((entry) => entry !== key)
+        : [...previous, key],
+    );
+    setLoadoutResults(null);
+  }
+
+  function toggleLoadoutOpponent(id) {
+    setLoadoutOpponentIds((previous) =>
+      previous.includes(id)
+        ? previous.filter((entry) => entry !== id)
+        : [...previous, id],
+    );
+    setLoadoutResults(null);
+  }
+
+  async function runLoadoutOptimization() {
+    if (!loadoutFighter || loadoutSelectedAttacks.length < loadoutSlotLimit) {
+      alert(`Choose at least ${loadoutSlotLimit} unlocked attacks for this fighter.`);
+      return;
+    }
+    if (loadoutOpponents.length === 0) {
+      alert("Select at least one opponent to test against.");
+      return;
+    }
+
+    const candidateLimit = Math.min(40, Math.max(1, Number(loadoutCandidateLimit) || 12));
+    const repeats = Math.min(20, Math.max(1, Number(loadoutRepeats) || 1));
+    const currentKeys = getEquippedAttackKeys(
+      loadoutFighter.id,
+      loadoutFighter.data.attacks ?? [],
+      loadoutFighter.data.slot,
+    );
+    const candidates = buildAttackCombinations(
+      loadoutSelectedAttacks,
+      loadoutSlotLimit,
+      candidateLimit,
+      currentKeys,
+    );
+    if (!candidates.length) {
+      alert("No legal attack combinations could be generated.");
+      return;
+    }
+
+    const total = candidates.length * loadoutOpponents.length * repeats * 2;
+    let completed = 0;
+    const progressUpdate = () => {
+      completed += 1;
+      setProgress({ completed, total });
+    };
+
+    setLoadoutResults(null);
+    setResults(null);
+    setRunning(true);
+    setProgress({ completed: 0, total });
+    await yieldToBrowser();
+
+    try {
+      let best = null;
+      const candidateResults = [];
+
+      for (let candidateIndex = 0; candidateIndex < candidates.length; candidateIndex += 1) {
+        const candidate = candidates[candidateIndex];
+        const candidateKeys = candidate.map(getAttackKey);
+        let wins = 0;
+        let losses = 0;
+        let draws = 0;
+        let roundsTotal = 0;
+        const opponentResults = [];
+
+        for (const opponent of loadoutOpponents) {
+          let opponentWins = 0;
+          let opponentLosses = 0;
+          let opponentDraws = 0;
+
+          for (let startingOrder = 0; startingOrder < 2; startingOrder += 1) {
+            for (let repeat = 0; repeat < repeats; repeat += 1) {
+              const candidateData = {
+                ...loadoutFighter.data,
+                attacks: candidate.map((attack) => ({ ...attack })),
+              };
+              const opponentData = getFighterWithEquippedAttacks(opponent);
+              const firstIsCandidate = startingOrder === 0;
+              const result = simulateBattle(
+                firstIsCandidate ? candidateData : opponentData,
+                firstIsCandidate ? opponentData : candidateData,
+                { difficultyOne: "Normal", difficultyTwo: "Normal" },
+              );
+              const outcome = getOneVsOneOutcome(result);
+              const candidateWon =
+                (firstIsCandidate && outcome === "first") ||
+                (!firstIsCandidate && outcome === "second");
+              const opponentWon =
+                (firstIsCandidate && outcome === "second") ||
+                (!firstIsCandidate && outcome === "first");
+
+              if (candidateWon) {
+                wins += 1;
+                opponentWins += 1;
+              } else if (opponentWon) {
+                losses += 1;
+                opponentLosses += 1;
+              } else {
+                draws += 1;
+                opponentDraws += 1;
+              }
+              roundsTotal += result.rounds;
+              progressUpdate();
+            }
+          }
+
+          const opponentBattles = opponentWins + opponentLosses + opponentDraws;
+          opponentResults.push({
+            id: opponent.id,
+            name: getFighterName(opponent),
+            wins: opponentWins,
+            losses: opponentLosses,
+            draws: opponentDraws,
+            winRate: opponentBattles
+              ? ((opponentWins / opponentBattles) * 100).toFixed(1)
+              : "0.0",
+          });
+          await yieldToBrowser();
+        }
+
+        const battles = wins + losses + draws;
+        const score = battles ? ((wins + draws * 0.5) / battles) * 100 : 0;
+        const entry = {
+          keys: candidateKeys,
+          attacks: candidate,
+          wins,
+          losses,
+          draws,
+          battles,
+          score,
+          averageRounds: battles ? roundsTotal / battles : 0,
+          opponentResults,
+        };
+        candidateResults.push(entry);
+        if (!best || entry.score > best.score ||
+          (entry.score === best.score && entry.wins > best.wins)) {
+          best = entry;
+        }
+      }
+
+      if (best) {
+        saveEquippedAttackKeys(
+          loadoutFighter.id,
+          best.keys,
+          loadoutFighter.data.attacks ?? [],
+          loadoutFighter.data.slot,
+        );
+      }
+      candidateResults.sort((a, b) => b.score - a.score || b.wins - a.wins);
+      setLoadoutResults({
+        fighter: loadoutFighter,
+        best,
+        candidatesTested: candidateResults.length,
+        opponentsTested: loadoutOpponents.length,
+        candidateResults,
+      });
+      setProgress({ completed: total, total });
+    } catch (error) {
+      console.error("Loadout optimization failed:", error);
+      alert("The loadout test encountered an error. Check the console.");
+    } finally {
+      setRunning(false);
+    }
+  }
 
   function toggleAnalysisFighter(id) {
     setSelectedFighterIds((previousIds) =>
@@ -846,8 +1127,8 @@ function BotSimulator() {
         for (const order of startingOrders) {
           for (let battle = 0; battle < requestedCount; battle++) {
             const result = simulateBattle(
-              getFighterData(order.first),
-              getFighterData(order.second),
+              getFighterWithEquippedAttacks(order.first),
+              getFighterWithEquippedAttacks(order.second),
               {
                 difficultyOne: order.firstDifficulty,
                 difficultyTwo: order.secondDifficulty,
@@ -1048,8 +1329,8 @@ function BotSimulator() {
         for (const order of startingOrders) {
           for (let battle = 0; battle < requestedCount; battle++) {
             const result = simulateTeamBattle(
-              order.first.map(getFighterData),
-              order.second.map(getFighterData),
+              order.first.map(getFighterWithEquippedAttacks),
+              order.second.map(getFighterWithEquippedAttacks),
               {
                 difficultyOne: order.firstDifficulty,
                 difficultyTwo: order.secondDifficulty,
@@ -1421,27 +1702,42 @@ function BotSimulator() {
 
         <div className="simulator-mode-buttons">
           <button
-            className={battleType === "1v1" ? "active" : ""}
+            className={activeTab === "1v1" ? "active" : ""}
             onClick={() => {
+              setActiveTab("1v1");
               setBattleType("1v1");
               setResults(null);
+              setLoadoutResults(null);
             }}
           >
             1V1
           </button>
 
           <button
-            className={battleType === "2v2" ? "active" : ""}
+            className={activeTab === "2v2" ? "active" : ""}
             onClick={() => {
+              setActiveTab("2v2");
               setBattleType("2v2");
               setResults(null);
+              setLoadoutResults(null);
             }}
           >
             2V2
           </button>
+
+          <button
+            className={activeTab === "loadout" ? "active" : ""}
+            onClick={() => {
+              setActiveTab("loadout");
+              setResults(null);
+              setLoadoutResults(null);
+            }}
+          >
+            LOADOUT LAB
+          </button>
         </div>
 
-        <div className="simulator-mode-buttons">
+        {activeTab !== "loadout" && <div className="simulator-mode-buttons">
           <button
             className={mode === "custom" ? "active" : ""}
             onClick={() => {
@@ -1461,8 +1757,184 @@ function BotSimulator() {
           >
             ALL MATCHUPS
           </button>
-        </div>
+        </div>}
 
+        {activeTab === "loadout" ? (
+          <div className="loadout-lab">
+            <div className="loadout-lab-intro">
+              <h3>ATTACK LOADOUT OPTIMIZER</h3>
+              <p>
+                Choose a fighter, define the unlocked attacks the optimizer may use,
+                then select opponents. Every tested combination obeys the fighter's
+                attack-slot limit. The winning combination becomes the fighter's equipped loadout.
+              </p>
+            </div>
+
+            <div className="loadout-lab-controls">
+              <div className="loadout-lab-panel">
+                <label htmlFor="loadoutFighter">1. SELECT FIGHTER</label>
+                <select
+                  id="loadoutFighter"
+                  value={loadoutFighterId}
+                  onChange={(event) => setLoadoutFighterId(event.target.value)}
+                  disabled={running}
+                >
+                  {availableFighters.map((fighter) => (
+                    <option key={fighter.id} value={fighter.id}>{getFighterName(fighter)}</option>
+                  ))}
+                </select>
+                <p className="loadout-slot-note">
+                  {loadoutSlotLimit} attack slots · {loadoutAttackPool.length} unlocked attacks available
+                </p>
+              </div>
+
+              <div className="loadout-lab-panel">
+                <div className="loadout-panel-heading">
+                  <label>2. CHOOSE ELIGIBLE ATTACKS</label>
+                  <span>{loadoutSelectedAttacks.length} selected</span>
+                </div>
+                <p className="loadout-slot-note">
+                  The pool can contain more attacks than the slots. Each tested build will equip no more than {loadoutSlotLimit}.
+                </p>
+                <div className="loadout-choice-list">
+                  {loadoutAttackPool.map((attack) => {
+                    const key = getAttackKey(attack);
+                    return (
+                      <label key={key} className="loadout-choice">
+                        <input
+                          type="checkbox"
+                          checked={loadoutAttackKeys.includes(key)}
+                          onChange={() => toggleLoadoutAttack(key)}
+                          disabled={running}
+                        />
+                        <span>{attack.name ?? key}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                {loadoutSelectedAttacks.length < loadoutSlotLimit && (
+                  <p className="loadout-warning">
+                    Select at least {loadoutSlotLimit} unlocked attacks to fill this fighter's slots.
+                  </p>
+                )}
+              </div>
+
+              <div className="loadout-lab-panel">
+                <div className="loadout-panel-heading">
+                  <label>3. SELECT OPPONENTS</label>
+                  <span>{loadoutOpponents.length} selected</span>
+                </div>
+                <div className="loadout-choice-list opponent-choice-list">
+                  {availableFighters.filter((fighter) => fighter.id !== loadoutFighterId).map((fighter) => (
+                    <label key={fighter.id} className="loadout-choice">
+                      <input
+                        type="checkbox"
+                        checked={loadoutOpponentIds.includes(fighter.id)}
+                        onChange={() => toggleLoadoutOpponent(fighter.id)}
+                        disabled={running}
+                      />
+                      <span>{getFighterName(fighter)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="loadout-test-settings">
+              <label>
+                Candidate combinations
+                <input
+                  type="number"
+                  min="1"
+                  max="40"
+                  value={loadoutCandidateLimit}
+                  onChange={(event) => setLoadoutCandidateLimit(event.target.value)}
+                  disabled={running}
+                />
+              </label>
+              <label>
+                Battles per starting position
+                <input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={loadoutRepeats}
+                  onChange={(event) => setLoadoutRepeats(event.target.value)}
+                  disabled={running}
+                />
+              </label>
+            </div>
+
+            <button
+              className="run-simulation-button"
+              onClick={runLoadoutOptimization}
+              disabled={running || !loadoutFighter || loadoutSelectedAttacks.length < loadoutSlotLimit || loadoutOpponents.length === 0}
+            >
+              {running ? "TESTING ATTACK COMBINATIONS..." : "FIND BEST ATTACK COMBINATION"}
+            </button>
+
+            {running && progress.total > 0 && (
+              <div className="simulation-progress">
+                <div className="simulation-progress-header">
+                  <span>TESTING LEGAL LOADOUTS AGAINST OPPONENTS...</span>
+                  <strong>{progressPercentage}%</strong>
+                </div>
+                <div className="simulation-progress-track" role="progressbar" aria-valuenow={progressPercentage} aria-valuemin={0} aria-valuemax={100}>
+                  <div className="simulation-progress-fill" style={{ width: `${progressPercentage}%` }} />
+                </div>
+                <p>{progress.completed.toLocaleString()} / {progress.total.toLocaleString()} battles completed</p>
+              </div>
+            )}
+
+            {loadoutResults && (
+              <div className="loadout-results">
+                <h3>BEST LOADOUT · {getFighterName(loadoutResults.fighter)}</h3>
+                <p className="loadout-best-score">
+                  Performance score: <strong>{loadoutResults.best.score.toFixed(1)}%</strong>
+                  <span> · {loadoutResults.best.wins} wins / {loadoutResults.best.losses} losses / {loadoutResults.best.draws} draws</span>
+                </p>
+                <p className="loadout-saved-note">
+                  <strong>Saved to equipped slots.</strong> Standard 1v1 and 2v2 simulations now use this legal loadout for this fighter.
+                </p>
+                <div className="loadout-best-attacks">
+                  {loadoutResults.best.attacks.map((attack, index) => (
+                    <div key={getAttackKey(attack)}>
+                      <span> SLOT {index + 1} </span>
+                      <strong>{attack.name ?? getAttackKey(attack)}</strong>
+                    </div>
+                  ))}
+                </div>
+                <h4>PERFORMANCE BY OPPONENT</h4>
+                <div className="matchup-table-wrapper">
+                  <table className="matchup-table">
+                    <thead><tr><th>OPPONENT</th><th>WIN RATE</th><th>WINS</th><th>LOSSES</th><th>DRAWS</th></tr></thead>
+                    <tbody>
+                      {loadoutResults.best.opponentResults.map((opponent) => (
+                        <tr key={opponent.id}>
+                          <td>{opponent.name}</td><td>{opponent.winRate}%</td><td>{opponent.wins}</td><td>{opponent.losses}</td><td>{opponent.draws}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <h4>TOP TESTED COMBINATIONS</h4>
+                <div className="loadout-candidate-results">
+                  {loadoutResults.candidateResults.slice(0, 5).map((candidate, index) => (
+                    <div key={candidate.keys.join("|")} className={index === 0 ? "loadout-candidate-best" : ""}>
+                      <strong>#{index + 1} · {candidate.score.toFixed(1)}%</strong>
+                      <span>{candidate.attacks.map((attack) => attack.name ?? getAttackKey(attack)).join(" · ")}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="simulation-warning">
+                  Tested {loadoutResults.candidatesTested} combinations against {loadoutResults.opponentsTested} opponents.
+                  When the full combination count is larger than the candidate budget, the lab samples legal combinations to keep testing responsive.
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
         {mode === "custom" && battleType === "1v1" && (
           <div className="simulator-bots">
             <div className="simulator-bot">
@@ -1692,9 +2164,11 @@ function BotSimulator() {
             </p>
           </div>
         )}
+          </>
+        )}
       </section>
 
-      {results && results.type === "custom" && (
+      {activeTab !== "loadout" && results && results.type === "custom" && (
         <section className="simulation-results">
           <h2>
             {results.battleType === "2v2"
@@ -1821,7 +2295,7 @@ function BotSimulator() {
         </section>
       )}
 
-      {results && results.type === "all" && (
+      {activeTab !== "loadout" && results && results.type === "all" && (
         <section className="simulation-results">
           <h2>
             {results.battleType === "2v2"
