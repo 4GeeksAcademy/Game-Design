@@ -140,16 +140,18 @@ const Ichigo = {
       description: "Ichigo releases his ultimate form as an overwhelming wave of darkness.",
       festivalExclusive: true,
       locked: true,
-      damage: 0,
-      speed: 0,
+      damage: 180,
+      speed: 90,
       uses: 1,
+      duration: 1,
       state: true,
       buff: {
-        health: 170,
+        
         mana: 100,
-        defense: 20,
-        agility: 40,
-        cooldown: 2,
+        defense: -20,
+        agility: -70,
+        cooldown: -2,
+        recovery: -3,
         maximumCooldown: 2,
         maximumHealth: 60,
       },
@@ -161,6 +163,9 @@ const Ichigo = {
         },
       },
       characterModifiers: {
+        health: {
+          amount: 170,
+        },
         agility: {
           multiplier: 1.7,
         },
@@ -169,6 +174,12 @@ const Ichigo = {
         },
         manaRegen: {
           multiplier: 1.2,
+        },
+        cooldown: {
+          amount: 4,
+        },
+        recovery: {
+          amount: 1,
         },
       },
       sacrifice: { health: 50 },
