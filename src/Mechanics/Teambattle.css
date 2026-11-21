@@ -3410,3 +3410,7 @@ battlefield > .local-coop-incoming {
   background: #c5ad59;
   color: #211e12;
 }
+
+
+/* Shared in-game pause control */
+.team-battle { position: relative; }
