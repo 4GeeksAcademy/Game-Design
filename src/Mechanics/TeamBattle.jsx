@@ -1920,7 +1920,7 @@ export default function TeamBattle() {
 
   // Resolve each card once when its own deadline expires.
   useEffect(() => {
-    if (phase !== "cpu-fighting" || !isLocalCoop) return;
+    if (isPaused || phase !== "cpu-fighting" || !isLocalCoop) return;
 
     const timers = localCoopDefenses
       .filter((defense) => defense.visible && !defense.outcome)
