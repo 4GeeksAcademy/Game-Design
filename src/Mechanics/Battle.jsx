@@ -109,8 +109,6 @@ function cloneBattleFighterForPreview(fighter) {
       ...modifier,
     })),
     attacks: (fighter?.attacks ?? []).map(cloneBattleAttackForPreview),
-      stunned: attack.stunned ? { ...attack.stunned } : attack.stunned,
-    })),
   };
 }
 
