@@ -322,7 +322,7 @@ function App() {
 
     return {
       current: getIncomingResourceSnapshot(character),
-      defend: createPreview("defend"),
+      defend: character.cooldown > 0 ? createPreview("defend") : null,
       evade: createPreview("evade"),
       takeDamage: createPreview("take-damage"),
     };
