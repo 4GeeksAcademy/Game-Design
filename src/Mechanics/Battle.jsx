@@ -79,6 +79,25 @@ function createBattleFighter(characterId, battleId) {
   };
 }
 
+function cloneBattleAttackForPreview(attack) {
+  return {
+    ...attack,
+    buff: attack.buff ? { ...attack.buff } : attack.buff,
+    debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
+    heal: attack.heal
+      ? {
+          ...attack.heal,
+          buff: attack.heal.buff ? { ...attack.heal.buff } : attack.heal.buff,
+        }
+      : attack.heal,
+    activeEffects: (attack.activeEffects ?? []).map((effect) => ({
+      ...effect,
+      effects: { ...effect.effects },
+    })),
+    stunned: attack.stunned ? { ...attack.stunned } : attack.stunned,
+  };
+}
+
 function cloneBattleFighterForPreview(fighter) {
   return {
     ...fighter,
@@ -89,20 +108,7 @@ function cloneBattleFighterForPreview(fighter) {
     activeModifiers: (fighter?.activeModifiers ?? []).map((modifier) => ({
       ...modifier,
     })),
-    attacks: (fighter?.attacks ?? []).map((attack) => ({
-      ...attack,
-      buff: attack.buff ? { ...attack.buff } : attack.buff,
-      debuff: attack.debuff ? { ...attack.debuff } : attack.debuff,
-      heal: attack.heal
-        ? {
-            ...attack.heal,
-            buff: attack.heal.buff ? { ...attack.heal.buff } : attack.heal.buff,
-          }
-        : attack.heal,
-      activeEffects: (attack.activeEffects ?? []).map((effect) => ({
-        ...effect,
-        effects: { ...effect.effects },
-      })),
+    attacks: (fighter?.attacks ?? []).map(cloneBattleAttackForPreview),
       stunned: attack.stunned ? { ...attack.stunned } : attack.stunned,
     })),
   };
@@ -282,7 +288,7 @@ function App() {
       const result =
         choice === "defend"
           ? attackCharacter(
-              { ...aiAttack },
+              cloneBattleAttackForPreview(aiAttack),
               previewAttacker,
               previewDefender,
               getModifiedCharacterStat(previewDefender, "defense"),
@@ -290,13 +296,13 @@ function App() {
             )
           : choice === "evade"
             ? evadeAttack(
-                { ...aiAttack },
+                cloneBattleAttackForPreview(aiAttack),
                 previewAttacker,
                 previewDefender,
                 stunOptions,
               )
             : attackCharacter(
-                { ...aiAttack },
+                cloneBattleAttackForPreview(aiAttack),
                 previewAttacker,
                 previewDefender,
                 0,
