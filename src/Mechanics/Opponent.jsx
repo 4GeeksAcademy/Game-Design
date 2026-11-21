@@ -89,7 +89,7 @@ function Opponent({ opponent, setOpponent }) {
             <div className="compactStat">
               <span>⏳ Cooldown</span>
               <strong>
-                {opponent.cooldown ?? 0}/{getModifiedCharacterStat(opponent, "maximumCooldown") || 3}
+                {getModifiedCharacterStat(opponent, "cooldown")}/{getModifiedCharacterStat(opponent, "maximumCooldown") || 3}
               </strong>
             </div>
 
