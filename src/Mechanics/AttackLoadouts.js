@@ -2,6 +2,7 @@ import { spendCoins } from "./Currency.js";
 
 const LOADOUT_KEY = "wildCardsAttackLoadouts";
 const UNLOCKED_ATTACKS_KEY = "wildCardsUnlockedAttacks";
+const FESTIVAL_UNLOCKED_ATTACKS_KEY = "wildCardsFestivalUnlockedAttacks";
 
 export function getAttackKey(attack) {
   return String(attack?.id ?? attack?.name ?? "");
@@ -47,6 +48,11 @@ export function getUnlockedAttackKeys(characterId) {
 }
 
 export function isAttackUnlocked(characterId, attack) {
+  if (attack.festivalExclusive) {
+    const festivalUnlocked = readObject(FESTIVAL_UNLOCKED_ATTACKS_KEY);
+    return Array.isArray(festivalUnlocked[characterId]) &&
+      festivalUnlocked[characterId].includes(getAttackKey(attack));
+  }
   if (!attack.locked && !attack.requiresPurchase && !(Number(attack.unlockCost ?? attack.coinCost ?? attack.price) > 0)) return true;
   return getUnlockedAttackKeys(characterId).includes(getAttackKey(attack));
 }
@@ -71,7 +77,21 @@ export function saveEquippedAttackKeys(characterId, keys, attacks = [], configur
   return clean;
 }
 
+export function unlockFestivalAttack(characterId, attack) {
+  if (!attack?.festivalExclusive) return false;
+  const key = getAttackKey(attack);
+  const unlocked = readObject(FESTIVAL_UNLOCKED_ATTACKS_KEY);
+  const current = Array.isArray(unlocked[characterId]) ? unlocked[characterId] : [];
+  if (!current.includes(key)) {
+    unlocked[characterId] = [...current, key];
+    localStorage.setItem(FESTIVAL_UNLOCKED_ATTACKS_KEY, JSON.stringify(unlocked));
+    window.dispatchEvent(new CustomEvent("attackUnlocked", { detail: { characterId, key, source: "festival" } }));
+  }
+  return true;
+}
+
 export function unlockAttack(characterId, attack) {
+  if (attack?.festivalExclusive) return false;
   const key = getAttackKey(attack);
   const cost = Math.max(0, Math.floor(Number(attack.unlockCost ?? attack.coinCost ?? attack.price) || 0));
   const unlocked = readObject(UNLOCKED_ATTACKS_KEY);
