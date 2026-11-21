@@ -1,4 +1,3 @@
-
 import IchigoArenaImage from "../../assets/img/Ichigo.png";
 
 // Attack Images
@@ -112,7 +111,8 @@ const Ichigo = {
     {
       id: "ichigo-hollowfication",
       name: "Hollowfication",
-      description: "Ichigo manifests his Hollow mask, drawing on his inner Hollow to amplify his combat abilities.",
+      description:
+        "Ichigo manifests his Hollow mask, drawing on his inner Hollow to amplify his combat abilities.",
       locked: true,
       unlockCost: 70000,
       damage: 0,
@@ -137,7 +137,8 @@ const Ichigo = {
     {
       id: "ichigo-festival-mugetsu",
       name: "Mugetsu",
-      description: "Ichigo releases his ultimate form as an overwhelming wave of darkness.",
+      description:
+        "Ichigo releases his ultimate form as an overwhelming wave of darkness.",
       festivalExclusive: true,
       locked: true,
       damage: 180,
@@ -146,7 +147,7 @@ const Ichigo = {
       duration: 1,
       state: true,
       buff: {
-        
+        health: 170,
         mana: 100,
         defense: -20,
         agility: -70,
@@ -159,13 +160,10 @@ const Ichigo = {
         targetAttackIds: null,
         stats: {
           damage: { multiplier: 1.5 },
-          speed: { multiplier: 1.5 },
+          speed: { amount: 140 },
         },
       },
       characterModifiers: {
-        health: {
-          amount: 170,
-        },
         agility: {
           multiplier: 1.7,
         },
