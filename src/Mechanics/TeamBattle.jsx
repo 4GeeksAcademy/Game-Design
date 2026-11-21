@@ -688,7 +688,7 @@ export default function TeamBattle() {
   };
 
   useEffect(() => {
-    if (!showRoundIntro) return;
+    if (!showRoundIntro || isPaused) return;
 
     setIsIntroFadingOut(false);
 
@@ -705,7 +705,7 @@ export default function TeamBattle() {
       clearTimeout(fadeTimer);
       clearTimeout(removeTimer);
     };
-  }, [showRoundIntro, roundNumber]);
+  }, [showRoundIntro, roundNumber, isPaused]);
 
   useEffect(() => {
     if (isPaused || !isCpuAssist || phase !== "selecting") return;
