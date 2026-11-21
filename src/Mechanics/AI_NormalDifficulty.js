@@ -1,5 +1,6 @@
 import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
 import { aiChooseStunTargets } from "./AI.js";
+import { getModifiedAttackStat, getModifiedCharacterStat } from "./Modifiers.js";
 
 const MAX_QUEUE_SIZE = 10;
 const ATTACK_TIMEOUT = 10000;
@@ -7,15 +8,12 @@ const ATTACK_TIMEOUT = 10000;
 function normalDefendOrEvade(attack, attacker, defender, options = {}) {
   if (!attack || !attacker || !defender) return null;
 
-  const defense =
-    typeof defender.defense === "object"
-      ? (defender.defense?.amount ?? 0)
-      : (defender.defense ?? 0);
+  const defense = getModifiedCharacterStat(defender, "defense");
 
   const health = defender.health ?? 0;
   const mana = defender.mana ?? 0;
-  const cooldown = defender.cooldown ?? 0;
-  const damage = Math.max(0, attack.damage ?? 0);
+  const cooldown = getModifiedCharacterStat(defender, "cooldown");
+  const damage = getModifiedAttackStat(attack, attacker, "damage");
 
   // Zero-damage moves should resolve without spending defense.
   if (damage === 0 || cooldown <= 0) {
@@ -25,10 +23,9 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
   const damageAfterBlock = Math.max(0, damage - defense);
   const blockPreventsKnockout = damage >= health && damageAfterBlock < health;
 
-  const evadeManaNeeded = Math.max(
-    0,
-    (attack.speed ?? 0) - (defender.agility ?? 0),
-  );
+  const attackSpeed = getModifiedAttackStat(attack, attacker, "speed");
+  const agility = getModifiedCharacterStat(defender, "agility");
+  const evadeManaNeeded = Math.max(0, attackSpeed - agility);
 
   // Never attempt an evade that would fail due to insufficient mana.
   const canEvade = mana >= evadeManaNeeded;
