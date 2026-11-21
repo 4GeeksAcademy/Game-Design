@@ -13,7 +13,7 @@ const FESTIVAL_REWARDS = {
     elite: { type: "coins", amount: 300 },
   },
   3: {
-    free: { type: "attack", characterId: "mina", attackId: "mina-festival-acidman", name: "Acidman: Alma" },
+    free: { type: "attack", characterId: "mina", attackId: "mina-festival-alma", name: "Alma" },
     elite: { type: "coins", amount: 400 },
   },
   4: {
@@ -98,7 +98,7 @@ const FESTIVAL_REWARDS = {
   },
   19: {
     free: { type: "coins", amount: 10000 },
-    elite: { type: "attack", characterId: "ichigo", attackId: "ichigo-festival-mugetsu", name: "Mugetsu" },
+    elite: { type: "attack", characterId: "ichigo", attackId: "ichigo-festival-hollow-getsuga", name: "Hollowfied Getsuga Tensho" },
   },
   20: {
     free: { type: "character",
