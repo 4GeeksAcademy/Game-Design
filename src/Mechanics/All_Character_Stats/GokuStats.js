@@ -1,3 +1,4 @@
+import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 import GokuImage from "../../assets/img/Goku.jpeg";
 
 import Attack1 from "../../assets/img/Attack_IMAGES/kamekameha.jpeg";
@@ -177,6 +178,7 @@ const Goku = {
         manaRegen: -12,
       },
     },
+    ...FESTIVAL_ATTACKS_BY_CHARACTER.goku,
   ],
 };
 
