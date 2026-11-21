@@ -5194,3 +5194,217 @@ body {
   border-color: #a5c76c !important;
   box-shadow: 0 0 12px rgba(165, 199, 108, 0.12);
 }
+
+
+/* =========================================
+   INCOMING ATTACK — PLAYER RESOURCE FORECAST
+========================================= */
+
+/* Shift the warning card away from the center of the fighter HUD. */
+#aiAttackSection.incoming-attack-card {
+  left: auto !important;
+  right: clamp(12px, 4vw, 54px) !important;
+  translate: 0 -50% !important;
+  width: min(390px, calc(100vw - 24px)) !important;
+  max-height: min(90vh, 900px);
+  margin: 0;
+}
+
+#aiAttackCard {
+  max-width: 390px;
+}
+
+.incoming-player-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  background: linear-gradient(145deg, #111a29, #090e18);
+  border-top: 1px solid #ff31594a;
+  border-bottom: 1px solid #ff315930;
+}
+
+.incoming-status-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #ff9aa9;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.incoming-status-heading small {
+  color: #9eacbf;
+  font-size: 0.55rem;
+  letter-spacing: 0.7px;
+}
+
+.incoming-current-resources {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+  padding: 8px;
+  background: #ffffff06;
+  border: 1px solid #ffffff12;
+  border-radius: 6px;
+}
+
+.incoming-resource {
+  min-width: 0;
+}
+
+.incoming-resource-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  margin-bottom: 3px;
+  color: #b9c8da;
+  font-size: 0.59rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.incoming-resource-heading strong {
+  color: #fff;
+  font-size: 0.67rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.incoming-resource-heading small {
+  color: #91a2b8;
+  font-size: 0.55rem;
+  font-weight: 700;
+}
+
+.incoming-resource-heading em {
+  margin-left: 4px;
+  font-size: 0.58rem;
+  font-style: normal;
+}
+
+.incoming-resource-heading .resource-loss {
+  color: #ff7185;
+}
+
+.incoming-resource-heading .resource-gain {
+  color: #65e6a3;
+}
+
+.incoming-resource-track {
+  height: 5px;
+  overflow: hidden;
+  background: #ffffff16;
+  border-radius: 999px;
+}
+
+.incoming-resource-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 250ms ease;
+}
+
+.incoming-resource-health .incoming-resource-fill {
+  background: linear-gradient(90deg, #a51d39, #ff526c);
+  box-shadow: 0 0 7px #ff526c70;
+}
+
+.incoming-resource-cooldown .incoming-resource-fill {
+  background: linear-gradient(90deg, #9a6b1d, #f4c45b);
+  box-shadow: 0 0 7px #f4c45b55;
+}
+
+.incoming-resource-mana .incoming-resource-fill {
+  background: linear-gradient(90deg, #0874d1, #13d5ff);
+  box-shadow: 0 0 7px #13d5ff65;
+}
+
+.incoming-aftermath-heading {
+  margin-top: 2px;
+  color: #ffd27b;
+}
+
+.incoming-aftermath-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.incoming-aftermath-option {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding: 8px 6px;
+  background: #ffffff06;
+  border: 1px solid #ffffff18;
+  border-radius: 6px;
+}
+
+.incoming-aftermath-option > strong {
+  color: #fff;
+  font-size: 0.61rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.aftermath-defend {
+  border-top: 2px solid #d2a44f;
+}
+
+.aftermath-evade {
+  border-top: 2px solid #42c58a;
+}
+
+.aftermath-takeDamage {
+  border-top: 2px solid #e34b61;
+}
+
+.incoming-aftermath-option .incoming-resource-heading {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.52rem;
+  text-align: center;
+}
+
+.incoming-aftermath-option .incoming-resource-heading strong {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.63rem;
+}
+
+.incoming-aftermath-option .incoming-resource-heading small {
+  font-size: 0.5rem;
+}
+
+.incoming-aftermath-option .incoming-resource-heading em {
+  display: inline-block;
+}
+
+.incoming-preview-unavailable {
+  color: #ff9aa9;
+  font-size: 0.58rem;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  #aiAttackSection.incoming-attack-card {
+    right: 10px !important;
+    width: min(370px, calc(100vw - 20px)) !important;
+    max-height: 88vh;
+  }
+
+  #aiAttackCard {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .incoming-resource-fill {
+    transition: none;
+  }
+}
