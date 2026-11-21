@@ -1,4 +1,3 @@
-import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 import NarutoArenaImage from "../../assets/img/Naruto.png";
 
 import Attack1 from "../../assets/img/Attack_IMAGES/Rasengan.jpeg";
@@ -123,7 +122,19 @@ const Naruto = {
       // Only apply stun if the attack successfully hits.
       stunRequiresHit: true,
     },
-    ...FESTIVAL_ATTACKS_BY_CHARACTER.naruto,
+    {
+      id: "naruto-festival-big-ball-rasengan",
+      name: "Big Ball Rasengan",
+      description: "Naruto forms an enlarged Rasengan, delivering a heavier impact than his standard technique.",
+      festivalExclusive: true,
+      locked: true,
+      damage: 68,
+      speed: 42,
+      cost: 42,
+      state: true,
+      debuff: { defense: 8 },
+      debuffRequiresHit: true,
+    },
   ],
 };
 
