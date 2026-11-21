@@ -1317,3 +1317,23 @@
     grid-column: auto;
   }
 }
+
+
+.matchup-table .ranked-loadout-cell {
+  min-width: 240px;
+  max-width: 420px;
+  color: #b9d5ef;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  white-space: normal;
+}
+
+.ranked-loadout-cell > div + div {
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(39, 160, 255, 0.16);
+}
+
+.ranked-loadout-cell strong {
+  color: #27dfff;
+}
