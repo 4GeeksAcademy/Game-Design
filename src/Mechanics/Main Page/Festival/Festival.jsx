@@ -8,7 +8,7 @@ import { skins } from "../../Skins";
 import { useNavigate } from "react-router-dom";
 import { getDailyObjectives } from "./FestivalDailyObjectives";
 import FESTIVAL_REWARDS from "./FestivalRewards";
-import { getFestivalAttack } from "../../FestivalAttacks.js";
+import { roster } from "../CharacterSelection.jsx";
 import { unlockFestivalAttack } from "../../AttackLoadouts.js";
 import {
   getFestivalProgress,
@@ -36,6 +36,11 @@ const FESTIVAL_CHARACTER_IMAGES = {
   hinata: HinataImage,
 };
 const ELITE_PASS_COST = 100000;
+
+const getFestivalAttack = (characterId, attackId) =>
+  roster.find((character) => character.id === characterId)?.data?.attacks?.find(
+    (attack) => attack.id === attackId && attack.festivalExclusive,
+  ) ?? null;
 
 // Each tier has a free and an elite reward placeholder.
 const tiers = Array.from({ length: FESTIVAL_TOTAL_TIERS }, (_, index) => ({
