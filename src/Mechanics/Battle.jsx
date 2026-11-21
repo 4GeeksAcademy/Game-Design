@@ -649,7 +649,7 @@ function App() {
     (choice) => {
       if (isPaused || !aiAttack || defenseTimeLeft <= 0) return;
 
-      if (choice === "defend" && character.cooldown <= 0) return;
+      if (choice === "defend" && getModifiedCharacterStat(character, "cooldown") <= 0) return;
 
       const selectedAttackIds = aiChooseStunTargets(
   character,
@@ -758,7 +758,7 @@ const stunOptions = {
       if (!choice) return;
 
       // Don't consume the defend key when defending is unavailable.
-      if (choice === "defend" && character.cooldown <= 0) return;
+      if (choice === "defend" && getModifiedCharacterStat(character, "cooldown") <= 0) return;
 
       event.preventDefault();
       resolveIncomingAttack(choice);
