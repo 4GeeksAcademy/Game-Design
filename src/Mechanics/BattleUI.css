@@ -5203,11 +5203,11 @@ body {
 /* Keep the incoming attack compact and centered over the battle. */
 #aiAttackSection.incoming-attack-card {
   position: fixed !important;
-  top: 50% !important;
+  top: 12px !important;
   left: 50% !important;
   right: auto !important;
   bottom: auto !important;
-  translate: -50% -50% !important;
+  translate: -50% 0 !important;
   width: min(340px, calc(100vw - 28px)) !important;
   max-height: min(82vh, 680px);
   margin: 0 !important;
@@ -5248,6 +5248,16 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.incoming-resource-line {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.incoming-mana-heading {
+  color: #79cfff;
+}
+
 .incoming-health-track {
   height: 7px;
   overflow: hidden;
@@ -5255,12 +5265,25 @@ body {
   border-radius: 999px;
 }
 
-.incoming-health-fill {
+.incoming-health-fill,
+.incoming-mana-fill {
   height: 100%;
   border-radius: inherit;
+  transition: width 250ms ease;
+}
+
+.incoming-health-fill {
   background: linear-gradient(90deg, #a51d39, #ff526c);
   box-shadow: 0 0 7px #ff526c70;
-  transition: width 250ms ease;
+}
+
+.incoming-mana-fill {
+  background: linear-gradient(90deg, #0874d1, #13d5ff);
+  box-shadow: 0 0 7px #13d5ff70;
+}
+
+.incoming-mana-track {
+  background: #13d5ff20;
 }
 
 @media (max-width: 600px) {
@@ -5274,7 +5297,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .incoming-health-fill {
+  .incoming-health-fill,
+  .incoming-mana-fill {
     transition: none;
   }
 }
