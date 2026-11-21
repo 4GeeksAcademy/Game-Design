@@ -2709,6 +2709,7 @@ export default function TeamBattle() {
           attacksUsed={attacksUsed}
           levelConfig={levelConfig}
           battlePath="/team-battle"
+          onRematch={resetBattle}
         />
       );
     }
