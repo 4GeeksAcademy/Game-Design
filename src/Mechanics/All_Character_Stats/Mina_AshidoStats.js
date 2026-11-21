@@ -1,4 +1,3 @@
-import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 import minaArenaImage from "../../assets/img/MinaAshidoArena.jpg";
 
 import Attack1 from "../../assets/img/Attack_IMAGES/Acid Shot.jpeg"
@@ -126,7 +125,19 @@ const mina = {
       // Only apply stun if the attack successfully hits.
       stunRequiresHit: true,
     },
-    ...FESTIVAL_ATTACKS_BY_CHARACTER.mina,
+    {
+      id: "mina-festival-alma",
+      name: "Alma",
+      description: "Mina raises her acid's solubility to its maximum and hurls the corrosive mass at her opponent.",
+      festivalExclusive: true,
+      locked: true,
+      damage: 65,
+      speed: 35,
+      cost: 42,
+      turnCooldown: 3,
+      state: true,
+      sacrifice: { health: 8 },
+    },
   ],
 };
 
