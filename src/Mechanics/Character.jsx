@@ -140,7 +140,7 @@ function Character({
             <div className="compactStat">
               <span>⏳ Cooldown</span>
               <strong>
-                {character.cooldown ?? 0}/{getModifiedCharacterStat(character, "maximumCooldown") || 3}
+                {getModifiedCharacterStat(character, "cooldown")}/{getModifiedCharacterStat(character, "maximumCooldown") || 3}
               </strong>
             </div>
 
