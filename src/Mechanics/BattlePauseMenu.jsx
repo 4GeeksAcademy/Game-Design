@@ -122,19 +122,6 @@ export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect
           <label className="battle-pause-mute"><span><strong>Mute all audio</strong><small>Silence music, effects, and voices.</small></span><input type="checkbox" checked={audio.muted} onChange={(event) => changeAudio("muted", event.target.checked)}/></label>
         </section>
       </div>}
-      {false && <div className="battle-pause-settings">
-        <p>These settings are shared with the Home Screen and save automatically.</p>
-        {[
-          ["master", "Master volume", "Controls all game audio."],
-          ["music", "Background music", "Menu, story, and battle themes."],
-          ["effects", "Sound effects", "Buttons, impacts, and action sounds."],
-          ["voices", "Character voices", "Dialogue and character reactions."],
-        ].map(([key, label, description]) => <label className="battle-pause-audio-row" key={key}>
-          <span><strong>{label}</strong><small>{description}</small></span>
-          <span><input type="range" min="0" max="1" step="0.05" value={audio[key]} onChange={(event) => changeAudio(key, Number(event.target.value))}/><output>{Math.round(audio[key] * 100)}%</output></span>
-        </label>)}
-        <label className="battle-pause-mute"><span><strong>Mute all audio</strong><small>Silence music, effects, and voices.</small></span><input type="checkbox" checked={audio.muted} onChange={(event) => changeAudio("muted", event.target.checked)}/></label>
-      </div>}
       {tab === "settings" && <button className="battle-pause-close" onClick={onResume}>SAVE SETTINGS & RESUME</button>}
       {tab === "pause" && <button className="battle-pause-close" onClick={onResume}>BACK TO MATCH</button>}
     </div>
