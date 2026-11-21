@@ -1584,6 +1584,7 @@ export default function TeamBattle() {
 
   useEffect(() => {
     if (
+      isPaused ||
       phase !== "cpu-fighting" ||
       pendingDefense ||
       cpuActionQueue !== null ||
@@ -1691,6 +1692,7 @@ export default function TeamBattle() {
     addLog("CPU attacks are queued.");
   }, [
     phase,
+    isPaused,
     pendingDefense,
     cpuActionQueue,
     cpuAttacksPerTurn,
@@ -1701,6 +1703,7 @@ export default function TeamBattle() {
 
   useEffect(() => {
     if (
+      isPaused ||
       phase !== "cpu-fighting" ||
       pendingDefense ||
       cpuActionQueue === null ||
@@ -1831,6 +1834,7 @@ export default function TeamBattle() {
     addLog(`${cpu.name} is preparing ${attack.name}. Defend or evade!`);
   }, [
     phase,
+    isPaused,
     pendingDefense,
     cpuActionQueue,
     cpuActionIndex,
@@ -1863,6 +1867,7 @@ export default function TeamBattle() {
     pendingDefense?.targetId,
     pendingDefense?.attackIndex,
     phase,
+    isPaused,
   ]);
 
   useEffect(() => {
@@ -1911,7 +1916,7 @@ export default function TeamBattle() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [phase, isLocalCoop]);
+  }, [phase, isLocalCoop, isPaused]);
 
   // Resolve each card once when its own deadline expires.
   useEffect(() => {
@@ -1929,7 +1934,7 @@ export default function TeamBattle() {
       );
 
     return () => timers.forEach(clearTimeout);
-  }, [phase, isLocalCoop, localCoopDefenses]);
+  }, [phase, isLocalCoop, localCoopDefenses, isPaused]);
 
   const resolveLocalCoopDefense = (defenseId, choice) => {
     console.log("[LocalCoop resolve] Called:", { defenseId, choice });
@@ -2492,7 +2497,7 @@ export default function TeamBattle() {
   resolveCPUDefenseRef.current = resolveCPUDefense;
 
   useEffect(() => {
-    if (!pendingDefense || phase !== "cpu-fighting") return;
+    if (isPaused || !pendingDefense || phase !== "cpu-fighting") return;
 
     const defender = teams.player.find(
       (fighter) => fighter.id === pendingDefense.targetId,
@@ -2597,7 +2602,7 @@ export default function TeamBattle() {
     }, 700);
 
     return () => clearTimeout(timer);
-  }, [pendingDefense, phase, teams.player, teams.opponent]);
+  }, [pendingDefense, phase, teams.player, teams.opponent, isPaused]);
 
   resolveCPUDefenseRef.current = resolveCPUDefense;
 
