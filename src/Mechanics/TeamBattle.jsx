@@ -1,6 +1,6 @@
 // TeamBattle.jsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { roster } from "./Main Page/CharacterSelection";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup";
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges";
@@ -368,7 +368,7 @@ function assignUniqueCpuTargets(opponents, players, previousCpuAttackers = []) {
 }
 
 export default function TeamBattle() {
-  const location = useLocation();
+  const location = useLocation();\n  const navigate = useNavigate();
   const levelConfig = location.state ?? {};
   const isStoryMode = levelConfig.gameMode === "story";
   const {
