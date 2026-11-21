@@ -133,6 +133,8 @@ const Kirishima = {
     },
     {
       name: "Crimson Crush",
+      locked: true,
+      unlockCost: 6000,
       image: Attack6,
       damage: 42,
       speed: 25,
@@ -155,6 +157,8 @@ const Kirishima = {
     },
     {
       name: "Red Riot Unbreakable",
+      locked: true,
+      unlockCost: 14000,
       image: Attack7,
       damage: 0,
       speed: 0,
@@ -203,7 +207,7 @@ const Kirishima = {
     {
       name: "Red Riot: Unbreakable Smash",
       locked: true,
-      unlockCost: 300,
+      unlockCost: 17000,
       image: Attack8,
       damage: 81,
       speed: 53,

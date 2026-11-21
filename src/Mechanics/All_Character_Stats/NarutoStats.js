@@ -85,6 +85,8 @@ const Naruto = {
     },
     {
       name: "Sage Mode",
+      locked: true,
+      unlockCost: 15000,
       image: Attack4,
       damage: 0,
       speed: 0,
@@ -101,7 +103,7 @@ const Naruto = {
     {
       name: "Tailed Beast Bomb Rasenshuriken",
       locked: true,
-      unlockCost: 300,
+      unlockCost: 30000,
       image: Attack5,
       damage: 135,
       uses: 1,

@@ -85,6 +85,8 @@ const Hinata = {
     // 3. Twin Lion Fists
     {
       name: "Twin Lion Fists",
+      locked: true,
+      unlockCost: 30000,
       image: TwinLionFistsImage,
       damage: 47,
       speed: 57,
@@ -130,15 +132,16 @@ const Hinata = {
       speed: 27,
       cost: 9,
       state: true,
+      debuff: {
+        defense: 17,
+      },
     },
 
     // 6. Eight Trigrams: Sixty-Four Palms
     {
       name: "Sixty-Four Palms",
       locked: true,
-      unlockCost: 300,
-      locked: true,
-      unlockCost: 300,
+      unlockCost: 26000,
       image: SixtyFourPalmsImage,
       damage: 29,
       speed: 30,

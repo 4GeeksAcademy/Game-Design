@@ -16,8 +16,8 @@ const Ochaco = {
   mana: 120,
   maximumMana: 120,
   manaRegen: 25,
-  cooldown: 2,
-  maximumCooldown: 2,
+  cooldown: 3,
+  maximumCooldown: 3,
   recovery: 2,
   agility: 20,
   defense: {
@@ -77,6 +77,8 @@ const Ochaco = {
 
     {
       name: "Zero Gravity: Floating Combo",
+      locked: true,
+      unlockCost: 13000,
       image: Attack5,
       turnCooldown: 3,
       damage: 20,

@@ -97,8 +97,9 @@ const TenTen = {
 
     {
       name: "Bashosen: Scroll Of Fire",
+      locked: true,
+      unlockCost: 10000,
       image: Attack6,
-
       damage: 70,
       speed: 40,
       cost: 45,
@@ -114,7 +115,7 @@ const TenTen = {
     {
       name: "Bashōsen: Coil of Wind",
       locked: true,
-      unlockCost: 300,
+      unlockCost: 11000,
       image: Attack7,
       description:
         "Attacks with a chained sickle, dealing damage and weakening the opponent's defense.",

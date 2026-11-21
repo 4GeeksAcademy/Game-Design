@@ -105,6 +105,8 @@ const Yoruichi = {
     },
     {
       name: "Shunko: Raiju Senkei",
+      locked: true,
+      unlockCost: 5000,
       image: Attack6,
       damage: 35,
       cost: 30,
@@ -122,7 +124,7 @@ const Yoruichi = {
     {
       name: "Shunko: Lightning Release",
       locked: true,
-      unlockCost: 300,
+      unlockCost: 10000,
       image: Attack3,
       damage: 12,
       cost: 37,

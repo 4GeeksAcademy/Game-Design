@@ -41,6 +41,15 @@ const mina = {
         mana: 5,
         agility: 2,
       },
+        // STUN CONFIGURATION
+      stun: {
+        type: "random", // "selected" | "random" | "all"
+        amount: 1, // attacks affected
+        duration: 1, // how long it will last
+      },
+
+      // Only apply stun if the attack successfully hits.
+      stunRequiresHit: true,
     },
 
     {
@@ -55,11 +64,19 @@ const mina = {
       debuff: {
         health: 7,
       },
+       // STUN CONFIGURATION
+      stun: {
+        type: "random", // "selected" | "random" | "all"
+        amount: 1, // attacks affected
+        duration: 1, // how long it will last
+      },
       state: true,
     },
 
     {
       name: "Acid Bomb",
+      locked: true,
+      unlockCost: 2000,
       image: Attack3,
       damage: 40,
       speed: 20,
@@ -76,18 +93,27 @@ const mina = {
         cooldown: 2,
         recovery: 1,
       },
+       // STUN CONFIGURATION
+      stun: {
+        type: "random", // "selected" | "random" | "all"
+        amount: 3, // attacks affected
+        duration: 1, // how long it will last
+      },
       state: true,
     },
 
     {
       name: "Acid Corrosion",
-      locked: true,
-      unlockCost: 300,
       image: Attack4,
       damage: 10,
       speed: 20,
       cost: 25,
-      debuff: { health: 10, defense: 10, agility: 10, cooldown: 1, recovery: 1 },
+      buffRequiresHit: true,
+      buff: {
+        defense: 10,
+      },
+      debuffRequiresHit: true,
+      debuff: { health: 30, defense: 10, agility: 10, cooldown: 1, recovery: 1 },
       state: true,
       // STUN CONFIGURATION
       stun: {

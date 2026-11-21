@@ -92,7 +92,7 @@ const Ichigo = {
     {
       name: "Bankai: Tensa Zangetsu",
       locked: true,
-      unlockCost: 300,
+      unlockCost: 40000,
       image: Attack5,
       damage: 10,
       speed: 40,

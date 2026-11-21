@@ -129,7 +129,7 @@ const Kenpachi = {
     {
       name: "Nozarashi",
       locked: true,
-      unlockCost: 300,
+      unlockCost: 50000,
       locked: true,
       unlockCost: 300,
       image: Attack5,
@@ -149,7 +149,7 @@ const Kenpachi = {
             amount: 25,
           },
           speed: {
-            multiplier: 1.2, // you can add amount along with multiplier too for aditional effect
+            multiplier: 1.3, // you can add amount along with multiplier too for aditional effect
           },
           cost: {
             multiplier: 1.2,

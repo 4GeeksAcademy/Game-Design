@@ -72,9 +72,9 @@ const Chad = {
   {
     name: "La Muerte",
       locked: true,
-      unlockCost: 300,
+      unlockCost: 27000,
     image: LaMuerte,
-    damage: 125,
+    damage: 200,
     speed: 30,
     turnCooldown: 3,
     cost: 45,

@@ -29,6 +29,8 @@ const rockLee = {
   attacks: [
     {
       name: "Hidden Lotus Awakening",
+      locked: true,
+      unlockCost: 8000,
       image: Attack1,
       damage: 0,
       speed: 0,

@@ -81,6 +81,8 @@ const Goku = {
     {
       name: "Kaio-ken 20x",
       id: "goku-kaio-ken-20x",
+      locked: true,
+      unlockCost: 20000,
       image: Attack3,
       damage: 0,
       speed: 0,
@@ -119,6 +121,8 @@ const Goku = {
     {
       name: "Super Saiyan",
       id: "goku-super-saiyan",
+      locked: true,
+      unlockCost: 45000,
       image: Attack7,
       damage: 0,
       speed: 0,

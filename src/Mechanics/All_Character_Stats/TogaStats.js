@@ -72,6 +72,8 @@ const Toga = {
     {
       // Official move name
       name: "Blood Sucker",
+      locked: true,
+      unlockCost: 3000,
       image: Attack3,
       damage: 20,
       speed: 35,
@@ -127,9 +129,7 @@ const Toga = {
 
       name: "Deadly Strike: Gory Stab",
       locked: true,
-      unlockCost: 300,
-      locked: true,
-      unlockCost: 300,
+      unlockCost: 7000,
       image: Attack6,
       damage: 45,
       speed: 70,

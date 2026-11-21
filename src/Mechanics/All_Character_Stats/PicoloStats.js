@@ -45,6 +45,8 @@ const Picolo = {
     {
       id: "ki-control",
       name: "Ki Control",
+      locked: true,
+      unlockCost: 5000,
       image: Attack2,
       damage: 0,
       speed: 0,
@@ -117,7 +119,7 @@ const Picolo = {
       id: "masenko",
       name: "Masenko",
       locked: true,
-      unlockCost: 300,
+      unlockCost: 9000,
       uses: 1,
       image: Attack7,
       damage: 60,
