@@ -1,4 +1,3 @@
-import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 import GokuImage from "../../assets/img/Goku.jpeg";
 
 import Attack1 from "../../assets/img/Attack_IMAGES/kamekameha.jpeg";
@@ -178,7 +177,19 @@ const Goku = {
         manaRegen: -12,
       },
     },
-    ...FESTIVAL_ATTACKS_BY_CHARACTER.goku,
+    {
+      id: "goku-festival-super-kamehameha",
+      name: "Super Kamehameha",
+      description: "Goku gathers a greater amount of ki to unleash a devastating Kamehameha.",
+      festivalExclusive: true,
+      locked: true,
+      damage: 100,
+      speed: 28,
+      cost: 85,
+      uses: 1,
+      turnCooldown: 4,
+      state: true,
+    },
   ],
 };
 
