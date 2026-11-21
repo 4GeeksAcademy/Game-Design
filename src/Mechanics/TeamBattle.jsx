@@ -1388,7 +1388,7 @@ export default function TeamBattle() {
         finishPlayerTurn(fighter.id);
       }
     },
-    phase === "fighting" && !pendingDefense && !pendingAllyAttack,
+    phase === "fighting" && !pendingDefense && !pendingAllyAttack && !isPaused,
   );
 
   useEffect(() => {
@@ -2640,6 +2640,12 @@ export default function TeamBattle() {
     setCombatLog(["Choose your fighters' targets."]);
     setCombatMessage("Choose your fighters' targets.");
     setPhase("selecting");
+    setShowRoundIntro(true);
+    setIsIntroFadingOut(false);
+    setCombatPopups([]);
+    lastFestivalDamage.current = 0;
+    lastFestivalAttacks.current = 0;
+    defenseResolvedRef.current = false;
     festivalBattleRecorded.current = false;
     teammateOpponentHistoryRef.current.clear();
     previousCpuAttackersRef.current.clear();
