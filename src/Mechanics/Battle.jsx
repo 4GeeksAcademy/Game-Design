@@ -1013,79 +1013,20 @@ const stunOptions = {
                     </div>
                   </div>
 
-                  {incomingAttackPreviews && (
-                    <section className="incoming-player-status" aria-label="Your resources and incoming attack aftermath">
-                      <div className="incoming-status-heading">
-                        <span>YOUR CURRENT RESOURCES</span>
-                        <small>BEFORE IMPACT</small>
-                      </div>
-
-                      <div className="incoming-current-resources">
-                        <IncomingResourceBar
-                          label="HEALTH"
-                          value={incomingAttackPreviews.current.health}
-                          maximum={incomingAttackPreviews.current.maximumHealth}
-                          kind="health"
-                        />
-                        <IncomingResourceBar
-                          label="COOLDOWN"
-                          value={incomingAttackPreviews.current.cooldown}
-                          maximum={incomingAttackPreviews.current.maximumCooldown}
-                          kind="cooldown"
-                        />
-                        <IncomingResourceBar
-                          label="MANA"
-                          value={incomingAttackPreviews.current.mana}
-                          maximum={incomingAttackPreviews.current.maximumMana}
-                          kind="mana"
-                        />
-                      </div>
-
-                      <div className="incoming-status-heading incoming-aftermath-heading">
-                        <span>AFTERMATH PREVIEW</span>
-                        <small>IF YOU CHOOSE</small>
-                      </div>
-
-                      <div className="incoming-aftermath-grid">
-                        {[
-                          { key: "defend", label: "BLOCK", result: incomingAttackPreviews.defend },
-                          { key: "evade", label: "EVADE", result: incomingAttackPreviews.evade },
-                          { key: "takeDamage", label: "TAKE HIT", result: incomingAttackPreviews.takeDamage },
-                        ].map(({ key, label, result }) => (
-                          <div className={`incoming-aftermath-option aftermath-${key}`} key={key}>
-                            <strong>{label}</strong>
-                            {result ? (
-                              <>
-                                <IncomingResourceBar
-                                  label="HP"
-                                  value={result.health}
-                                  maximum={result.maximumHealth}
-                                  before={incomingAttackPreviews.current.health}
-                                  kind="health"
-                                />
-                                <IncomingResourceBar
-                                  label="CD"
-                                  value={result.cooldown}
-                                  maximum={result.maximumCooldown}
-                                  before={incomingAttackPreviews.current.cooldown}
-                                  kind="cooldown"
-                                />
-                                <IncomingResourceBar
-                                  label="MP"
-                                  value={result.mana}
-                                  maximum={result.maximumMana}
-                                  before={incomingAttackPreviews.current.mana}
-                                  kind="mana"
-                                />
-                              </>
-                            ) : (
-                              <span className="incoming-preview-unavailable">UNAVAILABLE</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
+                  <section className="incoming-player-status" aria-label="Your current health">
+                    <div className="incoming-status-heading">
+                      <span>YOUR CURRENT HEALTH</span>
+                      <strong>{Math.max(0, character.health)} / {character.maximumHealth}</strong>
+                    </div>
+                    <div className="incoming-health-track">
+                      <div
+                        className="incoming-health-fill"
+                        style={{
+                          width: `${Math.max(0, Math.min(100, (character.health / Math.max(1, character.maximumHealth)) * 100))}%`,
+                        }}
+                      />
+                    </div>
+                  </section>
 
                   <div id="defensiveActions">
                     <button
