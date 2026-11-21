@@ -2144,3 +2144,25 @@
 @media (prefers-reduced-motion: reduce) {
   .attack-gate-backdrop, .attack-gate-popup, .attack-gate-emblem { animation: none; }
 }
+
+
+/* Smooth exit for both automatic timeout and manual dismissal. */
+.attack-gate-backdrop.is-closing {
+  animation: attack-gate-fade-out .36s ease-in forwards;
+  pointer-events: none;
+}
+.attack-gate-popup.is-closing {
+  animation: attack-gate-exit .36s cubic-bezier(.4, 0, .8, .3) forwards;
+}
+@keyframes attack-gate-fade-out {
+  from { opacity: 1; backdrop-filter: blur(7px); }
+  to { opacity: 0; backdrop-filter: blur(0); }
+}
+@keyframes attack-gate-exit {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(14px) scale(.96); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .attack-gate-backdrop.is-closing,
+  .attack-gate-popup.is-closing { animation: none; }
+}
