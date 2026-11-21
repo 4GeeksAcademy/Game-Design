@@ -576,7 +576,7 @@ function App() {
 
   // Display the round announcement before allowing combat.
   useEffect(() => {
-    if (!showRoundIntro) return;
+    if (!showRoundIntro || isPaused) return;
 
     setIsRoundIntroFadingOut(false);
 
@@ -596,7 +596,7 @@ function App() {
       clearTimeout(fadeTimer);
       clearTimeout(finishTimer);
     };
-  }, [showRoundIntro]);
+  }, [showRoundIntro, isPaused]);
 
   // Countdown for the player's defensive window.
   useEffect(() => {
