@@ -263,6 +263,8 @@ function Festival() {
       return `🎨 ${reward.name}`;
     }
 
+    if (reward.type === "attack") return `⚔ ${reward.name}`;
+
     return "UNKNOWN REWARD";
   };
 
@@ -322,6 +324,8 @@ function Festival() {
       return;
     }
 
+    if (reward.type === "attack" && !getFestivalAttack(reward.characterId, reward.attackId)) return;
+
     // Record the claim before granting the reward.
     const saved = claimFestivalReward(tierNumber, rewardTrack);
 
@@ -362,6 +366,10 @@ function Festival() {
         description: "EXCLUSIVE SKIN UNLOCKED!",
         image: skinData?.image,
       });
+    } else if (reward.type === "attack") {
+      const attack = getFestivalAttack(reward.characterId, reward.attackId);
+      if (!attack || !unlockFestivalAttack(reward.characterId, attack)) return;
+      setRewardPopup({ type: "attack", title: reward.name.toUpperCase(), description: "FESTIVAL-EXCLUSIVE ATTACK UNLOCKED! EQUIP IT IN INVENTORY." });
     }
   };
   return (
@@ -374,7 +382,7 @@ function Festival() {
         >
           <div
             className={`festival-reward-popup ${
-              rewardPopup.type === "character" || rewardPopup.type === "skin"
+              rewardPopup.type === "character" || rewardPopup.type === "skin" || rewardPopup.type === "attack"
                 ? "character-reward-popup"
                 : "coin-reward-popup"
             }`}
@@ -385,6 +393,8 @@ function Festival() {
                 src={rewardPopup.image}
                 alt={rewardPopup.title}
               />
+            ) : rewardPopup.type === "attack" ? (
+              <div className="reward-popup-icon">⚔️</div>
             ) : (
               <div className="reward-popup-icon">🪙</div>
             )}
@@ -516,7 +526,7 @@ function Festival() {
                     className={`festival-reward-slot ${
                       unlocked ? "reward-unlocked" : ""
                     } ${
-                      reward?.type === "character" || reward?.type === "skin"
+                      reward?.type === "character" || reward?.type === "skin" || reward?.type === "attack"
                         ? "character-reward-slot"
                         : ""
                     }`}
@@ -533,6 +543,8 @@ function Festival() {
                         }
                         alt={reward.name}
                       />
+                    ) : reward?.type === "attack" ? (
+                      <span className="reward-icon">⚔️</span>
                     ) : (
                       <span className="reward-icon">🪙</span>
                     )}
