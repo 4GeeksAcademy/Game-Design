@@ -1076,3 +1076,244 @@
     gap: 12px;
   }
 }
+
+
+/* ==========================================
+   LOADOUT LAB — SLOT-AWARE ATTACK OPTIMIZER
+========================================== */
+
+.loadout-lab {
+  margin-top: 22px;
+}
+
+.loadout-lab-intro {
+  margin-bottom: 22px;
+  padding: 18px;
+  border: 1px solid rgba(39, 223, 255, 0.28);
+  background: rgba(5, 19, 36, 0.75);
+}
+
+.loadout-lab-intro h3,
+.loadout-results h3,
+.loadout-results h4 {
+  margin: 0 0 10px;
+  color: var(--lab-cyan, #27dfff);
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+}
+
+.loadout-lab-intro p,
+.loadout-slot-note {
+  margin: 0;
+  color: #a9c6e2;
+  line-height: 1.55;
+}
+
+.loadout-lab-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.loadout-lab-panel {
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid rgba(39, 160, 255, 0.3);
+  background: linear-gradient(145deg, #102947, #071629);
+}
+
+.loadout-lab-panel > label,
+.loadout-panel-heading label {
+  display: block;
+  margin-bottom: 11px;
+  color: #39caff;
+  font-family: "Oxanium", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.loadout-lab-panel select,
+.loadout-test-settings input {
+  width: 100%;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid rgba(39, 160, 255, 0.4);
+  border-radius: 2px;
+  color: #fff;
+  background: #071a30;
+}
+
+.loadout-slot-note {
+  margin-top: 10px;
+  font-size: 0.88rem;
+}
+
+.loadout-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.loadout-panel-heading span {
+  color: #27dfff;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.loadout-choice-list {
+  display: grid;
+  gap: 7px;
+  max-height: 290px;
+  margin-top: 12px;
+  overflow-y: auto;
+}
+
+.loadout-choice {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(39, 160, 255, 0.18);
+  background: rgba(3, 14, 29, 0.72);
+  cursor: pointer;
+}
+
+.loadout-choice:hover {
+  border-color: #27dfff;
+}
+
+.loadout-choice input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  accent-color: #27dfff;
+}
+
+.loadout-choice span {
+  overflow-wrap: anywhere;
+  color: #e0eaf5;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.loadout-warning {
+  margin: 12px 0 0;
+  color: #ff8294;
+  font-weight: 800;
+}
+
+.loadout-test-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 220px));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.loadout-test-settings label {
+  display: grid;
+  gap: 8px;
+  color: #b9d5ef;
+  font-weight: 700;
+}
+
+.loadout-results {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid rgba(39, 223, 255, 0.35);
+  background: rgba(3, 14, 29, 0.82);
+}
+
+.loadout-best-score {
+  color: #e9f5ff;
+  font-size: 1.05rem;
+}
+
+.loadout-best-score strong {
+  color: #62e6a7;
+  font-size: 1.35rem;
+}
+
+.loadout-saved-note {
+  color: #62e6a7;
+}
+
+.loadout-best-attacks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 9px;
+  margin: 18px 0 24px;
+}
+
+.loadout-best-attacks > div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px;
+  border: 1px solid rgba(39, 223, 255, 0.24);
+  background: #0b2039;
+}
+
+.loadout-best-attacks span {
+  color: #27dfff;
+  font-family: "Oxanium", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.loadout-best-attacks strong {
+  color: #fff;
+}
+
+.loadout-results h4 {
+  margin-top: 24px;
+}
+
+.loadout-candidate-results {
+  display: grid;
+  gap: 8px;
+}
+
+.loadout-candidate-results > div {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid rgba(39, 160, 255, 0.2);
+  background: #0b1c31;
+}
+
+.loadout-candidate-results > div strong {
+  color: #27dfff;
+}
+
+.loadout-candidate-results > div span {
+  color: #c1d4e8;
+  line-height: 1.4;
+}
+
+.loadout-candidate-results > .loadout-candidate-best {
+  border-color: rgba(98, 230, 167, 0.55);
+  background: rgba(30, 95, 75, 0.18);
+}
+
+@media (max-width: 950px) {
+  .loadout-lab-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .loadout-lab-panel:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .loadout-lab-controls,
+  .loadout-test-settings {
+    grid-template-columns: 1fr;
+  }
+
+  .loadout-lab-panel:first-child {
+    grid-column: auto;
+  }
+}
