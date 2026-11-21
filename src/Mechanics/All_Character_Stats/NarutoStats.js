@@ -5,6 +5,7 @@ import Attack2 from "../../assets/img/Attack_IMAGES/Multiple Shadow Clone Jutsu.
 import Attack3 from "../../assets/img/Attack_IMAGES/Wind Style: Rasenshuriken.jpeg";
 import Attack4 from "../../assets/img/Attack_IMAGES/NarutoSageMode.webp";
 import Attack5 from "../../assets/img/Attack_IMAGES/Tailed Beast Bomb Rasenshuriken.jpeg";
+import BigBallRasenganImage from "../../assets/img/Attack_IMAGES/Big Ball Rasengan.jpeg";
 
 const Naruto = {
   name: "Naruto Uzumaki",
@@ -125,6 +126,7 @@ const Naruto = {
     {
       id: "naruto-festival-big-ball-rasengan",
       name: "Big Ball Rasengan",
+      image: BigBallRasenganImage,
       description: "Naruto forms an enlarged Rasengan, delivering a heavier impact than his standard technique.",
       festivalExclusive: true,
       locked: true,
