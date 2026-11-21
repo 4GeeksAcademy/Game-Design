@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from "react";
 import StatBar from "./StatBar.jsx";
+import { getModifiedCharacterStat } from "./Modifiers.js";
 import "./BattleUI.css";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 
@@ -121,7 +122,7 @@ function Character({
             <StatBar
               label="Defense"
               icon="🛡️"
-              current={character.defense.amount}
+              current={getModifiedCharacterStat(character, "defense")}
               maximum={100}
               color="secondary"
             />
@@ -129,7 +130,7 @@ function Character({
             <StatBar
               label="Agility"
               icon="⚡"
-              current={character.agility}
+              current={getModifiedCharacterStat(character, "agility")}
               maximum={100}
               color="warning"
             />
@@ -139,13 +140,13 @@ function Character({
             <div className="compactStat">
               <span>⏳ Cooldown</span>
               <strong>
-                {character.cooldown ?? 0}/{character.maximumCooldown ?? 3}
+                {character.cooldown ?? 0}/{getModifiedCharacterStat(character, "maximumCooldown") || 3}
               </strong>
             </div>
 
             <div className="compactStat">
               <span>🔄 Recovery</span>
-              <strong>{character.recovery ?? 0}</strong>
+              <strong>{getModifiedCharacterStat(character, "recovery")}</strong>
             </div>
           </div>
         </div>
