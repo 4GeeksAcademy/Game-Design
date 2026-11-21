@@ -1960,7 +1960,7 @@ export default function TeamBattle() {
 
     if (!attacker || !defender || !attack) return;
 
-    if (choice === "defend" && (Number(defender.cooldown) || 0) <= 0) {
+    if (choice === "defend" && getModifiedCharacterStat(defender, "cooldown") <= 0) {
       return;
     }
 
@@ -2277,7 +2277,7 @@ export default function TeamBattle() {
         }
 
         const defender = teams.player[playerIndex];
-        if (choice === "defend" && (Number(defender?.cooldown) || 0) <= 0) {
+        if (choice === "defend" && (!defender || getModifiedCharacterStat(defender, "cooldown") <= 0)) {
           return;
         }
 
@@ -2307,7 +2307,7 @@ export default function TeamBattle() {
       if (!choice) return;
 
       const defender = teams.player[playerIndex];
-      if (choice === "defend" && (Number(defender?.cooldown) || 0) <= 0) {
+      if (choice === "defend" && (!defender || getModifiedCharacterStat(defender, "cooldown") <= 0)) {
         return;
       }
 
@@ -2335,7 +2335,7 @@ export default function TeamBattle() {
 
       if (
         choice === "defend" &&
-        (!defendingFighter || (Number(defendingFighter.cooldown) || 0) <= 0)
+        (!defendingFighter || getModifiedCharacterStat(defendingFighter, "cooldown") <= 0)
       ) {
         return;
       }
@@ -3279,7 +3279,7 @@ export default function TeamBattle() {
                       className="defend-button"
                       disabled={
                         defense.timeLeft <= 0 ||
-                        (Number(target.cooldown) || 0) <= 0 ||
+                        getModifiedCharacterStat(target, "cooldown") <= 0 ||
                         Boolean(defense.outcome)
                       }
                       onClick={() =>
@@ -3387,7 +3387,7 @@ export default function TeamBattle() {
                   className="defend-button"
                   disabled={
                     defenseTimeLeft <= 0 ||
-                    (Number(pendingTarget?.cooldown) || 0) <= 0
+                    (!pendingTarget || getModifiedCharacterStat(pendingTarget, "cooldown") <= 0)
                   }
                   onClick={() => resolveCPUDefense("defend")}
                 >
