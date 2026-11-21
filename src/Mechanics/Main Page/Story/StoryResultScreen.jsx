@@ -33,14 +33,15 @@ function StoryResultsScreen({
 
   // Restart the same fight without replaying the opening cutscene.
   const rematch = () => {
-  navigate("/battle", {
-    state: {
-      ...levelConfig,
-      gameMode: "story",
-      storyPhase: "battle",
-    },
-  });
-};
+    if (onRematch) {
+      onRematch();
+      return;
+    }
+    navigate(battlePath, {
+      replace: true,
+      state: { ...levelConfig, gameMode: "story", storyPhase: "battle" },
+    });
+  };
 
   // Exit story mode and return to the main menu.
   const returnHome = () => {
