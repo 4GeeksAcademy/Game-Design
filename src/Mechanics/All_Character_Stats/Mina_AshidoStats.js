@@ -1,3 +1,4 @@
+import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 import minaArenaImage from "../../assets/img/MinaAshidoArena.jpg";
 
 import Attack1 from "../../assets/img/Attack_IMAGES/Acid Shot.jpeg"
@@ -125,6 +126,7 @@ const mina = {
       // Only apply stun if the attack successfully hits.
       stunRequiresHit: true,
     },
+    ...FESTIVAL_ATTACKS_BY_CHARACTER.mina,
   ],
 };
 
