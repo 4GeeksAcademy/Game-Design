@@ -1,4 +1,3 @@
-import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 
 import IchigoArenaImage from "../../assets/img/Ichigo.png";
 
@@ -110,7 +109,19 @@ const Ichigo = {
         recovery: 2,
       },
     },
-    ...FESTIVAL_ATTACKS_BY_CHARACTER.ichigo,
+    {
+      id: "ichigo-festival-hollow-getsuga",
+      name: "Hollowfied Getsuga Tensho",
+      description: "Ichigo's Hollow mask amplifies his spiritual pressure as he unleashes a devastating black Getsuga wave.",
+      festivalExclusive: true,
+      locked: true,
+      damage: 110,
+      speed: 45,
+      cost: 100,
+      uses: 1,
+      turnCooldown: 5,
+      state: true,
+    },
   ],
 };
 
