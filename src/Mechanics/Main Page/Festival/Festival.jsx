@@ -8,6 +8,8 @@ import { skins } from "../../Skins";
 import { useNavigate } from "react-router-dom";
 import { getDailyObjectives } from "./FestivalDailyObjectives";
 import FESTIVAL_REWARDS from "./FestivalRewards";
+import { getFestivalAttack } from "../../FestivalAttacks.js";
+import { unlockFestivalAttack } from "../../AttackLoadouts.js";
 import {
   getFestivalProgress,
   saveFestivalProgress,
