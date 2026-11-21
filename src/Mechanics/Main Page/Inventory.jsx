@@ -236,7 +236,7 @@ function AttackDetails({ attack, characterName, characterId, onClose, onUnlock }
     "speed", "cost", "state", "buff", "debuff", "heal", "stun", "sacrifice",
     "attackModifiers", "characterModifiers", "duration", "uses", "remainingUses",
     "turnCooldown", "cooldownRemaining", "buffRequiresHit", "debuffRequiresHit",
-    "stunRequiresHit", "locked", "unlockCost", "coinCost", "price"]);
+    "stunRequiresHit", "locked", "festivalExclusive", "unlockCost", "coinCost", "price"]);
   const extraDetails = Object.fromEntries(
     Object.entries(attack).filter(([key, value]) =>
       !knownKeys.has(key) && value !== undefined && value !== null && value !== false
