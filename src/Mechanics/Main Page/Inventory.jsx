@@ -367,9 +367,15 @@ function AttackLoadoutEditor({ character }) {
           <h2>{character.data.name}</h2>
           <span>{character.description}</span>
         </div>
-        <div className="loadout-slot-counter">
-          <strong>{equipped.length} / {slots}</strong>
-          <span>ATTACK SLOTS EQUIPPED</span>
+        <div className="loadout-header-actions">
+          <div className="loadout-slot-counter">
+            <strong>{equipped.length} / {slots}</strong>
+            <span>ATTACK SLOTS EQUIPPED</span>
+          </div>
+          <button className="loadout-save-button" onClick={save}>
+            SAVE {character.data.name.toUpperCase()} LOADOUT
+          </button>
+          {notice && <p className="loadout-save-message">{notice}</p>}
         </div>
       </header>
 
@@ -394,8 +400,6 @@ function AttackLoadoutEditor({ character }) {
         </div>
       </section>
 
-      {notice && <p className="loadout-save-message">{notice}</p>}
-      <button className="loadout-save-button" onClick={save}>SAVE {character.data.name.toUpperCase()} LOADOUT</button>
     </section>
   );
 }
