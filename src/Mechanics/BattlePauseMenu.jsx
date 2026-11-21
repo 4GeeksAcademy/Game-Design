@@ -14,6 +14,16 @@ export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    const blockCombatInput = (event) => {
+      if (listeningFor) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    };
+    window.addEventListener("keydown", blockCombatInput, true);
+    return () => window.removeEventListener("keydown", blockCombatInput, true);
+  }, [listeningFor]);
+
+  useEffect(() => {
     if (!listeningFor) return undefined;
     const capture = (event) => {
       event.preventDefault();
