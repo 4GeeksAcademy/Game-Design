@@ -8,6 +8,7 @@ import Attack5 from "../../assets/img/Attack_IMAGES/Meteor Barrage.jpeg";
 import Attack6 from "../../assets/img/Attack_IMAGES/Dragon Fists.jpeg";
 import Attack7 from "../../assets/img/Attack_IMAGES/Goku's Super Saiyan.jpeg";
 import Attack8 from "../../assets/img/Attack_IMAGES/Spirit Bomb.jpeg";
+import SuperKamehamehaImage from "../../assets/img/Attack_IMAGES/Super Kamekameha.jpeg";
 
 const Goku = {
   name: "Goku",
@@ -180,6 +181,7 @@ const Goku = {
     {
       id: "goku-festival-super-kamehameha",
       name: "Super Kamehameha",
+      image: SuperKamehamehaImage,
       description: "Goku gathers a greater amount of ki to unleash a devastating Kamehameha.",
       festivalExclusive: true,
       locked: true,
