@@ -1,5 +1,8 @@
 import IchigoArenaImage from "../../assets/img/Ichigo.png";
 
+import HollowficationImage from "../../assets/img/Attack_IMAGES/Ichigo's Hollowfication.jpeg";
+import FinalGetsugaTenshoImage from "../../assets/img/Attack_IMAGES/Final Getsuga Tensho.png";
+
 // Attack Images
 import Attack1 from "../../assets/img/Attack_IMAGES/Flash Step.jpeg";
 import Attack2 from "../../assets/img/Attack_IMAGES/Zangetsu Slash.jpeg";
@@ -111,6 +114,7 @@ const Ichigo = {
     {
       id: "ichigo-hollowfication",
       name: "Hollowfication",
+      image: HollowficationImage,
       description:
         "Ichigo manifests his Hollow mask, drawing on his inner Hollow to amplify his combat abilities.",
       locked: true,
@@ -154,6 +158,7 @@ const Ichigo = {
     {
       id: "ichigo-festival-mugetsu",
       name: "Mugetsu",
+      image: FinalGetsugaTenshoImage,
       description:
         "Ichigo releases his ultimate form as an overwhelming wave of darkness. However, it has a high cost costing you mobility. Wouldn't dare use it unless for last resort",
       festivalExclusive: true,
