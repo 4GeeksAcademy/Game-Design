@@ -5202,6 +5202,8 @@ body {
 
 /* Shift the warning card away from the center of the fighter HUD. */
 #aiAttackSection.incoming-attack-card {
+  position: fixed !important;
+  top: 50vh !important;
   left: auto !important;
   right: clamp(12px, 4vw, 54px) !important;
   translate: 0 -50% !important;
