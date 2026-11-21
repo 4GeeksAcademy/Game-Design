@@ -159,11 +159,6 @@ function FighterPreview({
   onClick,
   canSelect = false,
 }) {
-  const getDefense = (currentFighter) =>
-    typeof currentFighter.defense === "object" && currentFighter.defense
-      ? (currentFighter.defense.amount ?? 0)
-      : (currentFighter.defense ?? 0);
-
   const percent = (value, maximum) =>
     maximum > 0
       ? Math.max(0, Math.min(100, (Number(value) / maximum) * 100))
@@ -222,31 +217,31 @@ function FighterPreview({
       <div className="fighter-stat-bars">
         <StatBar
           label="DEF"
-          value={getDefense(fighter)}
+          value={getModifiedCharacterStat(fighter, "defense")}
           maximum={fighter.maximumDefense ?? 100}
           color="defense"
         />
         <StatBar
           label="AGI"
-          value={fighter.agility ?? 0}
+          value={getModifiedCharacterStat(fighter, "agility")}
           maximum={fighter.maximumAgility ?? 100}
           color="agility"
         />
         <StatBar
           label="REGEN"
-          value={fighter.manaRegen ?? 0}
+          value={getModifiedCharacterStat(fighter, "manaRegen")}
           maximum={fighter.maximumManaRegen ?? 100}
           color="regen"
         />
         <StatBar
           label="REC"
-          value={fighter.recovery ?? 0}
+          value={getModifiedCharacterStat(fighter, "recovery")}
           maximum={fighter.maximumRecovery ?? 10}
           color="recovery"
         />
         <StatBar
           label="CD"
-          value={fighter.cooldown ?? 0}
+          value={getModifiedCharacterStat(fighter, "cooldown")}
           maximum={fighter.maximumCooldown ?? 10}
           color="cooldown"
         />
@@ -1960,7 +1955,7 @@ export default function TeamBattle() {
 
     if (!attacker || !defender || !attack) return;
 
-    if (choice === "defend" && (Number(defender.cooldown) || 0) <= 0) {
+    if (choice === "defend" && getModifiedCharacterStat(defender, "cooldown") <= 0) {
       return;
     }
 
@@ -2277,7 +2272,7 @@ export default function TeamBattle() {
         }
 
         const defender = teams.player[playerIndex];
-        if (choice === "defend" && (Number(defender?.cooldown) || 0) <= 0) {
+        if (choice === "defend" && (!defender || getModifiedCharacterStat(defender, "cooldown") <= 0)) {
           return;
         }
 
@@ -2307,7 +2302,7 @@ export default function TeamBattle() {
       if (!choice) return;
 
       const defender = teams.player[playerIndex];
-      if (choice === "defend" && (Number(defender?.cooldown) || 0) <= 0) {
+      if (choice === "defend" && (!defender || getModifiedCharacterStat(defender, "cooldown") <= 0)) {
         return;
       }
 
@@ -2335,7 +2330,7 @@ export default function TeamBattle() {
 
       if (
         choice === "defend" &&
-        (!defendingFighter || (Number(defendingFighter.cooldown) || 0) <= 0)
+        (!defendingFighter || getModifiedCharacterStat(defendingFighter, "cooldown") <= 0)
       ) {
         return;
       }
@@ -3279,7 +3274,7 @@ export default function TeamBattle() {
                       className="defend-button"
                       disabled={
                         defense.timeLeft <= 0 ||
-                        (Number(target.cooldown) || 0) <= 0 ||
+                        getModifiedCharacterStat(target, "cooldown") <= 0 ||
                         Boolean(defense.outcome)
                       }
                       onClick={() =>
@@ -3387,7 +3382,7 @@ export default function TeamBattle() {
                   className="defend-button"
                   disabled={
                     defenseTimeLeft <= 0 ||
-                    (Number(pendingTarget?.cooldown) || 0) <= 0
+                    (!pendingTarget || getModifiedCharacterStat(pendingTarget, "cooldown") <= 0)
                   }
                   onClick={() => resolveCPUDefense("defend")}
                 >

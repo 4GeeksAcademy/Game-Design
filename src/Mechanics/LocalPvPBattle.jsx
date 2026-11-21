@@ -209,7 +209,7 @@ export default function LocalPvPBattle() {
           (fighter) => fighter?.id === pendingAttack.targetId,
         );
         if (key === normalizeKey(defenseBinds.defend)) {
-          if ((Number(defendingFighter?.cooldown) || 0) <= 0) return;
+          if ((!defendingFighter || getModifiedCharacterStat(defendingFighter, "cooldown") <= 0)) return;
           event.preventDefault();
           resolveAttack("defend");
         } else if (key === normalizeKey(defenseBinds.evade)) {
@@ -428,7 +428,7 @@ export default function LocalPvPBattle() {
     const defender = next[defenderSide].find((fighter) => fighter.id === pendingAttack.targetId);
     const attack = attacker?.attacks?.[pendingAttack.attackIndex];
     if (!attacker || !defender || !attack || !canUseAttack(attack) ||
-        (choice === "defend" && (Number(defender.cooldown) || 0) <= 0)) {
+        (choice === "defend" && getModifiedCharacterStat(defender, "cooldown") <= 0)) {
       setPendingAttack(null);
       setPhase("fighting");
       return;
@@ -588,7 +588,7 @@ export default function LocalPvPBattle() {
                 </div>
               </div>
               <div id="defensiveActions">
-                <button id="defendButton" disabled={(Number(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.cooldown) || 0) <= 0 || defenseTime <= 0} onClick={() => resolveAttack("defend")}><span id="defendButtonIcon">🛡</span><span>DEFEND</span></button>
+                <button id="defendButton" disabled={getModifiedCharacterStat(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId), "cooldown") <= 0 || defenseTime <= 0} onClick={() => resolveAttack("defend")}><span id="defendButtonIcon">🛡</span><span>DEFEND</span></button>
                 <button id="evadeButton" disabled={defenseTime <= 0} onClick={() => resolveAttack("evade")}><span id="evadeButtonIcon">💨</span><span>EVADE</span></button>
                 <button id="takeDamageButton" disabled={defenseTime <= 0} onClick={() => resolveAttack("take-damage")}><span>💥</span><span>TAKE FULL DAMAGE</span></button>
               </div>
@@ -641,7 +641,7 @@ export default function LocalPvPBattle() {
           <span>{teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.name} — CHOOSE YOUR DEFENSE</span>
           <div className="local-pvp-defense-timer">{defenseTime}s</div>
           <div>
-            <button onClick={() => resolveAttack("defend")} disabled={(Number(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.cooldown) || 0) <= 0}>DEFEND</button>
+            <button onClick={() => resolveAttack("defend")} disabled={getModifiedCharacterStat(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId), "cooldown") <= 0}>DEFEND</button>
             <button onClick={() => resolveAttack("evade")}>EVADE</button>
             <button onClick={() => resolveAttack("take-damage")}>TAKE DAMAGE</button>
           </div>

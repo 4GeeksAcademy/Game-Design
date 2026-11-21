@@ -1,5 +1,6 @@
 import React from "react";
 import StatBar from "./StatBar.jsx";
+import { getModifiedCharacterStat } from "./Modifiers.js";
 import "./BattleUI.css";
 
 function Opponent({ opponent, setOpponent }) {
@@ -70,7 +71,7 @@ function Opponent({ opponent, setOpponent }) {
             <StatBar
               label="Defense"
               icon="🛡️"
-              current={opponent.defense.amount}
+              current={getModifiedCharacterStat(opponent, "defense")}
               maximum={100}
               color="secondary"
             />
@@ -78,7 +79,7 @@ function Opponent({ opponent, setOpponent }) {
             <StatBar
               label="Agility"
               icon="⚡"
-              current={opponent.agility}
+              current={getModifiedCharacterStat(opponent, "agility")}
               maximum={100}
               color="warning"
             />
@@ -88,13 +89,13 @@ function Opponent({ opponent, setOpponent }) {
             <div className="compactStat">
               <span>⏳ Cooldown</span>
               <strong>
-                {opponent.cooldown ?? 0}/{opponent.maximumCooldown ?? 3}
+                {getModifiedCharacterStat(opponent, "cooldown")}/{getModifiedCharacterStat(opponent, "maximumCooldown") || 3}
               </strong>
             </div>
 
             <div className="compactStat">
               <span>🔄 Recovery</span>
-              <strong>{opponent.recovery ?? 0}</strong>
+              <strong>{getModifiedCharacterStat(opponent, "recovery")}</strong>
             </div>
           </div>
         </div>
