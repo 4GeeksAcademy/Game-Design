@@ -1,3 +1,4 @@
+import { FESTIVAL_ATTACKS_BY_CHARACTER } from "../FestivalAttacks.js";
 
 import IchigoArenaImage from "../../assets/img/Ichigo.png";
 
@@ -109,6 +110,7 @@ const Ichigo = {
         recovery: 2,
       },
     },
+    ...FESTIVAL_ATTACKS_BY_CHARACTER.ichigo,
   ],
 };
 
