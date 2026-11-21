@@ -530,7 +530,6 @@ export default function LocalPvPBattle() {
           <button className="local-pvp-finish-rect" disabled={!isActive || owner?.turnFinished || phase !== "fighting" || isPaused} onClick={() => owner && finishFighterTurn(owner.id)}>FINISH TURN →</button>
         </header>
         <div className="local-pvp-screen-fighters">
-          <LocalPvPFighterPanel fighter={rival} side="opponent" />
           <LocalPvPFighterPanel fighter={owner} side="player" />
         </div>
         <div className="local-pvp-existing-attacks">
