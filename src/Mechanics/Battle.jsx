@@ -784,7 +784,7 @@ const stunOptions = {
   return (
     <div className="container-fluid mt-3" id="gameContainer">
       <FestivalChallengePopup />
-      {!knockout && <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match">Ⅱ</button>}
+      {!knockout && <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>}
       {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: location.state })} onMainMenu={() => navigate("/")} />}
       {/* Full-screen round intro with both fighters and their health. */}
       {showRoundIntro && !knockout && (
