@@ -287,13 +287,13 @@ function App() {
   }, [playerId, opponentId]);
 
   useEffect(() => {
-    if (isPaused || knockout || isStoryMode) return undefined;
+    if (isPaused || knockout) return undefined;
     const handlePauseKey = (event) => {
       if (event.key === "Escape" && !event.repeat) { event.preventDefault(); setIsPaused(true); }
     };
     window.addEventListener("keydown", handlePauseKey);
     return () => window.removeEventListener("keydown", handlePauseKey);
-  }, [isPaused, knockout, isStoryMode]);
+  }, [isPaused, knockout]);
 
   // Preview each response on cloned fighters so the card never mutates live combat state.
   const incomingAttackPreviews = useMemo(() => {
