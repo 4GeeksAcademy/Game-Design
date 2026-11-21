@@ -15,6 +15,14 @@ export function getAttackDisplayName(attack) {
 }
 
 export function getAttackSlotLimit(characterOrAttacks = []) {
+  // Accept a numeric slot count directly, as battle and inventory callers
+  // pass character.data.slot into the loadout helpers.
+  if (typeof characterOrAttacks === "number") {
+    return Number.isFinite(characterOrAttacks) && characterOrAttacks >= 0
+      ? Math.floor(characterOrAttacks)
+      : 0;
+  }
+
   // Character stat objects own their equip capacity through the "slot" property.
   // Passing an attacks array remains supported for older callers.
   if (Array.isArray(characterOrAttacks)) return characterOrAttacks.length;
