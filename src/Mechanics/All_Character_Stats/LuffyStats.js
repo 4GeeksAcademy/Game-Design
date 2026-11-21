@@ -5,7 +5,11 @@ import Attack1 from "../../assets/img/Attack_IMAGES/Second Gear.jpeg";
 import Attack3 from "../../assets/img/Attack_IMAGES/gum gum pistol.jpeg";
 import Attack4 from "../../assets/img/Attack_IMAGES/Gum Gum gatling.jpeg";
 import Attack5 from "../../assets/img/Attack_IMAGES/gum gum bazooka.jpeg";
-import Attack6 from "../../assets/img/Attack_IMAGES/gum gum red halk.jpeg"
+import Attack6 from "../../assets/img/Attack_IMAGES/gum gum red halk.jpeg";
+import ArmamentHakiImage from "../../assets/img/Attack_IMAGES/luffy's armament haki.jpeg";
+import ObservationHakiImage from "../../assets/img/Attack_IMAGES/luffy's observation haki.jpeg";
+import ConquerorsHakiImage from "../../assets/img/Attack_IMAGES/luffy's conqueror's haki.jpeg";
+import ElephantGunImage from "../../assets/img/Attack_IMAGES/Elephant Gun.jpeg"
 
 const Luffy = {
   name: "Monkey D. Luffy",
@@ -131,6 +135,7 @@ const Luffy = {
     {
       id: "luffy-haki-armament",
       name: "Armament Haki",
+      image: ArmamentHakiImage,
       description: "Luffy hardens his body and fists with Armament Haki, strengthening his strikes and guarding.",
       damage: 0,
       speed: 0,
@@ -147,6 +152,7 @@ const Luffy = {
     {
       id: "luffy-haki-observation",
       name: "Observation Haki",
+      image: ObservationHakiImage,
       description: "Luffy sharpens his perception to read attacks before they happen, greatly improving his movement and recovery.",
       damage: 0,
       speed: 0,
@@ -164,6 +170,7 @@ const Luffy = {
     {
       id: "luffy-haki-conquerors",
       name: "Conqueror's Haki",
+      image: ConquerorsHakiImage,
       description: "Luffy releases an overwhelming wave of kingly ambition. Weaker opponents can be overwhelmed and briefly stunned.",
       damage: 0,
       speed: 60,
@@ -185,6 +192,7 @@ const Luffy = {
     {
       id: "luffy-festival-elephant-gun",
       name: "Gum-Gum Elephant Gun",
+      image: ElephantGunImage,
       description: "Luffy enlarges and hardens his arm with Haki before delivering a crushing punch.",
       festivalExclusive: true,
       locked: true,
