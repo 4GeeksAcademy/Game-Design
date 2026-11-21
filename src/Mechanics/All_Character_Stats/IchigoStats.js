@@ -119,9 +119,11 @@ const Ichigo = {
       speed: 0,
       cost: 70,
       uses: 1,
+      
       duration: 3,
       state: true,
       buff: {
+        mana: 90,
         agility: 20,
         defense: 12,
         recovery: 2,
@@ -133,12 +135,27 @@ const Ichigo = {
           speed: { multiplier: 1.3 },
         },
       },
+      characterModifiers: {
+        agility: {
+          multiplier: 1.5,
+        },
+        manaRegen: {
+          multiplier: 1.3,
+          amount: 20
+        },
+        cooldown: {
+          amount: 4,
+        },
+        recovery: {
+          amount: 1,
+        },
+      },
     },
     {
       id: "ichigo-festival-mugetsu",
       name: "Mugetsu",
       description:
-        "Ichigo releases his ultimate form as an overwhelming wave of darkness.",
+        "Ichigo releases his ultimate form as an overwhelming wave of darkness. However, it has a high cost costing you mobility. Wouldn't dare use it unless for last resort",
       festivalExclusive: true,
       locked: true,
       damage: 180,
@@ -160,15 +177,17 @@ const Ichigo = {
         targetAttackIds: null,
         stats: {
           damage: { multiplier: 1.5 },
-          speed: { amount: 140 },
+          speed: { multiplier: 1.7,  },
         },
       },
       characterModifiers: {
         agility: {
           multiplier: 1.7,
+          amount: 70,
         },
         defense: {
           multiplier: 1.15,
+          amount: 40,
         },
         manaRegen: {
           multiplier: 1.2,
