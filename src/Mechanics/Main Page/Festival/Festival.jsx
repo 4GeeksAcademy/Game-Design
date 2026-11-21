@@ -611,7 +611,7 @@ function Festival() {
                     className={`festival-reward-slot ${
                       unlocked ? "reward-unlocked" : ""
                     } ${
-                      reward?.type === "character" || reward?.type === "skin"
+                      reward?.type === "character" || reward?.type === "skin" || reward?.type === "attack"
                         ? "character-reward-slot"
                         : ""
                     }`}
@@ -628,6 +628,8 @@ function Festival() {
                         }
                         alt={reward.name}
                       />
+                    ) : reward?.type === "attack" ? (
+                      <span className="reward-icon">⚔️</span>
                     ) : (
                       <span className="reward-icon">🪙</span>
                     )}
