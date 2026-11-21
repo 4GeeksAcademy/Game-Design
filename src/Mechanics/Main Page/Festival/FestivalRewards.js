@@ -13,7 +13,7 @@ const FESTIVAL_REWARDS = {
     elite: { type: "coins", amount: 300 },
   },
   3: {
-    free: { type: "coins", amount: 200 },
+    free: { type: "attack", characterId: "mina", attackId: "mina-festival-acidman", name: "Acidman: Alma" },
     elite: { type: "coins", amount: 400 },
   },
   4: {
@@ -21,7 +21,7 @@ const FESTIVAL_REWARDS = {
     elite: { type: "coins", amount: 500 },
   },
   5: {
-    free: { type: "coins", amount: 300 },
+    free: { type: "attack", characterId: "luffy", attackId: "luffy-festival-elephant-gun", name: "Gum-Gum Elephant Gun" },
     elite: { type: "character", characterId: "toga", name: "Himiko Toga" },
   },
   6: {
@@ -50,7 +50,7 @@ const FESTIVAL_REWARDS = {
     elite: { type: "coins", amount: 1100 },
   },
   11: {
-    free: { type: "coins", amount: 550 },
+    free: { type: "attack", characterId: "naruto", attackId: "naruto-festival-big-ball-rasengan", name: "Big Ball Rasengan" },
     elite: { type: "character", characterId: "goku", name: "Goku" },
   },
   12: {
@@ -71,8 +71,8 @@ const FESTIVAL_REWARDS = {
     elite: { type: "coins", amount: 5300 },
   },
   15: {
-    free: { type: "coins", amount: 5000 },
-    elite: { type: "coins", amount: 20000 },
+    free: { type: "coins", amount: 20000 },
+    elite: { type: "attack", characterId: "goku", attackId: "goku-festival-super-kamehameha", name: "Super Kamehameha" },
   },
   16: {
     free: { type: "coins", amount: 1000 },
@@ -97,8 +97,8 @@ const FESTIVAL_REWARDS = {
     },
   },
   19: {
-    free: { type: "coins", amount: 3500 },
-    elite: { type: "coins", amount: 10000 },
+    free: { type: "coins", amount: 10000 },
+    elite: { type: "attack", characterId: "ichigo", attackId: "ichigo-festival-mugetsu", name: "Mugetsu" },
   },
   20: {
     free: { type: "character",
