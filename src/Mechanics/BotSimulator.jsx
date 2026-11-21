@@ -2009,7 +2009,9 @@ function BotSimulator() {
             <p>
               The simulator tests each unique pair of unlocked fighters in both
               starting positions. Every fighter uses only their unlocked, equipped
-              attacks, limited by their character's slot capacity.
+              attacks, limited by their character's slot capacity. Run the Loadout
+              Lab for each fighter first if you want the rankings to compare each
+              character's optimized build.
             </p>
 
             <p>
