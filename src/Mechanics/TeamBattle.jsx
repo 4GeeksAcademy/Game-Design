@@ -40,6 +40,7 @@ import {
   normalDefendOrEvade,
 } from "./AI_NormalDifficulty.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
+import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import "./Teambattle.css";
 
 function createBattleFighter(id, applyLoadout = false) {
@@ -409,6 +410,7 @@ export default function TeamBattle() {
   const [pendingAllyAttack, setPendingAllyAttack] = useState(null);
   const [defenseOutcome, setDefenseOutcome] = useState(null);
   const [phase, setPhase] = useState("selecting");
+  const [isPaused, setIsPaused] = useState(false);
   const festivalBattleRecorded = useRef(false);
 
   useEffect(() => {
@@ -441,6 +443,15 @@ export default function TeamBattle() {
   );
 
   const isFinalTeamPhase = phase === "victory" || phase === "defeat";
+
+  useEffect(() => {
+    if (isFinalTeamPhase) return undefined;
+    const handlePauseKey = (event) => {
+      if (event.key === "Escape" && !event.repeat) { event.preventDefault(); setIsPaused((value) => !value); }
+    };
+    window.addEventListener("keydown", handlePauseKey);
+    return () => window.removeEventListener("keydown", handlePauseKey);
+  }, [isFinalTeamPhase]);
 
   const winningTeam = phase === "victory" ? teams.player : teams.opponent;
 
@@ -696,7 +707,7 @@ export default function TeamBattle() {
   }, [showRoundIntro, roundNumber]);
 
   useEffect(() => {
-    if (!isCpuAssist || phase !== "selecting") return;
+    if (isPaused || !isCpuAssist || phase !== "selecting") return;
 
     const teammate = teams.player.find((fighter) => fighter.isCpuTeammate);
 
@@ -869,7 +880,7 @@ export default function TeamBattle() {
   };
 
   const finishPlayerTurn = (fighterId) => {
-    if (phase !== "fighting" || pendingDefense || pendingAllyAttack) return;
+    if (isPaused || phase !== "fighting" || pendingDefense || pendingAllyAttack) return;
     setTeams((current) => {
       const player = current.player.find((fighter) => fighter.id === fighterId);
 
@@ -942,7 +953,7 @@ export default function TeamBattle() {
     targetOverrideId = null,
     healTargetId = null,
   ) => {
-    if (phase !== "fighting") return;
+    if (isPaused || phase !== "fighting") return;
 
     const updatedPlayers = teams.player.map((fighter) => ({
       ...fighter,
@@ -1380,7 +1391,7 @@ export default function TeamBattle() {
   );
 
   useEffect(() => {
-    if (phase !== "fighting" || pendingAllyAttack) return;
+    if (isPaused || phase !== "fighting" || pendingAllyAttack) return;
 
     const playersAfter = teams.player.map((player) => {
       const targetId = roundTargets[player.id];
@@ -1423,7 +1434,7 @@ export default function TeamBattle() {
   }, [phase, pendingAllyAttack, teams.player, teams.opponent, roundTargets]);
 
   const runCpuTeammateTurn = () => {
-    if (!isCpuAssist || phase !== "fighting" || pendingAllyAttack) return;
+    if (isPaused || !isCpuAssist || phase !== "fighting" || pendingAllyAttack) return;
 
     const ally = teams.player.find(
       (fighter) => fighter.isCpuTeammate && fighter.health > 0,
@@ -1830,7 +1841,7 @@ export default function TeamBattle() {
   ]);
 
   useEffect(() => {
-    if (phase !== "cpu-fighting" || !pendingDefense) return;
+    if (isPaused || phase !== "cpu-fighting" || !pendingDefense) return;
 
     setDefenseTimeLeft(10);
 
@@ -1854,7 +1865,7 @@ export default function TeamBattle() {
   ]);
 
   useEffect(() => {
-    if (phase !== "cpu-fighting" || !isLocalCoop || !localCoopDefenses.length) {
+    if (isPaused || phase !== "cpu-fighting" || !isLocalCoop || !localCoopDefenses.length) {
       return;
     }
 
@@ -1886,7 +1897,7 @@ export default function TeamBattle() {
 
   // Display countdown only.
   useEffect(() => {
-    if (phase !== "cpu-fighting" || !isLocalCoop) return;
+    if (isPaused || phase !== "cpu-fighting" || !isLocalCoop) return;
 
     const interval = setInterval(() => {
       setLocalCoopDefenses((current) =>
@@ -2206,7 +2217,7 @@ export default function TeamBattle() {
   resolveLocalCoopDefenseRef.current = resolveLocalCoopDefense;
 
   useEffect(() => {
-    if (phase !== "cpu-fighting") return;
+    if (isPaused || phase !== "cpu-fighting") return;
 
     const handleDefenseKeyDown = (event) => {
       const target = event.target;
@@ -2589,7 +2600,7 @@ export default function TeamBattle() {
 
   resolveCPUDefenseRef.current = resolveCPUDefense;
 
-  const resetBattle = () => {
+  const resetBattle = () => {\n    setIsPaused(false);\n    setKnockout(null);\n    setIsKnockoutFadingOut(false);\n    setTeamFinishComplete(false);\n    setIsTeamFinishFadingOut(false);\n    setPendingHealSelection(null);\n    setPendingAllyAttack(null);\n    setAllyAttackOutcome(null);\n    setDefenseOutcome(null);\n    setLocalCoopDefenses([]);\n    setLocalCoopDefenseTimers({});\n    setCpuQueueReady(false);\n    localCoopTimeoutsRef.current.forEach(clearTimeout);\n    localCoopTimeoutsRef.current = [];\n    if (popupTimerRef.current) clearTimeout(popupTimerRef.current);\n    if (teammateTargetTimerRef.current) clearTimeout(teammateTargetTimerRef.current);\n    if (allyAttackTimerRef.current) clearTimeout(allyAttackTimerRef.current);
     setTeams(createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist));
     setRoundNumber(1);
     setRoundTargets({});
