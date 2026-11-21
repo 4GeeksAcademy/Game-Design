@@ -1,5 +1,6 @@
 import React from "react";
 import StatBar from "./StatBar.jsx";
+import { getModifiedCharacterStat } from "./Modifiers.js";
 import "./BattleUI.css";
 
 export default function LocalPvPFighterPanel({ fighter, side = "player" }) {
@@ -44,12 +45,12 @@ export default function LocalPvPFighterPanel({ fighter, side = "player" }) {
           <p id={isPlayer ? "characterHeader" : "opponentHeader"}>{isPlayer ? "YOUR FIGHTER" : "OPPONENT"}</p>
           <h2 id={nameId}>{fighter.name}</h2>
           <div id={statsId} className="local-pvp-fighter-statbars">
-            <StatBar label="Defense" icon="🛡️" current={fighter.defense?.amount ?? fighter.defense ?? 0} maximum={100} color="secondary" />
-            <StatBar label="Agility" icon="⚡" current={fighter.agility ?? 0} maximum={100} color="warning" />
+            <StatBar label="Defense" icon="🛡️" current={getModifiedCharacterStat(fighter, "defense")} maximum={100} color="secondary" />
+            <StatBar label="Agility" icon="⚡" current={getModifiedCharacterStat(fighter, "agility")} maximum={100} color="warning" />
           </div>
           <div id={compactId} className="local-pvp-fighter-compact">
-            <div className="compactStat"><span>⏳ Cooldown</span><strong>{fighter.cooldown ?? 0}/{fighter.maximumCooldown ?? 3}</strong></div>
-            <div className="compactStat"><span>🔄 Recovery</span><strong>{fighter.recovery ?? 0}</strong></div>
+            <div className="compactStat"><span>⏳ Cooldown</span><strong>{fighter.cooldown ?? 0}/{getModifiedCharacterStat(fighter, "maximumCooldown") || 3}</strong></div>
+            <div className="compactStat"><span>🔄 Recovery</span><strong>{getModifiedCharacterStat(fighter, "recovery")}</strong></div>
           </div>
         </div>
       </div>
