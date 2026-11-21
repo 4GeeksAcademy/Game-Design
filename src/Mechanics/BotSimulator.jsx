@@ -733,8 +733,8 @@ function BotSimulator() {
   );
   const [loadoutAttackKeys, setLoadoutAttackKeys] = useState([]);
   const [loadoutOpponentIds, setLoadoutOpponentIds] = useState([]);
-  const [loadoutCandidateLimit, setLoadoutCandidateLimit] = useState("12");
-  const [loadoutRepeats, setLoadoutRepeats] = useState("2");
+  const [loadoutCandidateLimit, setLoadoutCandidateLimit] = useState("8");
+  const [loadoutRepeats, setLoadoutRepeats] = useState("1");
   const [loadoutResults, setLoadoutResults] = useState(null);
 
   const [fighterOneId, setFighterOneId] = useState("random");
