@@ -50,3 +50,47 @@
  .battle-pause-audio-row > span:last-child { width:100%; }
  .battle-pause-trigger { top:8px; right:8px; }
 }
+
+
+/* Prominent arcade pause control */
+.battle-pause-trigger {
+  position: fixed !important;
+  top: 16px !important;
+  right: 18px !important;
+  z-index: 1400 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: auto !important;
+  min-width: 112px;
+  height: 48px !important;
+  padding: 0 17px !important;
+  color: #101522 !important;
+  background: linear-gradient(180deg, #ffe98b 0%, #e7b936 100%) !important;
+  border: 2px solid #fff0a8 !important;
+  border-radius: 9px !important;
+  box-shadow: 0 0 0 3px #e7b93645, 0 5px 0 #8d6418, 0 0 24px #ffd84f99 !important;
+  font: 900 1rem Oxanium, sans-serif !important;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.battle-pause-trigger:hover {
+  transform: translateY(-2px) scale(1.04);
+  filter: brightness(1.08);
+  box-shadow: 0 0 0 4px #e7b93655, 0 7px 0 #8d6418, 0 0 30px #ffd84fcc !important;
+}
+.battle-pause-trigger:active { transform: translateY(2px); box-shadow: 0 2px 0 #8d6418 !important; }
+.battle-pause-icon { font-size: 1.25rem; line-height: 1; }
+.battle-pause-back {
+  width: 100%; min-height: 40px; margin-bottom: 14px; padding: 8px 12px;
+  color: #eaf4ff; background: #14263b; border: 1px solid #31516d;
+  font: 800 .8rem Oxanium,sans-serif; letter-spacing: 1px; cursor: pointer;
+}
+.battle-pause-all-settings { max-height: 65vh; }
+.battle-pause-audio-section { margin-top: 24px; padding-top: 14px; border-top: 2px solid #d5bd5e66; }
+.battle-pause-audio-section h3 { margin: 0; color: #e8c85e; font: 900 1rem Oxanium,sans-serif; letter-spacing: 1.5px; }
+@media(max-width:620px) {
+  .battle-pause-trigger { top: 8px !important; right: 8px !important; min-width: 96px; height: 42px !important; padding: 0 12px !important; }
+}
