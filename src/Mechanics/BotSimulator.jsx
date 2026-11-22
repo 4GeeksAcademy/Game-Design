@@ -116,7 +116,7 @@ function buildAttackCombinations(attacks, slotLimit, maxCandidates, currentKeys 
   return combinations.slice(0, maxCandidates);
 }
 
-const AUTO_LOADOUT_CANDIDATE_LIMIT = 12;
+const AUTO_LOADOUT_CANDIDATE_LIMIT = 40;
 
 function createLoadoutOptimizationPlan(fighters) {
   const baselineLoadouts = new Map(
@@ -146,7 +146,10 @@ function createLoadoutOptimizationPlan(fighters) {
 
   const totalBattles = entries.reduce(
     (total, entry) =>
-      total + entry.candidates.length * Math.max(0, fighters.length - 1) * 2,
+      total +
+        (entry.candidates.length > 1
+          ? entry.candidates.length * Math.max(0, fighters.length - 1) * 2
+          : 0),
     0,
   );
 
@@ -161,6 +164,17 @@ async function optimizeLoadoutsForSimulation(plan, onProgress) {
   for (const entry of plan.entries) {
     const { fighter, data, candidates } = entry;
     if (!candidates.length) continue;
+
+    // If there is only one legal combination, use it directly. No trial
+    // battles are needed because there is nothing else to compare it with.
+    if (candidates.length === 1) {
+      optimized.push({
+        fighter,
+        data,
+        best: { keys: candidates[0].map(getAttackKey) },
+      });
+      continue;
+    }
 
     let best = null;
     const opponents = [...plan.baselineLoadouts.entries()]
@@ -1615,7 +1629,6 @@ function BotSimulator() {
     }
 
     const optimizationPlan = createLoadoutOptimizationPlan(fightersForOptimization);
-    const rankingBattleCount = totalBattles;
     totalBattles += optimizationPlan.totalBattles;
 
     setRunning(true);
