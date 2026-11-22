@@ -116,6 +116,127 @@ function buildAttackCombinations(attacks, slotLimit, maxCandidates, currentKeys 
   return combinations.slice(0, maxCandidates);
 }
 
+const AUTO_LOADOUT_CANDIDATE_LIMIT = 12;
+
+function createLoadoutOptimizationPlan(fighters) {
+  const baselineLoadouts = new Map(
+    fighters.map((fighter) => [fighter.id, getFighterWithEquippedAttacks(fighter)]),
+  );
+
+  const entries = fighters.map((fighter) => {
+    const data = getFighterData(fighter);
+    const unlockedAttacks = (data.attacks ?? []).filter((attack) =>
+      isAttackUnlocked(fighter.id, attack),
+    );
+    const slotLimit = getAttackSlotLimit(data.slot);
+    const currentKeys = getEquippedAttackKeys(
+      fighter.id,
+      data.attacks ?? [],
+      data.slot,
+    );
+    const candidates = buildAttackCombinations(
+      unlockedAttacks,
+      slotLimit,
+      AUTO_LOADOUT_CANDIDATE_LIMIT,
+      currentKeys,
+    );
+
+    return { fighter, data, candidates };
+  });
+
+  const totalBattles = entries.reduce(
+    (total, entry) =>
+      total + entry.candidates.length * Math.max(0, fighters.length - 1) * 2,
+    0,
+  );
+
+  return { entries, baselineLoadouts, totalBattles };
+}
+
+async function optimizeLoadoutsForSimulation(plan, onProgress) {
+  const optimized = [];
+
+  // Every fighter is evaluated against the same baseline opponent loadouts.
+  // This prevents roster order from changing the test conditions.
+  for (const entry of plan.entries) {
+    const { fighter, data, candidates } = entry;
+    if (!candidates.length) continue;
+
+    let best = null;
+    const opponents = [...plan.baselineLoadouts.entries()]
+      .filter(([opponentId]) => opponentId !== fighter.id);
+
+    for (const candidate of candidates) {
+      let wins = 0;
+      let losses = 0;
+      let draws = 0;
+
+      for (const [, opponentData] of opponents) {
+        for (let startingOrder = 0; startingOrder < 2; startingOrder += 1) {
+          const candidateData = {
+            ...data,
+            attacks: candidate.map((attack) => ({ ...attack })),
+          };
+          const candidateStartsFirst = startingOrder === 0;
+          const result = simulateBattle(
+            candidateStartsFirst ? candidateData : opponentData,
+            candidateStartsFirst ? opponentData : candidateData,
+            { difficultyOne: "Normal", difficultyTwo: "Normal" },
+          );
+          const outcome = getOneVsOneOutcome(result);
+
+          if (
+            (candidateStartsFirst && outcome === "first") ||
+            (!candidateStartsFirst && outcome === "second")
+          ) {
+            wins += 1;
+          } else if (
+            (candidateStartsFirst && outcome === "second") ||
+            (!candidateStartsFirst && outcome === "first")
+          ) {
+            losses += 1;
+          } else {
+            draws += 1;
+          }
+
+          onProgress?.();
+        }
+      }
+
+      const battles = wins + losses + draws;
+      const score = battles > 0 ? ((wins + draws * 0.5) / battles) * 100 : 0;
+      const result = {
+        keys: candidate.map(getAttackKey),
+        attacks: candidate,
+        wins,
+        losses,
+        draws,
+        battles,
+        score,
+      };
+
+      if (
+        !best ||
+        result.score > best.score ||
+        (result.score === best.score && result.wins > best.wins)
+      ) {
+        best = result;
+      }
+    }
+
+    if (best) optimized.push({ fighter, data, best });
+    await yieldToBrowser();
+  }
+
+  // Save only after every character has been evaluated against the same
+  // baseline roster, then let the normal ranking simulations resume.
+  for (const { fighter, data, best } of optimized) {
+    saveEquippedAttackKeys(fighter.id, best.keys, data.attacks ?? [], data.slot);
+  }
+
+  return optimized;
+}
+
 function chooseRandom(candidates) {
   if (candidates.length === 0) return null;
   return candidates[Math.floor(Math.random() * candidates.length)];
@@ -759,6 +880,7 @@ function BotSimulator() {
 
   const [results, setResults] = useState(null);
   const [running, setRunning] = useState(false);
+  const [simulationStage, setSimulationStage] = useState("");
 
   useEffect(() => {
     const updateUnlocks = () => {
@@ -1039,9 +1161,9 @@ function BotSimulator() {
     return team;
   }
 
-  async function runCustomSimulations(requestedCount, onProgress) {
-    const fighterOne = chooseFighter(fighterOneId);
-    const fighterTwo = chooseFighter(
+  async function runCustomSimulations(requestedCount, onProgress, selectedFighters) {
+    const fighterOne = selectedFighters?.[0] ?? chooseFighter(fighterOneId);
+    const fighterTwo = selectedFighters?.[1] ?? chooseFighter(
       fighterTwoId,
       fighterOne ? [fighterOne.id] : [],
     );
@@ -1226,9 +1348,9 @@ function BotSimulator() {
     await yieldToBrowser();
   }
 
-  async function runCustomTeamSimulations(requestedCount, onProgress) {
-    const teamOne = resolveTeam(teamOneIds);
-    const teamTwo = resolveTeam(
+  async function runCustomTeamSimulations(requestedCount, onProgress, selectedTeams) {
+    const teamOne = selectedTeams?.[0] ?? resolveTeam(teamOneIds);
+    const teamTwo = selectedTeams?.[1] ?? resolveTeam(
       teamTwoIds,
       teamOne ? teamOne.map((fighter) => fighter.id) : [],
     );
@@ -1425,6 +1547,36 @@ function BotSimulator() {
     const fightersToSimulate =
       mode === "all" ? analysisFighters : availableFighters;
 
+    let customFighters = null;
+    let customTeams = null;
+    if (mode === "custom" && battleType === "1v1") {
+      const first = chooseFighter(fighterOneId);
+      const second = chooseFighter(fighterTwoId, first ? [first.id] : []);
+      if (!first || !second) {
+        alert("You need at least two available fighters.");
+        return;
+      }
+      customFighters = [first, second];
+    } else if (mode === "custom" && battleType === "2v2") {
+      const firstTeam = resolveTeam(teamOneIds);
+      const secondTeam = resolveTeam(
+        teamTwoIds,
+        firstTeam ? firstTeam.map((fighter) => fighter.id) : [],
+      );
+      if (!firstTeam || !secondTeam) {
+        alert("You need at least four different unlocked fighters for 2v2.");
+        return;
+      }
+      customTeams = [firstTeam, secondTeam];
+    }
+
+    const fightersForOptimization =
+      mode === "all"
+        ? analysisFighters
+        : battleType === "1v1"
+          ? customFighters
+          : [...customTeams[0], ...customTeams[1]];
+
     if (fightersToSimulate.length < minimumFighters) {
       alert(
         mode === "all"
@@ -1462,8 +1614,13 @@ function BotSimulator() {
       totalBattles = teamMatchups * 2 * requestedCount;
     }
 
+    const optimizationPlan = createLoadoutOptimizationPlan(fightersForOptimization);
+    const rankingBattleCount = totalBattles;
+    totalBattles += optimizationPlan.totalBattles;
+
     setRunning(true);
     setResults(null);
+    setSimulationStage("OPTIMIZING ATTACK LOADOUTS");
     setProgress({
       completed: 0,
       total: totalBattles,
@@ -1484,17 +1641,21 @@ function BotSimulator() {
       // Give React time to display the progress bar before calculation.
       await yieldToBrowser();
 
+      await optimizeLoadoutsForSimulation(optimizationPlan, handleProgress);
+      setSimulationStage("RUNNING RANKING SIMULATIONS");
+      await yieldToBrowser();
+
       if (battleType === "1v1") {
         if (mode === "all") {
           await runAllMatchups(requestedCount, handleProgress);
         } else {
-          await runCustomSimulations(requestedCount, handleProgress);
+          await runCustomSimulations(requestedCount, handleProgress, customFighters);
         }
       } else {
         if (mode === "all") {
           await runAllTeamMatchups(requestedCount, handleProgress);
         } else {
-          await runCustomTeamSimulations(requestedCount, handleProgress);
+          await runCustomTeamSimulations(requestedCount, handleProgress, customTeams);
         }
       }
 
@@ -1508,6 +1669,7 @@ function BotSimulator() {
       alert("The simulation encountered an error. Check the console.");
     } finally {
       setRunning(false);
+      setSimulationStage("");
     }
   }
 
@@ -2152,7 +2314,7 @@ function BotSimulator() {
         {running && (
           <div className="simulation-progress">
             <div className="simulation-progress-header">
-              <span>CALCULATING MATCHUPS...</span>
+              <span>{simulationStage || "CALCULATING MATCHUPS..."}</span>
               <strong>{progressPercentage}%</strong>
             </div>
 
