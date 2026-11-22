@@ -5,7 +5,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
 
 import "./assets/img/rigo-baby.jpg";
-import "./assets/img/4geeks.ico";
+import "./assets/img/Wild Cards Neon Graffiti Emblem.ico";
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
