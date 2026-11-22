@@ -380,7 +380,12 @@ function Festival() {
     } else if (reward.type === "attack") {
       const attack = getFestivalAttack(reward.characterId, reward.attackId);
       if (!attack || !unlockFestivalAttack(reward.characterId, attack)) return;
-      setRewardPopup({ type: "attack", title: reward.name.toUpperCase(), description: "FESTIVAL-EXCLUSIVE ATTACK UNLOCKED! EQUIP IT IN INVENTORY." });
+      setRewardPopup({
+        type: "attack",
+        title: reward.name.toUpperCase(),
+        description: "FESTIVAL-EXCLUSIVE ATTACK UNLOCKED! EQUIP IT IN INVENTORY.",
+        image: attack.image,
+      });
     }
   };
   return (
@@ -398,9 +403,13 @@ function Festival() {
                 : "coin-reward-popup"
             }`}
           >
-            {rewardPopup.type === "character" || rewardPopup.type === "skin" ? (
+            {rewardPopup.image ? (
               <img
-                className="reward-popup-character-image"
+                className={
+                  rewardPopup.type === "attack"
+                    ? "reward-popup-character-image reward-popup-attack-image"
+                    : "reward-popup-character-image"
+                }
                 src={rewardPopup.image}
                 alt={rewardPopup.title}
               />
@@ -555,7 +564,15 @@ function Festival() {
                         alt={reward.name}
                       />
                     ) : reward?.type === "attack" ? (
-                      <span className="reward-icon">⚔️</span>
+                      getFestivalAttack(reward.characterId, reward.attackId)?.image ? (
+                        <img
+                          className="reward-character-image reward-attack-image"
+                          src={getFestivalAttack(reward.characterId, reward.attackId).image}
+                          alt={reward.name}
+                        />
+                      ) : (
+                        <span className="reward-icon">⚔️</span>
+                      )
                     ) : (
                       <span className="reward-icon">🪙</span>
                     )}
@@ -640,7 +657,15 @@ function Festival() {
                         alt={reward.name}
                       />
                     ) : reward?.type === "attack" ? (
-                      <span className="reward-icon">⚔️</span>
+                      getFestivalAttack(reward.characterId, reward.attackId)?.image ? (
+                        <img
+                          className="reward-character-image reward-attack-image"
+                          src={getFestivalAttack(reward.characterId, reward.attackId).image}
+                          alt={reward.name}
+                        />
+                      ) : (
+                        <span className="reward-icon">⚔️</span>
+                      )
                     ) : (
                       <span className="reward-icon">🪙</span>
                     )}
