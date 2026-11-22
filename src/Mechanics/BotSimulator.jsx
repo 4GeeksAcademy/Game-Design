@@ -2410,6 +2410,19 @@ function BotSimulator() {
             </div>
           </div>
 
+          <div className="optimized-loadout-summary">
+            <h3>OPTIMIZED ATTACK LOADOUTS</h3>
+            {(results.battleType === "2v2"
+              ? [...results.selectedTeamOne, ...results.selectedTeamTwo]
+              : [results.selectedFighterOne, results.selectedFighterTwo]
+            ).map((fighter) => (
+              <div className="optimized-loadout-row" key={fighter.id}>
+                <strong>{getFighterName(fighter)}</strong>
+                <span>{getEquippedAttackLabel(fighter)}</span>
+              </div>
+            ))}
+          </div>
+
           <div className="starting-order-comparison">
             <h3>STARTING-ORDER COMPARISON</h3>
 
