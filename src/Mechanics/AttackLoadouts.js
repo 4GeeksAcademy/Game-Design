@@ -59,8 +59,13 @@ export function isAttackUnlocked(characterId, attack) {
 
 export function getEquippedAttackKeys(characterId, attacks = [], configuredSlot) {
   const saved = readObject(LOADOUT_KEY)[characterId];
+  // Build the default loadout from the same unlock rules used everywhere else.
+  // This is important for festival-exclusive attacks: they must not be treated
+  // as free starter attacks merely because they have no coin price.
   const available = attacks.filter((attack) => isAttackUnlocked(characterId, attack));
-  const defaultKeys = attacks.filter((attack) => !attack.locked && !attack.requiresPurchase && !(Number(attack.unlockCost ?? attack.coinCost ?? attack.price) > 0)).slice(0, getAttackSlotLimit(configuredSlot ?? attacks)).map(getAttackKey);
+  const defaultKeys = available
+    .slice(0, getAttackSlotLimit(configuredSlot ?? attacks))
+    .map(getAttackKey);
   if (!Array.isArray(saved)) return defaultKeys;
   const allowed = new Set(available.map(getAttackKey));
   return [...new Set(saved.filter((key) => allowed.has(key)))].slice(0, getAttackSlotLimit(configuredSlot ?? attacks));
