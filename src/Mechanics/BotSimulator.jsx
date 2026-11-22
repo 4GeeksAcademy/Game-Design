@@ -158,6 +158,7 @@ function createLoadoutOptimizationPlan(fighters) {
 
 async function optimizeLoadoutsForSimulation(plan, onProgress) {
   const optimized = [];
+  let testedBattles = 0;
 
   // Every fighter is evaluated against the same baseline opponent loadouts.
   // This prevents roster order from changing the test conditions.
@@ -214,6 +215,8 @@ async function optimizeLoadoutsForSimulation(plan, onProgress) {
           }
 
           onProgress?.();
+          testedBattles += 1;
+          if (testedBattles % 5 === 0) await yieldToBrowser();
         }
       }
 
