@@ -47,16 +47,29 @@ function getTeamMaximumHealth(team) {
 
 function getFighterWithEquippedAttacks(fighter) {
   const data = getFighterData(fighter);
+  const slotLimit = getAttackSlotLimit(data);
+  const equippedAttacks = getEquippedAttacks(
+    fighter.id,
+    data.attacks ?? [],
+    data.slot,
+  ).slice(0, slotLimit);
+
   return {
     ...data,
-    attacks: getEquippedAttacks(fighter.id, data.attacks ?? [], data.slot),
+    attacks: equippedAttacks,
   };
 }
 
 function getEquippedAttackLabel(fighter) {
   if (!fighter) return "No fighter";
   const data = getFighterData(fighter);
-  const attacks = getEquippedAttacks(fighter.id, data.attacks ?? [], data.slot);
+  const slotLimit = getAttackSlotLimit(data);
+  const attacks = getEquippedAttacks(
+    fighter.id,
+    data.attacks ?? [],
+    data.slot,
+  ).slice(0, slotLimit);
+
   return attacks.map((attack) => attack.name ?? getAttackKey(attack)).join(" · ") || "No attacks equipped";
 }
 
