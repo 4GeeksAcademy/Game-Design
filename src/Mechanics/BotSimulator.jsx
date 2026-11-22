@@ -128,7 +128,7 @@ function createLoadoutOptimizationPlan(fighters) {
     const unlockedAttacks = (data.attacks ?? []).filter((attack) =>
       isAttackUnlocked(fighter.id, attack),
     );
-    const slotLimit = getAttackSlotLimit(data.slot);
+    const slotLimit = getAttackSlotLimit(data);
     const currentKeys = getEquippedAttackKeys(
       fighter.id,
       data.attacks ?? [],
