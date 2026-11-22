@@ -1337,3 +1337,42 @@
 .ranked-loadout-cell strong {
   color: #27dfff;
 }
+
+
+.optimized-loadout-summary {
+  margin: 22px 0;
+  padding: 18px;
+  border: 1px solid rgba(39, 223, 255, 0.28);
+  background: rgba(5, 19, 36, 0.72);
+}
+
+.optimized-loadout-summary h3 {
+  margin: 0 0 12px;
+  color: #27dfff;
+  font-family: "Oxanium", sans-serif;
+  font-weight: 800;
+}
+
+.optimized-loadout-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.35fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(39, 160, 255, 0.16);
+}
+
+.optimized-loadout-row strong {
+  color: #fff;
+}
+
+.optimized-loadout-row span {
+  color: #b9d5ef;
+  line-height: 1.45;
+}
+
+@media (max-width: 650px) {
+  .optimized-loadout-row {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+}
