@@ -1904,3 +1904,32 @@
     font-size: 18px;
   }
 }
+
+
+/* Festival-exclusive attack artwork in reward cards and claim popups */
+.reward-attack-image {
+  width: 100%;
+  max-width: 118px;
+  height: 100px;
+  object-fit: cover;
+  object-position: center;
+  border: 1px solid rgba(19, 213, 255, 0.38);
+  border-radius: 5px;
+  background: rgba(3, 12, 24, 0.7);
+  filter: drop-shadow(0 0 7px rgba(19, 213, 255, 0.24));
+}
+
+.elite-reward-row .reward-attack-image {
+  border-color: rgba(246, 216, 74, 0.48);
+  filter: drop-shadow(0 0 8px rgba(246, 216, 74, 0.3));
+}
+
+.reward-popup-attack-image {
+  width: 190px;
+  height: 155px;
+  object-fit: contain;
+  border: 1px solid rgba(19, 213, 255, 0.4);
+  border-radius: 7px;
+  background: rgba(3, 12, 24, 0.65);
+  padding: 5px;
+}
