@@ -28,7 +28,10 @@ function createBattleFighter(characterId, battleId) {
   if (!selected?.data) return null;
 
   const data = selected.data;
-  const sourceAttacks = battleId === "player" ? getEquippedAttacks(selected.id, data.attacks ?? [], data.slot) : (data.attacks ?? []);
+  // Every fighter must obey their saved, unlocked attack loadout.
+// Previously only the human player used this filter, allowing the AI to
+// access the character's entire attack list (including locked moves).
+const sourceAttacks = getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
   const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)
       ? attack.uses
