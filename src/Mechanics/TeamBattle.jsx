@@ -43,7 +43,7 @@ import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import "./Teambattle.css";
 
-function createBattleFighter(id, applyLoadout = false) {
+function createBattleFighter(id, applyLoadout = true) {
   const selected = roster.find((fighter) => fighter.id === id);
   if (!selected?.data) return null;
 
@@ -64,7 +64,9 @@ function createBattleFighter(id, applyLoadout = false) {
       typeof data.defense === "object" && data.defense
         ? { ...data.defense }
         : data.defense,
-    attacks: (applyLoadout ? getEquippedAttacks(selected.id, data.attacks ?? [], data.slot) : (data.attacks ?? [])).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
+    // Apply the same unlocked + equipped slot rules to every team member,
+// including CPU teammates and the opposing team.
+attacks: getEquippedAttacks(selected.id, data.attacks ?? [], data.slot).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
         ? attack.uses
         : attack.remainingUses;
