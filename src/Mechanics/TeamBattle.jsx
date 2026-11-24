@@ -1292,10 +1292,12 @@ export default function TeamBattle() {
     }
     const impactTier = damageActuallyDealt >= 70 ? "fatal" : damageActuallyDealt >= 45 ? "heavy" : damageActuallyDealt >= 20 ? "effective" : "light";
     const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : damageActuallyDealt > 0 ? "damage" : "status";
+    const attackerEffectId = Date.now() + Math.random();
+    const defenderEffectId = Date.now() + Math.random();
     setCombatEffects((current) => ({
       ...current,
       [attacker.id]: {
-        id: Date.now() + Math.random(),
+        id: attackerEffectId,
         type: damageActuallyDealt > 0 ? "attack" : "status",
         damage: 0,
         tier: "light",
@@ -1303,7 +1305,7 @@ export default function TeamBattle() {
         effects: appliedBuffs,
       },
       [defender.id]: {
-        id: Date.now() + Math.random(),
+        id: defenderEffectId,
         type: impactType,
         damage: damageActuallyDealt,
         tier: impactTier,
@@ -1311,6 +1313,15 @@ export default function TeamBattle() {
         effects: appliedDebuffs,
       },
     }));
+    [[attacker.id, attackerEffectId], [defender.id, defenderEffectId]].forEach(([fighterId, effectId]) => {
+      setTimeout(() => {
+        setCombatEffects((current) =>
+          current[fighterId]?.id === effectId
+            ? { ...current, [fighterId]: null }
+            : current,
+        );
+      }, 2200);
+    });
     if (!attacker.isCpuTeammate && damageActuallyDealt > 0) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
 
