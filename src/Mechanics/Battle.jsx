@@ -8,8 +8,7 @@ import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObj
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
-import VictoryScreen from "./VictoryScreen.jsx";
-import GameOverScreen from "./GameOverScreen.jsx";
+import BattleResultScreen from "./BattleResultScreen.jsx";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
 import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
@@ -825,6 +824,15 @@ const stunOptions = {
   return (
     <div className="container-fluid mt-3" id="gameContainer">
       <FestivalChallengePopup />
+      {combatMessages.length > 0 && (
+        <div id="combatPopupContainer" aria-live="polite">
+          {combatMessages.slice(0, 3).map((entry, index) => (
+            <div key={entry.id} className={`combat-popup ${entry.type}`} style={{ animationDelay: `${index * 0.15}s` }}>
+              {entry.text}
+            </div>
+          ))}
+        </div>
+      )}
       {!knockout && <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>}
       {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: location.state })} onMainMenu={() => navigate("/")} />}
       {/* Full-screen round intro with both fighters and their health. */}
@@ -985,13 +993,17 @@ const stunOptions = {
           attacksUsed={attacksUsed}
           levelConfig={levelConfig}
         />
-      ) : knockout && !showResults ? null : !isStoryMode &&
-        character.health <= 0 ? (
-        <GameOverScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} onRematch={resetBattle} />
-      ) : !isStoryMode && opponent.health <= 0 ? (
-        <div id="victorySection">
-          <VictoryScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} onRematch={resetBattle} />
-        </div>
+      ) : !isStoryMode && knockout && showResults ? (
+        <BattleResultScreen
+          won={knockout.defeatedTeam === "opponent"}
+          defeated={knockout.defeatedTeam === "player" ? character : opponent}
+          winner={knockout.defeatedTeam === "player" ? opponent : character}
+          damageDealt={damageDealt}
+          combatDefense={combatDefense}
+          attacksUsed={attacksUsed}
+          difficulty={levelConfig.difficulty ?? "Easy"}
+          onRematch={resetBattle}
+        />
       ) : knockout ? null : (
         <>
           {/* Horizontal arcade HUD matching the 2v2 battle foundation. */}
@@ -1174,7 +1186,6 @@ const stunOptions = {
                 character={character}
                 setCharacter={setCharacter}
                 currentTurn={currentTurn}
-                combatMessages={combatMessages}
                 combatEffect={combatEffects.player}
                 setCurrentTurn={setCurrentTurn}
                 showFinishTurnButton={false}
