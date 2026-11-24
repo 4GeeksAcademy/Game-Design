@@ -3956,3 +3956,80 @@ battlefield > .local-coop-incoming {
 .fighter-art-button:has(.effect-stun) { filter:drop-shadow(0 0 16px #b56cffcc); }
 
 .fighter-art-button:has(.effect-stun) { filter:drop-shadow(0 0 16px #b56cffcc); }
+
+
+/* Team battle finish: smoother corners and a weighty defensive brace. */
+.team-battle .battlefield,
+.team-battle .fighter-card,
+.team-battle .fighter-hud,
+.team-battle .fighter-info-popup,
+.team-battle .player-attack-panel,
+.team-battle .combat-log,
+.team-battle .incoming-attack,
+.team-battle .target-modal {
+  border-radius: 14px !important;
+  clip-path: none !important;
+}
+.team-battle .fighter-card {
+  overflow: visible;
+  border-radius: 14px !important;
+}
+.team-battle .fighter-art-button,
+.team-battle .fighter-portrait-stage,
+.team-battle .fighter-portrait-wrapper {
+  border-radius: 12px;
+  clip-path: none !important;
+}
+.team-battle .fighter-art-button:has(.impact-blocked) .fighter-portrait {
+  transform-origin: center bottom;
+  animation: team-defensive-brace .82s cubic-bezier(.2,.8,.25,1) both;
+  filter: brightness(1.35) drop-shadow(0 0 13px #d9f2ff) drop-shadow(0 0 25px #73cfffaa);
+}
+.team-battle .fighter-art-button:has(.impact-blocked) .fighter-portrait-stage::before {
+  content: "🛡 BLOCKED";
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: 43%;
+  padding: 6px 12px;
+  transform: translate(-50%,-50%);
+  border: 1px solid #d9f2ff;
+  border-radius: 7px;
+  color: #f5fbff;
+  background: linear-gradient(145deg,#34516aee,#101d2fee);
+  box-shadow: 0 0 12px #9bdcff, inset 0 0 12px #d9f2ff55;
+  font: 900 11px Oxanium,Arial,sans-serif;
+  letter-spacing: 1px;
+  pointer-events: none;
+  animation: team-shield-flash .82s ease-out both;
+}
+@keyframes team-defensive-brace {
+  0% { transform:translateY(0) rotate(0) scale(1); }
+  16% { transform:translateY(5px) rotate(-4deg) scale(.97); }
+  34% { transform:translateY(-2px) rotate(3deg) scale(1.015); }
+  52% { transform:translateY(2px) rotate(-2deg) scale(.99); }
+  72% { transform:translateY(-1px) rotate(1deg); }
+  100% { transform:translateY(0) rotate(0) scale(1); }
+}
+@keyframes team-shield-flash {
+  0% { opacity:0; filter:blur(4px); }
+  22% { opacity:1; filter:blur(0); }
+  72% { opacity:1; }
+  100% { opacity:0; }
+}
+.team-battle .battle-center { min-width:34px; }
+.team-battle .battle-center p {
+  max-width:190px;
+  padding:8px 10px;
+  border:1px solid #ffffff16;
+  border-radius:9px;
+  background:#0c1710bb;
+  font-size:10px;
+}
+.team-battle .fighter-card::before,
+.team-battle .fighter-card::after,
+.team-battle .fighter-unit::before,
+.team-battle .fighter-unit::after {
+  clip-path:none;
+  border-radius:inherit;
+}
