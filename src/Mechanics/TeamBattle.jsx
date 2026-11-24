@@ -18,7 +18,7 @@ import {
   tickSelfModifiers,
 } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
-import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
 import { addCoins } from "./Currency.js";
 import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
@@ -1063,8 +1063,23 @@ export default function TeamBattle() {
     }
 
     const attack = attacker.attacks[attackIndex];
+    const rosterFighter = roster.find((entry) => entry.id === attacker.id);
+    const allowedAttackKeys = new Set(
+      getEquippedAttacks(
+        attacker.id,
+        rosterFighter?.data?.attacks ?? [],
+        rosterFighter?.data?.slot,
+      ).map(getAttackKey),
+    );
 
-    if (!attack || !canUseAttack(attack)) {
+    // Never trust an AI-selected index alone: validate the actual move against
+    // this fighter's saved, unlocked, equipped loadout immediately before use.
+    if (!attack || !allowedAttackKeys.has(getAttackKey(attack))) {
+      addLog(`${attacker.name} tried to use an attack outside its equipped loadout.`);
+      return;
+    }
+
+    if (!canUseAttack(attack)) {
       addLog("That attack is unavailable or still on cooldown.");
       return;
     }
