@@ -93,10 +93,10 @@
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(115deg,#ff315966 0%,#ffb52e66 18%,#f7ed5266 34%,#5bff8a66 50%,#35eaff66 66%,#5574ff66 82%,#d45bff66 100%);
-  background-size: 250% 100%;
-  mix-blend-mode: screen;
-  animation: combo-portrait-rainbow 1.5s linear infinite;
+  background: linear-gradient(115deg,#ff315966 0%,#ffb52e66 18%,#f7ed5266 34%,#5bff8a66 50%,#35eaff66 66%,#5574ff66 82%,#d45bff66 100%) !important;
+  background-size: 250% 100% !important;
+  mix-blend-mode: screen !important;
+  animation: combo-portrait-rainbow 1.5s linear infinite !important;
 }
 @keyframes combo-portrait-rainbow {
   from { opacity: .18; background-position: 0% 50%; }
