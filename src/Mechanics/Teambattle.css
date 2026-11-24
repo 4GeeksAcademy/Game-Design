@@ -3949,3 +3949,8 @@ battlefield > .local-coop-incoming {
 .player-team .fighter-art-button:has(.impact-attack) .fighter-portrait { animation-name: team-attack-lunge-left; }
 @keyframes team-attack-lunge { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(28px) scale(1.04)} }
 @keyframes team-attack-lunge-left { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(-28px) scale(1.04)} }
+
+.fighter-art-button:has(.effect-defense) { filter:drop-shadow(0 0 13px #aeb7c4aa); }
+.fighter-art-button:has(.effect-agility) { filter:drop-shadow(0 0 13px #ffe45baa); }
+.fighter-art-button:has(.effect-manaRegen) { filter:drop-shadow(0 0 13px #35bfffaa); }
+.fighter-art-button:has(.effect-stun) { filter:drop-shadow(0 0 16px #b56cffcc); }
