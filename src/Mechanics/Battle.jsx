@@ -21,6 +21,7 @@ import { addCoins } from "./Currency.js";
 import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
+import ComboPopup from "./ComboPopup.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
@@ -279,6 +280,35 @@ function BattleMatch() {
   const [combatLog, setCombatLog] = useState([]);
   const [aiAttack, setAiAttack] = useState(null);
   const [combatEffects, setCombatEffects] = useState({});
+  const [comboState, setComboState] = useState(null);
+  const [highestCombo, setHighestCombo] = useState(0);
+  const comboStreakRef = useRef(0);
+  const highestComboRef = useRef(0);
+
+  const recordComboOutcome = useCallback((successful) => {
+    if (!successful) {
+      comboStreakRef.current = 0;
+      setComboState(null);
+      return;
+    }
+    const nextCount = comboStreakRef.current + 1;
+    comboStreakRef.current = nextCount;
+    if (nextCount >= 3) {
+      const stage = nextCount >= 10 ? 10 : nextCount >= 8 ? 8 : nextCount;
+      setComboState({ count: nextCount, stage, id: Date.now() + Math.random() });
+      if (nextCount > highestComboRef.current) {
+        highestComboRef.current = nextCount;
+        setHighestCombo(nextCount);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentTurn !== "player") {
+      comboStreakRef.current = 0;
+      setComboState(null);
+    }
+  }, [currentTurn]);
 
   const resetBattle = useCallback(() => {
     aiControllerRef.current?.stop();
@@ -287,6 +317,8 @@ function BattleMatch() {
     setCharacter(createBattleFighter(playerId, "player", location.state?.difficulty ?? "Easy"));
     setOpponent(createBattleFighter(opponentId, "opponent", location.state?.difficulty ?? "Easy"));
     setDamageDealt(0); setCombatDefense(0); setAttacksUsed(0);
+    comboStreakRef.current = 0; highestComboRef.current = 0;
+    setComboState(null); setHighestCombo(0);
     lastRewardedDamage.current = 0; lastRecordedAttacks.current = 0;
     rewardPaidRef.current = false;
     festivalBattleRecorded.current = false;
@@ -650,9 +682,9 @@ function BattleMatch() {
     if (!isStoryMode && showResults && knockout && !rewardPaidRef.current) {
       rewardPaidRef.current = true;
       const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[levelConfig.difficulty ?? "Easy"] ?? 1;
-      addCoins(Math.floor((damageDealt + combatDefense) * multiplier));
+      addCoins(Math.floor((damageDealt + combatDefense) * multiplier * Math.max(1, highestCombo)));
     }
-  }, [showResults, knockout, isStoryMode, levelConfig.difficulty, damageDealt, combatDefense]);
+  }, [showResults, knockout, isStoryMode, levelConfig.difficulty, damageDealt, combatDefense, highestCombo]);
 
   // Display the round announcement before allowing combat.
   useEffect(() => {
@@ -899,8 +931,9 @@ const stunOptions = {
   }, [aiAttack]);
 
   return (
-    <div className="container-fluid mt-3" id="gameContainer">
+    <div className={`container-fluid mt-3 ${comboState ? "solo-combo-active" : ""}`} id="gameContainer">
       <FestivalChallengePopup />
+      <ComboPopup combo={comboState} />
       {combatMessages.length > 0 && (
         <div id="combatPopupContainer" aria-live="polite">
           {combatMessages.slice(0, 3).map((entry, index) => (
@@ -1006,6 +1039,7 @@ const stunOptions = {
           combatDefense={combatDefense}
           attacksUsed={attacksUsed}
           difficulty={levelConfig.difficulty ?? "Easy"}
+          comboMultiplier={Math.max(1, highestCombo)}
           onRematch={resetBattle}
         />
       ) : knockout ? null : (
@@ -1234,6 +1268,7 @@ const stunOptions = {
               openingTurnActive={roundNumber === 1}
               difficulty={location.state?.difficulty ?? "Easy"}
               onCombatEffect={triggerCombatEffect}
+              onComboEvent={recordComboOutcome}
             />
               <button
                 type="button"
