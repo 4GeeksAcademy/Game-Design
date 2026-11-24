@@ -602,7 +602,7 @@ export default function TeamBattle() {
     const timer = setTimeout(() => {
       setPendingAllyAttack(null);
       setCombatPopups((current) => current.slice(displayedCount));
-    }, 2800);
+    }, 3400);
 
     return () => clearTimeout(timer);
   }, [combatPopups]);
@@ -1314,7 +1314,7 @@ export default function TeamBattle() {
             ? { ...current, [fighterId]: null }
             : current,
         );
-      }, 2200);
+      }, 3000);
     });
     if (!attacker.isCpuTeammate && damageActuallyDealt > 0) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
