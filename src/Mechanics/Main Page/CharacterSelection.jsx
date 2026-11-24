@@ -825,9 +825,14 @@ function CharacterSelection() {
               ))}
             </div>
           ) : (
-            <div className="cpu-placeholder">
-              <span>?</span>
-              <strong>OPPONENT UNKNOWN</strong>
+            <div className={`cpu-placeholder ${teamSize === "2v2" ? "cpu-placeholder-team" : ""}`}>
+              {Array.from({ length: requiredFighters }, (_, slot) => (
+                <div className="cpu-unidentified-slot" key={`cpu-empty-${slot}`}>
+                  <span>?</span>
+                  <strong>OPPONENT UNKNOWN</strong>
+                  {teamSize === "2v2" && <small>CPU TEAM SLOT {slot + 1}</small>}
+                </div>
+              ))}
               <p>The CPU is waiting for your selection.</p>
             </div>
           )}
