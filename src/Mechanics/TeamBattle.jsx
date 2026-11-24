@@ -207,8 +207,8 @@ function FighterPreview({
             title={`Recovery: ${recoveryCurrent}/${recoveryMaximum}`}
           />
         </div>
-        <div className="fighter-hud-pointer" aria-hidden="true" />
       </div>
+      <div className="fighter-hud-pointer" aria-hidden="true" />
 
       <button
         type="button"
