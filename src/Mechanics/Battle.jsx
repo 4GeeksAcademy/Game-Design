@@ -569,7 +569,7 @@ function App() {
 
     // Easy AI uses the same visible defense window, but can advance
     // immediately when the player blocks or evades.
-    const controller = aiTurn(opponent, character, setAiAttack, () => {
+    const controller = aiTurn(opponent, character, (attack) => { aiAttackHealthBeforeRef.current = characterRef.current?.health ?? 0; setAiAttack(attack); }, () => {
       setOpponent({ ...opponent });
       setCharacter({ ...character });
       setAiAttack(null);
