@@ -2052,3 +2052,33 @@ body {
   72% { transform:translateY(-1px) rotate(1deg); }
   100% { transform:translateY(0) rotate(0) scale(1); }
 }
+
+/* Round intro: preserve the classic face-off entrance and KO state. */
+#roundIntroContent .battle-intro-opponent img {
+  animation: intro-slide-opponent 720ms cubic-bezier(.18,.82,.22,1) both;
+}
+#roundIntroContent .battle-intro-player img {
+  animation: intro-slide-player 720ms cubic-bezier(.18,.82,.22,1) both;
+}
+#roundIntroContent .battle-intro-opponent .battle-intro-healthbar,
+#roundIntroContent .battle-intro-opponent .battle-intro-hp,
+#roundIntroContent .battle-intro-player .battle-intro-healthbar,
+#roundIntroContent .battle-intro-player .battle-intro-hp {
+  animation: intro-health-reveal 900ms ease-out both;
+}
+#roundIntroContent .battle-intro-opponent:has(.battle-intro-healthbar-fill[style*="width: 0%"]) img,
+#roundIntroContent .battle-intro-player:has(.battle-intro-healthbar-fill[style*="width: 0%"]) img {
+  filter: grayscale(1) brightness(.58) drop-shadow(0 0 12px #ff315966);
+}
+@keyframes intro-slide-opponent {
+  from { opacity:0; transform:translateX(-85px) scale(.9); }
+  to { opacity:1; transform:translateX(0) scale(1); }
+}
+@keyframes intro-slide-player {
+  from { opacity:0; transform:translateX(85px) scale(.9); }
+  to { opacity:1; transform:translateX(0) scale(1); }
+}
+@keyframes intro-health-reveal {
+  from { opacity:0; transform:scaleX(.35); }
+  to { opacity:1; transform:scaleX(1); }
+}
