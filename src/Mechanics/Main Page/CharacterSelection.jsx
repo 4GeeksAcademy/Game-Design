@@ -732,6 +732,13 @@ function CharacterSelection() {
                 fighter={fighter}
               />
             ))}
+            {Array.from({ length: Math.max(0, requiredFighters - selectedFighters.length) }, (_, slot) => (
+              <div className="fighter-unselected-placeholder" key={`player-empty-${slot}`}>
+                <span className="unselected-question">?</span>
+                <strong>FIGHTER NOT SELECTED</strong>
+                <small>{requiredFighters > 1 ? `TEAM SLOT ${selectedFighters.length + slot + 1} · AWAITING PICK` : "CHOOSE A FIGHTER FROM THE ROSTER"}</small>
+              </div>
+            ))}
           </div>
           {phase === "player" && (
             <button
@@ -798,6 +805,13 @@ function CharacterSelection() {
               <div className={teamSize === "2v2" ? "roster-team-preview" : ""}>
                 {player2Fighters.map((fighter) => (
                   <FighterStats key={`p2-${fighter.id}-${playerAnimationKey}`} fighter={fighter} />
+                ))}
+                {Array.from({ length: Math.max(0, requiredFighters - player2Fighters.length) }, (_, slot) => (
+                  <div className="fighter-unselected-placeholder" key={`player2-empty-${slot}`}>
+                    <span className="unselected-question">?</span>
+                    <strong>FIGHTER NOT SELECTED</strong>
+                    <small>{requiredFighters > 1 ? `TEAM SLOT ${player2Fighters.length + slot + 1} · AWAITING PICK` : "PLAYER 2 HAS NOT PICKED"}</small>
+                  </div>
                 ))}
               </div>
             </>
