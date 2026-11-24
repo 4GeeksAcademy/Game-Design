@@ -4241,3 +4241,23 @@ battlefield > .local-coop-incoming {
 #storyResultsScreen .story-results-actions button:hover { transform:translateY(-2px); filter:brightness(1.15); box-shadow:0 5px 0 #050b12,0 0 18px #13d5ff55; }
 @keyframes story-result-enter { from { opacity:0; transform:translateY(28px) scale(.96); } to { opacity:1; transform:translateY(0) scale(1); } }
 @media(max-width:560px){#storyResultsScreen{padding:12px}#storyResultsScreen .story-results-content{padding:22px 14px}.story-results-actions{grid-template-columns:1fr!important}.story-results-stats{gap:8px!important}}
+
+
+/* Keep the 2v2 missing-team card centered in the viewport, not at the top. */
+.team-battle.error-screen {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr);
+  align-content: center;
+  justify-items: center;
+  place-items: center;
+  width: 100%;
+  height: auto;
+  min-height: 100vh;
+  overflow: auto;
+  padding: 24px;
+}
+.team-battle.error-screen .error-card {
+  width: min(100%,520px);
+  margin: auto;
+  align-self: center;
+}
