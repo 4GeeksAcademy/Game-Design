@@ -2082,3 +2082,27 @@ body {
   from { opacity:0; transform:scaleX(.35); }
   to { opacity:1; transform:scaleX(1); }
 }
+
+
+/* Shared portrait lightning: same electric sweep in solo and team battles. */
+#battleLayout .solo-portrait-wrapper {
+  position:relative; display:flex; align-items:center; justify-content:center;
+  width:100%; height:100%; min-width:0; min-height:0; overflow:hidden;
+  border-radius:12px; isolation:isolate;
+}
+#battleLayout .solo-portrait-wrapper > img { position:relative; z-index:1; max-width:100%; max-height:100%; }
+#battleLayout .solo-portrait-wrapper.fighter-stunned { animation:stunned-fighter-shake .35s infinite; }
+#battleLayout .solo-portrait-wrapper.fighter-stunned > img {
+  filter:drop-shadow(0 0 5px #13d5ff) drop-shadow(0 0 14px rgba(19,213,255,.9)) !important;
+  animation:stunned-electric-glow 1s ease-in-out infinite alternate !important;
+}
+#battleLayout .solo-portrait-wrapper.fighter-stunned::after {
+  content:""; position:absolute; z-index:3; inset:0; border-radius:inherit;
+  pointer-events:none;
+  background:linear-gradient(110deg,transparent 25%,rgba(19,213,255,.1) 40%,rgba(255,255,255,.85) 50%,rgba(19,213,255,.35) 58%,transparent 75%);
+  background-size:250% 100%; animation:portrait-lightning-sweep 1.7s linear infinite;
+}
+@keyframes stunned-fighter-shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2px)} 75%{transform:translateX(2px)} }
+@keyframes stunned-electric-glow { from{filter:drop-shadow(0 0 5px #13d5ff) drop-shadow(0 0 10px rgba(19,213,255,.55))} to{filter:drop-shadow(0 0 8px #13d5ff) drop-shadow(0 0 16px rgba(19,213,255,.95))} }
+@keyframes portrait-lightning-sweep { from{background-position:100% 0} to{background-position:-150% 0} }
+@media(prefers-reduced-motion:reduce){#battleLayout .solo-portrait-wrapper.fighter-stunned,#battleLayout .solo-portrait-wrapper.fighter-stunned::after,#battleLayout .solo-portrait-wrapper.fighter-stunned > img{animation-duration:.01ms!important;animation-iteration-count:1!important}}
