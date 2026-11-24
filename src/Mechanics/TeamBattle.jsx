@@ -41,6 +41,7 @@ import {
 } from "./AI_NormalDifficulty.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
+import BattleResultScreen from "./BattleResultScreen.jsx";
 import "./Teambattle.css";
 
 function createBattleFighter(id, applyLoadout = true) {
@@ -2890,8 +2891,21 @@ export default function TeamBattle() {
       <FestivalChallengePopup />
       <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>
       {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: levelConfig })} onMainMenu={() => navigate("/")} />}
-      {isFinalTeamPhase && (
-        <div
+      {isFinalTeamPhase && !isStoryMode && (
+        <BattleResultScreen
+          won={phase === "victory"}
+          defeated={defeatedTeam}
+          winner={winningTeam}
+          damageDealt={damageDealt}
+          combatDefense={combatDefense}
+          attacksUsed={attacksUsed}
+          difficulty={difficulty}
+          onRematch={resetBattle}
+          onMainMenu={() => navigate("/")}
+        />
+      )}
+      {isFinalTeamPhase && isStoryMode && (
+<div
           className={`team-finish-overlay ${
             phase === "victory" ? "finish-victory" : "finish-defeat"
           } ${isTeamFinishFadingOut ? "is-fading-out" : ""}`}
@@ -2956,6 +2970,7 @@ export default function TeamBattle() {
             {teamFinishComplete ? "RESULT CONFIRMED" : "MATCH COMPLETE"}
           </p>
         </div>
+      
       )}
 
       {knockout && (
