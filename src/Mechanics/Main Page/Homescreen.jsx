@@ -44,6 +44,7 @@ function Homescreen() {
   );
 
   const [selectedStarter, setSelectedStarter] = useState("");
+  const [hoveredStarter, setHoveredStarter] = useState("");
   const [showStarterWarning, setShowStarterWarning] = useState(false);
 
   const [showStarterPopup, setShowStarterPopup] = useState(
@@ -1026,6 +1027,10 @@ const renderSinglePlayer = () => (
                     key={option.id}
                     className={`starter-choice starter-choice-expanded ${selected ? "selected" : ""}`}
                     onClick={() => setSelectedStarter(option.id)}
+                    onMouseEnter={() => setHoveredStarter(option.id)}
+                    onMouseLeave={() => setHoveredStarter("")}
+                    onFocus={() => setHoveredStarter(option.id)}
+                    onBlur={() => setHoveredStarter("")}
                     aria-pressed={selected}
                   >
                     <span className="starter-choice-name">{option.label}</span>
@@ -1041,8 +1046,9 @@ const renderSinglePlayer = () => (
               })}
             </div>
 
-            {selectedStarter && (() => {
-              const fighter = STARTER_OPTIONS.find((option) => option.id === selectedStarter);
+            {(hoveredStarter || selectedStarter) && (() => {
+              const previewId = hoveredStarter || selectedStarter;
+              const fighter = STARTER_OPTIONS.find((option) => option.id === previewId);
               const data = fighter.data;
               const defense = typeof data.defense === "object" ? data.defense?.amount : data.defense;
               return (
