@@ -226,7 +226,7 @@ function FighterPreview({
                   {combatEffect.tier === "light" ? `+${combatEffect.damage}` : combatEffect.tier === "effective" ? `!${combatEffect.damage}` : combatEffect.tier === "heavy" ? `!!${combatEffect.damage}` : `FATAL ${combatEffect.damage}`}
                 </strong>
               )}
-              {combatEffect.message && <span>{combatEffect.message}</span>}
+              {combatEffect.message && <span className={combatEffect.message === "STUNNED!" ? "team-stunned-callout" : ""}>{combatEffect.message}</span>}
               {(combatEffect.effects ?? []).map((effect, index) => (
                 <b key={index} className={`fighter-impact-status effect-${effect.stat}`} style={{ animationDelay: `${index * 650}ms` }}>{effect.label}</b>
               ))}
