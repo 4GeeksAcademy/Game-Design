@@ -2535,10 +2535,12 @@ export default function TeamBattle() {
           0,
           defenderHealthBefore - Math.max(0, Number(currentDefender.health) || 0),
         );
+        const cpuAttackerEffectId = Date.now() + Math.random();
+        const playerDefenderEffectId = Date.now() + Math.random();
         setCombatEffects((current) => ({
           ...current,
           [currentAttacker.id]: {
-            id: Date.now() + Math.random(),
+            id: cpuAttackerEffectId,
             type: "attack",
             damage: 0,
             tier: "light",
@@ -2546,7 +2548,7 @@ export default function TeamBattle() {
             effects: [],
           },
           [currentDefender.id]: {
-            id: Date.now() + Math.random(),
+            id: playerDefenderEffectId,
             type: choice === "defend" ? "blocked" : choice === "evade" && result.evaded ? "evaded" : actualDamage > 0 ? "damage" : "status",
             damage: actualDamage,
             tier: actualDamage >= 70 ? "fatal" : actualDamage >= 45 ? "heavy" : actualDamage >= 20 ? "effective" : "light",
@@ -2554,6 +2556,15 @@ export default function TeamBattle() {
             effects: Object.entries(result.debuffsApplied ?? {}).filter(([, amount]) => Number(amount) !== 0).map(([stat, amount]) => ({ stat, label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` })),
           },
         }));
+        [[currentAttacker.id, cpuAttackerEffectId], [currentDefender.id, playerDefenderEffectId]].forEach(([fighterId, effectId]) => {
+          setTimeout(() => {
+            setCombatEffects((current) =>
+              current[fighterId]?.id === effectId
+                ? { ...current, [fighterId]: null }
+                : current,
+            );
+          }, 2200);
+        });
       }
 
       if (!result) {
