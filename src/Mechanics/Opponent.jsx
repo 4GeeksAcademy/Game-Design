@@ -57,8 +57,10 @@ function Opponent({ opponent, setOpponent, combatEffect = null, isAttacking = fa
             <Segments label="REC" value={getModifiedCharacterStat(opponent, "recovery")} maximum={10} type="recovery" />
           </div>
         </div>
-        <div role="group" tabIndex={0} className={`solo-fighter-art ${hasStun ? "fighter-stunned" : ""} ${combatEffect?.type ? `combat-effect-${combatEffect.type}` : ""}`} aria-label={`${opponent.name} fighter artwork. Hover or focus to view stats.`}>
-          <img id="opponentImage" src={opponent.image} alt={opponent.name} />
+        <div role="group" tabIndex={0} className={`solo-fighter-art ${combatEffect?.type ? `combat-effect-${combatEffect.type}` : ""}`} aria-label={`${opponent.name} fighter artwork. Hover or focus to view stats.`}>
+          <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
+            <img id="opponentImage" src={opponent.image} alt={opponent.name} />
+          </div>
           {combatEffect?.target === "opponent" && (
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
               {combatEffect.damage > 0 && <strong className={`solo-damage-number damage-tier-${combatEffect.tier}`}>{combatEffect.tier === "light" ? `+${combatEffect.damage}` : combatEffect.tier === "effective" ? `!${combatEffect.damage}` : combatEffect.tier === "heavy" ? `!!${combatEffect.damage}` : `FATAL ${combatEffect.damage}`}</strong>}
