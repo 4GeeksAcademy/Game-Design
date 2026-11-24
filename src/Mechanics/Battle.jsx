@@ -279,6 +279,7 @@ function App() {
   const resetBattle = useCallback(() => {
     aiControllerRef.current?.stop();
     aiControllerRef.current = null;
+    aiAttackHealthBeforeRef.current = null;
     setCharacter(createBattleFighter(playerId, "player"));
     setOpponent(createBattleFighter(opponentId, "opponent"));
     setDamageDealt(0); setCombatDefense(0); setAttacksUsed(0);
