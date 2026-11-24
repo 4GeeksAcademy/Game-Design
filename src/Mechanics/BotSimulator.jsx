@@ -8,7 +8,6 @@ import {
   getAttackSlotLimit,
   getEquippedAttackKeys,
   getEquippedAttacks,
-  getHardDifficultyAttacks,
   isAttackUnlocked,
   saveEquippedAttackKeys,
 } from "./AttackLoadouts.js";
@@ -46,13 +45,11 @@ function getTeamMaximumHealth(team) {
   }, 0);
 }
 
-function getFighterWithEquippedAttacks(fighter, difficulty = "Normal") {
+function getFighterWithEquippedAttacks(fighter) {
   const data = getFighterData(fighter);
   const slotLimit = getAttackSlotLimit(data);
-  const equippedAttacks = (difficulty === "Hard"
-    ? getHardDifficultyAttacks(fighter.id, data.attacks ?? [], data.slot)
-    : getEquippedAttacks(fighter.id, data.attacks ?? [], data.slot)
-  ).slice(0, slotLimit);
+  const equippedAttacks = getEquippedAttacks(fighter.id, data.attacks ?? [], data.slot)
+    .slice(0, slotLimit);
 
   return {
     ...data,
