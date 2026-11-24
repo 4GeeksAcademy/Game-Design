@@ -2002,3 +2002,30 @@ body {
 @keyframes team-fatal-recoil {0%{transform:translateY(0) rotate(0) scale(1)}18%{transform:translateY(-9px) rotate(-3deg) scale(1.04)}48%{transform:translateY(12px) rotate(5deg) scale(.97)}68%{transform:translateY(6px) rotate(-3deg)}100%{transform:translateY(0) rotate(0) scale(1)}}
 @keyframes team-heavy-recoil {0%,100%{transform:translateX(0)}25%{transform:translateX(-7px) rotate(-2deg)}50%{transform:translateX(6px) rotate(2deg)}75%{transform:translateX(-3px)}}
 @keyframes team-spectrum-ring {0%{opacity:0;transform:scale(.94) rotate(0)}25%{opacity:1}100%{opacity:0;transform:scale(1.04) rotate(360deg)}}
+
+/* Damage counters and status labels use the same timing and motion as 2v2. */
+#battleLayout .solo-damage-number {
+  font-size:clamp(22px,2.5vw,42px);
+  -webkit-text-stroke:1px #300b13;
+  text-shadow:0 3px 0 #26060b,0 0 12px #ff3159,0 0 26px #ff3159;
+  animation:team-impact-pop 1.1s cubic-bezier(.15,.8,.25,1) both;
+}
+#battleLayout .solo-damage-number.damage-tier-effective { color:#fff; animation:team-impact-effective 1.2s ease-out both; }
+#battleLayout .solo-damage-number.damage-tier-heavy { color:#ffe7a3; font-size:clamp(28px,3.2vw,50px); animation:team-impact-heavy 1.35s ease-out both; }
+#battleLayout .solo-damage-number.damage-tier-fatal { color:#fff; font-size:clamp(30px,3.8vw,58px); text-shadow:0 0 12px #ff3159,0 0 30px #ff3159,0 0 55px #ff3159; animation:team-impact-fatal 1.7s ease-out both; }
+#battleLayout .solo-impact-overlay > span { padding:4px 9px; border:1px solid #ffffff70; border-radius:5px; color:#fff; background:#07101be8; font-size:10px; font-weight:1000; letter-spacing:1px; animation:team-impact-label .8s ease-out both; }
+#battleLayout .solo-effect-label { top:18%; padding:4px 8px; border:0; border-radius:5px; color:#fff; background:#111d2bea; font-size:9px; font-weight:1000; animation:team-impact-status 1.05s ease-out both; }
+#battleLayout .solo-effect-label.effect-defense { color:#c2c9d3; }
+#battleLayout .solo-effect-label.effect-agility { color:#f4d35e; }
+#battleLayout .solo-effect-label.effect-mana,#battleLayout .solo-effect-label.effect-manaregen { color:#45d9ff; }
+#battleLayout .solo-effect-label.effect-health,#battleLayout .solo-effect-label.effect-maximumhealth { color:#ff7187; }
+#battleLayout .solo-effect-label.effect-stun { color:#c49aff; }
+@keyframes team-impact-pop {0%{opacity:0;transform:translateY(20px) scale(.5)}18%{opacity:1;transform:translateY(-5px) scale(1.18)}75%{opacity:1}100%{opacity:0;transform:translateY(-48px) scale(.95)}}
+@keyframes team-impact-effective {0%{opacity:0;transform:scale(.5)}18%{opacity:1;transform:scale(1.2)}30%,45%{transform:translateX(-3px) rotate(-2deg)}38%,53%{transform:translateX(3px) rotate(2deg)}100%{opacity:0;transform:translateY(-50px)}}
+@keyframes team-impact-heavy {0%{opacity:0;transform:scale(.35) rotate(-8deg)}18%{opacity:1;transform:scale(1.3) rotate(3deg)}28%,45%{transform:translateX(-7px)}36%,54%{transform:translateX(7px)}100%{opacity:0;transform:translateY(-58px)}}
+@keyframes team-impact-fatal {0%{opacity:0;transform:scale(.2) rotate(-12deg)}14%{opacity:1;transform:scale(1.45) rotate(3deg)}24%,42%,60%{transform:translateX(-10px) scale(1.1)}33%,51%,69%{transform:translateX(10px) scale(1.1)}100%{opacity:0;transform:translateY(-65px) scale(.85)}}
+@keyframes team-impact-label {0%{opacity:0;transform:scale(.6)}20%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:translateY(-18px)}}
+@keyframes team-impact-status {0%,100%{opacity:0;transform:translate(-50%,8px) scale(.85)}25%,70%{opacity:1;transform:translate(-50%,0) scale(1)}}
+#battleLayout .solo-fighter-art:has(.impact-attack) img { animation:team-attack-lunge 380ms ease-in-out; }
+#battleLayout .player-fighter-section .solo-fighter-art:has(.impact-attack) img { animation-name:team-attack-lunge-left; }
+@keyframes team-attack-lunge-left {0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(-28px) scale(1.04)}}
