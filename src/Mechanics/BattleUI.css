@@ -5550,17 +5550,19 @@ body {
 
 
 /* ==========================================================
-   WILD CARDS 1v1 — HORIZONTAL TEAM-BATTLE LAYOUT
+   WILD CARDS 1v1 — MATCH THE TEAM BATTLE COMPOSITION
    ========================================================== */
+
 #gameContainer {
   min-height: 100vh;
-  padding: 12px 18px 16px;
+  padding: 12px 16px 14px;
   overflow-x: hidden;
 }
+
 #battleLayout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: 38px minmax(390px, 1fr) minmax(225px, 27vh);
+  grid-template-rows: 38px minmax(340px, 1fr) minmax(220px, 26vh);
   grid-template-areas:
     "header header"
     "arena arena"
@@ -5570,119 +5572,160 @@ body {
   width: 100%;
   max-width: 1700px;
   height: calc(100vh - 82px);
-  min-height: 760px;
+  min-height: 650px;
   margin: 0 auto;
 }
+
 .solo-battle-header {
   grid-area: header;
   display: grid;
-  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 14px;
   min-width: 0;
   padding: 0 8px;
 }
+
 .solo-battle-header h1 {
   margin: 0;
   color: #f7f4dd;
-  font-family: Oxanium,Arial,sans-serif;
-  font-size: clamp(17px,1.55vw,25px);
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(17px, 1.55vw, 25px);
   font-weight: 1000;
   letter-spacing: 2px;
   white-space: nowrap;
 }
+
 .solo-battle-header h1 span {
   margin-left: 8px;
   color: #ffe45b;
   font-size: .62em;
   letter-spacing: 1px;
 }
+
 .solo-team-label {
   min-width: 0;
   padding: 9px 12px;
   border: 1px solid #ffffff10;
   border-radius: 9px;
   background: #101c16c9;
-  font-family: Oxanium,Arial,sans-serif;
+  font-family: Oxanium, Arial, sans-serif;
   font-size: 10px;
   font-style: italic;
   font-weight: 1000;
   letter-spacing: 2px;
   text-align: center;
 }
-.solo-opponent-label { color:#ff7187; }
-.solo-player-label { color:#50e6ff; }
-#battleLayout #battleArena {
+
+.solo-opponent-label { color: #ff7187; }
+.solo-player-label { color: #50e6ff; }
+
+#battleLayout > #battleArena {
   grid-area: arena;
   display: grid;
-  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-  grid-template-rows: minmax(0,1fr);
-  grid-template-areas: none;
-  grid-auto-flow: row;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
-  gap: clamp(18px,4vw,70px);
+  justify-items: stretch;
+  gap: clamp(22px, 5vw, 76px);
   width: 100%;
   max-width: none;
+  min-width: 0;
   min-height: 0;
   height: 100%;
   margin: 0;
-  padding: 18px clamp(16px,3vw,48px) 12px;
-  overflow: visible;
+  padding: 14px clamp(18px, 5vw, 78px) 10px;
+  overflow: hidden;
   border: 2px solid #20c98b55;
   border-radius: 16px;
   background:
-    radial-gradient(ellipse at 50% 75%,#294c3a66,transparent 62%),
-    linear-gradient(145deg,#102016,#0a1510 72%,#101d15);
-  box-shadow: 0 0 16px #20c98b22,inset 0 0 18px #0005;
+    radial-gradient(ellipse at 50% 75%, #294c3a66, transparent 62%),
+    linear-gradient(145deg, #102016, #0a1510 72%, #101d15);
+  box-shadow: 0 0 16px #20c98b22, inset 0 0 18px #0005;
 }
-#battleLayout #opponentSection,
-#battleLayout #characterSection {
-  grid-area: auto;
-  display: flex;
-  align-self: stretch;
-  justify-content: center;
+
+/* The fighter components themselves are the two arena grid items.
+   Do not wrap them in another element with the same IDs. */
+#battleLayout > #battleArena > #opponentSection,
+#battleLayout > #battleArena > #characterSection {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
+  justify-items: center;
   align-items: stretch;
+  gap: 9px;
   width: 100%;
+  max-width: 520px;
   min-width: 0;
+  min-height: 0;
   height: 100%;
-  margin: 0 !important;
+  margin: 0 auto !important;
 }
+
 #battleLayout .solo-fighter-unit,
 #battleLayout #character.solo-fighter-unit,
 #battleLayout #opponent.solo-fighter-unit {
-  display: grid;
-  grid-template-rows: auto minmax(0,1fr);
-  align-content: stretch;
-  align-items: stretch;
-  gap: 10px;
-  width: 100%;
-  max-width: 520px;
-  height: 100%;
-  min-height: 0;
-  margin: 0 auto;
+  display: contents;
 }
+
 #battleLayout .solo-fighter-hud {
+  position: relative;
+  z-index: 4;
   align-self: start;
   width: 100%;
+  min-width: 0;
   padding: 10px 13px;
-  border-radius: 12px;
+  border-radius: 11px;
 }
+
 #battleLayout .solo-fighter-art {
+  position: relative;
+  display: flex;
   align-self: stretch;
   justify-self: center;
+  align-items: flex-end;
+  justify-content: center;
   width: 100%;
   height: 100%;
+  min-width: 0;
   min-height: 0;
   max-height: none;
-  border-radius: 12px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
+
+#battleLayout .solo-fighter-art::after {
+  bottom: 3px;
+  left: 28%;
+  right: 28%;
+}
+
 #battleLayout .solo-fighter-art img {
-  max-width: min(100%,360px);
+  display: block;
+  width: auto !important;
+  height: 100% !important;
+  max-width: min(100%, 330px);
   max-height: 100%;
   object-fit: contain;
   object-position: center bottom;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
-#battleLayout #combatLog {
+
+/* Hover details float above the HUD/art without changing the layout. */
+#battleLayout .solo-fighter-tooltip {
+  z-index: 30;
+}
+
+/* Compact event history; attack selection is the primary bottom panel. */
+#battleLayout > #combatLog {
   grid-area: log;
   position: relative;
   top: auto;
@@ -5692,102 +5735,140 @@ body {
   height: 100%;
   max-height: none;
   margin: 0;
+  overflow: hidden;
   border: 1px solid #8ddf2750;
   border-radius: 13px;
-  background: linear-gradient(145deg,#17271b,#0d1710);
+  background: linear-gradient(145deg, #17271b, #0d1710);
   box-shadow: 0 5px 18px #0006;
 }
+
 #battleLayout #combatLogHeader {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 11px;
   border-radius: 12px 12px 0 0;
   background: #1a2b1d;
 }
-#battleLayout #combatLogHeader h4 { margin:0; font-size:11px; }
+
+#battleLayout #combatLogHeader h4 { margin: 0; font-size: 10px; }
+#battleLayout #combatLogHeader span { font-size: 9px; }
+
 #battleLayout #combatLogEntries {
-  max-height: calc(100% - 42px);
-  padding: 6px 12px;
+  max-height: calc(100% - 38px);
+  padding: 5px 10px;
+  overflow-y: auto;
 }
-#battleLayout .combat-log-entry { padding: 5px 1px; }
-#battleLayout .combat-log-time { font-size:9px; }
-#battleLayout .combat-log-text { font-size:10px; }
-#battleLayout #attackSection {
+
+#battleLayout .combat-log-entry { gap: 3px; padding: 4px 1px; }
+#battleLayout .combat-log-time { font-size: 8px; }
+#battleLayout .combat-log-text { font-size: 9px; line-height: 1.3; }
+
+#battleLayout > #attackSection {
   grid-area: attacks;
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-  min-height:0;
-  width:100%;
-  max-width:none;
-  height:100%;
-  margin:0 !important;
-  overflow:hidden;
-  border:1px solid #8ddf2750;
-  border-radius:13px;
-  background:linear-gradient(145deg,#17271b,#0d1710);
-  box-shadow:0 5px 18px #0006;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  margin: 0 !important;
+  overflow: hidden;
+  border: 1px solid #8ddf2750;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #17271b, #0d1710);
+  box-shadow: 0 5px 18px #0006;
 }
-#battleLayout #attackSection > * { min-width:0; }
-#battleLayout .solo-finish-turn-button {
-  flex:0 0 auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-  width:calc(100% - 16px);
-  min-height:38px;
-  margin:6px 8px 8px;
-  border:1px solid #ffe45b;
-  border-radius:9px;
-  color:#171508;
-  background:linear-gradient(110deg,#fff078,#e5b82e);
-  box-shadow:0 0 12px #ffe45b30;
-  font-family:Oxanium,Arial,sans-serif;
-  font-size:12px;
-  font-weight:1000;
-  letter-spacing:1.2px;
+
+#battleLayout #attackSection > * { min-width: 0; }
+#battleLayout #attackSection #attackHeader { padding: 8px 12px; }
+#battleLayout #attackSection #attackBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
-#battleLayout .solo-finish-turn-button:disabled { opacity:.4; cursor:not-allowed; }
-#battleLayout .solo-finish-turn-button span { font-size:17px; }
-#battleLayout #attackSection #attackHeader { padding:8px 12px; }
-#battleLayout #attackSection #attackBody { min-height:0; flex:1 1 auto; overflow:hidden; }
-#battleLayout #attackSection #attackList { min-height:0; }
-#battleLayout #attackSection .attack-card { min-width:150px !important; }
-#battleLayout #attackSection .attack-card-wrapper { min-width:150px; }
-#battleLayout #attackSection .attack-image { max-height:88px; object-fit:cover; }
-#battleLayout #attackSection .attack-card { padding:8px !important; }
-#battleLayout #attackSection .attack-card h5 { font-size:10px; }
+#battleLayout #attackSection #attackList { min-height: 0; }
+#battleLayout #attackSection .attack-card,
+#battleLayout #attackSection .attack-card-wrapper {
+  min-width: 145px !important;
+}
+#battleLayout #attackSection .attack-card { padding: 8px !important; }
+#battleLayout #attackSection .attack-image {
+  max-height: 88px;
+  object-fit: cover;
+}
+#battleLayout #attackSection .attack-card h5 { font-size: 10px; }
 #battleLayout #attackSection .attack-stats,
-#battleLayout #attackSection .attack-cost { font-size:9px; }
-@media (max-width:1100px) {
-  #gameContainer { padding:10px; }
+#battleLayout #attackSection .attack-cost { font-size: 9px; }
+
+#battleLayout .solo-finish-turn-button {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: calc(100% - 16px);
+  min-height: 38px;
+  margin: 6px 8px 8px;
+  border: 1px solid #ffe45b;
+  border-radius: 9px;
+  color: #171508;
+  background: linear-gradient(110deg, #fff078, #e5b82e);
+  box-shadow: 0 0 12px #ffe45b30;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 1.2px;
+}
+#battleLayout .solo-finish-turn-button:disabled { opacity: .4; cursor: not-allowed; }
+#battleLayout .solo-finish-turn-button span { font-size: 17px; }
+
+/* Defensive and offensive effects remain visible on the fighter artwork. */
+#battleLayout .opponent-is-attacking .solo-fighter-art {
+  animation: solo-opponent-pressure .4s ease-out;
+}
+@keyframes solo-opponent-pressure {
+  0%, 100% { transform: translateX(0); }
+  45% { transform: translateX(24px) scale(1.035); }
+}
+
+@media (max-width: 1100px) {
+  #gameContainer { padding: 10px; }
   #battleLayout {
-    height:auto;
-    min-height:calc(100vh - 80px);
-    grid-template-rows:38px minmax(390px,55vh) 220px auto;
-    grid-template-areas:"header header" "arena arena" "log log" "attacks attacks";
+    height: auto;
+    min-height: calc(100vh - 80px);
+    grid-template-rows: 38px minmax(360px, 55vh) 190px auto;
+    grid-template-areas:
+      "header header"
+      "arena arena"
+      "log log"
+      "attacks attacks";
   }
-  #battleLayout #combatLog { max-height:220px; }
-  #battleLayout #combatLogEntries { max-height:160px; }
-  #battleLayout #attackSection { min-height:230px; }
+  #battleLayout > #combatLog { max-height: 190px; }
+  #battleLayout #combatLogEntries { max-height: 135px; }
+  #battleLayout > #attackSection { min-height: 245px; }
 }
-@media (max-width:620px) {
-  #battleLayout { grid-template-rows:34px minmax(330px,48vh) 180px auto; gap:8px; }
-  .solo-battle-header { gap:5px; padding:0; }
-  .solo-battle-header h1 { font-size:13px; letter-spacing:1px; }
-  .solo-battle-header h1 span { display:block; margin:2px 0 0; text-align:center; }
-  .solo-team-label { padding:7px 3px; font-size:8px; letter-spacing:1px; }
-  #battleLayout #battleArena { gap:8px; padding:10px 7px; }
-  #battleLayout .solo-fighter-hud { padding:7px; gap:5px; }
-  #battleLayout .solo-fighter-name-row h2 { font-size:11px; }
-  #battleLayout .solo-resource-row { grid-template-columns:18px minmax(0,1fr) auto; gap:4px; font-size:8px; }
-  #battleLayout .solo-resource-row b { min-width:40px; font-size:8px; }
-  #battleLayout .solo-segment-group { grid-template-columns:1fr; gap:4px; }
-  #battleLayout .solo-fighter-tooltip { width:min(240px,90vw); }
+
+@media (max-width: 620px) {
+  #battleLayout {
+    grid-template-rows: 34px minmax(320px, 48vh) 160px auto;
+    gap: 8px;
+  }
+  .solo-battle-header { gap: 5px; padding: 0; }
+  .solo-battle-header h1 { font-size: 13px; letter-spacing: 1px; }
+  .solo-battle-header h1 span { display: block; margin: 2px 0 0; text-align: center; }
+  .solo-team-label { padding: 7px 3px; font-size: 8px; letter-spacing: 1px; }
+  #battleLayout > #battleArena { gap: 8px; padding: 10px 7px; }
+  #battleLayout .solo-fighter-hud { padding: 7px; gap: 5px; }
+  #battleLayout .solo-fighter-name-row h2 { font-size: 11px; }
+  #battleLayout .solo-resource-row { grid-template-columns: 18px minmax(0, 1fr) auto; gap: 4px; font-size: 8px; }
+  #battleLayout .solo-resource-row b { min-width: 40px; font-size: 8px; }
+  #battleLayout .solo-segment-group { grid-template-columns: 1fr; gap: 4px; }
+  #battleLayout .solo-fighter-tooltip { width: min(240px, 90vw); }
 }
-@media (prefers-reduced-motion:reduce) {
+
+@media (prefers-reduced-motion: reduce) {
   #battleLayout .solo-fighter-art,
-  #battleLayout .solo-fighter-art * { transition-duration:.01ms !important; }
+  #battleLayout .solo-fighter-art * { transition-duration: .01ms !important; }
 }
