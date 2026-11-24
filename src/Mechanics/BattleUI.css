@@ -2026,7 +2026,7 @@ body {
 @keyframes team-impact-fatal {0%{opacity:0;transform:scale(.2) rotate(-12deg)}14%{opacity:1;transform:scale(1.45) rotate(3deg)}24%,42%,60%{transform:translateX(-10px) scale(1.1)}33%,51%,69%{transform:translateX(10px) scale(1.1)}100%{opacity:0;transform:translateY(-65px) scale(.85)}}
 @keyframes team-impact-label {0%{opacity:0;transform:scale(.6)}20%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:translateY(-18px)}}
 @keyframes team-impact-status {0%,100%{opacity:0;transform:translate(-50%,8px) scale(.85)}25%,70%{opacity:1;transform:translate(-50%,0) scale(1)}}
-#battleLayout .solo-fighter-art:has(.impact-attack) img { animation:team-attack-lunge 380ms ease-in-out; }
+#battleLayout .solo-fighter-art:has(.impact-attack) img { animation:team-attack-lunge .98s ease-in-out; }
 #battleLayout .player-fighter-section .solo-fighter-art:has(.impact-attack) img { animation-name:team-attack-lunge-left; }
 @keyframes team-attack-lunge-left {0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(-28px) scale(1.04)}}
 
