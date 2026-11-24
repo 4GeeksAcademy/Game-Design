@@ -109,7 +109,7 @@ attacks: (allowLockedAttacks
 }
 
 // function createTeammateFighter(id) {
-//   const fighter = createBattleFighter(id, true, isCpuAssist && index === 1 && difficulty === "Hard");
+//   const fighter = createBattleFighter(id, true);
 //   if (!fighter) return null;
 
 //   return {
