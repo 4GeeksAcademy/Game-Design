@@ -636,6 +636,13 @@ function App() {
       ...current,
       [effect.target]: { ...effect, id },
     }));
+    setTimeout(() => {
+      setCombatEffects((current) =>
+        current[effect.target]?.id === id
+          ? { ...current, [effect.target]: null }
+          : current,
+      );
+    }, 2200);
   }
 
   // Add messages to the popup queue and permanent combat log.
