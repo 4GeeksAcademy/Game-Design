@@ -3878,3 +3878,10 @@ battlefield > .local-coop-incoming {
   .fighter-info-stat-grid > div span { font-size: 7px; }
   .fighter-info-stat-grid > div b { font-size: 9px; }
 }
+
+
+/* The active highlight belongs to the fighter unit, not an image frame. */
+.fighter-art-button.is-selected {
+  border: 0;
+  box-shadow: none;
+}
