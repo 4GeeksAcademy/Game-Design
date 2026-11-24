@@ -1923,8 +1923,9 @@ body {
 #battleLayout .solo-combat-messages { display:none; }
 #battleLayout .solo-fighter-art .solo-impact-overlay { z-index:40; }
 #battleLayout .solo-fighter-art .solo-impact-overlay > span { font-size:clamp(11px,1.2vw,16px); padding:7px 13px; border-radius:8px; box-shadow:0 0 18px #000a,0 0 18px var(--effect-glow,#20d9ff55); }
-#battleLayout .combat-effect-blocked .solo-fighter-art { animation:solo-block-shake .42s ease-in-out; }
-#battleLayout .combat-effect-evaded .solo-fighter-art { animation:solo-evade-shift .55s ease-out; }
-#battleLayout .combat-effect-damage .solo-fighter-art { animation:solo-hit-flash .65s ease-out; }
-#battleLayout .combat-effect-status .solo-fighter-art { animation:solo-status-glow .8s ease-out; }
-#battleLayout .solo-fighter-art.fighter-stunned { animation:solo-stunned .5s ease-in-out infinite; }
+#battleLayout .solo-fighter-art.combat-effect-blocked img { animation:solo-block-shake .42s ease-in-out; }
+#battleLayout .solo-fighter-art.combat-effect-evaded img { animation:solo-evade-shift .55s ease-out; }
+#battleLayout .solo-fighter-art.combat-effect-damage img { animation:solo-hit-flash .65s ease-out; }
+#battleLayout .solo-fighter-art.combat-effect-status img { animation:solo-status-glow .8s ease-out; }
+#battleLayout .solo-fighter-art.combat-effect-attack img { animation:solo-attacker-pulse .48s ease-out; }
+#battleLayout .solo-fighter-art.fighter-stunned img { animation:solo-stunned .5s ease-in-out infinite; }
