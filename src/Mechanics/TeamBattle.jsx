@@ -220,7 +220,7 @@ function FighterPreview({
         <div className="fighter-portrait-stage">
           {fighter.image && (
             <div className={`fighter-portrait-wrapper ${hasStunnedAttacks ? "fighter-stunned" : ""}`}>
-              <img className="fighter-portrait" src={fighter.image} alt="" />
+              <img key={combatEffect?.id ?? "idle"} className="fighter-portrait" src={fighter.image} alt="" />
               {hasStunnedAttacks && <span className="team-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
             </div>
           )}
