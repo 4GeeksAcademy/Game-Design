@@ -121,10 +121,12 @@ function Character({
         <div
           role="group"
           tabIndex={0}
-          className={`solo-fighter-art ${hasStun ? "fighter-stunned" : ""} ${effectClass}`}
+          className={`solo-fighter-art ${effectClass}`}
           aria-label={`${character.name} fighter artwork. Focus or hover to view stats.`}
         >
-          <img src={character.image} id="characterImage" alt={character.name} />
+          <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
+            <img src={character.image} id="characterImage" alt={character.name} />
+          </div>
           {combatEffect?.target === "player" && (
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
               {combatEffect.damage > 0 && (
