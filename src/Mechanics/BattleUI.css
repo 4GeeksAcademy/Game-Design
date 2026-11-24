@@ -2107,3 +2107,104 @@ body {
 @keyframes stunned-electric-glow { from{filter:drop-shadow(0 0 5px #13d5ff) drop-shadow(0 0 10px rgba(19,213,255,.55))} to{filter:drop-shadow(0 0 8px #13d5ff) drop-shadow(0 0 16px rgba(19,213,255,.95))} }
 @keyframes portrait-lightning-sweep { from{background-position:100% 0} to{background-position:-150% 0} }
 @media(prefers-reduced-motion:reduce){#battleLayout .solo-portrait-wrapper.fighter-stunned,#battleLayout .solo-portrait-wrapper.fighter-stunned::after,#battleLayout .solo-portrait-wrapper.fighter-stunned > img{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+
+/* Dramatic stun announcement: distinct from ordinary status popups. */
+#battleLayout .solo-impact-overlay > .solo-stunned-callout {
+  position:relative;
+  z-index:45;
+  padding:9px 20px;
+  border:2px solid #d7a8ff;
+  border-radius:9px;
+  color:#fff;
+  background:linear-gradient(135deg,#5a1b91f5,#170b2df5);
+  box-shadow:0 0 10px #c58aff,0 0 28px #a34dff, inset 0 0 14px #e6c4ff55;
+  font-family:Oxanium,Arial,sans-serif;
+  font-size:clamp(18px,2.4vw,32px);
+  font-weight:1000;
+  font-style:italic;
+  letter-spacing:.14em;
+  text-shadow:0 2px 0 #310b55,0 0 12px #fff;
+  animation:solo-stunned-hero 1.35s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes solo-stunned-hero {
+  0% { opacity:0; transform:translateY(28px) scale(.35) rotate(-8deg); filter:blur(5px); }
+  18% { opacity:1; transform:translateY(-5px) scale(1.2) rotate(2deg); filter:blur(0); }
+  32%,48% { transform:translateX(-4px) rotate(-2deg) scale(1.08); }
+  40%,56% { transform:translateX(4px) rotate(2deg) scale(1.08); }
+  78% { opacity:1; transform:translateY(-8px) scale(1); }
+  100% { opacity:0; transform:translateY(-36px) scale(.92); }
+}
+
+/* The pre-results winner/defeated face-off is intentionally a separate scene. */
+.battle-finish-overlay {
+  gap:clamp(8px,1.5vh,16px);
+  padding:clamp(16px,3vh,34px);
+}
+.battle-finish-versus {
+  width:min(1120px,94vw);
+  gap:clamp(12px,3vw,42px);
+}
+.battle-finish-side { flex:1 1 0; }
+.battle-finish-card {
+  width:min(100%,390px);
+  min-width:0;
+  min-height:clamp(260px,48vh,500px);
+  justify-content:flex-end;
+  padding:clamp(12px,2vw,24px);
+  border:1px solid #ffffff35;
+  border-radius:16px;
+  background:linear-gradient(155deg,#17263aee,#080e19f5);
+  box-shadow:0 12px 34px #0009,inset 0 0 24px #ffffff08;
+  overflow:hidden;
+}
+.battle-finish-card img {
+  width:100%;
+  height:clamp(210px,43vh,420px);
+  max-width:100%;
+  object-fit:contain;
+  object-position:center bottom;
+}
+.battle-finish-card strong { font-size:clamp(14px,1.7vw,21px); letter-spacing:.06em; }
+.battle-finish-card span { font-size:clamp(10px,1vw,13px); letter-spacing:.12em; }
+.battle-finish-card.is-defeated-card {
+  border-color:#aeb7c766;
+  background:linear-gradient(155deg,#242832f2,#0a0d13f7);
+  animation:finish-defeated-enter .9s cubic-bezier(.16,1,.3,1) both;
+}
+.battle-finish-card.is-defeated-card img {
+  filter:grayscale(1) brightness(.58) contrast(1.08);
+  animation:finish-defeated-image .9s .12s cubic-bezier(.16,1,.3,1) both;
+}
+.battle-finish-card.is-defeated-card strong,
+.battle-finish-card.is-defeated-card span { color:#aeb7c7; }
+.battle-finish-card.is-winning-card {
+  border-color:#a5ff1988;
+  box-shadow:0 0 24px #a5ff1928,0 12px 34px #0009,inset 0 0 24px #a5ff190c;
+  animation:finish-winner-enter .85s cubic-bezier(.16,1,.3,1) both;
+}
+.battle-finish-card.is-winning-card img {
+  filter:drop-shadow(0 0 18px #a5ff1966);
+}
+@keyframes finish-defeated-enter {
+  0% { opacity:0; transform:translateY(-35px) rotate(-3deg) scale(1.08); filter:grayscale(0); }
+  55% { opacity:1; transform:translateY(8px) rotate(1deg) scale(.98); }
+  75% { transform:translateY(-3px) rotate(0) scale(1.01); }
+  100% { opacity:1; transform:translateY(0) rotate(0) scale(1); }
+}
+@keyframes finish-defeated-image {
+  0% { filter:grayscale(0) brightness(1); }
+  45% { filter:grayscale(.45) brightness(.8); }
+  100% { filter:grayscale(1) brightness(.58) contrast(1.08); }
+}
+@keyframes finish-winner-enter {
+  0% { opacity:0; transform:translateY(35px) scale(.9); }
+  65% { opacity:1; transform:translateY(-5px) scale(1.025); }
+  100% { opacity:1; transform:translateY(0) scale(1); }
+}
+@media(max-width:620px) {
+  .battle-finish-versus { gap:7px; }
+  .battle-finish-card { min-height:clamp(190px,38vh,300px); padding:8px; }
+  .battle-finish-card img { height:clamp(145px,31vh,260px); }
+  .battle-finish-vs { font-size:12px; }
+}
