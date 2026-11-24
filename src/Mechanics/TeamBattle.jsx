@@ -18,7 +18,7 @@ import {
   tickSelfModifiers,
 } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
-import { getEquippedAttacks, getHardDifficultyAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
 import { addCoins } from "./Currency.js";
 import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
@@ -44,7 +44,7 @@ import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import KnockoutOverlay from "./KnockoutOverlay.jsx";
 import "./Teambattle.css";
 
-function createBattleFighter(id, applyLoadout = true, allowLockedAttacks = false) {
+function createBattleFighter(id) {
   const selected = roster.find((fighter) => fighter.id === id);
   if (!selected?.data) return null;
 
@@ -65,12 +65,9 @@ function createBattleFighter(id, applyLoadout = true, allowLockedAttacks = false
       typeof data.defense === "object" && data.defense
         ? { ...data.defense }
         : data.defense,
-    // Normal uses each fighter's unlocked loadout; Hard CPU fighters receive a
-    // slot-limited pool that can include locked standard moves.
-attacks: (allowLockedAttacks
-      ? getHardDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
-      : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
-    ).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
+    // Difficulty changes CPU decision-making, never attack ownership.
+    attacks: getEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+      .map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
         ? attack.uses
         : attack.remainingUses;
@@ -141,9 +138,10 @@ function FighterPreview({
     maximum > 0
       ? Math.max(0, Math.min(100, (Number(value) / maximum) * 100))
       : 0;
-  const hasStunnedAttacks = fighter.attacks?.some(
+  const stunnedAttackCount = fighter.attacks?.filter(
     (attack) => (attack.stunned?.remainingRounds ?? 0) > 0,
-  );
+  ).length ?? 0;
+  const hasStunnedAttacks = stunnedAttackCount > 0;
   const cooldownMaximum = Math.max(0, Number(fighter.maximumCooldown) || 0);
   const cooldownCurrent = Math.max(
     0,
@@ -220,6 +218,7 @@ function FighterPreview({
           {fighter.image && (
             <div className={`fighter-portrait-wrapper ${hasStunnedAttacks ? "fighter-stunned" : ""}`}>
               <img className="fighter-portrait" src={fighter.image} alt="" />
+              {hasStunnedAttacks && <span className="team-stun-status"><strong>STUNNED!</strong><small>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
             </div>
           )}
           {combatEffect && (
@@ -320,11 +319,7 @@ function SegmentedMeter({ label, value, maximum, type, title }) {
 function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty = "Normal") {
   const player = playerTeamIds.map((id, index) => {
     const isCpuTeammate = isCpuAssist && index === 1;
-    const fighter = createBattleFighter(
-      id,
-      true,
-      isCpuTeammate && difficulty === "Hard",
-    );
+    const fighter = createBattleFighter(id);
 
     if (!fighter) return null;
 
@@ -333,7 +328,7 @@ function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficul
 
   return {
     player,
-    opponent: opponentTeamIds.map((id) => createBattleFighter(id, false, difficulty === "Hard")),
+    opponent: opponentTeamIds.map((id) => createBattleFighter(id)),
   };
 }
 
@@ -1060,17 +1055,11 @@ export default function TeamBattle() {
 
     const attack = attacker.attacks[attackIndex];
     const rosterFighter = roster.find((entry) => entry.id === attacker.id);
-    const cpuCanUseHardPool =
-      difficulty === "Hard" &&
-      (attacker.isCpuTeammate || teams.opponent.some((fighter) => fighter.id === attacker.id));
     const allowedAttackKeys = new Set(
-      (cpuCanUseHardPool
-        ? getHardDifficultyAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
-        : getEquippedAttacks(
-            attacker.id,
-            rosterFighter?.data?.attacks ?? [],
-            rosterFighter?.data?.slot,
-          )
+      getEquippedAttacks(
+        attacker.id,
+        rosterFighter?.data?.attacks ?? [],
+        rosterFighter?.data?.slot,
       ).map(getAttackKey),
     );
 
