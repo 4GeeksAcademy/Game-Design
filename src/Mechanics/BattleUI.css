@@ -2311,3 +2311,72 @@ body {
   transition: transform 160ms ease,filter 160ms ease;
 }
 .battle-setup-error-card button:hover { transform:translateY(-2px); filter:brightness(1.08); }
+
+
+/* Gentle idle motion: keep the HUD readable while making each fighter feel present. */
+#battleLayout .solo-fighter-hud {
+  animation: solo-hud-float 5.2s ease-in-out infinite;
+  will-change: transform;
+}
+#battleLayout #opponentSection .solo-fighter-hud { animation-delay: -2.6s; }
+#battleLayout .solo-portrait-wrapper > img {
+  transform-origin: center bottom;
+  animation: solo-fighter-idle 3.8s ease-in-out infinite;
+  will-change: transform;
+}
+#battleLayout .solo-fighter-marker,
+.team-battle .fighter-name-marker {
+  position: absolute;
+  z-index: 8;
+  top: 2px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+#battleLayout .solo-fighter-marker span,
+.team-battle .fighter-name-marker span {
+  max-width: min(180px, 60vw);
+  overflow: hidden;
+  padding: 4px 9px 3px;
+  border: 1px solid #ffffff55;
+  border-radius: 5px;
+  color: #f8fbff;
+  background: linear-gradient(180deg, #17263bf2, #080f1df2);
+  box-shadow: 0 3px 12px #0009, 0 0 10px #20d9ff35;
+  font: 900 9px/1.1 Oxanium, Arial, sans-serif;
+  letter-spacing: 1.15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#battleLayout #opponentSection .solo-fighter-marker span {
+  border-color: #ff718788;
+  box-shadow: 0 3px 12px #0009, 0 0 10px #ff315935;
+}
+#battleLayout .solo-fighter-marker i,
+.team-battle .fighter-name-marker i {
+  width: 0;
+  height: 0;
+  border-top: 7px solid #d9f5ff;
+  border-right: 6px solid transparent;
+  border-left: 6px solid transparent;
+  filter: drop-shadow(0 2px 2px #000b);
+}
+#battleLayout #opponentSection .solo-fighter-marker i {
+  border-top-color: #ff8193;
+}
+@keyframes solo-hud-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes solo-fighter-idle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.008); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #battleLayout .solo-fighter-hud,
+  #battleLayout .solo-portrait-wrapper > img { animation: none !important; }
+}
