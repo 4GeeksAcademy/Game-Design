@@ -956,7 +956,7 @@ const stunOptions = {
             <div className="battle-finish-side defeated-side">
               <h2>DEFEATED</h2>
 
-              <div className="battle-finish-card">
+              <div className="battle-finish-card is-defeated-card">
                 {knockout.defeatedImage && (
                   <img src={knockout.defeatedImage} alt="" />
                 )}
@@ -971,7 +971,7 @@ const stunOptions = {
             <div className="battle-finish-side winning-side">
               <h2>WINNER</h2>
 
-              <div className="battle-finish-card">
+              <div className="battle-finish-card is-winning-card">
                 {knockout.winnerImage && (
                   <img src={knockout.winnerImage} alt="" />
                 )}
