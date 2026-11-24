@@ -33,7 +33,7 @@ function createBattleFighter(characterId, battleId, difficulty = "Easy") {
 // Previously only the human player used this filter, allowing the AI to
 // access the character's entire attack list (including locked moves).
 const sourceAttacks = battleId === "opponent" && difficulty === "Hard"
-    ? getHardDifficultyAttacks(data.attacks ?? [], data.slot)
+    ? getHardDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
     : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
   const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)
