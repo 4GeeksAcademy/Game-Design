@@ -2970,7 +2970,6 @@ export default function TeamBattle() {
             {teamFinishComplete ? "RESULT CONFIRMED" : "MATCH COMPLETE"}
           </p>
         </div>
-      
       )}
 
       {knockout && (
