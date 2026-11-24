@@ -4105,3 +4105,40 @@ battlefield > .local-coop-incoming {
   80% { opacity:1; transform:translateY(-7px) scale(1); }
   100% { opacity:0; transform:translateY(-32px) scale(.92); }
 }
+
+
+/* Larger team winner/defeated showcase, matching the 1v1 finish beat. */
+.team-finish-overlay {
+  gap:clamp(8px,1.5vh,16px);
+  padding:clamp(14px,2.5vh,30px);
+}
+.team-finish-versus {
+  width:min(1180px,96vw);
+  gap:clamp(10px,2vw,28px);
+}
+.team-finish-cards {
+  align-items:stretch;
+  gap:clamp(8px,1.2vw,16px);
+}
+.team-finish-card {
+  min-width:0;
+  width:clamp(145px,20vw,280px);
+  min-height:clamp(250px,44vh,440px);
+  padding:clamp(8px,1vw,14px);
+  overflow:hidden;
+}
+.team-finish-card img {
+  width:100%;
+  height:clamp(190px,37vh,360px);
+  max-width:100%;
+  object-fit:contain;
+  object-position:center bottom;
+}
+.team-finish-side.defeated-side .team-finish-card img {
+  filter:grayscale(1) brightness(.58) contrast(1.08);
+}
+@media(max-width:640px) {
+  .team-finish-versus { gap:5px; }
+  .team-finish-card { width:clamp(118px,43vw,190px); min-height:clamp(185px,34vh,270px); }
+  .team-finish-card img { height:clamp(135px,27vh,220px); }
+}
