@@ -1864,7 +1864,7 @@ body {
 .wild-result-defeated .wild-result-character img { filter: grayscale(1) brightness(.72); }
 .wild-result-winner .wild-result-character { border-color: var(--result-accent); box-shadow: 0 0 24px var(--result-glow),0 12px 32px #0008; animation-delay: 420ms; }
 .wild-result-divider { color: #fff; font: italic 1000 25px Oxanium,sans-serif; text-shadow: 0 0 15px var(--result-glow); }
-.wild-result-stats { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 8px; width: min(920px,100%); margin-top: 4px; }
+.wild-result-stats { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 8px; width: min(920px,100%); margin-top: 4px; }
 .wild-result-stats > div { display: flex; flex-direction: column; gap: 4px; padding: 9px 6px; border: 1px solid #ffffff22; border-radius: 9px; background: #0d1a17d9; }
 .wild-result-stats span { color: #a9b9ad; font: 800 9px Rajdhani,sans-serif; letter-spacing: .1em; }
 .wild-result-stats strong { color: #fff; font: 900 16px Oxanium,sans-serif; }
