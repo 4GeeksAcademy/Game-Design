@@ -1291,6 +1291,14 @@ export default function TeamBattle() {
     const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : damageActuallyDealt > 0 ? "damage" : "status";
     setCombatEffects((current) => ({
       ...current,
+      [attacker.id]: {
+        id: Date.now() + Math.random(),
+        type: damageActuallyDealt > 0 ? "attack" : "status",
+        damage: 0,
+        tier: "light",
+        message: "",
+        effects: appliedBuffs,
+      },
       [defender.id]: {
         id: Date.now() + Math.random(),
         type: impactType,
@@ -1299,16 +1307,6 @@ export default function TeamBattle() {
         message: result.evaded ? "EVADED!" : result.action === "defend" ? "BLOCKED!" : "",
         effects: appliedDebuffs,
       },
-      ...(appliedBuffs.length ? {
-        [attacker.id]: {
-          id: Date.now() + Math.random(),
-          type: "status",
-          damage: 0,
-          tier: "light",
-          message: "",
-          effects: appliedBuffs,
-        },
-      } : {}),
     }));
     if (!attacker.isCpuTeammate && damageActuallyDealt > 0) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
