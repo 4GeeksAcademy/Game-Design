@@ -5561,7 +5561,7 @@ body {
 
 #battleLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(230px, 0.27fr) minmax(0, 0.73fr);
   grid-template-rows: 38px minmax(340px, 1fr) minmax(220px, 26vh);
   grid-template-areas:
     "header header"
