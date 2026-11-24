@@ -65,10 +65,10 @@ function createBattleFighter(id, applyLoadout = true, allowLockedAttacks = false
       typeof data.defense === "object" && data.defense
         ? { ...data.defense }
         : data.defense,
-    // Apply the same unlocked + equipped slot rules to every team member,
-// including CPU teammates and the opposing team.
+    // Normal uses each fighter's unlocked loadout; Hard CPU fighters receive a
+    // slot-limited pool that can include locked standard moves.
 attacks: (allowLockedAttacks
-      ? getHardDifficultyAttacks(data.attacks ?? [], data.slot)
+      ? getHardDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
       : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
     ).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
@@ -1065,7 +1065,7 @@ export default function TeamBattle() {
       (attacker.isCpuTeammate || teams.opponent.some((fighter) => fighter.id === attacker.id));
     const allowedAttackKeys = new Set(
       (cpuCanUseHardPool
-        ? getHardDifficultyAttacks(rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
+        ? getHardDifficultyAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
         : getEquippedAttacks(
             attacker.id,
             rosterFighter?.data?.attacks ?? [],
