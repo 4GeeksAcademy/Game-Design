@@ -2215,3 +2215,6 @@ body {
 #battleLayout .solo-stun-status strong,.team-battle .team-stun-status strong { font:1000 italic clamp(14px,1.8vw,22px) Oxanium,Arial,sans-serif;letter-spacing:.12em;text-shadow:0 0 10px #fff; }
 #battleLayout .solo-stun-status small,.team-battle .team-stun-status small { color:#ead7ff;font:900 8px Oxanium,Arial,sans-serif;letter-spacing:.1em;white-space:nowrap; }
 @keyframes stun-status-enter { from { opacity:0;transform:translate(-50%,-35%) scale(.65); } to { opacity:1;transform:translate(-50%,-50%) scale(1); } }
+
+#battleLayout .solo-stun-status small { animation:stun-count-fade 2.6s ease-out both; }
+@keyframes stun-count-fade { 0%,65% { opacity:1;transform:translateY(0); } 100% { opacity:0;transform:translateY(-7px); } }
