@@ -18,7 +18,7 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
-import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
@@ -29,8 +29,11 @@ function createBattleFighter(characterId, battleId) {
   if (!selected?.data) return null;
 
   const data = selected.data;
-  // Difficulty changes CPU decision-making, never which attacks it owns.
-  const sourceAttacks = getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
+  // Human equipment and CPU builds are independent. Bot kits are configured
+  // in Bot Simulator, so an empty player loadout cannot disable the opponent.
+  const sourceAttacks = battleId === "opponent"
+    ? getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+    : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
   const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)
       ? attack.uses
