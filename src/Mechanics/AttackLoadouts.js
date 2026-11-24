@@ -118,3 +118,24 @@ export function getEquippedAttacks(characterId, attacks = [], configuredSlot) {
   const keys = new Set(getEquippedAttackKeys(characterId, attacks, configuredSlot));
   return attacks.filter((attack) => keys.has(getAttackKey(attack))).map((attack) => ({ ...attack }));
 }
+
+// Hard CPU fighters may draw from the complete character move list, including
+// locked moves, but their active kit can never exceed the character's slot cap.
+export function getHardDifficultyAttacks(attacks = [], configuredSlot) {
+  const slotLimit = getAttackSlotLimit(configuredSlot ?? attacks);
+  if (slotLimit <= 0 || !Array.isArray(attacks)) return [];
+
+  const score = (attack) =>
+    Math.max(0, Number(attack.damage) || 0) * 1.5 +
+    Math.max(0, Number(attack.speed) || 0) * 0.5 +
+    (attack.buff ? 12 : 0) +
+    (attack.debuff ? 14 : 0) +
+    (attack.heal ? 10 : 0) -
+    Math.max(0, Number(attack.cost) || 0) * 0.6;
+
+  return attacks
+    .map((attack, index) => ({ attack, index }))
+    .sort((a, b) => score(b.attack) - score(a.attack) || a.index - b.index)
+    .slice(0, slotLimit)
+    .map(({ attack }) => ({ ...attack }));
+}
