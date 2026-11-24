@@ -168,38 +168,38 @@ function FighterPreview({
   const hasStunnedAttacks = fighter.attacks?.some(
     (attack) => (attack.stunned?.remainingRounds ?? 0) > 0,
   );
-  return (
-    <button
-      type="button"
-      className={`fighter-card fighter-${team} ${
-        isSelected ? "is-selected" : ""
-      } ${fighter.health <= 0 ? "is-defeated" : ""} ${
-        fighter.blocked ? "is-blocking" : ""
-      }`}
-      onClick={onClick}
-      disabled={fighter.health <= 0 || (team === "opponent" && !canSelect)}
-      aria-label={`${fighter.name}, ${fighter.health} health`}
-    >
-      <div className="fighter-card-heading">
-        <h3>{fighter.name}</h3>
-        {isSelected && <span className="selected-mark">ACTIVE</span>}
-      </div>
+  const cooldownMaximum = Math.max(0, Number(fighter.maximumCooldown) || 0);
+  const cooldownCurrent = Math.max(
+    0,
+    Math.min(
+      cooldownMaximum,
+      Number(getModifiedCharacterStat(fighter, "cooldown")) || 0,
+    ),
+  );
+  const recoveryMaximum = Math.max(1, Number(fighter.maximumRecovery) || 10);
+  const recoveryCurrent = Math.max(
+    0,
+    Math.min(
+      recoveryMaximum,
+      Number(getModifiedCharacterStat(fighter, "recovery")) || 0,
+    ),
+  );
+  const activeModifiers = fighter.activeModifiers ?? [];
+  const slotCount = Number.isFinite(Number(fighter.slot))
+    ? Number(fighter.slot)
+    : fighter.attacks?.length ?? 0;
 
-      {fighter.image && (
-        <div
-          className={`fighter-portrait-wrapper ${
-            hasStunnedAttacks ? "fighter-stunned" : ""
-          }`}
-        >
-          <img className="fighter-portrait" src={fighter.image} alt="" />
+  return (
+    <div
+      className={`fighter-unit fighter-${team} ${isSelected ? "is-selected" : ""} ${fighter.health <= 0 ? "is-defeated" : ""} ${fighter.blocked ? "is-blocking" : ""}`}
+    >
+      <div className="fighter-hud">
+        <div className="fighter-hud-heading">
+          <h3>{fighter.name}</h3>
+          {isSelected && <span className="selected-mark">ACTIVE</span>}
+          {fighter.isCpuTeammate && <span className="fighter-control-tag">CPU ALLY</span>}
         </div>
-      )}
-      {fighter.health <= 0 && (
-        <span className="fighter-ko-badge" aria-label="Knocked out">
-          K.O.
-        </span>
-      )}
-      <div className="fighter-bars">
+
         <ResourceBar
           label="HP"
           value={Math.max(0, fighter.health)}
@@ -209,52 +209,91 @@ function FighterPreview({
         />
         <ResourceBar
           label="MP"
-          value={fighter.mana}
+          value={Math.max(0, fighter.mana)}
           maximum={fighter.maximumMana}
-          percent={percent(fighter.mana, fighter.maximumMana)}
+          percent={percent(Math.max(0, fighter.mana), fighter.maximumMana)}
           type="mana"
         />
+
+        <div className="fighter-charge-row" aria-label="Cooldown and recovery">
+          <SegmentedMeter
+            label="CD"
+            value={cooldownCurrent}
+            maximum={cooldownMaximum}
+            type="cooldown"
+            title={`Cooldown charges: ${cooldownCurrent}/${cooldownMaximum}`}
+          />
+          <SegmentedMeter
+            label="REC"
+            value={recoveryCurrent}
+            maximum={recoveryMaximum}
+            type="recovery"
+            title={`Recovery: ${recoveryCurrent}/${recoveryMaximum}`}
+          />
+        </div>
       </div>
 
-      <div className="fighter-stat-bars">
-        <StatBar
-          label="DEF"
-          value={getModifiedCharacterStat(fighter, "defense")}
-          maximum={fighter.maximumDefense ?? 100}
-          color="defense"
-        />
-        <StatBar
-          label="AGI"
-          value={getModifiedCharacterStat(fighter, "agility")}
-          maximum={fighter.maximumAgility ?? 100}
-          color="agility"
-        />
-        <StatBar
-          label="REGEN"
-          value={getModifiedCharacterStat(fighter, "manaRegen")}
-          maximum={fighter.maximumManaRegen ?? 100}
-          color="regen"
-        />
-        <StatBar
-          label="REC"
-          value={getModifiedCharacterStat(fighter, "recovery")}
-          maximum={fighter.maximumRecovery ?? 10}
-          color="recovery"
-        />
-        <StatBar
-          label="CD"
-          value={getModifiedCharacterStat(fighter, "cooldown")}
-          maximum={fighter.maximumCooldown ?? 10}
-          color="cooldown"
-        />
-      </div>
-    </button>
+      <button
+        type="button"
+        className={`fighter-card fighter-art-button ${isSelected ? "is-selected" : ""} ${fighter.health <= 0 ? "is-defeated" : ""} ${fighter.blocked ? "is-blocking" : ""} ${hasStunnedAttacks ? "has-stunned-attacks" : ""}`}
+        onClick={onClick}
+        disabled={fighter.health <= 0 || (team === "opponent" && !canSelect)}
+        aria-label={`${fighter.name}, ${fighter.health} of ${fighter.maximumHealth} health, ${fighter.mana} of ${fighter.maximumMana} mana. Hover or focus for fighter stats.`}
+      >
+        <div className="fighter-portrait-stage">
+          {fighter.image && (
+            <div className={`fighter-portrait-wrapper ${hasStunnedAttacks ? "fighter-stunned" : ""}`}>
+              <img className="fighter-portrait" src={fighter.image} alt="" />
+            </div>
+          )}
+          {fighter.health <= 0 && (
+            <span className="fighter-ko-badge" aria-label="Knocked out">K.O.</span>
+          )}
+          {isSelected && fighter.health > 0 && (
+            <span className="fighter-active-indicator">ACTIVE FIGHTER</span>
+          )}
+        </div>
+
+        <div className="fighter-info-popup" role="tooltip">
+          <div className="fighter-info-popup-heading">
+            <strong>{fighter.name}</strong>
+            <span>FIGHTER STATUS</span>
+          </div>
+          <div className="fighter-info-stat-grid">
+            <div><span>DEFENSE</span><b>{getModifiedCharacterStat(fighter, "defense")}</b></div>
+            <div><span>AGILITY</span><b>{getModifiedCharacterStat(fighter, "agility")}</b></div>
+            <div><span>MANA REGEN</span><b>{getModifiedCharacterStat(fighter, "manaRegen")}</b></div>
+            <div><span>RECOVERY</span><b>{getModifiedCharacterStat(fighter, "recovery")}</b></div>
+            <div><span>MAX HEALTH</span><b>{fighter.maximumHealth}</b></div>
+            <div><span>MAX MANA</span><b>{fighter.maximumMana}</b></div>
+            <div><span>ATTACK SLOTS</span><b>{fighter.attacks?.length ?? 0}/{slotCount}</b></div>
+            <div><span>COOLDOWN</span><b>{cooldownCurrent}/{cooldownMaximum}</b></div>
+          </div>
+
+          {activeModifiers.length > 0 && (
+            <div className="fighter-info-effects">
+              <strong>ACTIVE EFFECTS</strong>
+              {activeModifiers.map((modifier, index) => (
+                <span key={modifier.id ?? index}>
+                  {modifier.sourceAttackName ?? modifier.id ?? "Active modifier"}
+                  {modifier.remainingDuration != null ? ` · ${modifier.remainingDuration} turns` : ""}
+                </span>
+              ))}
+            </div>
+          )}
+          {hasStunnedAttacks && (
+            <div className="fighter-info-stun">STUNNED ATTACKS</div>
+          )}
+          <span className="fighter-info-hint">Hovering shows current modified stats</span>
+        </div>
+      </button>
+    </div>
   );
 }
 
 function ResourceBar({ label, value, maximum, percent, type }) {
   return (
-    <div className="resource-row">
+    <div className={`resource-row resource-${type}`}>
       <span className="resource-label">{label}</span>
       <div className="resource-track">
         <div
@@ -269,23 +308,22 @@ function ResourceBar({ label, value, maximum, percent, type }) {
   );
 }
 
-function StatBar({ label, value, maximum, color }) {
-  const amount = Number(value) || 0;
-  const max = Number(maximum) || 1;
-  const percent = Math.max(0, Math.min(100, (amount / max) * 100));
-
+function SegmentedMeter({ label, value, maximum, type, title }) {
+  const safeMaximum = Math.min(12, Math.max(0, Math.floor(maximum)));
+  const filled = Math.min(safeMaximum, Math.max(0, Math.floor(value)));
   return (
-    <div
-      className={`stat-bar-row stat-${color}`}
-      title={`${label}: ${amount}/${max}`}
-    >
-      <span>{label}</span>
-      <div className="stat-bar-track">
-        <div className="stat-bar-fill" style={{ width: `${percent}%` }} />
+    <div className={`fighter-segmented-meter meter-${type}`} title={title}>
+      <span className="fighter-segmented-label">{label}</span>
+      <div className="fighter-segments" aria-label={title}>
+        {Array.from({ length: safeMaximum }, (_, index) => (
+          <span
+            key={index}
+            className={index < filled ? "is-filled" : ""}
+          />
+        ))}
+        {safeMaximum === 0 && <i className="fighter-no-segments">—</i>}
       </div>
-      <b>
-        {amount}/{max}
-      </b>
+      <b>{value}/{maximum}</b>
     </div>
   );
 }
