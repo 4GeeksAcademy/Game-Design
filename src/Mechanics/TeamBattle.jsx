@@ -18,7 +18,7 @@ import {
   tickSelfModifiers,
 } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
-import { getEquippedAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getHardDifficultyAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
 import { addCoins } from "./Currency.js";
 import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
@@ -44,7 +44,7 @@ import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import KnockoutOverlay from "./KnockoutOverlay.jsx";
 import "./Teambattle.css";
 
-function createBattleFighter(id, applyLoadout = true) {
+function createBattleFighter(id, applyLoadout = true, allowLockedAttacks = false) {
   const selected = roster.find((fighter) => fighter.id === id);
   if (!selected?.data) return null;
 
@@ -67,7 +67,10 @@ function createBattleFighter(id, applyLoadout = true) {
         : data.defense,
     // Apply the same unlocked + equipped slot rules to every team member,
 // including CPU teammates and the opposing team.
-attacks: getEquippedAttacks(selected.id, data.attacks ?? [], data.slot).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
+attacks: (allowLockedAttacks
+      ? getHardDifficultyAttacks(data.attacks ?? [], data.slot)
+      : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+    ).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
         ? attack.uses
         : attack.remainingUses;
@@ -106,7 +109,7 @@ attacks: getEquippedAttacks(selected.id, data.attacks ?? [], data.slot).map((att
 }
 
 // function createTeammateFighter(id) {
-//   const fighter = createBattleFighter(id, true);
+//   const fighter = createBattleFighter(id, true, isCpuAssist && index === 1 && difficulty === "Hard");
 //   if (!fighter) return null;
 
 //   return {
@@ -314,7 +317,7 @@ function SegmentedMeter({ label, value, maximum, type, title }) {
   );
 }
 
-function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist) {
+function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty = "Normal") {
   const player = playerTeamIds.map((id, index) => {
     const fighter = createBattleFighter(id, true);
 
@@ -327,7 +330,7 @@ function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist) {
 
   return {
     player,
-    opponent: opponentTeamIds.map((id) => createBattleFighter(id, false)),
+    opponent: opponentTeamIds.map((id) => createBattleFighter(id, false, difficulty === "Hard")),
   };
 }
 
@@ -420,7 +423,7 @@ export default function TeamBattle() {
     difficulty === "Easy" ? 2 : Number.POSITIVE_INFINITY;
 
   const [teams, setTeams] = useState(() =>
-    createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist),
+    createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty),
   );
   const [knockout, setKnockout] = useState(null);
   const [isKnockoutFadingOut, setIsKnockoutFadingOut] = useState(false);
@@ -565,7 +568,8 @@ export default function TeamBattle() {
   }, [knockout]);
 
   useEffect(() => {
-    if (!isFinalTeamPhase) {
+    // The individual K.O. cutscene must finish before the team face-off begins.
+    if (!isFinalTeamPhase || knockout) {
       setTeamFinishComplete(false);
       setIsTeamFinishFadingOut(false);
       return undefined;
@@ -574,19 +578,21 @@ export default function TeamBattle() {
     setTeamFinishComplete(false);
     setIsTeamFinishFadingOut(false);
 
+    // Give the winner/defeated showcase a full 3.2 seconds, then transition
+    // into the points/results screen.
     const fadeTimer = setTimeout(() => {
       setIsTeamFinishFadingOut(true);
-    }, 2600);
+    }, 3200);
 
     const completeTimer = setTimeout(() => {
       setTeamFinishComplete(true);
-    }, 3200);
+    }, 3800);
 
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(completeTimer);
     };
-  }, [isFinalTeamPhase, phase]);
+  }, [isFinalTeamPhase, phase, knockout]);
 
   useEffect(() => {
     if (!combatPopups.length) return undefined;
@@ -1051,11 +1057,17 @@ export default function TeamBattle() {
 
     const attack = attacker.attacks[attackIndex];
     const rosterFighter = roster.find((entry) => entry.id === attacker.id);
+    const cpuCanUseHardPool =
+      difficulty === "Hard" &&
+      (attacker.isCpuTeammate || teams.opponent.some((fighter) => fighter.id === attacker.id));
     const allowedAttackKeys = new Set(
-      getEquippedAttacks(
-        attacker.id,
-        rosterFighter?.data?.attacks ?? [],
-        rosterFighter?.data?.slot,
+      (cpuCanUseHardPool
+        ? getHardDifficultyAttacks(rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
+        : getEquippedAttacks(
+            attacker.id,
+            rosterFighter?.data?.attacks ?? [],
+            rosterFighter?.data?.slot,
+          )
       ).map(getAttackKey),
     );
 
@@ -2732,7 +2744,7 @@ export default function TeamBattle() {
     if (popupTimerRef.current) clearTimeout(popupTimerRef.current);
     if (teammateTargetTimerRef.current) clearTimeout(teammateTargetTimerRef.current);
     if (allyAttackTimerRef.current) clearTimeout(allyAttackTimerRef.current);
-    setTeams(createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist));
+    setTeams(createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty));
     setRoundNumber(1);
     setRoundTargets({});
     setCpuTargets({});
@@ -2844,7 +2856,7 @@ export default function TeamBattle() {
       <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>
       {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: levelConfig })} onMainMenu={() => navigate("/")} />}
 
-      {isFinalTeamPhase && isStoryMode && !knockout && (
+      {isFinalTeamPhase && !knockout && (
 <div
           className={`team-finish-overlay ${
             phase === "victory" ? "finish-victory" : "finish-defeat"
