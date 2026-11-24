@@ -58,8 +58,8 @@ function Opponent({ opponent, setOpponent, combatEffect = null, isAttacking = fa
             <Segments label="REC" value={getModifiedCharacterStat(opponent, "recovery")} maximum={10} type="recovery" />
           </div>
         </div>
+        <div className="solo-hud-pointer" aria-hidden="true" />
         <div role="group" tabIndex={0} className={`solo-fighter-art ${combatEffect?.type ? `combat-effect-${combatEffect.type}` : ""}`} aria-label={`${opponent.name} fighter artwork. Hover or focus to view stats.`}>
-          <div className="solo-fighter-marker" aria-hidden="true"><span>{opponent.name}</span><i /></div>
           <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
             <img id="opponentImage" src={opponent.image} alt={opponent.name} />
             {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
