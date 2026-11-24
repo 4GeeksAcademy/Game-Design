@@ -1030,3 +1030,10 @@
  .loadout-character-select-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:11px; }
  .loadout-character-select-art { height:175px; }
 }
+
+
+/* Reset controls in the fighter attack-loadout editor. */
+.loadout-action-buttons { display:grid;gap:8px;width:100%; }
+.loadout-header-actions .loadout-action-buttons .loadout-save-button { min-width:190px; }
+.loadout-reset-button { width:100%;padding:10px 14px;color:#ffe9a0;background:#22251c;border:1px solid #ffe45c88;font:800 9px Oxanium,sans-serif;letter-spacing:1px;cursor:pointer;transition:background .18s,border-color .18s; }
+.loadout-reset-button:hover { background:#3a3420;border-color:var(--inv-gold); }
