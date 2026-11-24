@@ -2241,3 +2241,73 @@ body {
 #storyResultsScreen .story-results-actions button:hover { transform:translateY(-2px); filter:brightness(1.15); box-shadow:0 5px 0 #050b12,0 0 18px #13d5ff55; }
 @keyframes story-result-enter { from { opacity:0; transform:translateY(28px) scale(.96); } to { opacity:1; transform:translateY(0) scale(1); } }
 @media(max-width:560px){#storyResultsScreen{padding:12px}#storyResultsScreen .story-results-content{padding:22px 14px}.story-results-actions{grid-template-columns:1fr!important}.story-results-stats{gap:8px!important}}
+
+
+/* 1V1 — EMPTY MATCH SETUP, CENTERED AND EXPLICIT */
+.battle-setup-error-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  color: #f4f8ff;
+  background:
+    radial-gradient(ellipse at 50% 42%,#1b344c 0%,transparent 52%),
+    linear-gradient(145deg,#070d18,#111b2b 55%,#070d18);
+}
+.battle-setup-error-card {
+  width: min(100%,520px);
+  margin: auto;
+  padding: clamp(26px,5vw,42px);
+  text-align: center;
+  border: 1px solid #e2c15e88;
+  border-radius: 18px 5px;
+  background: linear-gradient(145deg,#1b3047,#0a1220);
+  box-shadow: 0 24px 80px #000c,0 0 34px #e2c15e22,inset 0 1px 0 #ffffff18;
+}
+.battle-setup-error-icon {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 18px;
+  border: 1px solid #e2c15e;
+  border-radius: 50%;
+  color: #ffe58a;
+  background: #111c2c;
+  font: 900 40px Oxanium,sans-serif;
+  box-shadow: 0 0 22px #e2c15e33;
+}
+.battle-setup-error-eyebrow {
+  margin: 0 0 8px;
+  color: #64ddff;
+  font: 900 .7rem Oxanium,sans-serif;
+  letter-spacing: 2.5px;
+}
+.battle-setup-error-card h1 {
+  margin: 0;
+  color: #f5d56a;
+  font: 900 clamp(1.6rem,5vw,2.25rem) Oxanium,sans-serif;
+}
+.battle-setup-error-card p:not(.battle-setup-error-eyebrow) {
+  max-width: 390px;
+  margin: 14px auto 24px;
+  color: #b9c8da;
+  font: 600 1rem Rajdhani,sans-serif;
+  line-height: 1.55;
+}
+.battle-setup-error-card button {
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid #fff0a1;
+  border-bottom: 3px solid #80652c;
+  border-radius: 7px 3px;
+  color: #17202b;
+  background: linear-gradient(180deg,#fff0a1,#e5b938);
+  font: 900 .8rem Oxanium,sans-serif;
+  cursor: pointer;
+  transition: transform 160ms ease,filter 160ms ease;
+}
+.battle-setup-error-card button:hover { transform:translateY(-2px); filter:brightness(1.08); }
