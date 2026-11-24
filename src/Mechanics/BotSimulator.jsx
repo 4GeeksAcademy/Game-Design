@@ -8,6 +8,7 @@ import {
   getAttackSlotLimit,
   getEquippedAttackKeys,
   getEquippedAttacks,
+  getHardDifficultyAttacks,
   isAttackUnlocked,
   saveEquippedAttackKeys,
 } from "./AttackLoadouts.js";
@@ -45,13 +46,12 @@ function getTeamMaximumHealth(team) {
   }, 0);
 }
 
-function getFighterWithEquippedAttacks(fighter) {
+function getFighterWithEquippedAttacks(fighter, difficulty = "Normal") {
   const data = getFighterData(fighter);
   const slotLimit = getAttackSlotLimit(data);
-  const equippedAttacks = getEquippedAttacks(
-    fighter.id,
-    data.attacks ?? [],
-    data.slot,
+  const equippedAttacks = (difficulty === "Hard"
+    ? getHardDifficultyAttacks(data.attacks ?? [], data.slot)
+    : getEquippedAttacks(fighter.id, data.attacks ?? [], data.slot)
   ).slice(0, slotLimit);
 
   return {
@@ -340,8 +340,8 @@ async function runStartingOrderSeries(
 
   for (let i = 0; i < requestedCount; i++) {
     const result = simulateBattle(
-      getFighterWithEquippedAttacks(firstFighter),
-      getFighterWithEquippedAttacks(secondFighter),
+      getFighterWithEquippedAttacks(firstFighter, firstDifficulty),
+      getFighterWithEquippedAttacks(secondFighter, secondDifficulty),
       {
         difficultyOne: firstDifficulty,
         difficultyTwo: secondDifficulty,
@@ -1286,8 +1286,8 @@ function BotSimulator() {
         for (const order of startingOrders) {
           for (let battle = 0; battle < requestedCount; battle++) {
             const result = simulateBattle(
-              getFighterWithEquippedAttacks(order.first),
-              getFighterWithEquippedAttacks(order.second),
+              getFighterWithEquippedAttacks(order.first, order.firstDifficulty),
+              getFighterWithEquippedAttacks(order.second, order.secondDifficulty),
               {
                 difficultyOne: order.firstDifficulty,
                 difficultyTwo: order.secondDifficulty,
@@ -1488,8 +1488,8 @@ function BotSimulator() {
         for (const order of startingOrders) {
           for (let battle = 0; battle < requestedCount; battle++) {
             const result = simulateTeamBattle(
-              order.first.map(getFighterWithEquippedAttacks),
-              order.second.map(getFighterWithEquippedAttacks),
+              order.first.map((fighter) => getFighterWithEquippedAttacks(fighter, order.firstDifficulty)),
+              order.second.map((fighter) => getFighterWithEquippedAttacks(fighter, order.secondDifficulty)),
               {
                 difficultyOne: order.firstDifficulty,
                 difficultyTwo: order.secondDifficulty,
