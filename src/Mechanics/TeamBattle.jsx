@@ -2557,7 +2557,7 @@ export default function TeamBattle() {
                 ? { ...current, [fighterId]: null }
                 : current,
             );
-          }, 2200);
+          }, 3000);
         });
       }
 
