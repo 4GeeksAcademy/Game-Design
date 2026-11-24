@@ -121,9 +121,15 @@ export function getEquippedAttacks(characterId, attacks = [], configuredSlot) {
 
 // Hard CPU fighters may draw from the complete character move list, including
 // locked moves, but their active kit can never exceed the character's slot cap.
-export function getHardDifficultyAttacks(attacks = [], configuredSlot) {
+export function getHardDifficultyAttacks(characterId, attacks = [], configuredSlot) {
   const slotLimit = getAttackSlotLimit(configuredSlot ?? attacks);
   if (slotLimit <= 0 || !Array.isArray(attacks)) return [];
+
+  // Locked standard moves are fair game on Hard; festival-exclusive rewards
+  // remain unavailable until that character has actually earned them.
+  const eligibleAttacks = attacks.filter(
+    (attack) => !attack.festivalExclusive || isAttackUnlocked(characterId, attack),
+  );
 
   const score = (attack) =>
     Math.max(0, Number(attack.damage) || 0) * 1.5 +
@@ -133,7 +139,7 @@ export function getHardDifficultyAttacks(attacks = [], configuredSlot) {
     (attack.heal ? 10 : 0) -
     Math.max(0, Number(attack.cost) || 0) * 0.6;
 
-  return attacks
+  return eligibleAttacks
     .map((attack, index) => ({ attack, index }))
     .sort((a, b) => score(b.attack) - score(a.attack) || a.index - b.index)
     .slice(0, slotLimit)
