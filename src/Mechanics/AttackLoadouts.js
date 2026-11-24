@@ -63,7 +63,10 @@ export function getEquippedAttackKeys(characterId, attacks = [], configuredSlot)
   // This is important for festival-exclusive attacks: they must not be treated
   // as free starter attacks merely because they have no coin price.
   const available = attacks.filter((attack) => isAttackUnlocked(characterId, attack));
+  // Newly unlocked festival-exclusive attacks must be explicitly equipped.
+  // Otherwise a reward can silently enter the default AI/player loadout.
   const defaultKeys = available
+    .filter((attack) => !attack.festivalExclusive)
     .slice(0, getAttackSlotLimit(configuredSlot ?? attacks))
     .map(getAttackKey);
   if (!Array.isArray(saved)) return defaultKeys;
