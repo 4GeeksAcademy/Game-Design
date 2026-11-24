@@ -50,7 +50,7 @@ function getFighterWithEquippedAttacks(fighter, difficulty = "Normal") {
   const data = getFighterData(fighter);
   const slotLimit = getAttackSlotLimit(data);
   const equippedAttacks = (difficulty === "Hard"
-    ? getHardDifficultyAttacks(data.attacks ?? [], data.slot)
+    ? getHardDifficultyAttacks(fighter.id, data.attacks ?? [], data.slot)
     : getEquippedAttacks(fighter.id, data.attacks ?? [], data.slot)
   ).slice(0, slotLimit);
 
