@@ -18,23 +18,19 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
-import { getEquippedAttacks, getHardDifficultyAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
-function createBattleFighter(characterId, battleId, difficulty = "Easy") {
+function createBattleFighter(characterId, battleId) {
   const selected = roster.find((fighter) => fighter.id === characterId);
   if (!selected?.data) return null;
 
   const data = selected.data;
-  // Every fighter must obey their saved, unlocked attack loadout.
-// Previously only the human player used this filter, allowing the AI to
-// access the character's entire attack list (including locked moves).
-const sourceAttacks = battleId === "opponent" && difficulty === "Hard"
-    ? getHardDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
-    : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
+  // Difficulty changes CPU decision-making, never which attacks it owns.
+  const sourceAttacks = getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
   const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)
       ? attack.uses
@@ -551,7 +547,7 @@ function App() {
               type: damage > 0 ? "damage" : "status",
               damage,
               tier: damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light",
-              message: result?.stunnedAttacks?.length || attack.stun ? "STUNNED!" : "",
+              message: "",
               effects: targetEffects,
             });
           }
