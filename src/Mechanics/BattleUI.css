@@ -1933,3 +1933,72 @@ body {
 #battleLayout .attack-card h5 { flex:0 0 auto; width:100%; margin:0; color:#fff; font:900 11px Oxanium,sans-serif; line-height:1.2; overflow-wrap:anywhere; }
 #battleLayout .attack-card .attack-stats { display:flex; flex-direction:column; flex:0 0 auto; gap:5px; width:100%; }
 #battleLayout .attack-card .attack-cost { flex:0 0 auto; }
+
+/* Shared result-screen layout: supports both solo fighters and full teams. */
+.wild-result-character-group {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: clamp(6px, 1vw, 14px);
+  min-width: 0;
+}
+.wild-result-character-group .wild-result-character {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 245px;
+}
+.wild-result-character-group .wild-result-character img {
+  width: 100%;
+  max-width: 230px;
+}
+.wild-result-defeated .wild-result-character-group .wild-result-character {
+  filter: grayscale(1);
+  opacity: .72;
+}
+.wild-result-defeat-atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 80%, #ff31591c, transparent 55%),
+    linear-gradient(180deg, transparent 60%, #0008);
+  animation: wild-defeat-atmosphere 4s ease-in-out infinite alternate;
+}
+@keyframes wild-defeat-atmosphere {
+  from { opacity: .45; }
+  to { opacity: .9; }
+}
+@media(max-width:650px) {
+  .wild-result-character-group { flex-direction: column; align-items: center; }
+  .wild-result-character-group .wild-result-character { width: min(100%, 230px); }
+}
+
+/* Match the 2v2 impact language exactly in 1v1. */
+#battleLayout .solo-fighter-art:has(.impact-damage) img { animation: team-hit-flash .48s ease-out, team-hit-shake .42s ease-out; }
+#battleLayout .solo-fighter-art:has(.impact-blocked) img { animation: team-block-pulse .65s ease-out; }
+#battleLayout .solo-fighter-art:has(.impact-evaded) img { animation: team-evade-dodge .55s ease-out; }
+#battleLayout .solo-fighter-art:has(.impact-attack) img { animation: team-attack-lunge .38s ease-in-out; }
+#battleLayout .solo-fighter-art:has(.damage-tier-fatal) img { animation: team-fatal-recoil 1.35s cubic-bezier(.15,.75,.2,1), team-hit-flash .48s ease-out; }
+#battleLayout .solo-fighter-art:has(.damage-tier-heavy) img { animation: team-heavy-recoil .8s ease-out, team-hit-flash .48s ease-out; }
+#battleLayout .solo-fighter-art:has(.impact-damage)::after {
+  content:"";
+  position:absolute;
+  z-index:8;
+  inset:5px;
+  border:3px solid transparent;
+  border-radius:12px;
+  background:conic-gradient(#ff3159,#ffb52e,#f7ed52,#5bff8a,#35eaff,#5574ff,#d45bff,#ff3159) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  pointer-events:none;
+  animation:team-spectrum-ring 1.15s linear both;
+}
+@keyframes team-hit-flash {0%,100%{filter:brightness(1)}20%,55%{filter:brightness(1.8) sepia(1) saturate(5) hue-rotate(315deg)}}
+@keyframes team-hit-shake {0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes team-block-pulse {0%{filter:brightness(1)}35%{filter:brightness(1.8) drop-shadow(0 0 24px #b9e8ff)}100%{filter:brightness(1)}}
+@keyframes team-evade-dodge {0%,100%{transform:translateX(0);opacity:1}45%{transform:translateX(24px);opacity:.55}}
+@keyframes team-attack-lunge {0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(28px) scale(1.04)}}
+@keyframes team-fatal-recoil {0%{transform:translateY(0) rotate(0) scale(1)}18%{transform:translateY(-9px) rotate(-3deg) scale(1.04)}48%{transform:translateY(12px) rotate(5deg) scale(.97)}68%{transform:translateY(6px) rotate(-3deg)}100%{transform:translateY(0) rotate(0) scale(1)}}
+@keyframes team-heavy-recoil {0%,100%{transform:translateX(0)}25%{transform:translateX(-7px) rotate(-2deg)}50%{transform:translateX(6px) rotate(2deg)}75%{transform:translateX(-3px)}}
+@keyframes team-spectrum-ring {0%{opacity:0;transform:scale(.94) rotate(0)}25%{opacity:1}100%{opacity:0;transform:scale(1.04) rotate(360deg)}}
