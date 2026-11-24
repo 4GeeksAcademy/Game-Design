@@ -5724,6 +5724,16 @@ body {
   z-index: 30;
 }
 
+#battleLayout #characterSection .solo-combat-messages {
+  position: absolute;
+  z-index: 18;
+  right: 8px;
+  bottom: 8px;
+  left: 8px;
+  min-height: 0;
+  pointer-events: none;
+}
+
 /* Compact event history; attack selection is the primary bottom panel. */
 #battleLayout > #combatLog {
   grid-area: log;
