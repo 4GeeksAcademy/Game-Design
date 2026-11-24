@@ -3916,8 +3916,8 @@ battlefield > .local-coop-incoming {
 .fighter-impact-status { position:absolute; left:50%; top:18%; padding:4px 8px; transform:translateX(-50%); border-radius:5px; color:#fff; background:#111d2bea; font-size:9px; font-weight:1000; white-space:nowrap; animation:team-impact-status 1.65s ease-out both; }
 .fighter-art-button:has(.impact-damage) .fighter-portrait { animation:team-hit-flash 1.08s ease-out; }
 .fighter-art-button:has(.impact-damage) { animation:team-hit-shake 1.02s ease-out; }
-.fighter-art-button:has(.impact-blocked) .fighter-portrait { animation:team-block-pulse 1.25s ease-out; }
-.fighter-art-button:has(.impact-evaded) .fighter-portrait { animation:team-evade-dodge 1.15s ease-out; }
+.fighter-art-button:has(.impact-blocked) .fighter-portrait { animation:team-block-pulse .58s ease-out; }
+.fighter-art-button:has(.impact-evaded) .fighter-portrait { animation:team-evade-dodge .52s ease-out; }
 @keyframes team-impact-pop {0%{opacity:0;transform:translateY(20px) scale(.5)}18%{opacity:1;transform:translateY(-5px) scale(1.18)}75%{opacity:1}100%{opacity:0;transform:translateY(-48px) scale(.95)}}
 @keyframes team-impact-effective {0%{opacity:0;transform:scale(.5)}18%{opacity:1;transform:scale(1.2)}30%,45%{transform:translateX(-3px) rotate(-2deg)}38%,53%{transform:translateX(3px) rotate(2deg)}100%{opacity:0;transform:translateY(-50px)}}
 @keyframes team-impact-heavy {0%{opacity:0;transform:scale(.35) rotate(-8deg)}18%{opacity:1;transform:scale(1.3) rotate(3deg)}28%,45%{transform:translateX(-7px)}36%,54%{transform:translateX(7px)}100%{opacity:0;transform:translateY(-58px)}}
@@ -3945,10 +3945,10 @@ battlefield > .local-coop-incoming {
   75%{transform:translateX(-3px)}
 }
 
-.fighter-art-button:has(.impact-attack) .fighter-portrait { animation: team-attack-lunge .98s ease-in-out; }
+.fighter-art-button:has(.impact-attack) .fighter-portrait { animation: team-attack-lunge .46s cubic-bezier(.2,.8,.25,1); }
 .player-team .fighter-art-button:has(.impact-attack) .fighter-portrait { animation-name: team-attack-lunge-left; }
-@keyframes team-attack-lunge { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(28px) scale(1.04)} }
-@keyframes team-attack-lunge-left { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(-28px) scale(1.04)} }
+@keyframes team-attack-lunge { 0%,100%{transform:translateX(0) scale(1)}42%{transform:translateX(-46px) scale(1.05)} }
+@keyframes team-attack-lunge-left { 0%,100%{transform:translateX(0) scale(1)}42%{transform:translateX(46px) scale(1.05)} }
 
 .fighter-art-button:has(.effect-defense) { filter:drop-shadow(0 0 13px #aeb7c4aa); }
 .fighter-art-button:has(.effect-agility) { filter:drop-shadow(0 0 13px #ffe45baa); }
@@ -3982,7 +3982,7 @@ battlefield > .local-coop-incoming {
 }
 .team-battle .fighter-art-button:has(.impact-blocked) .fighter-portrait {
   transform-origin: center bottom;
-  animation: team-defensive-brace 1.42s cubic-bezier(.2,.8,.25,1) both;
+  animation: team-defensive-brace .65s cubic-bezier(.2,.8,.25,1) both;
   filter: brightness(1.35) drop-shadow(0 0 13px #d9f2ff) drop-shadow(0 0 25px #73cfffaa);
 }
 .team-battle .fighter-art-button:has(.impact-blocked) .fighter-portrait-stage::before {
