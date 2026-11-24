@@ -3945,10 +3945,10 @@ battlefield > .local-coop-incoming {
   75%{transform:translateX(-3px)}
 }
 
-.fighter-art-button:has(.impact-attack) .fighter-portrait { animation: team-attack-lunge .46s cubic-bezier(.2,.8,.25,1); }
+.fighter-art-button:has(.impact-attack) .fighter-portrait { animation: team-attack-lunge .24s cubic-bezier(.18,.9,.25,1); }
 .player-team .fighter-art-button:has(.impact-attack) .fighter-portrait { animation-name: team-attack-lunge-left; }
-@keyframes team-attack-lunge { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(28px) scale(1.04)} }
-@keyframes team-attack-lunge-left { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(-28px) scale(1.04)} }
+@keyframes team-attack-lunge { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(36px) scale(1.055)} }
+@keyframes team-attack-lunge-left { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(-36px) scale(1.055)} }
 
 .fighter-art-button:has(.effect-defense) { filter:drop-shadow(0 0 13px #aeb7c4aa); }
 .fighter-art-button:has(.effect-agility) { filter:drop-shadow(0 0 13px #ffe45baa); }
@@ -3982,7 +3982,7 @@ battlefield > .local-coop-incoming {
 }
 .team-battle .fighter-art-button:has(.impact-blocked) .fighter-portrait {
   transform-origin: center bottom;
-  animation: team-defensive-brace .65s cubic-bezier(.2,.8,.25,1) both;
+  animation: team-defensive-brace .38s cubic-bezier(.18,.9,.25,1) both;
   filter: brightness(1.35) drop-shadow(0 0 13px #d9f2ff) drop-shadow(0 0 25px #73cfffaa);
 }
 .team-battle .fighter-art-button:has(.impact-blocked) .fighter-portrait-stage::before {
@@ -4001,20 +4001,17 @@ battlefield > .local-coop-incoming {
   font: 900 11px Oxanium,Arial,sans-serif;
   letter-spacing: 1px;
   pointer-events: none;
-  animation: team-shield-flash 1.42s ease-out both;
+  animation: team-shield-flash .72s ease-out both;
 }
 @keyframes team-defensive-brace {
-  0% { transform:translateY(0) rotate(0) scale(1); }
-  16% { transform:translateY(5px) rotate(-4deg) scale(.97); }
-  34% { transform:translateY(-2px) rotate(3deg) scale(1.015); }
-  52% { transform:translateY(2px) rotate(-2deg) scale(.99); }
-  72% { transform:translateY(-1px) rotate(1deg); }
-  100% { transform:translateY(0) rotate(0) scale(1); }
+  0%,100% { transform:translateY(0) rotate(0) scale(1); }
+  22% { transform:translateY(6px) rotate(-3deg) scale(.965); }
+  48% { transform:translateY(-2px) rotate(1deg) scale(1.025); }
+  70% { transform:translateY(1px) scale(.99); }
 }
 @keyframes team-shield-flash {
-  0% { opacity:0; filter:blur(4px); }
-  22% { opacity:1; filter:blur(0); }
-  72% { opacity:1; }
+  0% { opacity:0; filter:blur(3px); }
+  18%,62% { opacity:1; filter:blur(0); }
   100% { opacity:0; }
 }
 .team-battle .battle-center { min-width:34px; }
