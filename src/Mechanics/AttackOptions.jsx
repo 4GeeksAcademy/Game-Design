@@ -142,10 +142,13 @@ function AttackOptions({
         ...Object.entries(result.buffsApplied ?? {}).map(([stat, amount]) => ({ stat, amount, kind: "buff" })),
         ...Object.entries(result.debuffsApplied ?? {}).map(([stat, amount]) => ({ stat, amount, kind: "debuff" })),
       ].filter((effect) => Number(effect.amount) !== 0);
+      if (result.stunnedAttacks?.length) {
+        effectStats.push({ stat: "stun", amount: 1, kind: "debuff" });
+      }
       const tier = damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light";
       const damageAndDebuffs = effectStats
         .filter((effect) => effect.kind === "debuff")
-        .map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+        .map(({ stat, amount, kind }) => ({ stat, kind, label: stat === "stun" ? "STUN APPLIED" : `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
       const selfBuffs = effectStats
         .filter((effect) => effect.kind === "buff")
         .map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
