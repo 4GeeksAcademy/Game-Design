@@ -49,6 +49,7 @@ export default function BattleResultScreen({
         <div><span>DEFENSES</span><strong>{combatDefense}</strong></div>
         <div><span>DIFFICULTY</span><strong>{difficulty.toUpperCase()} ×{multiplier}</strong></div>
         <div className="wild-result-score"><span>TOTAL SCORE</span><strong>{score}</strong></div>
+        <div className="wild-result-score"><span>COINS EARNED</span><strong>+{score}</strong></div>
       </section>
 
       <div className="wild-result-actions">
