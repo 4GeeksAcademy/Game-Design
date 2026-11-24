@@ -147,9 +147,7 @@ function Character({
         </div>
 
         <div className="solo-combat-messages" aria-live="polite">
-          {combatMessages.slice(0, 2).map((message, index) => (
-            <div className={`combat-popup ${message.type}`} key={message.id} style={{ animationDelay: `${index * 0.15}s` }}>{message.text}</div>
-          ))}
+
         </div>
         {showFinishTurnButton && (
           <div id="finishTurnArea">
