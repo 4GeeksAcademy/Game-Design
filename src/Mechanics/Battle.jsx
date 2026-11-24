@@ -18,13 +18,13 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
-import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getHardDifficultyAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
-function createBattleFighter(characterId, battleId) {
+function createBattleFighter(characterId, battleId, difficulty = "Easy") {
   const selected = roster.find((fighter) => fighter.id === characterId);
   if (!selected?.data) return null;
 
@@ -32,7 +32,9 @@ function createBattleFighter(characterId, battleId) {
   // Every fighter must obey their saved, unlocked attack loadout.
 // Previously only the human player used this filter, allowing the AI to
 // access the character's entire attack list (including locked moves).
-const sourceAttacks = getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
+const sourceAttacks = battleId === "opponent" && difficulty === "Hard"
+    ? getHardDifficultyAttacks(data.attacks ?? [], data.slot)
+    : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
   const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)
       ? attack.uses
@@ -215,11 +217,11 @@ function App() {
       : "mina";
 
   const [character, setCharacter] = useState(() =>
-    createBattleFighter(playerId, "player"),
+    createBattleFighter(playerId, "player", location.state?.difficulty ?? "Easy"),
   );
 
   const [opponent, setOpponent] = useState(() =>
-    createBattleFighter(opponentId, "opponent"),
+    createBattleFighter(opponentId, "opponent", location.state?.difficulty ?? "Easy"),
   );
 
   const [damageDealt, setDamageDealt] = useState(0);
@@ -283,8 +285,8 @@ function App() {
     aiControllerRef.current?.stop();
     aiControllerRef.current = null;
     aiAttackHealthBeforeRef.current = null;
-    setCharacter(createBattleFighter(playerId, "player"));
-    setOpponent(createBattleFighter(opponentId, "opponent"));
+    setCharacter(createBattleFighter(playerId, "player", location.state?.difficulty ?? "Easy"));
+    setOpponent(createBattleFighter(opponentId, "opponent", location.state?.difficulty ?? "Easy"));
     setDamageDealt(0); setCombatDefense(0); setAttacksUsed(0);
     lastRewardedDamage.current = 0; lastRecordedAttacks.current = 0;
     rewardPaidRef.current = false;
