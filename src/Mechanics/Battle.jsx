@@ -274,6 +274,7 @@ function App() {
   const [combatMessages, setCombatMessages] = useState([]);
   const [combatLog, setCombatLog] = useState([]);
   const [aiAttack, setAiAttack] = useState(null);
+  const [combatEffect, setCombatEffect] = useState(null);
 
   const resetBattle = useCallback(() => {
     aiControllerRef.current?.stop();
@@ -287,7 +288,7 @@ function App() {
     setDefenseTimeLeft(10); setCurrentTurn("intro"); setShowIncomingAttack(false);
     setRoundNumber(1); setShowRoundIntro(true); setKnockout(null); setShowResults(false);
     setIsRoundIntroFadingOut(false); setShowFinishOverlay(false); setIsFinishFadingOut(false);
-    setCombatMessages([]); setCombatLog([]); setAiAttack(null); setIsPaused(false);
+    setCombatMessages([]); setCombatLog([]); setAiAttack(null); setCombatEffect(null); setIsPaused(false);
   }, [playerId, opponentId]);
 
   useEffect(() => {
@@ -628,6 +629,11 @@ function App() {
     return () => clearInterval(timer);
   }, [aiAttack, knockout, character.health, opponent.health, isPaused]);
 
+  // Route a short-lived impact/status animation to the fighter actually affected.
+  function triggerCombatEffect(effect) {
+    setCombatEffect({ ...effect, id: Date.now() + Math.random() });
+  }
+
   // Add messages to the popup queue and permanent combat log.
   function showCombatMessage(text, type) {
     const message = {
@@ -708,6 +714,15 @@ const stunOptions = {
 
       setOpponent({ ...result.attacker });
       setCharacter({ ...result.defender });
+      const incomingDamage = Math.max(0, Number(result.damageReceived) || 0);
+      triggerCombatEffect({
+        target: "player",
+        type: choice === "defend" ? "blocked" : choice === "evade" && result.evaded ? "evaded" : incomingDamage > 0 ? "damage" : "status",
+        damage: incomingDamage,
+        tier: incomingDamage >= 70 ? "fatal" : incomingDamage >= 45 ? "heavy" : incomingDamage >= 20 ? "effective" : "light",
+        message: choice === "defend" ? "BLOCKED!" : choice === "evade" && result.evaded ? "EVADED!" : "",
+        effects: [],
+      });
 
       if (choice === "defend") {
         showCombatMessage("🛡️ BLOCKED!", "blocked");
@@ -1124,7 +1139,7 @@ const stunOptions = {
                 id="opponentSection"
                 className={aiAttack ? "opponent-is-attacking" : ""}
               >
-                <Opponent opponent={opponent} setOpponent={setOpponent} />
+                <Opponent opponent={opponent} setOpponent={setOpponent} combatEffect={combatEffect} />
               </div>
 
               <div id="characterSection">
@@ -1133,6 +1148,7 @@ const stunOptions = {
                   setCharacter={setCharacter}
                   currentTurn={currentTurn}
                   combatMessages={combatMessages}
+                  combatEffect={combatEffect}
                   setCurrentTurn={setCurrentTurn}
                 />
               </div>
@@ -1177,6 +1193,7 @@ const stunOptions = {
               showCombatMessage={showCombatMessage}
               openingTurnActive={roundNumber === 1}
               difficulty={location.state?.difficulty ?? "Easy"}
+              onCombatEffect={triggerCombatEffect}
             />
           </div>
         </>
