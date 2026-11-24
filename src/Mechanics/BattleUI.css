@@ -5529,3 +5529,9 @@ body {
 .effect-defense { outline:1px solid #aeb7c4; }
 .effect-agility { outline:1px solid #ffe45b; }
 .effect-manaRegen { outline:1px solid #35bfff; }
+
+.solo-fighter-art.combat-effect-attack img { animation: solo-attack-lunge .38s ease-in-out; }
+@keyframes solo-attack-lunge {
+  0%,100%{transform:translateX(0) scale(1)}
+  45%{transform:translateX(-34px) scale(1.045)}
+}
