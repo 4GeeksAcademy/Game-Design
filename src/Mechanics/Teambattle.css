@@ -4329,6 +4329,7 @@ battlefield > .local-coop-incoming {
     #35eaff66 66%,
     #5574ff66 82%,
     #d45bff66 100%);
+  background-size:250% 100%;
   mix-blend-mode:screen;
   opacity:0;
   animation:team-prismatic-image-hit .9s ease-out both;
