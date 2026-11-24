@@ -1998,7 +1998,7 @@ body {
 @keyframes team-hit-shake {0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
 @keyframes team-block-pulse {0%{filter:brightness(1)}35%{filter:brightness(1.8) drop-shadow(0 0 24px #b9e8ff)}100%{filter:brightness(1)}}
 @keyframes team-evade-dodge {0%,100%{transform:translateX(0);opacity:1}45%{transform:translateX(24px);opacity:.55}}
-@keyframes team-attack-lunge {0%,100%{transform:translateX(0) scale(1)}42%{transform:translateX(-46px) scale(1.05)}}
+@keyframes team-attack-lunge {0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(28px) scale(1.04)}}
 @keyframes team-fatal-recoil {0%{transform:translateY(0) rotate(0) scale(1)}18%{transform:translateY(-9px) rotate(-3deg) scale(1.04)}48%{transform:translateY(12px) rotate(5deg) scale(.97)}68%{transform:translateY(6px) rotate(-3deg)}100%{transform:translateY(0) rotate(0) scale(1)}}
 @keyframes team-heavy-recoil {0%,100%{transform:translateX(0)}25%{transform:translateX(-7px) rotate(-2deg)}50%{transform:translateX(6px) rotate(2deg)}75%{transform:translateX(-3px)}}
 @keyframes team-spectrum-ring {0%{opacity:0;transform:scale(.94) rotate(0)}25%{opacity:1}100%{opacity:0;transform:scale(1.04) rotate(360deg)}}
@@ -2028,7 +2028,7 @@ body {
 @keyframes team-impact-status {0%,100%{opacity:0;transform:translate(-50%,8px) scale(.85)}25%,70%{opacity:1;transform:translate(-50%,0) scale(1)}}
 #battleLayout .solo-fighter-art:has(.impact-attack) img { animation:team-attack-lunge .46s cubic-bezier(.2,.8,.25,1); }
 #battleLayout .player-fighter-section .solo-fighter-art:has(.impact-attack) img { animation-name:team-attack-lunge-left; }
-@keyframes team-attack-lunge-left {0%,100%{transform:translateX(0) scale(1)}42%{transform:translateX(46px) scale(1.05)}}
+@keyframes team-attack-lunge-left {0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(-28px) scale(1.04)}}
 
 /* Prevent the older solo container animations from competing with the shared fighter animations. */
 #battleLayout .solo-fighter-art.combat-effect-damage,
@@ -2354,4 +2354,32 @@ body {
 @media (prefers-reduced-motion: reduce) {
   #battleLayout .solo-fighter-hud,
   #battleLayout .solo-portrait-wrapper > img { animation: none !important; }
+}
+
+
+/* Compact 1v1 attack cards so cost details fit inside the fixed battle viewport. */
+@media (min-width: 701px) {
+  #battleLayout #attackBody { padding: 5px 8px 7px; }
+  #battleLayout #attackList { padding: 3px 4px 6px; gap: 8px; }
+  #battleLayout .attack-card-wrapper { min-height: 0; }
+  #battleLayout .attack-card {
+    min-height: 0;
+    height: 100%;
+    gap: 3px;
+    padding: 6px !important;
+  }
+  #battleLayout .attack-card .attack-image,
+  #battleLayout .attack-card [id^="attackImage"] {
+    height: clamp(42px, 7vh, 66px);
+    max-height: 66px;
+    margin-bottom: 0;
+  }
+  #battleLayout .attack-card h5,
+  #battleLayout .attack-card [id^="attackName"] { margin: 0 0 2px; }
+  #battleLayout .attack-stats { gap: 2px; }
+  #battleLayout .attack-damage,
+  #battleLayout .attack-speed { padding: 3px 2px; }
+  #battleLayout .attack-cost { gap: 2px; margin-top: 1px; }
+  #battleLayout .attack-stats span,
+  #battleLayout .attack-cost span { font-size: 8px; line-height: 1.15; }
 }
