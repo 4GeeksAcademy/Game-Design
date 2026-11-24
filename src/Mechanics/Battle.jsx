@@ -10,6 +10,7 @@ import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import BattleResultScreen from "./BattleResultScreen.jsx";
 import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
+import KnockoutOverlay from "./KnockoutOverlay.jsx";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
 import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
@@ -265,6 +266,7 @@ function App() {
 
   const [knockout, setKnockout] = useState(null);
   const [showResults, setShowResults] = useState(false);
+  const [isKnockoutFadingOut, setIsKnockoutFadingOut] = useState(false);
 
   const [isRoundIntroFadingOut, setIsRoundIntroFadingOut] = useState(false);
 
@@ -288,7 +290,7 @@ function App() {
     rewardPaidRef.current = false;
     festivalBattleRecorded.current = false;
     setDefenseTimeLeft(10); setCurrentTurn("intro"); setShowIncomingAttack(false);
-    setRoundNumber(1); setShowRoundIntro(true); setKnockout(null); setShowResults(false);
+    setRoundNumber(1); setShowRoundIntro(true); setKnockout(null); setShowResults(false); setIsKnockoutFadingOut(false);
     setIsRoundIntroFadingOut(false); setShowFinishOverlay(false); setIsFinishFadingOut(false);
     setCombatMessages([]); setCombatLog([]); setAiAttack(null); setCombatEffects({}); setIsPaused(false);
   }, [playerId, opponentId]);
@@ -427,9 +429,14 @@ function App() {
 
     setShowFinishOverlay(false);
     setIsFinishFadingOut(false);
+    setIsKnockoutFadingOut(false);
     setShowResults(false);
 
-    // Let the individual K.O. cutscene play first.
+    // Match the 2v2 knockout cutscene: hold, fade, then continue.
+    const koFadeTimer = setTimeout(() => {
+      setIsKnockoutFadingOut(true);
+    }, 2100);
+
     const finishTimer = setTimeout(() => {
       setShowFinishOverlay(true);
     }, 2600);
@@ -444,6 +451,7 @@ function App() {
     }, 5600);
 
     return () => {
+      clearTimeout(koFadeTimer);
       clearTimeout(finishTimer);
       clearTimeout(fadeTimer);
       clearTimeout(resultsTimer);
@@ -914,37 +922,11 @@ const stunOptions = {
 
       {/* Individual K.O. cutscene. */}
       {knockout && !showFinishOverlay && !showResults && (
-        <div
-          className={`battle-ko-overlay ko-${knockout.defeatedTeam} ${
-            isFinishFadingOut ? "is-fading-out" : ""
-          }`}
-          role="alert"
-          aria-live="assertive"
-        >
-          <div className="battle-ko-flash" />
-
-          <div className="battle-ko-content">
-            <p className="battle-ko-eyebrow">FIGHTER DEFEATED</p>
-
-            {knockout.defeatedImage && (
-              <img
-                className="battle-ko-portrait"
-                src={knockout.defeatedImage}
-                alt={knockout.defeated}
-              />
-            )}
-
-            <h1 className="battle-ko-title">K.O.!</h1>
-
-            <p className="battle-ko-name">{knockout.defeated}</p>
-
-            <p className="battle-ko-subtitle">
-              {knockout.defeatedTeam === "opponent"
-                ? "OPPONENT DOWN"
-                : "PLAYER DOWN"}
-            </p>
-          </div>
-        </div>
+        <KnockoutOverlay
+          fighter={{ name: knockout.defeated, image: knockout.defeatedImage }}
+          defeatedTeam={knockout.defeatedTeam}
+          isFadingOut={isKnockoutFadingOut}
+        />
       )}
 
       {/* Final winner-versus-defeated cards. */}
