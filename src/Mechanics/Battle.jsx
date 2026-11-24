@@ -994,8 +994,13 @@ const stunOptions = {
         </div>
       ) : knockout ? null : (
         <>
-          {/* Fighters and combat log share one layout. */}
+          {/* Horizontal arcade HUD matching the 2v2 battle foundation. */}
           <div id="battleLayout">
+            <header className="solo-battle-header">
+              <div className="solo-team-label solo-opponent-label">CPU OPPONENT</div>
+              <h1>WILD CARDS <span>ROUND {roundNumber}</span></h1>
+              <div className="solo-team-label solo-player-label">PLAYER</div>
+            </header>
             {/* Opponent's attack and defensive choices. */}
             {aiAttack && showIncomingAttack && (
               <div
@@ -1173,11 +1178,12 @@ const stunOptions = {
                   combatMessages={combatMessages}
                   combatEffect={combatEffects.player}
                   setCurrentTurn={setCurrentTurn}
+                  showFinishTurnButton={false}
                 />
               </div>
             </div>
 
-            {/* Permanent combat log beside the fighters. */}
+            {/* Bottom-left combat log, paired with the attack panel. */}
             <div id="combatLog">
               <div id="combatLogHeader">
                 <h4>📜 Combat Log</h4>
@@ -1201,10 +1207,8 @@ const stunOptions = {
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Player's attack cards stay below the battle layout. */}
-          <div id="attackSection">
+            <div id="attackSection">
             <AttackOptions
               character={character}
               opponent={opponent}
@@ -1218,6 +1222,18 @@ const stunOptions = {
               difficulty={location.state?.difficulty ?? "Easy"}
               onCombatEffect={triggerCombatEffect}
             />
+              <button
+                type="button"
+                className="solo-finish-turn-button"
+                disabled={currentTurn !== "player"}
+                onClick={() => {
+                  setCharacter({ ...character, turnFinished: true });
+                  setCurrentTurn("ai");
+                }}
+              >
+                FINISH TURN <span aria-hidden="true">➜</span>
+              </button>
+            </div>
           </div>
         </>
       )}
