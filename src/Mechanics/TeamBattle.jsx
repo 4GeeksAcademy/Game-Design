@@ -160,6 +160,7 @@ function FighterPreview({
   isSelected,
   onClick,
   canSelect = false,
+  combatEffect = null,
 }) {
   const percent = (value, maximum) =>
     maximum > 0
@@ -244,6 +245,19 @@ function FighterPreview({
           {fighter.image && (
             <div className={`fighter-portrait-wrapper ${hasStunnedAttacks ? "fighter-stunned" : ""}`}>
               <img className="fighter-portrait" src={fighter.image} alt="" />
+            </div>
+          )}
+          {combatEffect && (
+            <div key={combatEffect.id} className={`fighter-impact-overlay impact-${combatEffect.type}`}>
+              {combatEffect.damage > 0 && (
+                <strong className={`fighter-impact-number damage-tier-${combatEffect.tier}`}>
+                  {combatEffect.tier === "light" ? `+${combatEffect.damage}` : combatEffect.tier === "effective" ? `!${combatEffect.damage}` : combatEffect.tier === "heavy" ? `!!${combatEffect.damage}` : `FATAL ${combatEffect.damage}`}
+                </strong>
+              )}
+              {combatEffect.message && <span>{combatEffect.message}</span>}
+              {(combatEffect.effects ?? []).map((effect, index) => (
+                <b key={index} className={`fighter-impact-status effect-${effect.stat}`} style={{ animationDelay: `${index * 650}ms` }}>{effect.label}</b>
+              ))}
             </div>
           )}
           {fighter.health <= 0 && (
@@ -501,6 +515,7 @@ export default function TeamBattle() {
     "Choose your fighters' targets.",
   );
   const [combatPopups, setCombatPopups] = useState([]);
+  const [combatEffects, setCombatEffects] = useState({});
   const popupTimerRef = useRef(null);
   const teammateTargetTimerRef = useRef(null);
   // Remember which opponents the CPU teammate has faced during this battle.
@@ -1265,6 +1280,36 @@ export default function TeamBattle() {
 
     const damageActuallyDealt = Math.max(0, healthBefore - Math.max(0, defender.health));
     setDamageDealt((value) => value + damageActuallyDealt);
+
+    const appliedBuffs = Object.entries(result.buffsApplied ?? {})
+      .filter(([, amount]) => Number(amount) !== 0)
+      .map(([stat, amount]) => ({ stat, label: `↑ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+    const appliedDebuffs = Object.entries(result.debuffsApplied ?? {})
+      .filter(([, amount]) => Number(amount) !== 0)
+      .map(([stat, amount]) => ({ stat, label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+    const impactTier = damageActuallyDealt >= 70 ? "fatal" : damageActuallyDealt >= 45 ? "heavy" : damageActuallyDealt >= 20 ? "effective" : "light";
+    const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : damageActuallyDealt > 0 ? "damage" : "status";
+    setCombatEffects((current) => ({
+      ...current,
+      [defender.id]: {
+        id: Date.now() + Math.random(),
+        type: impactType,
+        damage: damageActuallyDealt,
+        tier: impactTier,
+        message: result.evaded ? "EVADED!" : result.action === "defend" ? "BLOCKED!" : "",
+        effects: appliedDebuffs,
+      },
+      ...(appliedBuffs.length ? {
+        [attacker.id]: {
+          id: Date.now() + Math.random(),
+          type: "status",
+          damage: 0,
+          tier: "light",
+          message: "",
+          effects: appliedBuffs,
+        },
+      } : {}),
+    }));
     if (!attacker.isCpuTeammate && damageActuallyDealt > 0) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
 
@@ -2684,6 +2729,7 @@ export default function TeamBattle() {
     setShowRoundIntro(true);
     setIsIntroFadingOut(false);
     setCombatPopups([]);
+    setCombatEffects({});
     lastFestivalDamage.current = 0;
     lastFestivalAttacks.current = 0;
     defenseResolvedRef.current = false;
@@ -3160,6 +3206,7 @@ export default function TeamBattle() {
                 team="opponent"
                 isSelected={false}
                 canSelect={phase === "fighting"}
+                combatEffect={combatEffects[fighter.id]}
                 onClick={() => {}}
               />
             ))}
@@ -3184,6 +3231,7 @@ export default function TeamBattle() {
                 fighter={fighter}
                 team="player"
                 isSelected={fighter.id === activePlayerId}
+                combatEffect={combatEffects[fighter.id]}
                 onClick={() => {
                   if (fighter.health > 0) setActivePlayerId(fighter.id);
                 }}
