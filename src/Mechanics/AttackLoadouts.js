@@ -3,6 +3,7 @@ import { spendCoins } from "./Currency.js";
 const LOADOUT_KEY = "wildCardsAttackLoadouts";
 const UNLOCKED_ATTACKS_KEY = "wildCardsUnlockedAttacks";
 const FESTIVAL_UNLOCKED_ATTACKS_KEY = "wildCardsFestivalUnlockedAttacks";
+const BOT_LOADOUT_KEY = "wildCardsBotAttackLoadouts";
 
 export function getAttackKey(attack) {
   return String(attack?.id ?? attack?.name ?? "");
@@ -93,6 +94,44 @@ export function resetEquippedAttackKeys(characterId, attacks = [], configuredSlo
     .slice(0, getAttackSlotLimit(configuredSlot ?? attacks))
     .map(getAttackKey);
   return saveEquippedAttackKeys(characterId, ownedKeys, attacks, configuredSlot);
+}
+
+function scoreBotAttack(attack) {
+  return Math.max(0, Number(attack.damage) || 0) * 1.5 +
+    Math.max(0, Number(attack.speed) || 0) * 0.5 +
+    (attack.buff ? 12 : 0) + (attack.debuff ? 14 : 0) +
+    (attack.heal ? 10 : 0) - Math.max(0, Number(attack.cost) || 0) * 0.6;
+}
+
+// CPU builds are independent from player Inventory equipment.
+export function getBotEquippedAttackKeys(characterId, attacks = [], configuredSlot) {
+  const saved = readObject(BOT_LOADOUT_KEY)[characterId];
+  const allowed = new Set(attacks.filter((attack) => isAttackUnlocked(characterId, attack)).map(getAttackKey));
+  const slotLimit = getAttackSlotLimit(configuredSlot ?? attacks);
+  if (Array.isArray(saved)) {
+    const valid = [...new Set(saved.filter((key) => allowed.has(key)))].slice(0, slotLimit);
+    if (valid.length) return valid;
+  }
+  return attacks.filter((attack) => isAttackUnlocked(characterId, attack))
+    .map((attack, index) => ({ attack, index }))
+    .sort((a, b) => scoreBotAttack(b.attack) - scoreBotAttack(a.attack) || a.index - b.index)
+    .slice(0, slotLimit).map(({ attack }) => getAttackKey(attack));
+}
+
+export function saveBotEquippedAttackKeys(characterId, keys, attacks = [], configuredSlot) {
+  const slotLimit = getAttackSlotLimit(configuredSlot ?? attacks);
+  const allowed = new Set(attacks.filter((attack) => isAttackUnlocked(characterId, attack)).map(getAttackKey));
+  const clean = [...new Set((keys ?? []).filter((key) => allowed.has(key)))].slice(0, slotLimit);
+  const saved = readObject(BOT_LOADOUT_KEY);
+  saved[characterId] = clean;
+  localStorage.setItem(BOT_LOADOUT_KEY, JSON.stringify(saved));
+  window.dispatchEvent(new CustomEvent("botAttackLoadoutUpdated", { detail: { characterId, keys: clean } }));
+  return clean;
+}
+
+export function getBotEquippedAttacks(characterId, attacks = [], configuredSlot) {
+  const keys = new Set(getBotEquippedAttackKeys(characterId, attacks, configuredSlot));
+  return attacks.filter((attack) => keys.has(getAttackKey(attack))).map((attack) => ({ ...attack }));
 }
 
 export function unlockFestivalAttack(characterId, attack) {
