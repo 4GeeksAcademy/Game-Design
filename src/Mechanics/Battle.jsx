@@ -291,7 +291,7 @@ function BattleMatch() {
       setComboState(null);
       return;
     }
-    const nextCount = comboStreakRef.current + 1;
+    const nextCount = Math.min(10, comboStreakRef.current + 1);
     comboStreakRef.current = nextCount;
     if (nextCount >= 3) {
       const stage = nextCount >= 10 ? 10 : nextCount >= 8 ? 8 : nextCount;
