@@ -63,7 +63,7 @@ function Opponent({ opponent, setOpponent, combatEffect = null, isAttacking = fa
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
               {combatEffect.damage > 0 && <strong className={`solo-damage-number damage-tier-${combatEffect.tier}`}>{combatEffect.tier === "light" ? `+${combatEffect.damage}` : combatEffect.tier === "effective" ? `!${combatEffect.damage}` : combatEffect.tier === "heavy" ? `!!${combatEffect.damage}` : `FATAL ${combatEffect.damage}`}</strong>}
               {combatEffect.message && <span>{combatEffect.message}</span>}
-              {(combatEffect.effects ?? []).map((effect, index) => <b key={index} className={`solo-effect-label effect-${effect.stat}`} style={{ animationDelay: `${index * 1050}ms` }}>{effect.label}</b>)}
+              {(combatEffect.effects ?? []).map((effect, index) => <b key={index} className={`solo-effect-label effect-${effect.stat}`} style={{ animationDelay: `${index * 650}ms` }}>{effect.label}</b>)}
             </div>
           )}
           <FighterInfo fighter={opponent} />
