@@ -3885,3 +3885,46 @@ battlefield > .local-coop-incoming {
   border: 0;
   box-shadow: none;
 }
+
+
+/* Fighter-specific impact feedback, matching the 1v1 combat language. */
+.fighter-impact-overlay {
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+.fighter-impact-number {
+  color: #fff;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(22px, 2.5vw, 42px);
+  font-weight: 1000;
+  line-height: 1;
+  -webkit-text-stroke: 1px #300b13;
+  text-shadow: 0 3px 0 #26060b, 0 0 12px #ff3159, 0 0 26px #ff3159;
+  animation: team-impact-pop 1.1s cubic-bezier(.15,.8,.25,1) both;
+}
+.fighter-impact-number.damage-tier-effective { animation: team-impact-effective 1.2s ease-out both; }
+.fighter-impact-number.damage-tier-heavy { color:#ffe7a3; font-size:clamp(28px,3.2vw,50px); animation:team-impact-heavy 1.35s ease-out both; }
+.fighter-impact-number.damage-tier-fatal { font-size:clamp(30px,3.8vw,58px); color:#fff; text-shadow:0 0 12px #ff3159,0 0 30px #ff3159,0 0 55px #ff3159; animation:team-impact-fatal 1.7s ease-out both; }
+.fighter-impact-overlay > span { padding:4px 9px; border:1px solid #ffffff70; border-radius:5px; color:#fff; background:#07101be8; font-size:10px; font-weight:1000; letter-spacing:1px; animation:team-impact-label .8s ease-out both; }
+.fighter-impact-status { position:absolute; left:50%; top:18%; padding:4px 8px; transform:translateX(-50%); border-radius:5px; color:#fff; background:#111d2bea; font-size:9px; font-weight:1000; white-space:nowrap; animation:team-impact-status 1.05s ease-out both; }
+.fighter-art-button:has(.impact-damage) .fighter-portrait { animation:team-hit-flash .48s ease-out; }
+.fighter-art-button:has(.impact-damage) { animation:team-hit-shake .42s ease-out; }
+.fighter-art-button:has(.impact-blocked) .fighter-portrait { animation:team-block-pulse .65s ease-out; }
+.fighter-art-button:has(.impact-evaded) .fighter-portrait { animation:team-evade-dodge .55s ease-out; }
+@keyframes team-impact-pop {0%{opacity:0;transform:translateY(20px) scale(.5)}18%{opacity:1;transform:translateY(-5px) scale(1.18)}75%{opacity:1}100%{opacity:0;transform:translateY(-48px) scale(.95)}}
+@keyframes team-impact-effective {0%{opacity:0;transform:scale(.5)}18%{opacity:1;transform:scale(1.2)}30%,45%{transform:translateX(-3px) rotate(-2deg)}38%,53%{transform:translateX(3px) rotate(2deg)}100%{opacity:0;transform:translateY(-50px)}}
+@keyframes team-impact-heavy {0%{opacity:0;transform:scale(.35) rotate(-8deg)}18%{opacity:1;transform:scale(1.3) rotate(3deg)}28%,45%{transform:translateX(-7px)}36%,54%{transform:translateX(7px)}100%{opacity:0;transform:translateY(-58px)}}
+@keyframes team-impact-fatal {0%{opacity:0;transform:scale(.2) rotate(-12deg)}14%{opacity:1;transform:scale(1.45) rotate(3deg)}24%,42%,60%{transform:translateX(-10px) scale(1.1)}33%,51%,69%{transform:translateX(10px) scale(1.1)}100%{opacity:0;transform:translateY(-65px) scale(.85)}}
+@keyframes team-hit-flash {0%,100%{filter:brightness(1)}20%,55%{filter:brightness(1.8) sepia(1) saturate(5) hue-rotate(315deg)}}
+@keyframes team-hit-shake {0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes team-block-pulse {0%{filter:brightness(1)}35%{filter:brightness(1.8) drop-shadow(0 0 24px #b9e8ff)}100%{filter:brightness(1)}}
+@keyframes team-evade-dodge {0%,100%{transform:translateX(0);opacity:1}45%{transform:translateX(24px);opacity:.55}}
+@keyframes team-impact-label {0%{opacity:0;transform:scale(.6)}20%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:translateY(-18px)}}
+@keyframes team-impact-status {0%,100%{opacity:0;transform:translate(-50%,8px) scale(.85)}25%,70%{opacity:1;transform:translate(-50%,0) scale(1)}}
