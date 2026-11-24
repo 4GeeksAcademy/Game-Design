@@ -99,7 +99,8 @@ function Character({
   const cooldown = getModifiedCharacterStat(character, "cooldown");
   const cooldownMax = getModifiedCharacterStat(character, "maximumCooldown") || 3;
   const recovery = getModifiedCharacterStat(character, "recovery");
-  const hasStun = character.attacks.some((attack) => (attack.stunned?.remainingRounds ?? 0) > 0);
+  const stunnedAttackCount = character.attacks.filter((attack) => (attack.stunned?.remainingRounds ?? 0) > 0).length;
+  const hasStun = stunnedAttackCount > 0;
   const effectClass = combatEffect?.type ? `combat-effect-${combatEffect.type}` : "";
 
   return (
@@ -126,6 +127,7 @@ function Character({
         >
           <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
             <img src={character.image} id="characterImage" alt={character.name} />
+            {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
           </div>
           {combatEffect?.target === "player" && (
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
