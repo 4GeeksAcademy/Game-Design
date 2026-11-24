@@ -2208,3 +2208,10 @@ body {
   .battle-finish-card img { height:clamp(145px,31vh,260px); }
   .battle-finish-vs { font-size:12px; }
 }
+
+
+/* Persistent stun indicator: remains until every disabled move recovers. */
+#battleLayout .solo-stun-status,.team-battle .team-stun-status { position:absolute;z-index:14;left:50%;top:52%;display:flex;flex-direction:column;align-items:center;gap:3px;width:max-content;max-width:94%;padding:8px 13px;transform:translate(-50%,-50%);border:2px solid #d7a8ff;border-radius:8px;color:#fff;background:linear-gradient(135deg,#5a1b91ed,#170b2df0);box-shadow:0 0 12px #c58aff,0 0 26px #a34dff,inset 0 0 12px #e6c4ff55;text-align:center;pointer-events:none;animation:stun-status-enter .42s cubic-bezier(.16,1,.3,1) both; }
+#battleLayout .solo-stun-status strong,.team-battle .team-stun-status strong { font:1000 italic clamp(14px,1.8vw,22px) Oxanium,Arial,sans-serif;letter-spacing:.12em;text-shadow:0 0 10px #fff; }
+#battleLayout .solo-stun-status small,.team-battle .team-stun-status small { color:#ead7ff;font:900 8px Oxanium,Arial,sans-serif;letter-spacing:.1em;white-space:nowrap; }
+@keyframes stun-status-enter { from { opacity:0;transform:translate(-50%,-35%) scale(.65); } to { opacity:1;transform:translate(-50%,-50%) scale(1); } }
