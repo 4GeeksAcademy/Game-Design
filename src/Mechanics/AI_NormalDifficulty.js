@@ -335,7 +335,7 @@ function createNormalAIController({
       currentAttack = null;
 
       if (result) {
-        onResolveAttack(attack, attacker, defender);
+        onResolveAttack(attack, attacker, defender, result);
       }
 
       if (isBattleOver()) {
