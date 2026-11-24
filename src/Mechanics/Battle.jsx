@@ -196,7 +196,7 @@ function RoundIntroHealthBar({ fighter }) {
   );
 }
 
-function App() {
+function BattleMatch() {
   const location = useLocation();
   const navigate = useNavigate();
   const levelConfig = location.state ?? {};
@@ -1252,6 +1252,32 @@ const stunOptions = {
       )}
     </div>
   );
+}
+
+function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const levelConfig = location.state ?? {};
+  const hasPlayer = roster.some((fighter) => fighter.id === levelConfig.playerId);
+  const hasOpponent = roster.some((fighter) => fighter.id === levelConfig.opponentId);
+
+  if (!hasPlayer || !hasOpponent) {
+    return (
+      <main className="battle-setup-error-screen">
+        <section className="battle-setup-error-card" role="alert">
+          <span className="battle-setup-error-icon" aria-hidden="true">?</span>
+          <p className="battle-setup-error-eyebrow">FIGHTER DATA NOT FOUND</p>
+          <h1>NO FIGHTERS SELECTED</h1>
+          <p>You haven't selected both characters for this match yet. Head back to character selection and choose your fighter and opponent before entering the arena.</p>
+          <button type="button" onClick={() => navigate("/character-select", { state: { ...levelConfig, teamSize: "1v1" } })}>
+            SELECT YOUR FIGHTERS <span>▶</span>
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  return <BattleMatch />;
 }
 
 export default App;
