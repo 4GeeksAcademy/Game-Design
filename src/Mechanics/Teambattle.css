@@ -4120,8 +4120,10 @@ battlefield > .local-coop-incoming {
   align-items:stretch;
   gap:clamp(8px,1.2vw,16px);
 }
-.team-finish-card {
+ .team-finish-card {
+  flex:1 1 0;
   min-width:0;
+  max-width:280px;
   width:clamp(145px,20vw,280px);
   min-height:clamp(250px,44vh,440px);
   padding:clamp(8px,1vw,14px);
