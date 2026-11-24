@@ -10,12 +10,14 @@ export default function BattleResultScreen({
   combatDefense = 0,
   attacksUsed = 0,
   difficulty = "Easy",
+  comboMultiplier = 1,
   onRematch,
   onMainMenu,
 }) {
   const navigate = useNavigate();
   const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[difficulty] ?? 1;
-  const score = Math.max(0, Math.floor((Number(damageDealt) + Number(combatDefense)) * multiplier));
+  const combo = Math.max(1, Number(comboMultiplier) || 1);
+  const score = Math.max(0, Math.floor((Number(damageDealt) + Number(combatDefense)) * multiplier * combo));
   const defeatedFighters = Array.isArray(defeated) ? defeated : defeated ? [defeated] : [];
   const winningFighters = Array.isArray(winner) ? winner : winner ? [winner] : [];
 
@@ -61,6 +63,7 @@ export default function BattleResultScreen({
         <div><span>ATTACKS USED</span><strong>{attacksUsed}</strong></div>
         <div><span>DEFENSES</span><strong>{combatDefense}</strong></div>
         <div><span>DIFFICULTY</span><strong>{difficulty.toUpperCase()} ×{multiplier}</strong></div>
+        <div><span>COMBO MULTIPLIER</span><strong>×{combo}</strong></div>
         <div className="wild-result-score"><span>TOTAL SCORE</span><strong>{score}</strong></div>
         <div className="wild-result-score"><span>COINS EARNED</span><strong>+{score}</strong></div>
       </section>
