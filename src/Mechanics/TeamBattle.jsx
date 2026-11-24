@@ -41,6 +41,7 @@ import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import BattleResultScreen from "./BattleResultScreen.jsx";
 import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
+import KnockoutOverlay from "./KnockoutOverlay.jsx";
 import "./Teambattle.css";
 
 function createBattleFighter(id, applyLoadout = true) {
@@ -2912,37 +2913,11 @@ export default function TeamBattle() {
       )}
 
       {knockout && (
-        <div
-          className={`team-ko-overlay ko-${knockout.defeatedTeam} ${
-            isKnockoutFadingOut ? "is-fading-out" : ""
-          }`}
-          role="alert"
-          aria-live="assertive"
-        >
-          <div className="team-ko-flash" />
-
-          <div className="team-ko-content">
-            <p className="team-ko-eyebrow">FIGHTER DEFEATED</p>
-
-            {knockout.image && (
-              <img
-                className="team-ko-portrait"
-                src={knockout.image}
-                alt={knockout.name}
-              />
-            )}
-
-            <h1 className="team-ko-title">K.O.!</h1>
-
-            <p className="team-ko-name">{knockout.name}</p>
-
-            <p className="team-ko-subtitle">
-              {knockout.defeatedTeam === "opponent"
-                ? "OPPONENT DOWN"
-                : "PLAYER DOWN"}
-            </p>
-          </div>
-        </div>
+        <KnockoutOverlay
+          fighter={knockout}
+          defeatedTeam={knockout.defeatedTeam}
+          isFadingOut={isKnockoutFadingOut}
+        />
       )}
       {(showRoundIntro || isIntroFadingOut) && (
         <RoundIntroOverlay
