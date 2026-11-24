@@ -124,7 +124,7 @@ function Character({
           className={`solo-fighter-art ${hasStun ? "fighter-stunned" : ""} ${effectClass}`}
           aria-label={`${character.name} fighter artwork. Focus or hover to view stats.`}
         >
-          <img key={combatEffect?.id ?? "idle"} src={character.image} id="characterImage" alt={character.name} />
+          <img src={character.image} id="characterImage" alt={character.name} />
           {combatEffect?.target === "player" && (
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
               {combatEffect.damage > 0 && (
