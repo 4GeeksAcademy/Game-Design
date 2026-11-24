@@ -3263,8 +3263,7 @@ export default function TeamBattle() {
           </div>
         </div>
 
-        <div className="battle-center">
-          <div className="versus-mark">VS</div>
+        <div className="battle-center" aria-live="polite">
           <p>{combatMessage}</p>
         </div>
 
