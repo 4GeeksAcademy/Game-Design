@@ -274,7 +274,7 @@ function App() {
   const [combatMessages, setCombatMessages] = useState([]);
   const [combatLog, setCombatLog] = useState([]);
   const [aiAttack, setAiAttack] = useState(null);
-  const [combatEffect, setCombatEffect] = useState(null);
+  const [combatEffects, setCombatEffects] = useState({});
 
   const resetBattle = useCallback(() => {
     aiControllerRef.current?.stop();
@@ -288,7 +288,7 @@ function App() {
     setDefenseTimeLeft(10); setCurrentTurn("intro"); setShowIncomingAttack(false);
     setRoundNumber(1); setShowRoundIntro(true); setKnockout(null); setShowResults(false);
     setIsRoundIntroFadingOut(false); setShowFinishOverlay(false); setIsFinishFadingOut(false);
-    setCombatMessages([]); setCombatLog([]); setAiAttack(null); setCombatEffect(null); setIsPaused(false);
+    setCombatMessages([]); setCombatLog([]); setAiAttack(null); setCombatEffects({}); setIsPaused(false);
   }, [playerId, opponentId]);
 
   useEffect(() => {
@@ -631,7 +631,11 @@ function App() {
 
   // Route a short-lived impact/status animation to the fighter actually affected.
   function triggerCombatEffect(effect) {
-    setCombatEffect({ ...effect, id: Date.now() + Math.random() });
+    const id = Date.now() + Math.random();
+    setCombatEffects((current) => ({
+      ...current,
+      [effect.target]: { ...effect, id },
+    }));
   }
 
   // Add messages to the popup queue and permanent combat log.
@@ -1139,7 +1143,7 @@ const stunOptions = {
                 id="opponentSection"
                 className={aiAttack ? "opponent-is-attacking" : ""}
               >
-                <Opponent opponent={opponent} setOpponent={setOpponent} combatEffect={combatEffect} />
+                <Opponent opponent={opponent} setOpponent={setOpponent} combatEffect={combatEffects.opponent} />
               </div>
 
               <div id="characterSection">
@@ -1148,7 +1152,7 @@ const stunOptions = {
                   setCharacter={setCharacter}
                   currentTurn={currentTurn}
                   combatMessages={combatMessages}
-                  combatEffect={combatEffect}
+                  combatEffect={combatEffects.player}
                   setCurrentTurn={setCurrentTurn}
                 />
               </div>
