@@ -1145,6 +1145,8 @@ export default function TeamBattle() {
     // ==========================================
 
     if (attack.heal) {
+      // A healing action does not connect with an opponent, so it ends the hit streak.
+      recordComboOutcome(false);
       let recipients = [];
 
       if (attack.heal.target === "all") {
