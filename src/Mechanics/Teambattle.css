@@ -4052,3 +4052,20 @@ battlefield > .local-coop-incoming {
 .team-battle .team-attack-card.team-attack-limited { border-color:#a5f51b; }
 .team-battle .team-attack-card.team-attack-limited-cooldown { border-color:#f6a43a; }
 .team-battle #combatPopupContainer { top:18px; right:18px; left:auto; bottom:auto; transform:none; align-items:flex-end; }
+
+/* Prismatic impact ring: shared with the 1v1 battle artwork. */
+.fighter-art-button:has(.impact-damage)::after {
+  content:"";
+  position:absolute;
+  z-index:8;
+  inset:5px;
+  border:3px solid transparent;
+  border-radius:12px;
+  background:conic-gradient(#ff3159,#ffb52e,#f7ed52,#5bff8a,#35eaff,#5574ff,#d45bff,#ff3159) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  pointer-events:none;
+  animation:team-spectrum-ring 1.15s linear both;
+}
+@keyframes team-spectrum-ring {0%{opacity:0;transform:scale(.94) rotate(0)}25%{opacity:1}100%{opacity:0;transform:scale(1.04) rotate(360deg)}}
