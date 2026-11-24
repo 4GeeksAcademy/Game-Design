@@ -718,7 +718,7 @@ function App() {
           ? { ...current, [effect.target]: null }
           : current,
       );
-    }, 2200);
+    }, 3000);
   }
 
   // Add messages to the popup queue and permanent combat log.
