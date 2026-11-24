@@ -89,6 +89,7 @@ function AttackOptions({
   canAttack = true,
   onPvPAttack,
   onCombatEffect,
+  onComboEvent,
 }) {
   const [pendingStunAttack, setPendingStunAttack] = useState(null);
   const openingTurnAttackLimitReached =
@@ -149,6 +150,8 @@ function AttackOptions({
       const damageAndDebuffs = effectStats
         .filter((effect) => effect.kind === "debuff")
         .map(({ stat, amount, kind }) => ({ stat, kind, label: stat === "stun" ? "STUN APPLIED" : `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+      // A combo advances only when damage lands or an opponent debuff/stun is applied.
+      onComboEvent?.(damage > 0 || damageAndDebuffs.length > 0);
       const selfBuffs = effectStats
         .filter((effect) => effect.kind === "buff")
         .map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
