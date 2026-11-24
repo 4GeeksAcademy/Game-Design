@@ -44,7 +44,8 @@ function FighterInfo({ fighter }) {
   );
 }
 function Opponent({ opponent, setOpponent, combatEffect = null, isAttacking = false }) {
-  const hasStun = opponent.attacks.some((attack) => (attack.stunned?.remainingRounds ?? 0) > 0);
+  const stunnedAttackCount = opponent.attacks.filter((attack) => (attack.stunned?.remainingRounds ?? 0) > 0).length;
+  const hasStun = stunnedAttackCount > 0;
   return (
     <div id="opponentSection" className={`solo-fighter-section opponent-fighter-section ${isAttacking ? "opponent-is-attacking" : ""}`}>
       <div id="opponent" className="solo-fighter-unit battle-status-panel">
@@ -60,6 +61,7 @@ function Opponent({ opponent, setOpponent, combatEffect = null, isAttacking = fa
         <div role="group" tabIndex={0} className={`solo-fighter-art ${combatEffect?.type ? `combat-effect-${combatEffect.type}` : ""}`} aria-label={`${opponent.name} fighter artwork. Hover or focus to view stats.`}>
           <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
             <img id="opponentImage" src={opponent.image} alt={opponent.name} />
+            {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
           </div>
           {combatEffect?.target === "opponent" && (
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
