@@ -720,6 +720,14 @@ const stunOptions = {
       setCharacter({ ...result.defender });
       const incomingDamage = Math.max(0, Number(result.damageReceived) || 0);
       triggerCombatEffect({
+        target: "opponent",
+        type: "attack",
+        damage: 0,
+        tier: "light",
+        message: "",
+        effects: [],
+      });
+      triggerCombatEffect({
         target: "player",
         type: choice === "defend" ? "blocked" : choice === "evade" && result.evaded ? "evaded" : incomingDamage > 0 ? "damage" : "status",
         damage: incomingDamage,
