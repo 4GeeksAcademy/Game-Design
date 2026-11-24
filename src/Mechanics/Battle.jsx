@@ -226,6 +226,7 @@ function App() {
   const rewardPaidRef = useRef(false);
 
   const aiControllerRef = useRef(null);
+  const aiAttackHealthBeforeRef = useRef(null);
 
   useEffect(() => {
     const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
@@ -517,12 +518,26 @@ function App() {
         getPlayer: () => characterRef.current,
 
         onShowAttack: (attack) => {
+          if (attack) aiAttackHealthBeforeRef.current = characterRef.current?.health ?? 0;
           setAiAttack(attack);
         },
 
         onResolveAttack: (attack, currentAI, currentPlayer) => {
-          showCombatMessage(`${currentAI.name} used ${attack.name}!`, "hit");
-
+          const before = Number(aiAttackHealthBeforeRef.current ?? currentPlayer.health);
+          const damage = Math.max(0, before - Math.max(0, Number(currentPlayer.health) || 0));
+          const hasStatus = Boolean(attack.debuff || attack.stun || attack.activeEffects?.length);
+          triggerCombatEffect({
+            target: "player",
+            type: damage > 0 ? "damage" : hasStatus ? "status" : "blocked",
+            damage,
+            tier: damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light",
+            message: attack.stun ? "STUNNED!" : "",
+            effects: [],
+          });
+          triggerCombatEffect({ target: "opponent", type: "attack", damage: 0, tier: "light", message: "", effects: [] });
+          showCombatMessage(`${currentAI.name} used ${attack.name}!`, damage > 0 ? "hit" : hasStatus ? "debuff" : "attack");
+          if (damage > 0) showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
+          if (attack.stun) showCombatMessage(`${currentPlayer.name} was stunned!`, "debuff");
           setOpponent({ ...currentAI });
           setCharacter({ ...currentPlayer });
         },
@@ -558,6 +573,23 @@ function App() {
       setOpponent({ ...opponent });
       setCharacter({ ...character });
       setAiAttack(null);
+    }, 2, (attack, currentAI, currentPlayer) => {
+      const before = Number(characterRef.current?.health ?? currentPlayer.health);
+      const damage = Math.max(0, before - Math.max(0, Number(currentPlayer.health) || 0));
+      const hasStatus = Boolean(attack.debuff || attack.stun || attack.activeEffects?.length);
+      triggerCombatEffect({
+        target: "player",
+        type: damage > 0 ? "damage" : hasStatus ? "status" : "blocked",
+        damage,
+        tier: damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light",
+        message: attack.stun ? "STUNNED!" : "",
+        effects: [],
+      });
+      triggerCombatEffect({ target: "opponent", type: "attack", damage: 0, tier: "light", message: "", effects: [] });
+      showCombatMessage(`${currentAI.name} used ${attack.name}!`, damage > 0 ? "hit" : hasStatus ? "debuff" : "attack");
+      if (damage > 0) showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
+      setOpponent({ ...currentAI });
+      setCharacter({ ...currentPlayer });
     });
     aiControllerRef.current = controller;
 
