@@ -84,8 +84,9 @@
   overflow: hidden;
   isolation: isolate;
 }
-.solo-combo-active .solo-portrait-wrapper::before,
-.team-combo-active .fighter-portrait-wrapper::before {
+#gameContainer.solo-combo-active #battleLayout .solo-portrait-wrapper::before,
+.team-battle.team-combo-active .fighter-art-button .fighter-portrait-wrapper::before,
+.team-battle.team-combo-active .fighter-portrait-wrapper::before {
   content: "";
   position: absolute;
   z-index: 3;
