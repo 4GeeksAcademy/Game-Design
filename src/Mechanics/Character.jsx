@@ -127,7 +127,7 @@ function Character({
           aria-label={`${character.name} fighter artwork. Focus or hover to view stats.`}
         >
           <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
-            <img src={character.image} id="characterImage" alt={character.name} />
+            <img key={combatEffect?.id ?? "idle"} src={character.image} id="characterImage" alt={character.name} />
             {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
           </div>
           {combatEffect?.target === "player" && (
