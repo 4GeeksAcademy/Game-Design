@@ -117,8 +117,9 @@ function Character({
           </div>
         </div>
 
-        <button
-          type="button"
+        <div
+          role="group"
+          tabIndex={0}
           className={`solo-fighter-art ${hasStun ? "fighter-stunned" : ""} ${effectClass}`}
           aria-label={`${character.name} fighter artwork. Focus or hover to view stats.`}
         >
@@ -142,7 +143,7 @@ function Character({
             </div>
           )}
           <FighterInfo fighter={character} />
-        </button>
+        </div>
 
         <div className="solo-combat-messages" aria-live="polite">
           {combatMessages.slice(0, 2).map((message, index) => (
