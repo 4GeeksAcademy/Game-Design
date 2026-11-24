@@ -4144,3 +4144,6 @@ battlefield > .local-coop-incoming {
   .team-finish-card { width:clamp(118px,43vw,190px); min-height:clamp(185px,34vh,270px); }
   .team-finish-card img { height:clamp(135px,27vh,220px); }
 }
+
+
+.team-battle .team-stun-status { top:50%;padding:7px 10px; }
