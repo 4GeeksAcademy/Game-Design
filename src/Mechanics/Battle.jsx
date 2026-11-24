@@ -718,7 +718,11 @@ const stunOptions = {
 
       setOpponent({ ...result.attacker });
       setCharacter({ ...result.defender });
-      const incomingDamage = Math.max(0, Number(result.damageReceived) || 0);
+      const incomingDamage = Math.max(
+        0,
+        Math.max(0, Number(character.health) || 0) -
+          Math.max(0, Number(result.defender?.health) || 0),
+      );
       triggerCombatEffect({
         target: "opponent",
         type: "attack",
