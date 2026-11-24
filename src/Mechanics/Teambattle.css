@@ -4274,21 +4274,26 @@ battlefield > .local-coop-incoming {
   animation: team-fighter-idle 3.9s ease-in-out infinite;
   will-change: transform;
 }
-.team-battle .fighter-name-marker {
-  top: 1px;
+.team-battle .fighter-hud-pointer {
+  position: relative;
+  z-index: 7;
+  align-self: center;
+  width: 0;
+  height: 0;
+  margin: -1px 0 -2px;
+  border-top: 9px solid #8deeff;
+  border-right: 8px solid transparent;
+  border-left: 8px solid transparent;
+  filter: drop-shadow(0 2px 3px #000b) drop-shadow(0 0 5px #20d9ff88);
+  animation: team-hud-float 5.4s ease-in-out infinite;
+  pointer-events: none;
 }
-.team-battle .fighter-name-marker span {
-  border-color: #20d9ff88;
-  font-size: 8px;
-}
-.team-battle .fighter-opponent .fighter-name-marker span {
-  border-color: #ff718788;
-}
-.team-battle .fighter-name-marker i {
-  border-top-color: #8deeff;
-}
-.team-battle .fighter-opponent .fighter-name-marker i {
+.team-battle .fighter-opponent .fighter-hud-pointer {
   border-top-color: #ff8193;
+  filter: drop-shadow(0 2px 3px #000b) drop-shadow(0 0 5px #ff315988);
+}
+.team-battle .fighter-unit:nth-child(even) .fighter-hud-pointer {
+  animation-delay: -2.7s;
 }
 @keyframes team-hud-float {
   0%, 100% { transform: translateY(0); }
