@@ -319,13 +319,16 @@ function SegmentedMeter({ label, value, maximum, type, title }) {
 
 function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty = "Normal") {
   const player = playerTeamIds.map((id, index) => {
-    const fighter = createBattleFighter(id, true);
+    const isCpuTeammate = isCpuAssist && index === 1;
+    const fighter = createBattleFighter(
+      id,
+      true,
+      isCpuTeammate && difficulty === "Hard",
+    );
 
     if (!fighter) return null;
 
-    return isCpuAssist && index === 1
-      ? { ...fighter, isCpuTeammate: true }
-      : fighter;
+    return isCpuTeammate ? { ...fighter, isCpuTeammate: true } : fighter;
   });
 
   return {
