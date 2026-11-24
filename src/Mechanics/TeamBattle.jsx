@@ -42,6 +42,7 @@ import {
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import BattleResultScreen from "./BattleResultScreen.jsx";
+import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import "./Teambattle.css";
 
 function createBattleFighter(id, applyLoadout = true) {
@@ -2852,36 +2853,17 @@ export default function TeamBattle() {
       );
     }
 
-    return won ? (
-      <VictoryScreen
-        damageDealt={damageDealt}
-        combatDefense={combatDefense}
-        difficulty={difficulty}
-        attacksUsed={attacksUsed}
-        message="Your team has defeated the opposing team!"
-        onRematch={resetBattle}
-      />
-    ) : (
-      <GameOverScreen
-        damageDealt={damageDealt}
-        combatDefense={combatDefense}
-        difficulty={difficulty}
-        attacksUsed={attacksUsed}
-        message="Your entire team has been defeated."
-        onRematch={resetBattle}
-      />
-    );
-  }
-
-  if (phase === "defeat" && !knockout && teamFinishComplete) {
     return (
-      <GameOverScreen
+      <BattleResultScreen
+        won={won}
+        defeated={defeatedTeam}
+        winner={winningTeam}
         damageDealt={damageDealt}
         combatDefense={combatDefense}
-        difficulty={difficulty}
         attacksUsed={attacksUsed}
-        message="Your entire team has been defeated."
+        difficulty={difficulty}
         onRematch={resetBattle}
+        onMainMenu={() => navigate("/")}
       />
     );
   }
@@ -2891,20 +2873,8 @@ export default function TeamBattle() {
       <FestivalChallengePopup />
       <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>
       {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: levelConfig })} onMainMenu={() => navigate("/")} />}
-      {isFinalTeamPhase && !isStoryMode && (
-        <BattleResultScreen
-          won={phase === "victory"}
-          defeated={defeatedTeam}
-          winner={winningTeam}
-          damageDealt={damageDealt}
-          combatDefense={combatDefense}
-          attacksUsed={attacksUsed}
-          difficulty={difficulty}
-          onRematch={resetBattle}
-          onMainMenu={() => navigate("/")}
-        />
-      )}
-      {isFinalTeamPhase && isStoryMode && (
+
+      {isFinalTeamPhase && isStoryMode && !knockout && (
 <div
           className={`team-finish-overlay ${
             phase === "victory" ? "finish-victory" : "finish-defeat"
@@ -3006,97 +2976,12 @@ export default function TeamBattle() {
         </div>
       )}
       {(showRoundIntro || isIntroFadingOut) && (
-        <div
-          className={`team-round-intro ${
-            isIntroFadingOut ? "is-hiding" : "is-visible"
-          }`}
-          role="status"
-          aria-hidden={isIntroFadingOut}
-        >
-          <div className="team-round-intro__eyebrow">Wild Cards</div>
-
-          <h1 className="team-round-intro__round">ROUND {roundNumber}</h1>
-
-          <div className="team-round-intro__matchup">
-            <div className="team-round-intro__team team-round-intro__team--cpu">
-              <div className="team-round-intro__label">CPU TEAM</div>
-
-              <div className="team-round-intro__fighters">
-                {teams.opponent.map((fighter) => {
-                  const isKO = fighter.health <= 0;
-
-                  return (
-                    <div
-                      className={`team-round-intro__fighter ${
-                        isKO ? "is-defeated" : "is-alive"
-                      }`}
-                      key={fighter.id}
-                    >
-                      {fighter.image && <img src={fighter.image} alt="" />}
-
-                      <RoundIntroHealthBar fighter={fighter} />
-
-                      <span className="team-round-intro__name">
-                        {fighter.name}
-                      </span>
-
-                      <span
-                        className={`team-round-intro__status ${
-                          isKO ? "status-ko" : "status-alive"
-                        }`}
-                      >
-                        {isKO
-                          ? "K.O."
-                          : `HP ${Math.max(0, fighter.health)} / ${fighter.maximumHealth}`}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="team-round-intro__vs">VS</div>
-
-            <div className="team-round-intro__team team-round-intro__team--player">
-              <div className="team-round-intro__label">PLAYER TEAM</div>
-
-              <div className="team-round-intro__fighters">
-                {teams.player.map((fighter) => {
-                  const isKO = fighter.health <= 0;
-
-                  return (
-                    <div
-                      className={`team-round-intro__fighter ${
-                        isKO ? "is-defeated" : "is-alive"
-                      }`}
-                      key={fighter.id}
-                    >
-                      {fighter.image && <img src={fighter.image} alt="" />}
-
-                      <RoundIntroHealthBar fighter={fighter} />
-
-                      <span className="team-round-intro__name">
-                        {fighter.name}
-                      </span>
-
-                      <span
-                        className={`team-round-intro__status ${
-                          isKO ? "status-ko" : "status-alive"
-                        }`}
-                      >
-                        {isKO
-                          ? "K.O."
-                          : `HP ${Math.max(0, fighter.health)} / ${fighter.maximumHealth}`}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="team-round-intro__footer">GET READY</div>
-        </div>
+        <RoundIntroOverlay
+          roundNumber={roundNumber}
+          opponentTeam={teams.opponent}
+          playerTeam={teams.player}
+          isFadingOut={isIntroFadingOut}
+        />
       )}
       {combatPopups.length > 0 && (
         <div id="combatPopupContainer" aria-live="polite">
