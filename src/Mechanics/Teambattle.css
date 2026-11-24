@@ -3954,3 +3954,5 @@ battlefield > .local-coop-incoming {
 .fighter-art-button:has(.effect-agility) { filter:drop-shadow(0 0 13px #ffe45baa); }
 .fighter-art-button:has(.effect-manaRegen) { filter:drop-shadow(0 0 13px #35bfffaa); }
 .fighter-art-button:has(.effect-stun) { filter:drop-shadow(0 0 16px #b56cffcc); }
+
+.fighter-art-button:has(.effect-stun) { filter:drop-shadow(0 0 16px #b56cffcc); }
