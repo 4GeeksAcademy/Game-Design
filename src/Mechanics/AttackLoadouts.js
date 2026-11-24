@@ -85,6 +85,16 @@ export function saveEquippedAttackKeys(characterId, keys, attacks = [], configur
   return clean;
 }
 
+// Restore this fighter's loadout to their currently owned/unlocked attacks.
+// Ownership and unlock records are intentionally left untouched.
+export function resetEquippedAttackKeys(characterId, attacks = [], configuredSlot) {
+  const ownedKeys = attacks
+    .filter((attack) => isAttackUnlocked(characterId, attack))
+    .slice(0, getAttackSlotLimit(configuredSlot ?? attacks))
+    .map(getAttackKey);
+  return saveEquippedAttackKeys(characterId, ownedKeys, attacks, configuredSlot);
+}
+
 export function unlockFestivalAttack(characterId, attack) {
   if (!attack?.festivalExclusive) return false;
   const key = getAttackKey(attack);
