@@ -3947,8 +3947,8 @@ battlefield > .local-coop-incoming {
 
 .fighter-art-button:has(.impact-attack) .fighter-portrait { animation: team-attack-lunge .46s cubic-bezier(.2,.8,.25,1); }
 .player-team .fighter-art-button:has(.impact-attack) .fighter-portrait { animation-name: team-attack-lunge-left; }
-@keyframes team-attack-lunge { 0%,100%{transform:translateX(0) scale(1)}42%{transform:translateX(-46px) scale(1.05)} }
-@keyframes team-attack-lunge-left { 0%,100%{transform:translateX(0) scale(1)}42%{transform:translateX(46px) scale(1.05)} }
+@keyframes team-attack-lunge { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(28px) scale(1.04)} }
+@keyframes team-attack-lunge-left { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(-28px) scale(1.04)} }
 
 .fighter-art-button:has(.effect-defense) { filter:drop-shadow(0 0 13px #aeb7c4aa); }
 .fighter-art-button:has(.effect-agility) { filter:drop-shadow(0 0 13px #ffe45baa); }
@@ -4306,4 +4306,12 @@ battlefield > .local-coop-incoming {
 @media (prefers-reduced-motion: reduce) {
   .team-battle .fighter-hud,
   .team-battle .fighter-portrait { animation: none !important; }
+}
+
+
+/* Keep the 2v2 finish control fully visible below the attack cards. */
+.team-battle .player-attack-panel .finish-turn-button {
+  position: relative;
+  transform: translateY(-5px);
+  margin-bottom: 2px;
 }
