@@ -18,7 +18,7 @@ import {
   tickSelfModifiers,
 } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
-import { getEquippedAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
 import { addCoins } from "./Currency.js";
 import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
@@ -44,7 +44,7 @@ import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import KnockoutOverlay from "./KnockoutOverlay.jsx";
 import "./Teambattle.css";
 
-function createBattleFighter(id) {
+function createBattleFighter(id, isCpuControlled = false) {
   const selected = roster.find((fighter) => fighter.id === id);
   if (!selected?.data) return null;
 
@@ -65,9 +65,11 @@ function createBattleFighter(id) {
       typeof data.defense === "object" && data.defense
         ? { ...data.defense }
         : data.defense,
-    // Difficulty changes CPU decision-making, never attack ownership.
-    attacks: getEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
-      .map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
+    // CPU fighters use their independent Bot Simulator build.
+    attacks: (isCpuControlled
+      ? getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+      : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+    ).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
         ? attack.uses
         : attack.remainingUses;
@@ -319,7 +321,7 @@ function SegmentedMeter({ label, value, maximum, type, title }) {
 function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty = "Normal") {
   const player = playerTeamIds.map((id, index) => {
     const isCpuTeammate = isCpuAssist && index === 1;
-    const fighter = createBattleFighter(id);
+    const fighter = createBattleFighter(id, isCpuTeammate);
 
     if (!fighter) return null;
 
@@ -328,7 +330,7 @@ function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficul
 
   return {
     player,
-    opponent: opponentTeamIds.map((id) => createBattleFighter(id)),
+    opponent: opponentTeamIds.map((id) => createBattleFighter(id, true)),
   };
 }
 
@@ -1055,11 +1057,12 @@ export default function TeamBattle() {
 
     const attack = attacker.attacks[attackIndex];
     const rosterFighter = roster.find((entry) => entry.id === attacker.id);
+    const cpuControlled = attacker.isCpuTeammate ||
+      teams.opponent.some((fighter) => fighter.id === attacker.id);
     const allowedAttackKeys = new Set(
-      getEquippedAttacks(
-        attacker.id,
-        rosterFighter?.data?.attacks ?? [],
-        rosterFighter?.data?.slot,
+      (cpuControlled
+        ? getBotEquippedAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
+        : getEquippedAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
       ).map(getAttackKey),
     );
 
