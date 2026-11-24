@@ -207,6 +207,7 @@ function FighterPreview({
             title={`Recovery: ${recoveryCurrent}/${recoveryMaximum}`}
           />
         </div>
+        <div className="fighter-hud-pointer" aria-hidden="true" />
       </div>
 
       <button
@@ -217,7 +218,6 @@ function FighterPreview({
         aria-label={`${fighter.name}, ${fighter.health} of ${fighter.maximumHealth} health, ${fighter.mana} of ${fighter.maximumMana} mana. Hover or focus for fighter stats.`}
       >
         <div className="fighter-portrait-stage">
-          <div className="fighter-name-marker" aria-hidden="true"><span>{fighter.name}</span><i /></div>
           {fighter.image && (
             <div className={`fighter-portrait-wrapper ${hasStunnedAttacks ? "fighter-stunned" : ""}`}>
               <img className="fighter-portrait" src={fighter.image} alt="" />
