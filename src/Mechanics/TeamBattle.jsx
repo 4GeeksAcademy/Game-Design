@@ -39,6 +39,7 @@ import {
 } from "./AI_NormalDifficulty.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
+import ComboPopup from "./ComboPopup.jsx";
 import BattleResultScreen from "./BattleResultScreen.jsx";
 import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import KnockoutOverlay from "./KnockoutOverlay.jsx";
@@ -503,14 +504,43 @@ export default function TeamBattle() {
   const [damageDealt, setDamageDealt] = useState(0);
   const [combatDefense, setCombatDefense] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
+  const [comboState, setComboState] = useState(null);
+  const [highestCombo, setHighestCombo] = useState(0);
+  const comboStreakRef = useRef(0);
+  const highestComboRef = useRef(0);
+  const recordComboOutcome = useCallback((successful) => {
+    if (!successful) {
+      comboStreakRef.current = 0;
+      setComboState(null);
+      return;
+    }
+    const nextCount = comboStreakRef.current + 1;
+    comboStreakRef.current = nextCount;
+    if (nextCount >= 3) {
+      const stage = nextCount >= 10 ? 10 : nextCount >= 8 ? 8 : nextCount;
+      setComboState({ count: nextCount, stage, id: Date.now() + Math.random() });
+      if (nextCount > highestComboRef.current) {
+        highestComboRef.current = nextCount;
+        setHighestCombo(nextCount);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "fighting") {
+      comboStreakRef.current = 0;
+      setComboState(null);
+    }
+  }, [phase]);
+
   const teamRewardPaidRef = useRef(false);
   useEffect(() => {
     if (!isStoryMode && (phase === "victory" || phase === "defeat") && !teamRewardPaidRef.current) {
       teamRewardPaidRef.current = true;
       const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[difficulty] ?? 1;
-      addCoins(Math.floor((damageDealt + combatDefense) * multiplier));
+      addCoins(Math.floor((damageDealt + combatDefense) * multiplier * Math.max(1, highestCombo)));
     }
-  }, [phase, isStoryMode, difficulty, damageDealt, combatDefense]);
+  }, [phase, isStoryMode, difficulty, damageDealt, combatDefense, highestCombo]);
 
   // Prevent previously recorded damage from being counted again.
   const lastFestivalDamage = useRef(0);
@@ -1285,6 +1315,7 @@ export default function TeamBattle() {
     if (result.stunnedAttacks?.length) {
       appliedDebuffs.push({ stat: "stun", label: "STUN APPLIED" });
     }
+    recordComboOutcome(damageActuallyDealt > 0 || appliedDebuffs.length > 0);
     const impactTier = damageActuallyDealt >= 70 ? "fatal" : damageActuallyDealt >= 45 ? "heavy" : damageActuallyDealt >= 20 ? "effective" : "light";
     const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : damageActuallyDealt > 0 ? "damage" : "status";
     const attackerEffectId = Date.now() + Math.random();
@@ -2767,6 +2798,8 @@ export default function TeamBattle() {
     setDamageDealt(0);
     setCombatDefense(0);
     setAttacksUsed(0);
+    comboStreakRef.current = 0; highestComboRef.current = 0;
+    setComboState(null); setHighestCombo(0);
     teamRewardPaidRef.current = false;
     setCombatLog(["Choose your fighters' targets."]);
     setCombatMessage("Choose your fighters' targets.");
@@ -2855,6 +2888,7 @@ export default function TeamBattle() {
         combatDefense={combatDefense}
         attacksUsed={attacksUsed}
         difficulty={difficulty}
+        comboMultiplier={Math.max(1, highestCombo)}
         onRematch={resetBattle}
         onMainMenu={() => navigate("/")}
       />
@@ -2862,8 +2896,9 @@ export default function TeamBattle() {
   }
 
   return (
-    <main className="team-battle">
+    <main className={`team-battle ${comboState ? "team-combo-active" : ""}`}>
       <FestivalChallengePopup />
+      <ComboPopup combo={comboState} />
       <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>
       {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: levelConfig })} onMainMenu={() => navigate("/")} />}
 
