@@ -307,6 +307,7 @@ function AttackDetails({ attack, characterName, characterId, onClose, onUnlock }
 
 
 function AttackLoadoutEditor({ character }) {
+  const navigate = useNavigate();
   const [equipped, setEquipped] = useState([]);
   const [notice, setNotice] = useState("");
   const attacks = character?.data?.attacks ?? [];
@@ -362,7 +363,7 @@ function AttackLoadoutEditor({ character }) {
         <span>{attack.damage ?? 0} DMG · {attack.cost ?? 0} MANA</span>
         {mode === "locked" ? (
           attack.festivalExclusive ? (
-            <span className="loadout-festival-exclusive">FESTIVAL EXCLUSIVE · CLAIM IN FESTIVAL</span>
+            <button type="button" className="loadout-festival-exclusive" onClick={() => navigate("/festival")}>FESTIVAL EXCLUSIVE · CLAIM IN FESTIVAL ↗</button>
           ) : (
           <button onClick={() => unlock(attack)}>UNLOCK · ◈ {attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}</button>
           )
