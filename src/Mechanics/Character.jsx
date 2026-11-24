@@ -118,6 +118,7 @@ function Character({
             <Segments label="REC" value={recovery} maximum={10} type="recovery" />
           </div>
         </div>
+        <div className="solo-hud-pointer" aria-hidden="true" />
 
         <div
           role="group"
@@ -125,7 +126,6 @@ function Character({
           className={`solo-fighter-art ${effectClass}`}
           aria-label={`${character.name} fighter artwork. Focus or hover to view stats.`}
         >
-          <div className="solo-fighter-marker" aria-hidden="true"><span>{character.name}</span><i /></div>
           <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
             <img src={character.image} id="characterImage" alt={character.name} />
             {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
