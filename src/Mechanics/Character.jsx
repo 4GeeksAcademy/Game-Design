@@ -127,7 +127,7 @@ function Character({
         >
           <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
             <img src={character.image} id="characterImage" alt={character.name} />
-            {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
+            {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
           </div>
           {combatEffect?.target === "player" && (
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
