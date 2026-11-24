@@ -1163,24 +1163,22 @@ const stunOptions = {
                 />
               )}
 
-              <div
-                id="opponentSection"
-                className={aiAttack ? "opponent-is-attacking" : ""}
-              >
-                <Opponent opponent={opponent} setOpponent={setOpponent} combatEffect={combatEffects.opponent} />
-              </div>
+              <Opponent
+                opponent={opponent}
+                setOpponent={setOpponent}
+                combatEffect={combatEffects.opponent}
+                isAttacking={Boolean(aiAttack)}
+              />
 
-              <div id="characterSection">
-                <Character
-                  character={character}
-                  setCharacter={setCharacter}
-                  currentTurn={currentTurn}
-                  combatMessages={combatMessages}
-                  combatEffect={combatEffects.player}
-                  setCurrentTurn={setCurrentTurn}
-                  showFinishTurnButton={false}
-                />
-              </div>
+              <Character
+                character={character}
+                setCharacter={setCharacter}
+                currentTurn={currentTurn}
+                combatMessages={combatMessages}
+                combatEffect={combatEffects.player}
+                setCurrentTurn={setCurrentTurn}
+                showFinishTurnButton={false}
+              />
             </div>
 
             {/* Bottom-left combat log, paired with the attack panel. */}
