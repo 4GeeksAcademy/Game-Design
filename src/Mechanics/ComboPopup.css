@@ -78,15 +78,14 @@
 @keyframes combo-hit-ten { 0%,100% { transform:scale(1); filter:brightness(1); box-shadow:0 0 0 3px #ffffff12,0 0 22px #6deaff99,inset 0 0 20px #ffffff12; } 50% { transform:scale(1.045); filter:brightness(1.35); box-shadow:0 0 0 5px #ffffff22,0 0 38px #6deaffdd,0 0 70px #d45bff66,inset 0 0 28px #ffffff2a; } }
 
 /* The prismatic color is now tied to an active combo, not to damage size. */
-.solo-combo-active .solo-portrait-wrapper,
-.team-combo-active .fighter-portrait-wrapper {
+#gameContainer.solo-combo-active #battleLayout #opponentSection .solo-portrait-wrapper,
+.team-battle.team-combo-active .fighter-opponent .fighter-portrait-wrapper {
   position: relative;
   overflow: hidden;
   isolation: isolate;
 }
-#gameContainer.solo-combo-active #battleLayout .solo-portrait-wrapper::before,
-.team-battle.team-combo-active .fighter-art-button .fighter-portrait-wrapper::before,
-.team-battle.team-combo-active .fighter-portrait-wrapper::before {
+#gameContainer.solo-combo-active #battleLayout #opponentSection .solo-portrait-wrapper::before,
+.team-battle.team-combo-active .fighter-opponent .fighter-portrait-wrapper::before {
   content: "";
   position: absolute;
   z-index: 3;
@@ -105,6 +104,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .wild-combo-popup, .wild-combo-popup::before,
-  .solo-combo-active .solo-portrait-wrapper::before,
-  .team-combo-active .fighter-portrait-wrapper::before { animation: none !important; }
+  #gameContainer.solo-combo-active #battleLayout #opponentSection .solo-portrait-wrapper::before,
+  .team-battle.team-combo-active .fighter-opponent .fighter-portrait-wrapper::before { animation: none !important; }
 }
