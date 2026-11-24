@@ -5535,3 +5535,8 @@ body {
   0%,100%{transform:translateX(0) scale(1)}
   45%{transform:translateX(-34px) scale(1.045)}
 }
+
+.solo-fighter-art:has(.effect-defense) { filter:drop-shadow(0 0 15px #aeb7c4aa); }
+.solo-fighter-art:has(.effect-agility) { filter:drop-shadow(0 0 15px #ffe45baa); }
+.solo-fighter-art:has(.effect-manaRegen) { filter:drop-shadow(0 0 15px #35bfffaa); }
+.solo-fighter-art:has(.effect-stun) { filter:drop-shadow(0 0 17px #b56cffcc); }
