@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { roster } from "./CharacterSelection.jsx";
 import { getUnlockedCharacters } from "../Currency.js";
 import { skins } from "../Skins.js";
-import { getAttackKey, getAttackDisplayName, getAttackSlotLimit, getEquippedAttackKeys, saveEquippedAttackKeys, isAttackUnlocked, unlockAttack } from "../AttackLoadouts.js";
+import { getAttackKey, getAttackDisplayName, getAttackSlotLimit, getEquippedAttackKeys, saveEquippedAttackKeys, resetEquippedAttackKeys, isAttackUnlocked, unlockAttack } from "../AttackLoadouts.js";
 
 import {
   getOwnedSkins,
@@ -330,6 +330,12 @@ function AttackLoadoutEditor({ character }) {
     setNotice("LOADOUT SAVED — READY FOR BATTLE");
   };
 
+  const resetToOwned = () => {
+    const resetKeys = resetEquippedAttackKeys(character.id, attacks, character.data.slot);
+    setEquipped(resetKeys);
+    setNotice(`LOADOUT RESET — ${resetKeys.length} OWNED ATTACKS EQUIPPED`);
+  };
+
   const unlock = (attack) => {
     if (unlockAttack(character.id, attack)) {
       setNotice(`${getAttackDisplayName(attack)} UNLOCKED`);
@@ -385,9 +391,14 @@ function AttackLoadoutEditor({ character }) {
             <strong>{equipped.length} / {slots}</strong>
             <span>ATTACK SLOTS EQUIPPED</span>
           </div>
-          <button className="loadout-save-button" onClick={save}>
-            SAVE {character.data.name.toUpperCase()} LOADOUT
-          </button>
+          <div className="loadout-action-buttons">
+            <button className="loadout-save-button" onClick={save}>
+              SAVE {character.data.name.toUpperCase()} LOADOUT
+            </button>
+            <button className="loadout-reset-button" onClick={resetToOwned}>
+              RESET TO OWNED ATTACKS
+            </button>
+          </div>
           {notice && <p className="loadout-save-message">{notice}</p>}
         </div>
       </header>
