@@ -139,15 +139,31 @@ function AttackOptions({
         ...Object.entries(result.debuffsApplied ?? {}).map(([stat, amount]) => ({ stat, amount, kind: "debuff" })),
       ].filter((effect) => Number(effect.amount) !== 0);
       const tier = damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light";
+      const damageAndDebuffs = effectStats
+        .filter((effect) => effect.kind === "debuff")
+        .map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+      const selfBuffs = effectStats
+        .filter((effect) => effect.kind === "buff")
+        .map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+
       onCombatEffect?.({
-        id: Date.now() + Math.random(),
-        target: result.action === "defend" || result.action === "evade" ? "opponent" : "opponent",
-        type: result.action === "defend" ? "blocked" : result.action === "evade" ? "evaded" : damage > 0 ? "damage" : effectStats.length ? "status" : "attack",
+        target: "opponent",
+        type: result.action === "defend" ? "blocked" : result.action === "evade" ? "evaded" : damage > 0 ? "damage" : damageAndDebuffs.length ? "status" : "attack",
         damage,
         tier,
         message: result.action === "defend" ? "BLOCKED!" : result.action === "evade" ? (result.evaded ? "EVADED!" : "FAILED TO EVADE!") : "",
-        effects: effectStats.map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` })),
+        effects: damageAndDebuffs,
       });
+      if (selfBuffs.length) {
+        onCombatEffect?.({
+          target: "player",
+          type: "status",
+          damage: 0,
+          tier: "light",
+          message: "",
+          effects: selfBuffs,
+        });
+      }
 
       setAttacksUsed((previous) => previous + 1);
       showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
