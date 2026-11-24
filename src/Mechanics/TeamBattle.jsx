@@ -706,6 +706,21 @@ export default function TeamBattle() {
       return;
     }
 
+    // Clicking the currently selected opponent again deselects that target.
+    if (roundTargets[fighterId] === opponentId) {
+      setRoundTargets((current) => {
+        const updated = { ...current };
+        delete updated[fighterId];
+        return updated;
+      });
+      if (player.isCpuTeammate && teammateTargetTimerRef.current) {
+        clearTimeout(teammateTargetTimerRef.current);
+        teammateTargetTimerRef.current = null;
+      }
+      addLog(`${player.name} is no longer assigned to ${opponent.name}.`);
+      return;
+    }
+
     if (player.isCpuTeammate && teammateTargetTimerRef.current) {
       clearTimeout(teammateTargetTimerRef.current);
       teammateTargetTimerRef.current = null;
@@ -727,7 +742,7 @@ export default function TeamBattle() {
     const removeTimer = setTimeout(() => {
       setShowRoundIntro(false);
       setIsIntroFadingOut(false);
-    }, 3000);
+    }, 7000);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -2958,57 +2973,78 @@ export default function TeamBattle() {
 
       {phase === "selecting" && (
         <div className="target-modal-backdrop">
-          <section className="target-modal">
-            <p className="eyebrow">ROUND {roundNumber}</p>
-            <h2>Choose your opponents</h2>
-            <p>
-              Assign each opponent to one teammate. Any remaining teammate skips
-              this round.
+          <section className="target-modal battle-pause-panel">
+            <header className="battle-pause-header target-modal-header">
+              <span>WILD CARDS · ROUND {roundNumber}</span>
+              <h2>SELECT YOUR TARGETS</h2>
+            </header>
+            <p className="target-modal-instructions">
+              Assign each available opponent to one teammate. Select an active target again to clear it.
             </p>
 
             {livingPlayers.map((player) => (
               <div className="target-choice-group" key={player.id}>
-                <h3>{player.name}</h3>
-                {livingOpponents
-                  .filter((opponent) => {
-                    const assignedToAnotherPlayer = Object.entries(
-                      roundTargets,
-                    ).some(
-                      ([assignedPlayer, assignedOpponent]) =>
-                        assignedPlayer !== player.id &&
-                        assignedOpponent === opponent.id,
-                    );
-
-                    return !assignedToAnotherPlayer;
-                  })
-                  .map((opponent) => {
-                    const selected = roundTargets[player.id] === opponent.id;
-
-                    return (
-                      <button
-                        key={opponent.id}
-                        type="button"
-                        className={`target-choice-button ${
-                          selected ? "is-selected" : ""
-                        }`}
-                        onClick={() =>
-                          selectRoundTarget(player.id, opponent.id)
-                        }
-                      >
-                        {opponent.name}
-                        {selected ? " ✓" : ""}
-                      </button>
-                    );
-                  })}
+                <div className="target-player-heading">
+                  {player.image && <img src={player.image} alt="" />}
+                  <div>
+                    <h3>{player.name}</h3>
+                    <span>{player.isCpuTeammate ? "CPU ALLY" : "YOUR FIGHTER"}</span>
+                  </div>
+                  {roundTargets[player.id] && (
+                    <button
+                      type="button"
+                      className="target-clear-button"
+                      onClick={() => {
+                        const target = teams.opponent.find((item) => item.id === roundTargets[player.id]);
+                        if (target) selectRoundTarget(player.id, target.id);
+                      }}
+                    >
+                      CLEAR ×
+                    </button>
+                  )}
+                </div>
+                <div className="target-opponent-grid">
+                  {livingOpponents
+                    .filter((opponent) => {
+                      const assignedToAnotherPlayer = Object.entries(roundTargets).some(
+                        ([assignedPlayer, assignedOpponent]) =>
+                          assignedPlayer !== player.id && assignedOpponent === opponent.id,
+                      );
+                      return !assignedToAnotherPlayer;
+                    })
+                    .map((opponent) => {
+                      const selected = roundTargets[player.id] === opponent.id;
+                      const hp = Math.max(0, Math.floor(opponent.health));
+                      const mp = Math.max(0, Math.floor(opponent.mana));
+                      return (
+                        <button
+                          key={opponent.id}
+                          type="button"
+                          className={`target-choice-button ${selected ? "is-selected" : ""}`}
+                          onClick={() => selectRoundTarget(player.id, opponent.id)}
+                          aria-pressed={selected}
+                        >
+                          <span className="target-choice-art">
+                            {opponent.image && <img src={opponent.image} alt="" />}
+                            {selected && <b>✓ TARGET LOCKED</b>}
+                          </span>
+                          <span className="target-choice-copy">
+                            <strong>{opponent.name}</strong>
+                            <small>HP {hp}/{opponent.maximumHealth} · MP {mp}/{opponent.maximumMana}</small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
               </div>
             ))}
 
             <button
               type="button"
-              className="confirm-target-button"
+              className="confirm-target-button battle-pause-close"
               onClick={confirmPlayerTargets}
             >
-              Confirm targets
+              CONFIRM TARGETS <span>▶</span>
             </button>
             <p className="modal-message">{combatMessage}</p>
           </section>
