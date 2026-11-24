@@ -1287,6 +1287,9 @@ export default function TeamBattle() {
     const appliedDebuffs = Object.entries(result.debuffsApplied ?? {})
       .filter(([, amount]) => Number(amount) !== 0)
       .map(([stat, amount]) => ({ stat, label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+    if (result.stunnedAttacks?.length) {
+      appliedDebuffs.push({ stat: "stun", label: "STUN APPLIED" });
+    }
     const impactTier = damageActuallyDealt >= 70 ? "fatal" : damageActuallyDealt >= 45 ? "heavy" : damageActuallyDealt >= 20 ? "effective" : "light";
     const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : damageActuallyDealt > 0 ? "damage" : "status";
     setCombatEffects((current) => ({
@@ -2478,6 +2481,7 @@ export default function TeamBattle() {
         }, 1000);
         return;
       }
+      const defenderHealthBefore = Math.max(0, Number(currentDefender.health) || 0);
       const stunOptions = {
         fighters: allFighters,
         selectedAttackIds: aiChooseStunTargets(currentDefender, attack.stun),
@@ -2514,6 +2518,32 @@ export default function TeamBattle() {
       }
 
       defenseResolvedRef.current = true;
+
+      if (result) {
+        const actualDamage = Math.max(
+          0,
+          defenderHealthBefore - Math.max(0, Number(currentDefender.health) || 0),
+        );
+        setCombatEffects((current) => ({
+          ...current,
+          [currentAttacker.id]: {
+            id: Date.now() + Math.random(),
+            type: "attack",
+            damage: 0,
+            tier: "light",
+            message: "",
+            effects: [],
+          },
+          [currentDefender.id]: {
+            id: Date.now() + Math.random(),
+            type: choice === "defend" ? "blocked" : choice === "evade" && result.evaded ? "evaded" : actualDamage > 0 ? "damage" : "status",
+            damage: actualDamage,
+            tier: actualDamage >= 70 ? "fatal" : actualDamage >= 45 ? "heavy" : actualDamage >= 20 ? "effective" : "light",
+            message: choice === "defend" ? "BLOCKED!" : choice === "evade" && result.evaded ? "EVADED!" : "",
+            effects: Object.entries(result.debuffsApplied ?? {}).filter(([, amount]) => Number(amount) !== 0).map(([stat, amount]) => ({ stat, label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` })),
+          },
+        }));
+      }
 
       if (!result) {
         addLog("The defensive action could not be completed.");
