@@ -522,22 +522,39 @@ function App() {
           setAiAttack(attack);
         },
 
-        onResolveAttack: (attack, currentAI, currentPlayer) => {
+        onResolveAttack: (attack, currentAI, currentPlayer, result) => {
           const before = Number(aiAttackHealthBeforeRef.current ?? currentPlayer.health);
           const damage = Math.max(0, before - Math.max(0, Number(currentPlayer.health) || 0));
-          const hasStatus = Boolean(attack.debuff || attack.stun || attack.activeEffects?.length);
+          const targetEffects = Object.entries(result?.debuffsApplied ?? {})
+            .filter(([, amount]) => Number(amount) !== 0)
+            .map(([stat, amount]) => ({ stat, kind: "debuff", label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+          if (result?.stunnedAttacks?.length || attack.stun) targetEffects.push({ stat: "stun", kind: "debuff", label: "STUN APPLIED" });
+          const selfEffects = Object.entries(result?.buffsApplied ?? {})
+            .filter(([, amount]) => Number(amount) !== 0)
+            .map(([stat, amount]) => ({ stat, kind: "buff", label: `↑ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+
+          if (damage > 0 || targetEffects.length) {
+            triggerCombatEffect({
+              target: "player",
+              type: damage > 0 ? "damage" : "status",
+              damage,
+              tier: damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light",
+              message: result?.stunnedAttacks?.length || attack.stun ? "STUNNED!" : "",
+              effects: targetEffects,
+            });
+          }
           triggerCombatEffect({
-            target: "player",
-            type: damage > 0 ? "damage" : hasStatus ? "status" : "blocked",
-            damage,
-            tier: damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light",
-            message: attack.stun ? "STUNNED!" : "",
-            effects: [],
+            target: "opponent",
+            type: selfEffects.length || attack.heal ? "status" : "attack",
+            damage: 0,
+            tier: "light",
+            message: attack.heal ? "RECOVERED!" : selfEffects.length ? "POWER UP!" : "",
+            effects: selfEffects,
           });
-          triggerCombatEffect({ target: "opponent", type: "attack", damage: 0, tier: "light", message: "", effects: [] });
-          showCombatMessage(`${currentAI.name} used ${attack.name}!`, damage > 0 ? "hit" : hasStatus ? "debuff" : "attack");
+          showCombatMessage(`${currentAI.name} used ${attack.name}!`, damage > 0 ? "hit" : targetEffects.length ? "debuff" : selfEffects.length || attack.heal ? "buff" : "attack");
           if (damage > 0) showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
-          if (attack.stun) showCombatMessage(`${currentPlayer.name} was stunned!`, "debuff");
+          if (targetEffects.length) showCombatMessage(`${currentPlayer.name} was affected by ${attack.name}!`, "debuff");
+          if (selfEffects.length || attack.heal) showCombatMessage(`${currentAI.name} gained a status effect!`, "buff");
           setOpponent({ ...currentAI });
           setCharacter({ ...currentPlayer });
         },
@@ -573,21 +590,38 @@ function App() {
       setOpponent({ ...opponent });
       setCharacter({ ...character });
       setAiAttack(null);
-    }, 2, (attack, currentAI, currentPlayer) => {
+    }, 2, (attack, currentAI, currentPlayer, result) => {
       const before = Number(aiAttackHealthBeforeRef.current ?? currentPlayer.health);
       const damage = Math.max(0, before - Math.max(0, Number(currentPlayer.health) || 0));
-      const hasStatus = Boolean(attack.debuff || attack.stun || attack.activeEffects?.length);
+      const targetEffects = Object.entries(result?.debuffsApplied ?? {})
+        .filter(([, amount]) => Number(amount) !== 0)
+        .map(([stat, amount]) => ({ stat, kind: "debuff", label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+      if (result?.stunnedAttacks?.length || attack.stun) targetEffects.push({ stat: "stun", kind: "debuff", label: "STUN APPLIED" });
+      const selfEffects = Object.entries(result?.buffsApplied ?? {})
+        .filter(([, amount]) => Number(amount) !== 0)
+        .map(([stat, amount]) => ({ stat, kind: "buff", label: `↑ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+      if (damage > 0 || targetEffects.length) {
+        triggerCombatEffect({
+          target: "player",
+          type: damage > 0 ? "damage" : "status",
+          damage,
+          tier: damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light",
+          message: result?.stunnedAttacks?.length || attack.stun ? "STUNNED!" : "",
+          effects: targetEffects,
+        });
+      }
       triggerCombatEffect({
-        target: "player",
-        type: damage > 0 ? "damage" : hasStatus ? "status" : "blocked",
-        damage,
-        tier: damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light",
-        message: attack.stun ? "STUNNED!" : "",
-        effects: [],
+        target: "opponent",
+        type: selfEffects.length || attack.heal ? "status" : "attack",
+        damage: 0,
+        tier: "light",
+        message: attack.heal ? "RECOVERED!" : selfEffects.length ? "POWER UP!" : "",
+        effects: selfEffects,
       });
-      triggerCombatEffect({ target: "opponent", type: "attack", damage: 0, tier: "light", message: "", effects: [] });
-      showCombatMessage(`${currentAI.name} used ${attack.name}!`, damage > 0 ? "hit" : hasStatus ? "debuff" : "attack");
+      showCombatMessage(`${currentAI.name} used ${attack.name}!`, damage > 0 ? "hit" : targetEffects.length ? "debuff" : selfEffects.length || attack.heal ? "buff" : "attack");
       if (damage > 0) showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
+      if (targetEffects.length) showCombatMessage(`${currentPlayer.name} was affected by ${attack.name}!`, "debuff");
+      if (selfEffects.length || attack.heal) showCombatMessage(`${currentAI.name} gained a status effect!`, "buff");
       setOpponent({ ...currentAI });
       setCharacter({ ...currentPlayer });
     });
