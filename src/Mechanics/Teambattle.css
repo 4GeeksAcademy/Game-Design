@@ -4186,3 +4186,6 @@ battlefield > .local-coop-incoming {
   from { opacity:0;transform:translate(-50%,-35%) scale(.65); }
   to { opacity:1;transform:translate(-50%,-50%) scale(1); }
 }
+
+.team-battle .team-stun-status small { animation:team-stun-count-fade 2.6s ease-out both; }
+@keyframes team-stun-count-fade { 0%,65% { opacity:1;transform:translateY(0); } 100% { opacity:0;transform:translateY(-7px); } }
