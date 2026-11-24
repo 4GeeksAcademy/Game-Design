@@ -5461,3 +5461,46 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .solo-fighter-art *, .solo-impact-overlay *, .solo-fighter-art { animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
+
+
+/* Override legacy portrait-frame rules for the new floating fighter artwork. */
+#character.solo-fighter-unit,
+#opponent.solo-fighter-unit {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  width:100%;
+  max-width:440px;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  clip-path:none;
+  box-shadow:none;
+  filter:none;
+}
+#characterImage,
+#opponentImage {
+  display:block;
+  grid-column:auto;
+  grid-row:auto;
+  width:auto !important;
+  max-width:100%;
+  height:100% !important;
+  min-width:0;
+  margin:0;
+  object-fit:contain !important;
+  object-position:center bottom;
+  border:0;
+  border-radius:0;
+  clip-path:none;
+  background:transparent;
+  box-shadow:none;
+}
+#characterSection.solo-fighter-section,
+#opponentSection.solo-fighter-section {
+  width:100%;
+  max-width:none;
+  margin:0 auto !important;
+  padding:0;
+}
