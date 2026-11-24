@@ -88,6 +88,7 @@ function AttackOptions({
   playerKey = "player1",
   canAttack = true,
   onPvPAttack,
+  onCombatEffect,
 }) {
   const [pendingStunAttack, setPendingStunAttack] = useState(null);
   const openingTurnAttackLimitReached =
@@ -130,8 +131,23 @@ function AttackOptions({
       setCharacter({ ...result.attacker });
       setOpponent({ ...result.defender });
 
-      const damage = result.damageReceived ?? 0;
+      const damage = Math.max(0, Number(result.damageReceived) || 0);
       if (damage > 0) setDamageDealt((previous) => previous + damage);
+
+      const effectStats = [
+        ...Object.entries(result.buffsApplied ?? {}).map(([stat, amount]) => ({ stat, amount, kind: "buff" })),
+        ...Object.entries(result.debuffsApplied ?? {}).map(([stat, amount]) => ({ stat, amount, kind: "debuff" })),
+      ].filter((effect) => Number(effect.amount) !== 0);
+      const tier = damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light";
+      onCombatEffect?.({
+        id: Date.now() + Math.random(),
+        target: result.action === "defend" || result.action === "evade" ? "opponent" : "opponent",
+        type: result.action === "defend" ? "blocked" : result.action === "evade" ? "evaded" : damage > 0 ? "damage" : effectStats.length ? "status" : "attack",
+        damage,
+        tier,
+        message: result.action === "defend" ? "BLOCKED!" : result.action === "evade" ? (result.evaded ? "EVADED!" : "FAILED TO EVADE!") : "",
+        effects: effectStats.map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` })),
+      });
 
       setAttacksUsed((previous) => previous + 1);
       showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
@@ -191,6 +207,7 @@ function AttackOptions({
       localPvP,
       canAttack,
       onPvPAttack,
+      onCombatEffect,
     ],
   );
 
