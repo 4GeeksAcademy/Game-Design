@@ -4033,3 +4033,22 @@ battlefield > .local-coop-incoming {
   clip-path:none;
   border-radius:inherit;
 }
+
+/* Team battle attack cards: match the glowing pause-menu visual language. */
+.team-battle .player-attack-panel { overflow:visible; border:1px solid #a5f51b65; border-radius:14px; background:linear-gradient(145deg,#18291d,#0b1510); box-shadow:0 0 18px #a5f51b16,0 8px 24px #0008; }
+.team-battle .attack-panel-header { padding:8px 10px; border-bottom:2px solid #a5f51b; color:#fff9e9; }
+.team-battle .team-attack-grid { overflow-x:auto; overflow-y:visible; padding:8px 5px 14px; }
+.team-battle .team-attack-wrapper { min-height:232px; height:232px; }
+.team-battle .team-attack-card { min-height:232px; border:1px solid #20d9ff75; border-radius:12px; background:linear-gradient(155deg,#172b40,#091522 75%); box-shadow:0 5px 16px #0007,inset 0 0 14px #20d9ff0d; transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,filter .18s ease; }
+.team-battle .team-attack-card:not(:disabled):hover { z-index:3; transform:translateY(-5px); border-color:#f6d84a!important; box-shadow:0 0 0 1px #f6d84a55,0 0 22px #f6d84a3b; filter:brightness(1.1); }
+.team-battle .team-attack-card:disabled { opacity:.46; filter:saturate(.55); }
+.team-battle .team-attack-card .team-attack-image { height:78px; flex-basis:78px; border:1px solid #ffffff35; border-radius:8px; background:#020811; }
+.team-battle .team-attack-card .team-attack-name { color:#fff; font:900 10px Oxanium,sans-serif; }
+.team-battle .team-attack-card .team-attack-damage { width:100%; padding:5px 4px; border:1px solid #ff315955; border-radius:6px; color:#ff8194; background:#ff31591c; font:900 9px Oxanium,sans-serif; }
+.team-battle .team-attack-card .team-attack-speed { padding:5px 4px; border:1px solid #13d5ff70; border-radius:6px; color:#66e7ff; background:#13d5ff14; font:900 9px Oxanium,sans-serif; }
+.team-battle .team-attack-card .team-attack-cost { margin-top:auto; padding:6px 5px; border:1px solid #f6d84a55; border-radius:7px; color:#ffe58b; background:#f6d84a12; font:900 8px Oxanium,sans-serif; line-height:1.35; }
+.team-battle .team-attack-card.team-attack-sacrifice { border-color:#ff3159!important; box-shadow:inset 0 0 16px #ff31591a; }
+.team-battle .team-attack-card.team-attack-cooldown { border-color:#f6a43a; }
+.team-battle .team-attack-card.team-attack-limited { border-color:#a5f51b; }
+.team-battle .team-attack-card.team-attack-limited-cooldown { border-color:#f6a43a; }
+.team-battle #combatPopupContainer { top:18px; right:18px; left:auto; bottom:auto; transform:none; align-items:flex-end; }
