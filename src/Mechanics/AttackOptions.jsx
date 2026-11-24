@@ -118,6 +118,7 @@ function AttackOptions({
         selectedAttackIds,
       };
 
+      const opponentHealthBefore = Math.max(0, Number(opponent.health) || 0);
       const result =
         difficulty === "Normal"
           ? normalDefendOrEvade(attack, character, opponent, stunOptions)
@@ -131,7 +132,10 @@ function AttackOptions({
       setCharacter({ ...result.attacker });
       setOpponent({ ...result.defender });
 
-      const damage = Math.max(0, Number(result.damageReceived) || 0);
+      const damage = Math.max(
+        0,
+        opponentHealthBefore - Math.max(0, Number(result.defender?.health) || 0),
+      );
       if (damage > 0) setDamageDealt((previous) => previous + damage);
 
       const effectStats = [
@@ -154,10 +158,10 @@ function AttackOptions({
         message: result.action === "defend" ? "BLOCKED!" : result.action === "evade" ? (result.evaded ? "EVADED!" : "FAILED TO EVADE!") : "",
         effects: damageAndDebuffs,
       });
-      if (selfBuffs.length) {
+      if (selfBuffs.length || damage > 0) {
         onCombatEffect?.({
           target: "player",
-          type: "status",
+          type: damage > 0 ? "attack" : "status",
           damage: 0,
           tier: "light",
           message: "",
