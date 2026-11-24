@@ -137,7 +137,7 @@ function Character({
               )}
               {combatEffect.message && <span>{combatEffect.message}</span>}
               {(combatEffect.effects ?? []).map((effect, index) => (
-                <b key={index} className={`solo-effect-label effect-${effect.stat}`} style={{ animationDelay: `${index * 1050}ms` }}>
+                <b key={index} className={`solo-effect-label effect-${effect.stat}`} style={{ animationDelay: `${index * 650}ms` }}>
                   {effect.label}
                 </b>
               ))}
