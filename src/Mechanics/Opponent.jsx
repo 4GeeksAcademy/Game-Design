@@ -43,10 +43,10 @@ function FighterInfo({ fighter }) {
     </div>
   );
 }
-function Opponent({ opponent, setOpponent, combatEffect = null }) {
+function Opponent({ opponent, setOpponent, combatEffect = null, isAttacking = false }) {
   const hasStun = opponent.attacks.some((attack) => (attack.stunned?.remainingRounds ?? 0) > 0);
   return (
-    <div id="opponentSection" className="solo-fighter-section opponent-fighter-section">
+    <div id="opponentSection" className={`solo-fighter-section opponent-fighter-section ${isAttacking ? "opponent-is-attacking" : ""}`}>
       <div id="opponent" className="solo-fighter-unit battle-status-panel">
         <div className="solo-fighter-hud">
           <div className="solo-fighter-name-row"><h2 id="opponentName">{opponent.name}</h2><span>CPU</span></div>
