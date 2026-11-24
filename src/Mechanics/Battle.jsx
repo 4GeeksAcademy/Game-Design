@@ -9,6 +9,7 @@ import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup"
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
 import BattleResultScreen from "./BattleResultScreen.jsx";
+import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
 import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
@@ -902,60 +903,13 @@ const stunOptions = {
       )}
       {!knockout && <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>}
       {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: location.state })} onMainMenu={() => navigate("/")} />}
-      {/* Full-screen round intro with both fighters and their health. */}
       {showRoundIntro && !knockout && (
-        <div
-          id="roundIntroOverlay"
-          className={isRoundIntroFadingOut ? "is-fading-out" : ""}
-          role="status"
-          aria-live="polite"
-        >
-          <div id="roundIntroContent" className="battle-intro-enhanced">
-            <span id="roundIntroEyebrow">Wild Cards</span>
-
-            <h1 key={roundNumber}>ROUND {roundNumber}</h1>
-
-            <div className="battle-intro-matchup">
-              <div className="battle-intro-fighter battle-intro-opponent">
-                <span className="battle-intro-label">CPU OPPONENT</span>
-
-                {opponent.image && (
-                  <img src={opponent.image} alt={opponent.name} />
-                )}
-
-                <strong>{opponent.name}</strong>
-
-                <RoundIntroHealthBar fighter={opponent} />
-
-                <span className="battle-intro-hp">
-                  HP {Math.max(0, opponent.health)} / {opponent.maximumHealth}
-                </span>
-              </div>
-
-              <div className="battle-intro-vs">VS</div>
-
-              <div className="battle-intro-fighter battle-intro-player">
-                <span className="battle-intro-label">PLAYER</span>
-
-                {character.image && (
-                  <img src={character.image} alt={character.name} />
-                )}
-
-                <strong>{character.name}</strong>
-
-                <RoundIntroHealthBar fighter={character} />
-
-                <span className="battle-intro-hp">
-                  HP {Math.max(0, character.health)} / {character.maximumHealth}
-                </span>
-              </div>
-            </div>
-
-            <div id="roundIntroLine" />
-
-            <p>GET READY</p>
-          </div>
-        </div>
+        <RoundIntroOverlay
+          roundNumber={roundNumber}
+          opponentTeam={[opponent]}
+          playerTeam={[character]}
+          isFadingOut={isRoundIntroFadingOut}
+        />
       )}
 
       {/* Individual K.O. cutscene. */}
