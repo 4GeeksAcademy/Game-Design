@@ -1053,10 +1053,26 @@ const renderSinglePlayer = () => (
                     <p>{fighter.role}</p>
                   </div>
                   <div className="starter-detail-stats">
-                    <span>DEFENSE <b>{defense ?? 0}</b></span>
-                    <span>AGILITY <b>{data.agility ?? 0}</b></span>
-                    <span>MANA REGEN <b>{data.manaRegen ?? 0}</b></span>
-                    <span>ATTACK SLOTS <b>{data.slot ?? data.attacks?.length ?? 0}</b></span>
+                    {[
+                      { label: "DEFENSE", value: defense ?? 0, maximum: 100, tone: "defense" },
+                      { label: "AGILITY", value: data.agility ?? 0, maximum: 100, tone: "agility" },
+                      { label: "MANA REGEN", value: data.manaRegen ?? 0, maximum: 20, tone: "regen" },
+                      { label: "ATTACK SLOTS", value: data.slot ?? data.attacks?.length ?? 0, maximum: 8, tone: "slots" },
+                    ].map((stat) => {
+                      const value = Math.max(0, Number(stat.value) || 0);
+                      const percentage = Math.min(100, (value / stat.maximum) * 100);
+                      return (
+                        <div className={`starter-stat-bar starter-stat-${stat.tone}`} key={stat.label}>
+                          <div className="starter-stat-heading">
+                            <span>{stat.label}</span>
+                            <strong>{value}<small> / {stat.maximum}</small></strong>
+                          </div>
+                          <span className="starter-stat-track">
+                            <span className="starter-stat-fill" style={{ width: `${percentage}%` }} />
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               );
