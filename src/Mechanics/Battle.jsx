@@ -1206,7 +1206,7 @@ const stunOptions = {
               </div>
             </div>
 
-            <div id="attackSection">
+            <div id="battleAttackPanel">
             <AttackOptions
               character={character}
               opponent={opponent}
