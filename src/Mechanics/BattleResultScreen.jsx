@@ -34,7 +34,7 @@ export default function BattleResultScreen({
         </div>
         <div className="wild-result-divider" aria-hidden="true"><span>VS</span></div>
         <div className="wild-result-side wild-result-winner">
-          <span className="wild-result-side-label">{won ? "CHAMPION" : "SURVIVOR"}</span>
+          <span className="wild-result-side-label">{won ? "CHAMPION" : "WINNER"}</span>
           <div className="wild-result-character">
             {winner?.image && <img src={winner.image} alt={winner.name} />}
             <strong>{winner?.name ?? "Fighter"}</strong>
