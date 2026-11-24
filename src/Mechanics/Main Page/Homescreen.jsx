@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import mina from "../All_Character_Stats/Mina_AshidoStats.js";
 import Kirishima from "../All_Character_Stats/KirishimaStats.js";
+import Usopp from "../All_Character_Stats/UsoppStats.js";
+import Ochaco from "../All_Character_Stats/OchacoStats.js";
 import wildCardsLogo from "../../assets/img/logo.png";
 import { useNavigate } from "react-router-dom";
 import { getAudioSettings, updateAudioSettings } from "../../audio/audioManager.js";
@@ -17,6 +19,13 @@ import {
   saveKeybinds,
 } from "./keybinds.js";
 import "./Homescreen.css";
+
+const STARTER_OPTIONS = [
+  { id: "mina", label: "MINA ASHIDO", data: mina, role: "ACID FIGHTER" },
+  { id: "kirishima", label: "EIJIRO KIRISHIMA", data: Kirishima, role: "HARDENING HERO" },
+  { id: "usopp", label: "USOPP", data: Usopp, role: "SNIPER KING" },
+  { id: "ochaco", label: "OCHACO URARAKA", data: Ochaco, role: "ZERO-GRAVITY HERO" },
+];
 
 // TEMPORARY FEATURE SWITCH:
 // Set to true to show the LOCAL 2 PLAYERS button in the Multiplayer menu.
@@ -35,6 +44,7 @@ function Homescreen() {
   );
 
   const [selectedStarter, setSelectedStarter] = useState("");
+  const [showStarterWarning, setShowStarterWarning] = useState(false);
 
   const [showStarterPopup, setShowStarterPopup] = useState(
     () => getUnlockedCharacters().length === 0,
@@ -233,20 +243,22 @@ function Homescreen() {
   }, []);
 
   const confirmStarterSelection = () => {
+    if (selectedStarter) setShowStarterWarning(true);
+  };
+
+  const finalizeStarterSelection = () => {
     if (!selectedStarter) return;
-
     const unlocked = getUnlockedCharacters();
-
     if (unlocked.length > 0) {
       setUnlockedCharacters(unlocked);
       setShowStarterPopup(false);
+      setShowStarterWarning(false);
       return;
     }
-
     unlockCharacter(selectedStarter);
-
     setUnlockedCharacters(getUnlockedCharacters());
     setShowStarterPopup(false);
+    setShowStarterWarning(false);
     setSelectedStarter("");
   };
 
@@ -996,80 +1008,84 @@ const renderSinglePlayer = () => (
       </section>
       {showStarterPopup && (
         <div className="starter-modal-overlay">
-          <div
-            className="starter-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="starter-modal-title"
-          >
+          <div className="starter-modal starter-modal-expanded" role="dialog" aria-modal="true" aria-labelledby="starter-modal-title">
             <p className="home-eyebrow">WELCOME TO WILD CARDS</p>
-
-            <h2 id="starter-modal-title" className="menu-title">
-              CHOOSE YOUR FIRST FIGHTER
-            </h2>
-
+            <h2 id="starter-modal-title" className="menu-title">CHOOSE YOUR FIRST FIGHTER</h2>
             <p className="menu-description">
-              Select ONE fighter to unlock for free. Your other option will
-              remain available in the Character Shop.
+              Choose ONE of these four fighters to permanently unlock for free. Your other choices remain available through the game.
             </p>
 
-            <div className="starter-choice-grid">
-              <button
-                type="button"
-                className={`starter-choice ${
-                  selectedStarter === "mina" ? "selected" : ""
-                }`}
-                onClick={() => setSelectedStarter("mina")}
-                aria-pressed={selectedStarter === "mina"}
-              >
-                <span className="starter-choice-name">MINA</span>
-                <span className="starter-choice-status">FREE STARTER</span>
-                <img
-                  src={mina.image}
-                  alt="Mina"
-                  className="starter-choice-image"
-                />
-                {selectedStarter === "mina" && (
-                  <span className="starter-selected-check">✓ SELECTED</span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                className={`starter-choice ${
-                  selectedStarter === "kirishima" ? "selected" : ""
-                }`}
-                onClick={() => setSelectedStarter("kirishima")}
-                aria-pressed={selectedStarter === "kirishima"}
-              >
-                <span className="starter-choice-name">KIRISHIMA</span>
-                <span className="starter-choice-status">FREE STARTER</span>
-                <img
-                  src={Kirishima.image}
-                  alt="Kirishima"
-                  className="starter-choice-image"
-                />
-                {selectedStarter === "kirishima" && (
-                  <span className="starter-selected-check">✓ SELECTED</span>
-                )}
-              </button>
+            <div className="starter-choice-grid starter-choice-grid-four">
+              {STARTER_OPTIONS.map((option) => {
+                const data = option.data;
+                const selected = selectedStarter === option.id;
+                const defense = typeof data.defense === "object" ? data.defense?.amount : data.defense;
+                return (
+                  <button
+                    type="button"
+                    key={option.id}
+                    className={`starter-choice starter-choice-expanded ${selected ? "selected" : ""}`}
+                    onClick={() => setSelectedStarter(option.id)}
+                    aria-pressed={selected}
+                  >
+                    <span className="starter-choice-name">{option.label}</span>
+                    <span className="starter-choice-status">{option.role} · FREE STARTER</span>
+                    <img src={data.image} alt={option.label} className="starter-choice-image" />
+                    <span className="starter-choice-vitals">
+                      <span><b>HP</b><strong>{data.health}</strong></span>
+                      <span><b>MP</b><strong>{data.maximumMana ?? data.mana}</strong></span>
+                    </span>
+                    {selected && <span className="starter-selected-check">✓ SELECTED</span>}
+                  </button>
+                );
+              })}
             </div>
 
-            <button
-              type="button"
-              className="arcade-button primary-button starter-confirm-button"
-              disabled={!selectedStarter}
-              onClick={confirmStarterSelection}
-            >
+            {selectedStarter && (() => {
+              const fighter = STARTER_OPTIONS.find((option) => option.id === selectedStarter);
+              const data = fighter.data;
+              const defense = typeof data.defense === "object" ? data.defense?.amount : data.defense;
+              return (
+                <section className="starter-expanded-details">
+                  <div>
+                    <span>FIGHTER PROFILE</span>
+                    <h3>{fighter.label}</h3>
+                    <p>{fighter.role}</p>
+                  </div>
+                  <div className="starter-detail-stats">
+                    <span>DEFENSE <b>{defense ?? 0}</b></span>
+                    <span>AGILITY <b>{data.agility ?? 0}</b></span>
+                    <span>MANA REGEN <b>{data.manaRegen ?? 0}</b></span>
+                    <span>ATTACK SLOTS <b>{data.slot ?? data.attacks?.length ?? 0}</b></span>
+                  </div>
+                </section>
+              );
+            })()}
+
+            <button type="button" className="arcade-button primary-button starter-confirm-button" disabled={!selectedStarter} onClick={confirmStarterSelection}>
               CONFIRM FIGHTER <span>▶</span>
             </button>
-
-            <p className="starter-modal-note">
-              Choose carefully! Your free starter selection is permanent.
-            </p>
+            <p className="starter-modal-note">Your first fighter unlock is permanent. Review your choice before confirming.</p>
           </div>
         </div>
       )}
+
+      {showStarterWarning && (
+        <div className="starter-warning-overlay">
+          <section className="starter-warning-modal" role="alertdialog" aria-modal="true" aria-labelledby="starter-warning-title">
+            <span className="starter-warning-icon" aria-hidden="true">⚠</span>
+            <p className="home-eyebrow">PERMANENT STARTER UNLOCK</p>
+            <h2 id="starter-warning-title">ARE YOU SURE?</h2>
+            <p>You are about to permanently unlock <strong>{STARTER_OPTIONS.find((option) => option.id === selectedStarter)?.label}</strong> as your free starter fighter.</p>
+            <p className="starter-warning-emphasis">This choice cannot be changed later.</p>
+            <div className="starter-warning-actions">
+              <button type="button" className="starter-warning-cancel" onClick={() => setShowStarterWarning(false)}>GO BACK</button>
+              <button type="button" className="starter-warning-confirm" onClick={finalizeStarterSelection}>YES, UNLOCK FIGHTER</button>
+            </div>
+          </section>
+        </div>
+      )}
+
       <footer className="home-footer">
         <span>INSERT COIN? NAH. JUST FIGHT.</span>
         <span>Wild Cards © 2026</span>
