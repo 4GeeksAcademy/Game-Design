@@ -1991,7 +1991,7 @@ body {
   font:900 11px Oxanium,Arial,sans-serif;
   letter-spacing:1px;
   pointer-events:none;
-  animation:team-shield-flash .72s ease-out both;
+  animation:solo-shield-flash .72s ease-out both;
 }
 #battleLayout .solo-fighter-art:has(.impact-blocked) img { animation: team-block-pulse .58s ease-out; }
 #battleLayout .solo-fighter-art:has(.impact-evaded) img { animation: team-evade-dodge .52s ease-out; }
@@ -2061,6 +2061,11 @@ body {
   transform-origin:center bottom;
   animation:team-defensive-brace .38s cubic-bezier(.18,.9,.25,1) both;
   filter:brightness(1.35) drop-shadow(0 0 13px #d9f2ff) drop-shadow(0 0 25px #73cfffaa);
+}
+@keyframes solo-shield-flash {
+  0% { opacity:0; filter:blur(3px); }
+  18%,62% { opacity:1; filter:blur(0); }
+  100% { opacity:0; }
 }
 @keyframes team-defensive-brace {
   0%,100% { transform:translateY(0) rotate(0) scale(1); }
