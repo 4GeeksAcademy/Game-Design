@@ -3944,3 +3944,8 @@ battlefield > .local-coop-incoming {
   50%{transform:translateX(6px) rotate(2deg)}
   75%{transform:translateX(-3px)}
 }
+
+.fighter-art-button:has(.impact-attack) .fighter-portrait { animation: team-attack-lunge .38s ease-in-out; }
+.player-team .fighter-art-button:has(.impact-attack) .fighter-portrait { animation-name: team-attack-lunge-left; }
+@keyframes team-attack-lunge { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(28px) scale(1.04)} }
+@keyframes team-attack-lunge-left { 0%,100%{transform:translateX(0) scale(1)}45%{transform:translateX(-28px) scale(1.04)} }
