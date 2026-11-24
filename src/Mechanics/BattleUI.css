@@ -2404,3 +2404,30 @@ body {
   #battleLayout .attack-stats span,
   #battleLayout .attack-cost span { font-size: 8px; line-height: 1.15; }
 }
+
+
+/* Good-hit prismatic wash: only effective hits (20+ damage) tint the fighter artwork. */
+#battleLayout .solo-fighter-art:has(.damage-tier-effective) .solo-portrait-wrapper::before {
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(115deg,
+    #ff315966 0%,
+    #ffb52e66 18%,
+    #f7ed5266 34%,
+    #5bff8a66 50%,
+    #35eaff66 66%,
+    #5574ff66 82%,
+    #d45bff66 100%);
+  mix-blend-mode:screen;
+  opacity:0;
+  animation:solo-prismatic-image-hit .9s ease-out both;
+}
+@keyframes solo-prismatic-image-hit {
+  0% { opacity:0; background-position:0% 50%; }
+  22% { opacity:.72; }
+  100% { opacity:0; background-position:100% 50%; }
+}
+
