@@ -3928,3 +3928,19 @@ battlefield > .local-coop-incoming {
 @keyframes team-evade-dodge {0%,100%{transform:translateX(0);opacity:1}45%{transform:translateX(24px);opacity:.55}}
 @keyframes team-impact-label {0%{opacity:0;transform:scale(.6)}20%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:translateY(-18px)}}
 @keyframes team-impact-status {0%,100%{opacity:0;transform:translate(-50%,8px) scale(.85)}25%,70%{opacity:1;transform:translate(-50%,0) scale(1)}}
+
+.fighter-art-button:has(.damage-tier-fatal) .fighter-portrait { animation: team-fatal-recoil 1.35s cubic-bezier(.15,.75,.2,1); }
+.fighter-art-button:has(.damage-tier-heavy) .fighter-portrait { animation: team-heavy-recoil .8s ease-out; }
+@keyframes team-fatal-recoil {
+  0%{transform:translateY(0) rotate(0) scale(1)}
+  18%{transform:translateY(-9px) rotate(-3deg) scale(1.04)}
+  48%{transform:translateY(12px) rotate(5deg) scale(.97)}
+  68%{transform:translateY(6px) rotate(-3deg)}
+  100%{transform:translateY(0) rotate(0) scale(1)}
+}
+@keyframes team-heavy-recoil {
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-7px) rotate(-2deg)}
+  50%{transform:translateX(6px) rotate(2deg)}
+  75%{transform:translateX(-3px)}
+}
