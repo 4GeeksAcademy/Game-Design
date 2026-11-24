@@ -2324,49 +2324,24 @@ body {
   animation: solo-fighter-idle 3.8s ease-in-out infinite;
   will-change: transform;
 }
-#battleLayout .solo-fighter-marker,
-.team-battle .fighter-name-marker {
-  position: absolute;
-  z-index: 8;
-  top: 2px;
-  left: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-#battleLayout .solo-fighter-marker span,
-.team-battle .fighter-name-marker span {
-  max-width: min(180px, 60vw);
-  overflow: hidden;
-  padding: 4px 9px 3px;
-  border: 1px solid #ffffff55;
-  border-radius: 5px;
-  color: #f8fbff;
-  background: linear-gradient(180deg, #17263bf2, #080f1df2);
-  box-shadow: 0 3px 12px #0009, 0 0 10px #20d9ff35;
-  font: 900 9px/1.1 Oxanium, Arial, sans-serif;
-  letter-spacing: 1.15px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-#battleLayout #opponentSection .solo-fighter-marker span {
-  border-color: #ff718788;
-  box-shadow: 0 3px 12px #0009, 0 0 10px #ff315935;
-}
-#battleLayout .solo-fighter-marker i,
-.team-battle .fighter-name-marker i {
+#battleLayout .solo-hud-pointer {
+  position: relative;
+  z-index: 7;
+  align-self: center;
   width: 0;
   height: 0;
-  border-top: 7px solid #d9f5ff;
-  border-right: 6px solid transparent;
-  border-left: 6px solid transparent;
-  filter: drop-shadow(0 2px 2px #000b);
+  margin: -1px 0 -2px;
+  border-top: 9px solid #8deeff;
+  border-right: 8px solid transparent;
+  border-left: 8px solid transparent;
+  filter: drop-shadow(0 2px 3px #000b) drop-shadow(0 0 5px #20d9ff88);
+  animation: solo-hud-float 5.2s ease-in-out infinite;
+  pointer-events: none;
 }
-#battleLayout #opponentSection .solo-fighter-marker i {
+#battleLayout #opponentSection .solo-hud-pointer {
   border-top-color: #ff8193;
+  filter: drop-shadow(0 2px 3px #000b) drop-shadow(0 0 5px #ff315988);
+  animation-delay: -2.6s;
 }
 @keyframes solo-hud-float {
   0%, 100% { transform: translateY(0); }
