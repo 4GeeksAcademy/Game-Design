@@ -128,7 +128,7 @@ function aiChooseStunTargets(defender, stun) {
 //   return result;
 // }
 
-function aiTurn(ai, player, showAttack, hideAttack, attacksPerTurn = 2) {
+function aiTurn(ai, player, showAttack, hideAttack, attacksPerTurn = 2, onResolveAttack) {
   let attacksResolved = 0;
   let currentAttack = null;
   let timer = null;
@@ -170,10 +170,11 @@ function aiTurn(ai, player, showAttack, hideAttack, attacksPerTurn = 2) {
     // the attack lands when the defense window expires.
     if (player.blocked === false) {
       const selectedAttackIds = aiChooseStunTargets(player, attack.stun);
-      attackCharacter(attack, ai, player, 0, {
+      const result = attackCharacter(attack, ai, player, 0, {
         selectedAttackIds,
         fighters: [ai, player],
       });
+      onResolveAttack?.(attack, ai, player, result);
     }
 
     player.blocked = false;
