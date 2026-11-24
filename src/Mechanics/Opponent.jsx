@@ -57,7 +57,7 @@ function Opponent({ opponent, setOpponent, combatEffect = null }) {
             <Segments label="REC" value={getModifiedCharacterStat(opponent, "recovery")} maximum={10} type="recovery" />
           </div>
         </div>
-        <button type="button" className={`solo-fighter-art ${hasStun ? "fighter-stunned" : ""} ${combatEffect?.type ? `combat-effect-${combatEffect.type}` : ""}`} aria-label={`${opponent.name} fighter artwork. Hover or focus to view stats.`}>
+        <div role="group" tabIndex={0} className={`solo-fighter-art ${hasStun ? "fighter-stunned" : ""} ${combatEffect?.type ? `combat-effect-${combatEffect.type}` : ""}`} aria-label={`${opponent.name} fighter artwork. Hover or focus to view stats.`}>
           <img id="opponentImage" src={opponent.image} alt={opponent.name} />
           {combatEffect?.target === "opponent" && (
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
@@ -67,7 +67,7 @@ function Opponent({ opponent, setOpponent, combatEffect = null }) {
             </div>
           )}
           <FighterInfo fighter={opponent} />
-        </button>
+        </div>
       </div>
     </div>
   );
