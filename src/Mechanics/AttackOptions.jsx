@@ -364,7 +364,7 @@ function AttackOptions({
                           : ""
                       } ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}
 ${(attack.stunned?.remainingRounds ?? 0) > 0 ? "attack-stunned" : ""}`}
-                      style={{ minWidth: "200px" }}
+                      style={{ minWidth: "158px" }}
                       disabled={
                         (!localPvP && currentTurn !== "player") ||
                         (localPvP && !canAttack) ||
