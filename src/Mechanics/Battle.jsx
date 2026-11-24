@@ -574,7 +574,7 @@ function App() {
       setCharacter({ ...character });
       setAiAttack(null);
     }, 2, (attack, currentAI, currentPlayer) => {
-      const before = Number(characterRef.current?.health ?? currentPlayer.health);
+      const before = Number(aiAttackHealthBeforeRef.current ?? currentPlayer.health);
       const damage = Math.max(0, before - Math.max(0, Number(currentPlayer.health) || 0));
       const hasStatus = Boolean(attack.debuff || attack.stun || attack.activeEffects?.length);
       triggerCombatEffect({
