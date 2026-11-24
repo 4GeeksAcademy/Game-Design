@@ -75,6 +75,7 @@ function Character({
   setCurrentTurn,
   combatMessages = [],
   combatEffect = null,
+  showFinishTurnButton = true,
 }) {
   const finishTurn = useCallback(() => {
     if (currentTurn !== "player") return;
@@ -150,11 +151,13 @@ function Character({
             <div className={`combat-popup ${message.type}`} key={message.id} style={{ animationDelay: `${index * 0.15}s` }}>{message.text}</div>
           ))}
         </div>
-        <div id="finishTurnArea">
-          <button id="finishTurnButton" disabled={currentTurn !== "player"} onClick={finishTurn}>
-            <span>Finish</span><span>Turn</span><span id="finishTurnArrow">➜</span>
-          </button>
-        </div>
+        {showFinishTurnButton && (
+          <div id="finishTurnArea">
+            <button id="finishTurnButton" disabled={currentTurn !== "player"} onClick={finishTurn}>
+              <span>Finish</span><span>Turn</span><span id="finishTurnArrow">➜</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
