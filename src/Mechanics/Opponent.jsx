@@ -61,7 +61,7 @@ function Opponent({ opponent, setOpponent, combatEffect = null, isAttacking = fa
         <div className="solo-hud-pointer" aria-hidden="true" />
         <div role="group" tabIndex={0} className={`solo-fighter-art ${combatEffect?.type ? `combat-effect-${combatEffect.type}` : ""}`} aria-label={`${opponent.name} fighter artwork. Hover or focus to view stats.`}>
           <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
-            <img id="opponentImage" src={opponent.image} alt={opponent.name} />
+            <img key={combatEffect?.id ?? "idle"} id="opponentImage" src={opponent.image} alt={opponent.name} />
             {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
           </div>
           {combatEffect?.target === "opponent" && (
