@@ -22,8 +22,6 @@ import { getEquippedAttacks, getAttackDisplayName, getAttackKey } from "./Attack
 import { addCoins } from "./Currency.js";
 import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
-import VictoryScreen from "./VictoryScreen.jsx";
-import GameOverScreen from "./GameOverScreen.jsx";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
@@ -125,35 +123,6 @@ function describeEffects(effects, targetName, kind) {
       const signedAmount = `${amount > 0 ? "+" : ""}${amount}`;
       return `${targetName}'s ${stat} ${verb} by ${signedAmount}`;
     });
-}
-
-function RoundIntroHealthBar({ fighter }) {
-  const maximumHealth = Number(fighter.maximumHealth) || 1;
-  const health = Math.max(0, Number(fighter.health) || 0);
-
-  const percent = Math.max(0, Math.min(100, (health / maximumHealth) * 100));
-
-  const healthLevel =
-    percent <= 10
-      ? "critical"
-      : percent <= 30
-        ? "danger"
-        : percent <= 50
-          ? "warning"
-          : "healthy";
-
-  return (
-    <div
-      className={`team-round-intro__healthbar health-${healthLevel}`}
-      role="img"
-      aria-label={`${health} of ${maximumHealth} health remaining`}
-    >
-      <div
-        className="team-round-intro__healthbar-fill"
-        style={{ width: `${percent}%` }}
-      />
-    </div>
-  );
 }
 
 function FighterPreview({
