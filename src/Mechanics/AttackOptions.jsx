@@ -234,6 +234,7 @@ function AttackOptions({
       canAttack,
       onPvPAttack,
       onCombatEffect,
+      onComboEvent,
     ],
   );
 
