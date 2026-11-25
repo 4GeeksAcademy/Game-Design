@@ -107,3 +107,92 @@
   #gameContainer.solo-combo-active #battleLayout #opponentSection .solo-portrait-wrapper::before,
   .team-battle.team-combo-active .fighter-opponent .fighter-portrait-wrapper::before { animation: none !important; }
 }
+
+
+/* Combo-ending performance callout */
+.wild-combo-break-anchor {
+  position: fixed;
+  z-index: 1451;
+  top: clamp(76px, 12vh, 132px);
+  left: 50%;
+  width: min(430px, 88vw);
+  transform: translateX(-50%);
+  pointer-events: none;
+  perspective: 900px;
+}
+.wild-combo-break-popup {
+  --break-edge: #54eaff;
+  --break-glow: #35dfff88;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  overflow: hidden;
+  padding: 13px 25px 12px;
+  border: 2px solid var(--break-edge);
+  border-radius: 4px 12px 4px 12px;
+  color: #fff;
+  background: linear-gradient(115deg, #081522f7, #172d43f7 55%, #081522f7);
+  box-shadow: 0 0 0 3px #ffffff12, 0 0 25px var(--break-glow), inset 0 0 20px #ffffff12;
+  text-align: center;
+  isolation: isolate;
+  animation: combo-break-enter .72s cubic-bezier(.16,1,.3,1) both;
+}
+.wild-combo-break-popup::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -50%;
+  background: linear-gradient(110deg, transparent 35%, var(--break-glow) 50%, transparent 65%);
+  transform: translateX(-65%) rotate(12deg);
+  animation: combo-break-sweep 1.1s ease-out both;
+}
+.wild-combo-break-eyebrow {
+  color: #d9e8f4;
+  font: 900 9px Oxanium, sans-serif;
+  letter-spacing: .24em;
+}
+.wild-combo-break-popup > strong {
+  color: #fff;
+  font: 1000 italic clamp(21px, 4.8vw, 36px) Oxanium, sans-serif;
+  line-height: 1.05;
+  text-shadow: 0 2px 0 #000, 0 0 12px var(--break-glow);
+}
+.wild-combo-break-rating {
+  color: var(--break-edge);
+  font: 1000 italic clamp(25px, 5.5vw, 43px) Oxanium, sans-serif;
+  letter-spacing: .035em;
+  line-height: 1.08;
+  text-shadow: 0 2px 0 #000, 0 0 17px var(--break-glow);
+}
+.wild-combo-break-subtitle {
+  color: #d8e8f5;
+  font: 900 8px Oxanium, sans-serif;
+  letter-spacing: .2em;
+}
+.wild-combo-break-spark {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: var(--break-edge);
+  box-shadow: 0 0 12px var(--break-glow);
+  transform: rotate(45deg);
+}
+.wild-combo-break-spark.spark-a { top: 12px; left: 13px; }
+.wild-combo-break-spark.spark-b { right: 13px; bottom: 12px; }
+.combo-break-disappointed { --break-edge:#9aa7b3; --break-glow:#74839199; animation: combo-break-disappointed .72s ease-out both; }
+.combo-break-good { --break-edge:#f7ed52; --break-glow:#f7c52ebb; animation: combo-break-good .72s cubic-bezier(.16,1,.3,1) both; }
+.combo-break-excellent { --break-edge:#a5f51b; --break-glow:#69ff8acc; animation: combo-break-excellent .82s cubic-bezier(.16,1,.3,1) both; }
+.combo-break-crazy {
+  --break-edge:#fff;
+  --break-glow:#6deaff;
+  border-image: linear-gradient(110deg,#ff3159,#ffb52e,#f7ed52,#5bff8a,#35eaff,#5574ff,#d45bff) 1;
+  animation: combo-break-crazy .95s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes combo-break-enter { 0% { opacity:0; transform:translateY(-25px) scale(.7); filter:blur(5px); } 55% { opacity:1; transform:translateY(4px) scale(1.08); filter:blur(0); } 100% { transform:translateY(0) scale(1); } }
+@keyframes combo-break-sweep { from { transform:translateX(-75%) rotate(12deg); opacity:0; } 35% { opacity:.3; } to { transform:translateX(75%) rotate(12deg); opacity:0; } }
+@keyframes combo-break-disappointed { 0% { opacity:0; transform:translateY(-10px) scale(.9); } 45% { opacity:1; transform:translateY(3px) scale(1.02); } 100% { transform:translateY(0) scale(1); } }
+@keyframes combo-break-good { 0% { opacity:0; transform:scale(1.35); filter:brightness(1.8); } 55% { opacity:1; transform:scale(.96); } 100% { transform:scale(1); filter:brightness(1); } }
+@keyframes combo-break-excellent { 0% { opacity:0; transform:translateX(45px) skewX(-10deg) scale(.8); } 45% { opacity:1; transform:translateX(-5px) skewX(2deg) scale(1.1); } 100% { transform:translateX(0) skewX(0) scale(1); } }
+@keyframes combo-break-crazy { 0% { opacity:0; transform:scale(.45) rotate(-8deg); filter:brightness(2) hue-rotate(0); } 45% { opacity:1; transform:scale(1.16) rotate(2deg); filter:brightness(1.5) hue-rotate(100deg); } 100% { transform:scale(1) rotate(0); filter:brightness(1) hue-rotate(220deg); } }
+@media (prefers-reduced-motion: reduce) { .wild-combo-break-popup, .wild-combo-break-popup::before { animation:none !important; } }
