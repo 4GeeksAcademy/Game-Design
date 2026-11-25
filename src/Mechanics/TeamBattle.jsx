@@ -3201,11 +3201,11 @@ export default function TeamBattle() {
         })()}
 
       <section className="battlefield">
-        {isStoryMode && (
+        {(isStoryMode || levelConfig.stageBackground) && (
           <div
             className="team-battle-story-background"
             style={{
-              backgroundImage: `url("${storyBackgrounds[levelConfig.background] || storyBackgrounds.arena}")`,
+              backgroundImage: `url("${storyBackgrounds[isStoryMode ? levelConfig.background : levelConfig.stageBackground] || storyBackgrounds.arena}")`,
             }}
             aria-hidden="true"
           />
