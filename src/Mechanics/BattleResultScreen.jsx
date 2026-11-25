@@ -70,8 +70,17 @@ export default function BattleResultScreen({
       </section>
 
       <div className="wild-result-actions">
-        <button type="button" className="wild-result-rematch" onClick={onRematch}>↻ REMATCH</button>
-        <button type="button" className="wild-result-menu" onClick={onMainMenu ?? (() => navigate("/"))}>⌂ MAIN MENU</button>
+        {onTournamentComplete ? (
+          <>
+            <button type="button" className="wild-result-rematch" onClick={onTournamentComplete}>RETURN TO BRACKET ▶</button>
+            <button type="button" className="wild-result-menu" onClick={() => navigate("/")}>⌂ MAIN MENU</button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="wild-result-rematch" onClick={onRematch}>↻ REMATCH</button>
+            <button type="button" className="wild-result-menu" onClick={onMainMenu ?? (() => navigate("/"))}>⌂ MAIN MENU</button>
+          </>
+        )}
       </div>
       <p className="wild-result-footer">{won ? "A NEW LEGEND RISES." : "EVERY DEFEAT IS ANOTHER CHANCE TO GROW."}</p>
     </main>
