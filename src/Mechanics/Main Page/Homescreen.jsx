@@ -798,6 +798,19 @@ const renderSinglePlayer = () => (
       </button>
 
       <button
+        className="mode-card mode-card--tournament"
+        onClick={() => navigate("/tournament")}
+      >
+        <span className="mode-card-art"><span className="mode-art-symbol">♛</span></span>
+        <span className="mode-card-info">
+          <span className="mode-card-number">02 / CHAMPIONSHIP</span>
+          <strong>TOURNAMENT</strong>
+          <span>Climb the bracket. Claim the crown.</span>
+        </span>
+        <span className="mode-card-arrow">↗</span>
+      </button>
+
+      <button
         className="mode-card mode-card--story"
         onClick={() => navigate("/story-mode")}
       >
@@ -820,7 +833,7 @@ const renderSinglePlayer = () => (
           <span className="mode-art-symbol">⚔</span>
         </span>
         <span className="mode-card-info">
-          <span className="mode-card-number">03 / SPECTATOR</span>
+          <span className="mode-card-number">04 / SPECTATOR</span>
           <strong>BOT SIMULATOR</strong>
           <span>Watch fighters battle automatically.</span>
         </span>
@@ -835,7 +848,7 @@ const renderSinglePlayer = () => (
           <span className="mode-art-symbol">冠</span>
         </span>
         <span className="mode-card-info">
-          <span className="mode-card-number">04 / LIMITED EVENTS</span>
+          <span className="mode-card-number">05 / LIMITED EVENTS</span>
           <strong>FESTIVAL</strong>
           <span>Take on challenges and earn rewards.</span>
         </span>
