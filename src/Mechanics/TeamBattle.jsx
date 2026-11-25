@@ -2942,7 +2942,7 @@ export default function TeamBattle() {
   }
 
   return (
-    <main className={`team-battle ${comboState ? "team-combo-active" : ""} ${isLocalCoop ? "is-local-coop" : ""}`}>
+    <main className={`team-battle ${comboState ? "team-combo-active" : ""} ${isLocalCoop ? "is-local-coop" : ""} ${levelConfig.localPvP ? "is-local-pvp" : ""}`}>
       <FestivalChallengePopup />
       <ComboPopup combo={comboState} />
       <ComboBreakPopup combo={comboBreakState ? { ...comboBreakState, onDismiss: () => setComboBreakState(null) } : null} />
