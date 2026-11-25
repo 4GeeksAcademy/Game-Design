@@ -120,6 +120,8 @@ export default function LocalPvPBattle() {
   const [turnTime, setTurnTime] = useState(TURN_SECONDS);
   const [defenseTime, setDefenseTime] = useState(DEFENSE_SECONDS);
   const [pendingAttack, setPendingAttack] = useState(null);
+  const [attackQueue, setAttackQueue] = useState([]);
+  const [attackPhaseComplete, setAttackPhaseComplete] = useState(false);
   const [combatLog, setCombatLog] = useState(["ROUND 1 — PLAYER 1'S TURN"]);
   const [targetIds, setTargetIds] = useState({});
   const [healTargetIds, setHealTargetIds] = useState({});
@@ -156,7 +158,7 @@ export default function LocalPvPBattle() {
   }, []);
 
   useEffect(() => {
-    if (phase !== "fighting" || pendingAttack || isFinal || isPaused) return;
+    if (phase !== "fighting" || attackPhaseComplete || isFinal || isPaused) return;
     const timer = window.setInterval(() => {
       const remaining = turnTimeRef.current - 1;
       turnTimeRef.current = remaining;
@@ -167,7 +169,7 @@ export default function LocalPvPBattle() {
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [phase, activeSide, pendingAttack, round, isPaused]);
+  }, [phase, activeSide, attackPhaseComplete, round, isPaused]);
 
   useEffect(() => {
     if (phase !== "defending" || !pendingAttack || isPaused) return;
@@ -221,7 +223,7 @@ export default function LocalPvPBattle() {
         }
         return;
       }
-      if (phase !== "fighting") return;
+      if (phase !== "fighting" || attackPhaseComplete) return;
       if (!isTeamMatch) {
         const playerKey = activeSide === "player" ? "player1" : "player2";
         if (key === normalizeKey(binds[playerKey].finishTurn)) {
@@ -257,15 +259,15 @@ export default function LocalPvPBattle() {
     };
     window.addEventListener("keydown", handleKeys);
     return () => window.removeEventListener("keydown", handleKeys);
-  }, [phase, pendingAttack, teams, activeSide, activeTeam, defendingSide, isFinal, isPaused]);
+  }, [phase, pendingAttack, teams, activeSide, activeTeam, defendingSide, isFinal, isPaused, attackPhaseComplete]);
 
   useEffect(() => {
-    if (phase !== "fighting") return;
+    if (phase !== "fighting" || attackPhaseComplete) return;
     const living = teams[activeSide].filter((fighter) => fighter?.health > 0);
     if (living.length && living.every((fighter) => fighter.turnFinished)) {
       endTeamTurn(false);
     }
-  }, [teams, phase, activeSide]);
+  }, [teams, phase, activeSide, attackPhaseComplete]);
 
   useEffect(() => {
     if (isFinal) {
@@ -279,28 +281,17 @@ export default function LocalPvPBattle() {
   }, [phase]);
 
   const finishFighterTurn = (fighterId) => {
-    if (phase !== "fighting" || pendingAttack) return;
-    setTeams((current) => ({
-      ...current,
-      [activeSide]: current[activeSide].map((fighter) =>
-        fighter?.id === fighterId ? { ...fighter, turnFinished: true } : fighter,
-      ),
-    }));
-    const fighter = activeTeam.find((member) => member?.id === fighterId);
-    if (fighter) addLog(`${fighter.name} finished their turn.`);
+    if (phase !== "fighting" || attackPhaseComplete) return;
+    const updated = activeTeam.map((fighter) =>
+      fighter?.id === fighterId ? { ...fighter, turnFinished: true } : fighter,
+    );
+    setTeams((current) => ({ ...current, [activeSide]: updated }));
+    if (updated.filter((fighter) => fighter?.health > 0).every((fighter) => fighter.turnFinished)) {
+      endTeamTurn(false);
+    }
   };
 
-  const endTeamTurn = (timedOut) => {
-    if (phase !== "fighting" || pendingAttack || isFinal) return;
-    setTeams((current) => ({
-      ...current,
-      [activeSide]: current[activeSide].map((fighter) =>
-        fighter && fighter.health > 0 ? { ...fighter, turnFinished: true } : fighter,
-      ),
-    }));
-    addLog(timedOut
-      ? `${activeSide === "player" ? "PLAYER 1" : "PLAYER 2"} ran out of time.`
-      : `${activeSide === "player" ? "PLAYER 1" : "PLAYER 2"} ended their turn.`);
+  const advanceTeamTurn = () => {
     const nextSide = activeSide === "player" ? "opponent" : "player";
     if (nextSide === "player") {
       setTeams((current) => {
@@ -324,13 +315,33 @@ export default function LocalPvPBattle() {
       });
       setRound((value) => value + 1);
       setShowRoundIntro(true);
-      addLog(`ROUND ${round + 1} — PLAYER 1'S TURN`);
-    } else {
-      addLog("PLAYER 2'S TURN");
     }
     setActiveSide(nextSide);
+    setAttackQueue([]);
+    setPendingAttack(null);
+    setAttackPhaseComplete(false);
+    setPhase("fighting");
     turnTimeRef.current = TURN_SECONDS;
     setTurnTime(TURN_SECONDS);
+  };
+
+  const endTeamTurn = (timedOut = false) => {
+    if (phase !== "fighting" || attackPhaseComplete || isFinal) return;
+    setTeams((current) => ({
+      ...current,
+      [activeSide]: current[activeSide].map((fighter) =>
+        fighter && fighter.health > 0 ? { ...fighter, turnFinished: true } : fighter,
+      ),
+    }));
+    setAttackPhaseComplete(true);
+    if (attackQueue.length > 0) {
+      setPendingAttack(attackQueue[0]);
+      setPhase("defending");
+      defenseTimeRef.current = DEFENSE_SECONDS;
+      setDefenseTime(DEFENSE_SECONDS);
+    } else {
+      advanceTeamTurn();
+    }
   };
 
   const chooseTarget = (fighterId, targetId) => {
@@ -338,7 +349,7 @@ export default function LocalPvPBattle() {
   };
 
   const startAttack = (fighterId, attackIndex, selectedAttackIds = []) => {
-    if (phase !== "fighting" || pendingAttack) return;
+    if (phase !== "fighting" || attackPhaseComplete) return;
     const attacker = teams[activeSide].find((fighter) => fighter?.id === fighterId);
     const attack = attacker?.attacks?.[attackIndex];
     if (!attacker || attacker.health <= 0 || attacker.turnFinished ||
@@ -396,10 +407,7 @@ export default function LocalPvPBattle() {
       addLog("Choose a living opponent first.");
       return;
     }
-    resolvedRef.current = false;
-    defenseTimeRef.current = DEFENSE_SECONDS;
-    setDefenseTime(DEFENSE_SECONDS);
-    setPendingAttack({
+    const queued = {
       attackerId: fighterId,
       targetId,
       attackIndex,
@@ -410,9 +418,9 @@ export default function LocalPvPBattle() {
       cost,
       hasHeal: Boolean(attack.heal),
       selectedAttackIds,
-    });
-    setPhase("defending");
-    addLog(`${attacker.name} used ${attack.name}. ${target.name}, defend!`);
+    };
+    setAttackQueue((current) => [...current, queued]);
+    addLog(`${attacker.name} queued ${attack.name} against ${target.name}.`);
   };
 
   const resolveAttack = (choice) => {
@@ -483,14 +491,26 @@ export default function LocalPvPBattle() {
           : `${attack.name} dealt ${damage} damage.`);
       if (defender.health <= 0) addLog(`${defender.name} is K.O.!`);
     }
-    setPendingAttack(null);
+    const remainingQueue = attackQueue.slice(1);
+    setAttackQueue(remainingQueue);
     const playerAlive = next.player.some((fighter) => fighter?.health > 0);
     const opponentAlive = next.opponent.some((fighter) => fighter?.health > 0);
     if (!playerAlive || !opponentAlive) {
+      setPendingAttack(null);
+      setAttackQueue([]);
       setPhase(playerAlive ? "victory" : "defeat");
       return;
     }
-    setPhase("fighting");
+    if (remainingQueue.length > 0) {
+      setPendingAttack(remainingQueue[0]);
+      resolvedRef.current = false;
+      defenseTimeRef.current = DEFENSE_SECONDS;
+      setDefenseTime(DEFENSE_SECONDS);
+      setPhase("defending");
+    } else {
+      setPendingAttack(null);
+      advanceTeamTurn();
+    }
   };
 
   const resetMatch = () => {
@@ -504,6 +524,9 @@ export default function LocalPvPBattle() {
     turnTimeRef.current = TURN_SECONDS;
     setTurnTime(TURN_SECONDS);
     setPendingAttack(null);
+    setAttackQueue([]);
+    setAttackPhaseComplete(false);
+    setPhase("fighting");
     setIsPaused(false);
     defenseTimeRef.current = DEFENSE_SECONDS;
     setDefenseTime(DEFENSE_SECONDS);
