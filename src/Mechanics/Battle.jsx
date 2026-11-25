@@ -684,12 +684,12 @@ function BattleMatch() {
   }, [currentTurn, isPaused]);
 
   useEffect(() => {
-    if (!isStoryMode && showResults && knockout && !rewardPaidRef.current) {
+    if (!isStoryMode && !levelConfig.tournament && showResults && knockout && !rewardPaidRef.current) {
       rewardPaidRef.current = true;
       const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[levelConfig.difficulty ?? "Easy"] ?? 1;
       addCoins(Math.floor((damageDealt + combatDefense) * multiplier * Math.max(1, highestCombo)));
     }
-  }, [showResults, knockout, isStoryMode, levelConfig.difficulty, damageDealt, combatDefense, highestCombo]);
+  }, [showResults, knockout, isStoryMode, levelConfig.tournament, levelConfig.difficulty, damageDealt, combatDefense, highestCombo]);
 
   // Display the round announcement before allowing combat.
   useEffect(() => {
@@ -1047,6 +1047,15 @@ const stunOptions = {
           difficulty={levelConfig.difficulty ?? "Easy"}
           comboMultiplier={Math.max(1, highestCombo)}
           onRematch={resetBattle}
+          onTournamentComplete={levelConfig.tournament ? () => navigate("/tournament", {
+            state: {
+              tournament: levelConfig.tournament,
+              tournamentResult: {
+                matchId: levelConfig.tournamentMatchId,
+                won: knockout.defeatedTeam === "opponent",
+              },
+            },
+          }) : undefined}
         />
       ) : knockout ? null : (
         <>
