@@ -5,6 +5,7 @@ import { getCharacterImage } from "./SkinManager.js";
 import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import AttackOptions from "./AttackOptions.jsx";
+import LocalPvPFighterPanel from "./LocalPvPFighterPanel.jsx";
 import { aiChooseStunTargets } from "./AI.js";
 import {
   attackCharacter,
@@ -24,6 +25,8 @@ import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges.js"
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives.js";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup.jsx";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
+import "./Teambattle.css";
+import "./BattleUI.css";
 import "./LocalPvPBattle.css";
 
 const TURN_SECONDS = 20;
@@ -125,7 +128,6 @@ export default function LocalPvPBattle() {
   const [showRoundIntro, setShowRoundIntro] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const resolvedRef = useRef(false);
-  const attackQueueRef = useRef([]);
   const turnTimeRef = useRef(TURN_SECONDS);
   const defenseTimeRef = useRef(DEFENSE_SECONDS);
 
@@ -222,105 +224,464 @@ export default function LocalPvPBattle() {
         return;
       }
       if (phase !== "fighting" || attackPhaseComplete) return;
-      const renderDefensePrompt = (fighter) => {
-    if (phase !== "defending" || !pendingAttack || fighter?.id !== pendingAttack.targetId) return null;
-    const canDefend = getModifiedCharacterStat(fighter, "cooldown") > 0;
-    return (
-      <div className="local-pvp-defense-anchor" role="dialog" aria-live="assertive">
-        <div className="local-pvp-defense-top"><span>⚠ INCOMING ATTACK</span><strong>{defenseTime}s</strong></div>
-        <h3>{pendingAttack.attackName}</h3>
-        {pendingAttack.attackImage && <img src={pendingAttack.attackImage} alt={pendingAttack.attackName} />}
-        <p>{pendingAttack.damage} DAMAGE · {pendingAttack.speed} SPEED</p>
-        <div className="local-pvp-defense-actions">
-          <button disabled={!canDefend} onClick={() => resolveAttack("defend")}>🛡 BLOCK</button>
-          <button onClick={() => resolveAttack("evade")}>💨 EVADE</button>
-          <button onClick={() => resolveAttack("take-damage")}>💥 TAKE DAMAGE</button>
-        </div>
-      </div>
+      if (!isTeamMatch) {
+        const playerKey = activeSide === "player" ? "player1" : "player2";
+        if (key === normalizeKey(binds[playerKey].finishTurn)) {
+          event.preventDefault();
+          const fighter = activeTeam.find((member) => member && member.health > 0);
+          if (fighter) finishFighterTurn(fighter.id);
+        }
+        return;
+      }
+      const playerKey = activeSide === "player" ? "player1" : "player2";
+      const playerBinds = binds[playerKey];
+      const finishKey = normalizeKey(playerBinds.finishTurn);
+      if (key === finishKey) {
+        event.preventDefault();
+        const nextFighter = activeTeam.find(
+          (fighter) => fighter && fighter.health > 0 && !fighter.turnFinished,
+        );
+        if (nextFighter) finishFighterTurn(nextFighter.id);
+        return;
+      }
+      const attackIndex = playerBinds.attacks.findIndex(
+        (boundKey) => normalizeKey(boundKey) === key,
+      );
+      if (attackIndex >= 0) {
+        const nextFighter = activeTeam.find(
+          (fighter) => fighter && fighter.health > 0 && !fighter.turnFinished,
+        );
+        if (nextFighter) {
+          event.preventDefault();
+          startAttack(nextFighter.id, attackIndex);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeys);
+    return () => window.removeEventListener("keydown", handleKeys);
+  }, [phase, pendingAttack, teams, activeSide, activeTeam, defendingSide, isFinal, isPaused, attackPhaseComplete]);
+
+  useEffect(() => {
+    if (phase !== "fighting" || attackPhaseComplete) return;
+    const living = teams[activeSide].filter((fighter) => fighter?.health > 0);
+    if (living.length && living.every((fighter) => fighter.turnFinished)) {
+      endTeamTurn(false);
+    }
+  }, [teams, phase, activeSide, attackPhaseComplete]);
+
+  useEffect(() => {
+    if (isFinal) {
+      recordFestivalEvent("battle", 1);
+      recordDailyObjectiveEvent("battle", 1);
+      if (phase === "victory") {
+        recordFestivalEvent("victory", 1);
+        recordDailyObjectiveEvent("victory", 1);
+      }
+    }
+  }, [phase]);
+
+  const finishFighterTurn = (fighterId) => {
+    if (phase !== "fighting" || attackPhaseComplete) return;
+    const updated = activeTeam.map((fighter) =>
+      fighter?.id === fighterId ? { ...fighter, turnFinished: true } : fighter,
     );
+    setTeams((current) => ({ ...current, [activeSide]: updated }));
+    if (updated.filter((fighter) => fighter?.health > 0).every((fighter) => fighter.turnFinished)) {
+      endTeamTurn(false);
+    }
   };
 
-  const renderSide = (side, label) => (
-    <section className={`local-pvp-team-side local-pvp-${side}`}>
-      <header><span>{label}</span><strong>{side === activeSide && phase === "fighting" && !attackPhaseComplete ? "ATTACK PHASE" : side === defendingSide && phase === "defending" ? "DEFENDING" : "READY"}</strong></header>
-      <div className="local-pvp-team-fighters">
-        {teams[side].map((fighter) => fighter && (
-          <article key={fighter.id} className={`local-pvp-combatant ${fighter.health <= 0 ? "is-ko" : ""} ${fighter.id === pendingAttack?.targetId && phase === "defending" ? "is-targeted" : ""}`}>
-            <div className="local-pvp-combatant-image">
-              <img src={fighter.image} alt={fighter.name} />
-              {fighter.health <= 0 && <span className="local-pvp-ko-label">K.O.</span>}
-            </div>
-            <div className="local-pvp-combatant-data">
-              <h3>{fighter.name}</h3>
-              <div className="local-pvp-resource-label"><span>HP</span><b>{Math.max(0, fighter.health)}/{fighter.maximumHealth}</b></div>
-              <div className="local-pvp-resource-track"><i className="hp" style={{width: `${Math.max(0, fighter.health / fighter.maximumHealth * 100)}%`}} /></div>
-              <div className="local-pvp-resource-label"><span>MP</span><b>{Math.max(0, fighter.mana)}/{fighter.maximumMana}</b></div>
-              <div className="local-pvp-resource-track"><i className="mp" style={{width: `${Math.max(0, fighter.mana / fighter.maximumMana * 100)}%`}} /></div>
-              {side === activeSide && phase === "fighting" && !attackPhaseComplete && fighter.health > 0 && (
-                <button className="local-pvp-finish-button" disabled={fighter.turnFinished} onClick={() => finishFighterTurn(fighter.id)}>{fighter.turnFinished ? "ACTION COMPLETE" : "FINISH ATTACKS"}</button>
-              )}
-            </div>
-            {renderDefensePrompt(fighter)}
-          </article>
-        ))}
-      </div>
-    </section>
-  );
+  const advanceTeamTurn = () => {
+    const nextSide = activeSide === "player" ? "opponent" : "player";
+    if (nextSide === "player") {
+      setTeams((current) => {
+        const next = { player: current.player.map(cloneFighter), opponent: current.opponent.map(cloneFighter) };
+        [...next.player, ...next.opponent].forEach((fighter) => {
+          if (!fighter || fighter.health <= 0) return;
+          regenerateMana(fighter);
+          recoverCooldown(fighter);
+          tickSelfModifiers(fighter);
+          fighter.turnFinished = false;
+        });
+        next.player = next.player.map((fighter) => fighter ? {
+          ...fighter,
+          attacks: resetAttacks(fighter.attacks, [...next.player, ...next.opponent]),
+        } : fighter);
+        next.opponent = next.opponent.map((fighter) => fighter ? {
+          ...fighter,
+          attacks: resetAttacks(fighter.attacks, [...next.player, ...next.opponent]),
+        } : fighter);
+        return next;
+      });
+      setRound((value) => value + 1);
+      setShowRoundIntro(true);
+    }
+    setActiveSide(nextSide);
+    setAttackQueue([]);
+    setPendingAttack(null);
+    setAttackPhaseComplete(false);
+    setPhase("fighting");
+    turnTimeRef.current = TURN_SECONDS;
+    setTurnTime(TURN_SECONDS);
+  };
 
-  const renderAttackCenter = () => {
-    if (phase !== "fighting" || attackPhaseComplete || isPaused) return null;
-    const fighters = activeTeam.filter((fighter) => fighter && fighter.health > 0 && !fighter.turnFinished);
-    return (
-      <section className="local-pvp-attack-center">
-        <div className="local-pvp-center-heading">
-          <span>PLAYER {activeSide === "player" ? "1" : "2"} CONTROL</span>
-          <h2>CHOOSE YOUR ATTACK</h2>
-          <p>{turnTime}s TO QUEUE · MULTIPLE ATTACKS ALLOWED</p>
+  const endTeamTurn = (timedOut = false) => {
+    if (phase !== "fighting" || attackPhaseComplete || isFinal) return;
+    setTeams((current) => ({
+      ...current,
+      [activeSide]: current[activeSide].map((fighter) =>
+        fighter && fighter.health > 0 ? { ...fighter, turnFinished: true } : fighter,
+      ),
+    }));
+    setAttackPhaseComplete(true);
+    if (attackQueue.length > 0) {
+      setPendingAttack(attackQueue[0]);
+      setPhase("defending");
+      defenseTimeRef.current = DEFENSE_SECONDS;
+      setDefenseTime(DEFENSE_SECONDS);
+    } else {
+      advanceTeamTurn();
+    }
+  };
+
+  const chooseTarget = (fighterId, targetId) => {
+    setTargetIds((current) => ({ ...current, [fighterId]: targetId }));
+  };
+
+  const startAttack = (fighterId, attackIndex, selectedAttackIds = []) => {
+    if (phase !== "fighting" || attackPhaseComplete) return;
+    const attacker = teams[activeSide].find((fighter) => fighter?.id === fighterId);
+    const attack = attacker?.attacks?.[attackIndex];
+    if (!attacker || attacker.health <= 0 || attacker.turnFinished ||
+        !attack || !canUseAttack(attack)) return;
+    const attacksUsedThisRound = attacker.attacks.filter(
+      (move) => move.state === false,
+    ).length;
+    if (round === 1 && attacksUsedThisRound >= 4) {
+      addLog(`${attacker.name} has reached the 4-attack opening limit.`);
+      return;
+    }
+    const cost = getModifiedAttackStat(attack, attacker, "cost");
+    if (attacker.mana < cost) {
+      addLog(`${attacker.name} does not have enough mana.`);
+      return;
+    }
+    const modifiedDamage = getModifiedAttackStat(attack, attacker, "damage");
+    if (attack.heal && modifiedDamage <= 0) {
+      if (activeTeam.length === 1 && attack.heal.target !== "self") {
+        addLog("This fighter has no teammate to receive that healing effect.");
+        return;
+      }
+      setTeams((current) => {
+        const next = {
+          player: current.player.map(cloneFighter),
+          opponent: current.opponent.map(cloneFighter),
+        };
+        const caster = next[activeSide].find((fighter) => fighter.id === fighterId);
+        const otherLivingAlly = next[activeSide].find(
+          (member) => member.id === healTargetIds[fighterId] && member.health > 0,
+        ) ?? next[activeSide].find(
+          (member) => member.id !== fighterId && member.health > 0,
+        );
+        const recipients = attack.heal.target === "all"
+          ? next[activeSide].filter((fighter) => fighter.health > 0)
+          : attack.heal.target === "selected"
+            ? [otherLivingAlly].filter(Boolean)
+            : [caster];
+        if (!recipients.length) return current;
+        caster.mana -= cost;
+        recipients.forEach((recipient) => applyHeal(attack, recipient));
+        consumeAttack(caster.attacks[attackIndex]);
+        return next;
+      });
+      recordFestivalEvent("attack", 1);
+      addLog(`${attacker.name} used ${attack.name}.`);
+      return;
+    }
+    const selectedTarget = defendingLiving.some(
+      (fighter) => fighter.id === targetIds[fighterId],
+    ) ? targetIds[fighterId] : defendingLiving[0]?.id;
+    const targetId = selectedTarget;
+    const target = opposingTeam.find((fighter) => fighter?.id === targetId && fighter.health > 0);
+    if (!target) {
+      addLog("Choose a living opponent first.");
+      return;
+    }
+    const queued = {
+      attackerId: fighterId,
+      targetId,
+      attackIndex,
+      attackName: attack.name,
+      attackImage: attack.image,
+      damage: getModifiedAttackStat(attack, attacker, "damage"),
+      speed: getModifiedAttackStat(attack, attacker, "speed"),
+      cost,
+      hasHeal: Boolean(attack.heal),
+      selectedAttackIds,
+    };
+    setAttackQueue((current) => [...current, queued]);
+    addLog(`${attacker.name} queued ${attack.name} against ${target.name}.`);
+  };
+
+  const resolveAttack = (choice) => {
+    if (phase !== "defending" || !pendingAttack || resolvedRef.current) return;
+    resolvedRef.current = true;
+    const attackerSide = activeSide;
+    const defenderSide = attackerSide === "player" ? "opponent" : "player";
+    const next = {
+      player: teams.player.map(cloneFighter),
+      opponent: teams.opponent.map(cloneFighter),
+    };
+    const attacker = next[attackerSide].find((fighter) => fighter.id === pendingAttack.attackerId);
+    const defender = next[defenderSide].find((fighter) => fighter.id === pendingAttack.targetId);
+    const attack = attacker?.attacks?.[pendingAttack.attackIndex];
+    if (!attacker || !defender || !attack || !canUseAttack(attack) ||
+        (choice === "defend" && getModifiedCharacterStat(defender, "cooldown") <= 0)) {
+      setPendingAttack(null);
+      setPhase("fighting");
+      return;
+    }
+    const allFighters = [...next.player, ...next.opponent];
+    const selectedAttackIds = pendingAttack.selectedAttackIds?.length
+      ? pendingAttack.selectedAttackIds
+      : aiChooseStunTargets(defender, attack.stun);
+    const stunOptions = { fighters: allFighters, selectedAttackIds };
+    let result;
+    if (choice === "defend") {
+      const defense = getModifiedCharacterStat(defender, "defense");
+      result = attackCharacter(attack, attacker, defender, defense, {
+        blocked: true,
+        ...stunOptions,
+      });
+      defender.cooldown = Math.max(0, (Number(defender.cooldown) || 0) - 1);
+    } else if (choice === "evade") {
+      result = evadeAttack(attack, attacker, defender, stunOptions);
+    } else {
+      result = attackCharacter(attack, attacker, defender, 0, {
+        blocked: false,
+        ...stunOptions,
+      });
+    }
+    if (result) {
+      if (attack.heal) {
+        const livingAllies = next[attackerSide].filter(
+          (fighter) => fighter.health > 0 && fighter.id !== attacker.id,
+        );
+        const selectedAlly = livingAllies.find(
+          (fighter) => fighter.id === healTargetIds[attacker.id],
+        ) ?? livingAllies[0];
+        const recipients = attack.heal.target === "all"
+          ? next[attackerSide].filter((fighter) => fighter.health > 0)
+          : attack.heal.target === "selected"
+            ? [selectedAlly].filter(Boolean)
+            : [attacker];
+        recipients.forEach((recipient) => applyHeal(attack, recipient));
+      }
+      setTeams(next);
+      const damage = Math.max(0, result.damageReceived ?? 0);
+      if (damage > 0 && attackerSide === "player") {
+        recordFestivalEvent("damage", damage);
+        recordDailyObjectiveEvent("damage", damage);
+      }
+      recordFestivalEvent("attack", 1);
+      addLog(choice === "defend"
+        ? `${defender.name} blocked ${attack.name}.`
+        : choice === "evade"
+          ? `${defender.name} ${result.evaded ? "evaded" : "failed to evade"} ${attack.name}.`
+          : `${attack.name} dealt ${damage} damage.`);
+      if (defender.health <= 0) addLog(`${defender.name} is K.O.!`);
+    }
+    const remainingQueue = attackQueue.slice(1);
+    setAttackQueue(remainingQueue);
+    const playerAlive = next.player.some((fighter) => fighter?.health > 0);
+    const opponentAlive = next.opponent.some((fighter) => fighter?.health > 0);
+    if (!playerAlive || !opponentAlive) {
+      setPendingAttack(null);
+      setAttackQueue([]);
+      setPhase(playerAlive ? "victory" : "defeat");
+      return;
+    }
+    if (remainingQueue.length > 0) {
+      setPendingAttack(remainingQueue[0]);
+      resolvedRef.current = false;
+      defenseTimeRef.current = DEFENSE_SECONDS;
+      setDefenseTime(DEFENSE_SECONDS);
+      setPhase("defending");
+    } else {
+      setPendingAttack(null);
+      advanceTeamTurn();
+    }
+  };
+
+  const resetMatch = () => {
+    setTeams({
+      player: playerIds.map(createFighter),
+      opponent: opponentIds.map(createFighter),
+    });
+    setActiveSide("player");
+    setPhase("fighting");
+    setRound(1);
+    turnTimeRef.current = TURN_SECONDS;
+    setTurnTime(TURN_SECONDS);
+    setPendingAttack(null);
+    setAttackQueue([]);
+    setAttackPhaseComplete(false);
+    setPhase("fighting");
+    setIsPaused(false);
+    defenseTimeRef.current = DEFENSE_SECONDS;
+    setDefenseTime(DEFENSE_SECONDS);
+    setCombatLog(["ROUND 1 — PLAYER 1'S TURN"]);
+    setShowRoundIntro(true);
+  };
+
+  if (phase === "error") {
+    return <main className="local-pvp-screen"><h1>LOCAL MATCH COULD NOT START</h1><p>Return to character selection and choose fighters for both players.</p><button onClick={() => navigate("/character-select")}>BACK TO SELECTION</button></main>;
+  }
+
+
+  if (!isTeamMatch) {
+    const playerOne = teams.player[0];
+    const playerTwo = teams.opponent[0];
+    const playerOneActive = activeSide === "player" && phase === "fighting";
+    const playerTwoActive = activeSide === "opponent" && phase === "fighting";
+    const noOp = () => {};
+    const renderPlayerPane = (owner, rival, playerKey, isActive, sideClass) => (
+      <section className={"local-pvp-player-screen " + sideClass + " " + (isActive ? "turn-active" : "turn-waiting")}>
+        <header className="local-pvp-player-heading">
+          <span>{playerKey === "player1" ? "PLAYER 1" : "PLAYER 2"}</span>
+          <strong>{isActive ? "YOUR TURN" : "WAITING"}</strong>
+          <b className={turnTime <= 5 && isActive ? "timer-danger" : ""}>{isActive ? turnTime + "s" : ""}</b>
+          <button className="local-pvp-finish-rect" disabled={!isActive || owner?.turnFinished || phase !== "fighting" || isPaused} onClick={() => owner && finishFighterTurn(owner.id)}>FINISH TURN →</button>
+        </header>
+        <div className="local-pvp-screen-fighters">
+          <LocalPvPFighterPanel fighter={rival} side="opponent" />
+          <LocalPvPFighterPanel fighter={owner} side="player" />
         </div>
-        {isTeamMatch ? (
-          <div className="local-pvp-attack-panels">
-            {fighters.map((fighter) => (
-              <div className="local-pvp-attack-panel-wrap" key={fighter.id}>
-                <TeamAttackOptions fighter={fighter} isActive phase="fighting" onAttack={startAttack} onFinishTurn={finishFighterTurn} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          fighters.map((fighter) => {
-            const rival = teams[defendingSide][0];
-            return <AttackOptions key={fighter.id} character={fighter} opponent={rival} setCharacter={() => {}} setOpponent={() => {}} setDamageDealt={() => {}} setAttacksUsed={() => {}} currentTurn="player" showCombatMessage={() => {}} openingTurnActive={round === 1} localPvP playerKey={activeSide === "player" ? "player1" : "player2"} canAttack onPvPAttack={(index, selectedIds) => startAttack(fighter.id, index, selectedIds)} />;
-          })
-        )}
+        <div className="local-pvp-existing-attacks">
+          {owner && rival && (
+            <AttackOptions
+              character={owner}
+              opponent={rival}
+              setCharacter={noOp}
+              setOpponent={noOp}
+              setDamageDealt={noOp}
+              setAttacksUsed={noOp}
+              currentTurn="player"
+              showCombatMessage={noOp}
+              openingTurnActive={round === 1}
+              localPvP
+              playerKey={playerKey}
+              canAttack={isActive && phase === "fighting" && !pendingAttack && !owner.turnFinished && !isPaused}
+              onPvPAttack={(index, selectedIds) => startAttack(owner.id, index, selectedIds)}
+            />
+          )}
+        </div>
       </section>
     );
-  };
+
+    return (
+      <main className="local-pvp-screen local-pvp-1v1">
+        <FestivalChallengePopup />
+        <header className="local-pvp-header local-pvp-match-header">
+          <button className="local-pvp-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match">Ⅱ</button>
+          <div><strong>ROUND {round}</strong><span>1 VS 1 LOCAL PVP</span></div>
+          <div className="local-pvp-active-clock"><small>{activeSide === "player" ? "PLAYER 1 TURN" : "PLAYER 2 TURN"}</small><strong>{turnTime}s</strong></div>
+        </header>
+        <div className="local-pvp-split-screen">
+          {renderPlayerPane(playerTwo, playerOne, "player2", playerTwoActive, "local-pvp-player-two")}
+          
+          {renderPlayerPane(playerOne, playerTwo, "player1", playerOneActive, "local-pvp-player-one")}
+        </div>
+        {showRoundIntro && <div className="local-pvp-round-intro">ROUND {round}<span>PLAYER 1 VS PLAYER 2</span></div>}
+        {phase === "defending" && pendingAttack && (
+          <section id="aiAttackSection" className={"incoming-attack-card local-pvp-incoming " + (defendingSide === "player" ? "local-pvp-incoming-player-one" : "local-pvp-incoming-player-two") } role="dialog" aria-live="assertive">
+            <div id="aiAttackCard">
+              <div id="aiAttackHeader"><span>⚠ INCOMING ATTACK</span><span className="attack-warning-dot" /></div>
+              <div id="defenseTimer" className={defenseTime <= 3 ? "timer-critical" : defenseTime <= 5 ? "timer-warning" : ""}>
+                <div id="defenseTimerText"><span>DEFENSE WINDOW</span><strong>{defenseTime}s</strong></div>
+                <div id="defenseTimerTrack"><div id="defenseTimerFill" style={{ width: defenseTime * 10 + "%" }} /></div>
+              </div>
+              <div id="aiAttackInfo">
+                <h5 id="aiAttackName">{pendingAttack.attackName}</h5>
+                {pendingAttack.attackImage && <div className="incoming-attack-image"><img src={pendingAttack.attackImage} alt={pendingAttack.attackName} /></div>}
+                <div id="aiAttackStats">
+                  <div className={"attack-threat-badge " + getDamageThreat(pendingAttack.damage).className}><span className="threat-label">DAMAGE</span><strong>{pendingAttack.damage}</strong><span className="threat-rating">{getDamageThreat(pendingAttack.damage).label}</span></div>
+                  <div className={"attack-threat-badge " + getSpeedThreat(pendingAttack.speed).className}><span className="threat-label">SPEED</span><strong>{pendingAttack.speed}</strong><span className="threat-rating">{getSpeedThreat(pendingAttack.speed).label}</span></div>
+                  <div className="attack-cost-badge"><span className="threat-label">MANA COST</span><strong>◆ {pendingAttack.cost}</strong></div>
+                </div>
+              </div>
+              <div id="defensiveActions">
+                <button id="defendButton" disabled={getModifiedCharacterStat(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId), "cooldown") <= 0 || defenseTime <= 0} onClick={() => resolveAttack("defend")}><span id="defendButtonIcon">🛡</span><span>DEFEND</span></button>
+                <button id="evadeButton" disabled={defenseTime <= 0} onClick={() => resolveAttack("evade")}><span id="evadeButtonIcon">💨</span><span>EVADE</span></button>
+                <button id="takeDamageButton" disabled={defenseTime <= 0} onClick={() => resolveAttack("take-damage")}><span>💥</span><span>TAKE FULL DAMAGE</span></button>
+              </div>
+            </div>
+          </section>
+        )}
+        {isPaused && !isFinal && <section className="local-pvp-pause-overlay" role="dialog" aria-modal="true"><div className="local-pvp-pause-panel"><span>WILD CARDS</span><h2>PAUSED</h2><button onClick={() => setIsPaused(false)}>RESUME MATCH</button><button onClick={resetMatch}>RESTART MATCH</button><button onClick={() => navigate("/character-select")}>CHARACTER SELECT</button><button onClick={() => navigate("/")}>MAIN MENU</button></div></section>}
+        {isFinal && <div className="local-pvp-result"><p>{phase === "victory" ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!"}</p><button onClick={resetMatch}>REMATCH</button><button onClick={() => navigate("/")}>MAIN MENU</button></div>}
+      </main>
+    );
+  }
 
   return (
-    <main className="local-pvp-screen">
+    <main className="team-battle local-pvp-screen">
       <FestivalChallengePopup />
       <header className="local-pvp-header">
-        <button className="local-pvp-nav-button" onClick={() => setIsPaused(true)}>Ⅱ PAUSE</button>
-        <div className="local-pvp-match-title"><strong>ROUND {round}</strong><span>{isTeamMatch ? "2 VS 2 LOCAL BATTLE" : "1 VS 1 LOCAL BATTLE"}</span></div>
-        <div className={`local-pvp-clock ${turnTime <= 5 ? "timer-danger" : ""}`}><small>PLAYER {activeSide === "player" ? "1" : "2"} ATTACK PHASE</small><strong>{attackPhaseComplete ? "DEFENSE" : `${turnTime}s`}</strong></div>
+        <button onClick={() => navigate("/character-select")}>← CHARACTER SELECT</button>
+        <div><strong>ROUND {round}</strong><span>{isTeamMatch ? "2 VS 2 LOCAL PVP" : "1 VS 1 LOCAL PVP"}</span></div>
+        <div className={turnTime <= 5 ? "timer-danger" : ""}><small>{activeSide === "player" ? "PLAYER 1" : "PLAYER 2"} TURN</small><strong>{turnTime}s</strong></div>
       </header>
 
-      <div className="local-pvp-battlefield">
-        {renderSide("player", "PLAYER 1")}
-        <div className="local-pvp-center-column">
-          <div className="local-pvp-versus-mark">VS</div>
-          {renderAttackCenter()}
-          <div className="local-pvp-queue-status">
-            <strong>{attackQueue.length}</strong>
-            <span>{attackQueue.length === 1 ? "ATTACK QUEUED" : "ATTACKS QUEUED"}</span>
-            {phase === "fighting" && !attackPhaseComplete && <button onClick={() => endTeamTurn(false)}>END ATTACK PHASE</button>}
-            {phase === "defending" && <small>RESOLVE EVERY INCOMING ATTACK</small>}
-          </div>
-        </div>
-        {renderSide("opponent", "PLAYER 2")}
+      {showRoundIntro && <div className="local-pvp-round-intro">ROUND {round}<span>PLAYER 1 VS PLAYER 2</span></div>}
+
+      <div className="local-pvp-matchup">
+        <section className="local-pvp-side local-pvp-player2">
+          <h2>PLAYER 2 <span>TEAM</span></h2>
+          {teams.opponent.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} />)}
+        </section>
+        <div className="local-pvp-vs">VS</div>
+        <section className="local-pvp-side local-pvp-player1">
+          <h2>PLAYER 1 <span>TEAM</span></h2>
+          {teams.player.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} />)}
+        </section>
       </div>
 
-      {showRoundIntro && <div className="local-pvp-round-intro">ROUND {round}<span>PLAYER 1 VS PLAYER 2</span></div>}
-      {isPaused && !isFinal && <section className="local-pvp-pause-overlay" role="dialog" aria-modal="true"><div className="local-pvp-pause-panel"><span>WILD CARDS</span><h2>PAUSED</h2><button onClick={() => setIsPaused(false)}>RESUME MATCH</button><button onClick={resetMatch}>RESTART MATCH</button><button onClick={() => navigate("/character-select")}>CHARACTER SELECT</button><button onClick={() => navigate("/")}>MAIN MENU</button></div></section>}
+      <div className="local-pvp-targets">
+        {activeTeam.filter((fighter) => fighter?.health > 0).map((fighter) => (
+          <label key={fighter.id}>{fighter.name} TARGET
+            <select value={defendingLiving.some((target) => target.id === targetIds[fighter.id]) ? targetIds[fighter.id] : (defendingLiving[0]?.id || "")} onChange={(event) => chooseTarget(fighter.id, event.target.value)}>
+              {defendingLiving.map((target) => <option key={target.id} value={target.id}>{target.name}</option>)}
+            </select>
+          </label>
+        ))}
+      </div>
+
+      {phase === "defending" && pendingAttack && (
+        <section className="local-pvp-defense" role="dialog" aria-live="assertive">
+          <p>INCOMING ATTACK</p>
+          <h2>{pendingAttack.attackName}</h2>
+          <span>{teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.name} — CHOOSE YOUR DEFENSE</span>
+          <div className="local-pvp-defense-timer">{defenseTime}s</div>
+          <div>
+            <button onClick={() => resolveAttack("defend")} disabled={getModifiedCharacterStat(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId), "cooldown") <= 0}>DEFEND</button>
+            <button onClick={() => resolveAttack("evade")}>EVADE</button>
+            <button onClick={() => resolveAttack("take-damage")}>TAKE DAMAGE</button>
+          </div>
+        </section>
+      )}
+
+      <section className="local-pvp-attacks">
+        <div className="local-pvp-player2-panels">
+          {activeSide === "opponent" && teams.opponent.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={finishFighterTurn} />)}
+        </div>
+        <div className="local-pvp-player1-panels">
+          {activeSide === "player" && teams.player.map((fighter) => fighter && <TeamAttackOptions key={fighter.id} fighter={fighter} isActive phase={phase === "defending" ? "defending" : phase} onAttack={startAttack} onFinishTurn={finishFighterTurn} />)}
+        </div>
+      </section>
+
+      <section className="local-pvp-log"><h3>COMBAT LOG</h3>{combatLog.map((message, index) => <p key={index}>{message}</p>)}</section>
+
       {isFinal && <div className="local-pvp-result"><p>{phase === "victory" ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!"}</p><button onClick={resetMatch}>REMATCH</button><button onClick={() => navigate("/")}>MAIN MENU</button></div>}
     </main>
   );
