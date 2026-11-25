@@ -463,6 +463,17 @@ function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
   recordTemporaryEffects(ATK, attacker, buffsApplied);
   activateSelfModifiers(attacker, ATK);
 
+  // Resolve the physical strike first so its damage is independent from
+  // any health-draining debuff attached to the same attack.
+  let damageReceived = 0;
+  const attackDamage = getModifiedAttackStat(ATK, attacker, "damage");
+
+  if (attackDamage > 0 && defender.health > 0) {
+    damageReceived = Math.max(0, attackDamage - defense);
+    defender.health = Math.max(0, defender.health - damageReceived);
+  }
+
+  // Apply the debuff as a separate follow-up effect after physical damage.
   // By default, debuffs can still affect a defender who blocks.
   // Set debuffRequiresHit to make the debuff require a successful hit.
   const debuffNotAppliedReason =
@@ -471,15 +482,7 @@ function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
   const debuffsApplied = debuffNotAppliedReason
     ? {}
     : applyEffects(ATK.debuff, defender, -1);
-  let damageReceived = 0;
   recordTemporaryEffects(ATK, defender, debuffsApplied);
-
-  const attackDamage = getModifiedAttackStat(ATK, attacker, "damage");
-
-  if (attackDamage > 0 && defender.health > 0) {
-    damageReceived = Math.max(0, attackDamage - defense);
-    defender.health = Math.max(0, defender.health - damageReceived);
-  }
 
   // Apply stun unless the attack requires a successful hit
   // and the defender successfully blocked it.
