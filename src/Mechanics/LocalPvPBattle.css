@@ -134,3 +134,17 @@
 .local-pvp-queue-counter span { color:#c5d2df; font-size:.58rem; letter-spacing:1px; }
 .local-pvp-defense-player1 { left:2%; right:auto; border-left:5px solid var(--lp-cyan); }
 .local-pvp-defense-player2 { right:2%; left:auto; border-right:5px solid var(--lp-red); }
+
+.local-pvp-fighter { position:relative; }
+.local-pvp-fighter-defense { position:absolute; z-index:10; top:0; width:min(270px,90vw); padding:10px; border:1px solid var(--lp-gold); border-radius:9px; color:white; background:#101925f7; box-shadow:0 12px 28px #000c; }
+.local-pvp-player1 .local-pvp-fighter-defense { left:calc(100% + 10px); }
+.local-pvp-player2 .local-pvp-fighter-defense { right:calc(100% + 10px); }
+.local-pvp-fighter-defense > strong { display:block; color:var(--lp-gold); font-size:.65rem; }
+.local-pvp-fighter-defense h4 { margin:7px 0; font-size:.85rem; }
+.local-pvp-fighter-defense p { margin:5px 0; font:700 .62rem Arial,sans-serif; }
+.local-pvp-fighter-defense > div { display:grid; gap:5px; }
+.local-pvp-fighter-defense button { padding:7px 5px; border:1px solid #718399; border-radius:6px; color:white; background:#26394d; font-size:.62rem; font-weight:900; }
+.local-pvp-fighter-defense button:disabled { opacity:.4; }
+@media(max-width:600px) {
+ .local-pvp-fighter-defense { position:relative; top:auto; left:auto !important; right:auto !important; width:100%; margin-top:8px; }
+}
