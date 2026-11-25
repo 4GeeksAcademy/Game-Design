@@ -274,6 +274,20 @@ export function playGameSound(name) {
 }
 
 
+// Escalating arcade-style combo sting: the same motif rises from 3x through 10x.
+export function playComboSound(comboCount = 3) {
+  const count = Math.max(3, Math.min(10, Number(comboCount) || 3));
+  const ctx = ensureAudio();
+  if (!ctx || settings.muted || settings.effects <= 0) return;
+  const level = count - 3;
+  const base = 360 + level * 58;
+  const volume = Math.min(0.105, 0.052 + level * 0.007);
+  makeTone(base, 0.095, "square", volume, 0);
+  makeTone(base * 1.25, 0.105, "triangle", volume * 0.82, 0.075);
+  makeTone(base * 1.5, 0.14, "sawtooth", volume * 0.52, 0.15);
+  if (count >= 7) makeTone(base * 2, 0.18, "triangle", volume * 0.42, 0.22);
+}
+
 export function playUISound(kind = "click") {
   if (kind === "click") {
     playGameSound("click");
