@@ -727,6 +727,8 @@ export default function TeamBattle() {
     const defeatedFighter = defeatedOpponent ?? defeatedPlayer;
 
     if (defeatedFighter) {
+      // The combo-break celebration has absolute priority over the K.O. overlay.
+      if (comboStreakRef.current >= 3) endComboStreak();
       setKnockout({
         ...defeatedFighter,
         defeatedTeam: defeatedOpponent ? "opponent" : "player",
@@ -3014,7 +3016,7 @@ export default function TeamBattle() {
         </div>
       )}
 
-      {knockout && (
+      {knockout && !comboBreakState && (
         <KnockoutOverlay
           fighter={knockout}
           defeatedTeam={knockout.defeatedTeam}
