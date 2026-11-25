@@ -54,8 +54,8 @@
 .local-pvp-existing-attacks .attack-card { width:100%; min-width:0 !important; height:100%; color:white; background:#1d2c3d; border:1px solid #5a7189; }
 .local-pvp-existing-attacks .attack-image { height:85px; object-fit:contain; }
 .local-pvp-incoming { position:relative !important; inset:auto !important; width:min(100%,520px); margin:16px auto 0; padding:12px; border:1px solid var(--lp-gold); border-radius:12px; color:white; background:#101925f5; box-shadow:0 12px 30px #000c; }
-.local-pvp-incoming-player-one { border-left:5px solid var(--lp-cyan); left:2%; right:auto; margin:0; }
-.local-pvp-incoming-player-two { border-right:5px solid var(--lp-red); right:2%; left:auto; margin:0; }
+.local-pvp-incoming-player-one { border-left:5px solid var(--lp-cyan); right:2%; left:auto; margin:0; }
+.local-pvp-incoming-player-two { border-right:5px solid var(--lp-red); left:2%; right:auto; margin:0; }
 .local-pvp-1v1 > .local-pvp-incoming { position:absolute !important; top:30%; width:min(38%,520px); z-index:8; }
 .local-pvp-incoming #aiAttackCard { display:grid; gap:8px; }
 .local-pvp-incoming #aiAttackHeader { display:flex; justify-content:space-between; color:var(--lp-gold); font-size:.75rem; }
@@ -82,8 +82,8 @@
 .local-pvp-targets label { display:grid; gap:4px; color:#d6e0ea; font-size:.65rem; }
 .local-pvp-targets select { min-width:150px; padding:7px; border:1px solid #64798e; border-radius:6px; color:white; background:#172536; }
 .local-pvp-defense { position:absolute; z-index:8; top:27%; width:min(34%,460px); margin:0; padding:14px; border:1px solid var(--lp-gold); border-radius:12px; color:white; background:#101925f5; box-shadow:0 12px 30px #000c; text-align:center; }
-.local-pvp-defense-player1 { left:2%; right:auto; border-left:5px solid var(--lp-cyan); }
-.local-pvp-defense-player2 { right:2%; left:auto; border-right:5px solid var(--lp-red); }
+.local-pvp-defense-player1 { right:2%; left:auto; border-left:5px solid var(--lp-cyan); }
+.local-pvp-defense-player2 { left:2%; right:auto; border-right:5px solid var(--lp-red); }
 .local-pvp-defense h2 { margin:5px; }
 .local-pvp-defense-timer { color:var(--lp-gold); font-size:1.5rem; }
 .local-pvp-defense > div:last-child { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; }
