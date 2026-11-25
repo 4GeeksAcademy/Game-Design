@@ -341,6 +341,7 @@ function CharacterSelection() {
   const [playerAnimationKey, setPlayerAnimationKey] = useState(0);
   const [cpuAnimationKey, setCpuAnimationKey] = useState(0);
   const [phase, setPhase] = useState("player");
+  const [characterChosenCountdown, setCharacterChosenCountdown] = useState(null);
 
   const selectedFighters = selectedIndices.map((index) => roster[index]);
   const player2Fighters = player2Indices.map((index) => roster[index]);
@@ -458,11 +459,9 @@ function CharacterSelection() {
     if (!localPvP || phase !== "player" || pvpConfirmed[playerId] ||
       selection.length !== requiredFighters) return;
     if (showAttackRequirement(selection, playerId === "player1" ? "PLAYER 1" : "PLAYER 2")) return;
-    setPvpConfirmed((current) => {
-      const next = { ...current, [playerId]: true };
-      if (next.player1 && next.player2) setPhase("ready");
-      return next;
-    });
+    setPvpConfirmed((current) => ({ ...current, [playerId]: true }));
+    const otherPlayer = playerId === "player1" ? "player2" : "player1";
+    if (pvpConfirmed[otherPlayer]) setPhase("pvp-confirmed");
   };
 
   // Handle keyboard arrows and Enter.
@@ -620,12 +619,35 @@ function CharacterSelection() {
       if (animationStep >= 6) {
         clearInterval(animation);
         setCpuIndices(finalTeam);
-        setPhase("ready");
+        setPhase("cpu-confirmed");
       }
     }, 350);
 
     return () => clearInterval(animation);
   }, [phase, selectedIndices, unlockedIds, requiredFighters, teamControl]);
+
+  // Give the chosen character a clear three-second reveal before stage select.
+  useEffect(() => {
+    if (phase !== "cpu-confirmed" && phase !== "pvp-confirmed") {
+      setCharacterChosenCountdown(null);
+      return undefined;
+    }
+
+    setCharacterChosenCountdown(3);
+    let remaining = 3;
+    const countdown = window.setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        window.clearInterval(countdown);
+        setCharacterChosenCountdown(0);
+        setPhase("ready");
+      } else {
+        setCharacterChosenCountdown(remaining);
+      }
+    }, 1000);
+
+    return () => window.clearInterval(countdown);
+  }, [phase]);
 
   const startBattle = (stageBackground = "arena") => {
     if (
@@ -693,6 +715,21 @@ function CharacterSelection() {
 
   return (
     <main className="character-select-screen">
+      {(phase === "cpu-confirmed" || phase === "pvp-confirmed") && characterChosenCountdown !== null && (
+        <div className="character-chosen-countdown" role="status" aria-live="assertive">
+          <div className="character-chosen-card">
+            <span className="character-chosen-kicker">FIGHTERS LOCKED IN</span>
+            <h2>{phase === "pvp-confirmed" ? "BOTH PLAYERS HAVE CHOSEN" : "OPPONENT SELECTED"}</h2>
+            <div className="character-chosen-names">
+              <span>P1 · {selectedFighters.map((fighter) => fighter.data.name).join(" + ")}</span>
+              <span>{phase === "pvp-confirmed" ? "P2" : "CPU"} · {(phase === "pvp-confirmed" ? player2Fighters : cpuFighters).map((fighter) => fighter.data.name).join(" + ")}</span>
+            </div>
+            <strong className="character-chosen-number">{characterChosenCountdown || "GO!"}</strong>
+            <p>PREPARING STAGE SELECTION</p>
+          </div>
+        </div>
+      )}
+
       <header className="select-header">
         <button
           className="select-back-button"
