@@ -39,7 +39,7 @@ import {
 } from "./AI_NormalDifficulty.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
-import ComboPopup from "./ComboPopup.jsx";
+import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
 import BattleResultScreen from "./BattleResultScreen.jsx";
 import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import KnockoutOverlay from "./KnockoutOverlay.jsx";
@@ -505,13 +505,20 @@ export default function TeamBattle() {
   const [combatDefense, setCombatDefense] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
   const [comboState, setComboState] = useState(null);
+  const [comboBreakState, setComboBreakState] = useState(null);
   const [highestCombo, setHighestCombo] = useState(0);
   const comboStreakRef = useRef(0);
   const highestComboRef = useRef(0);
+  const endComboStreak = useCallback(() => {
+    const count = comboStreakRef.current;
+    if (count >= 3) setComboBreakState({ count, id: Date.now() + Math.random() });
+    comboStreakRef.current = 0;
+    setComboState(null);
+  }, []);
+
   const recordComboOutcome = useCallback((successful) => {
     if (!successful) {
-      comboStreakRef.current = 0;
-      setComboState(null);
+      endComboStreak();
       return;
     }
     const nextCount = Math.min(10, comboStreakRef.current + 1);
@@ -524,14 +531,11 @@ export default function TeamBattle() {
         setHighestCombo(nextCount);
       }
     }
-  }, []);
+  }, [endComboStreak]);
 
   useEffect(() => {
-    if (phase !== "fighting") {
-      comboStreakRef.current = 0;
-      setComboState(null);
-    }
-  }, [phase]);
+    if (phase !== "fighting") endComboStreak();
+  }, [phase, endComboStreak]);
 
   const teamRewardPaidRef = useRef(false);
   useEffect(() => {
@@ -2801,7 +2805,7 @@ export default function TeamBattle() {
     setCombatDefense(0);
     setAttacksUsed(0);
     comboStreakRef.current = 0; highestComboRef.current = 0;
-    setComboState(null); setHighestCombo(0);
+    setComboState(null); setComboBreakState(null); setHighestCombo(0);
     teamRewardPaidRef.current = false;
     setCombatLog(["Choose your fighters' targets."]);
     setCombatMessage("Choose your fighters' targets.");
@@ -2901,6 +2905,7 @@ export default function TeamBattle() {
     <main className={`team-battle ${comboState ? "team-combo-active" : ""}`}>
       <FestivalChallengePopup />
       <ComboPopup combo={comboState} />
+      <ComboBreakPopup combo={comboBreakState ? { ...comboBreakState, onDismiss: () => setComboBreakState(null) } : null} />
       <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>
       {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: levelConfig })} onMainMenu={() => navigate("/")} />}
 
