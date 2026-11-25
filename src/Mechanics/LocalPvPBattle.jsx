@@ -356,7 +356,7 @@ export default function LocalPvPBattle() {
         !attack || !canUseAttack(attack)) return;
     const attacksUsedThisRound = attacker.attacks.filter(
       (move) => move.state === false,
-    ).length;
+    ).length + attackQueueRef.current.filter((entry) => entry.attackerId === fighterId).length;
     if (round === 1 && attacksUsedThisRound >= 4) {
       addLog(`${attacker.name} has reached the 4-attack opening limit.`);
       return;
