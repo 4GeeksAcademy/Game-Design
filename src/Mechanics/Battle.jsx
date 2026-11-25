@@ -751,7 +751,7 @@ function BattleMatch() {
           ? { ...current, [effect.target]: null }
           : current,
       );
-    }, 900);
+    }, 2100);
   }
 
   // Add messages to the popup queue and permanent combat log.
