@@ -63,7 +63,7 @@ export default function StageSelect({ localPvP = false, onStart, onBack }) {
     timeoutRefs.current.push(window.setTimeout(() => {
       setTransitionExiting(true);
       timeoutRefs.current.push(window.setTimeout(() => onStart?.(stageId), 760));
-    }, 650));
+    }, 3100));
   };
 
   const confirmPlayer = (playerId) => {
