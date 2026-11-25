@@ -2709,3 +2709,36 @@ body {
   #battleLayout .attack-card-wrapper { flex-basis:138px; width:138px; min-width:138px; }
   #battleLayout .attack-card .attack-image { flex-basis:48px; height:48px; min-height:48px; }
 }
+
+
+/* Defensive callouts must remain fully inside the large portrait card. */
+#battleLayout .solo-fighter-art:has(.impact-blocked)::before,
+#battleLayout .solo-fighter-art:has(.impact-evaded)::before {
+  position:absolute;
+  z-index:45;
+  left:50%;
+  top:50%;
+  width:max-content;
+  max-width:calc(100% - 18px);
+  box-sizing:border-box;
+  padding:7px 11px;
+  transform:translate(-50%,-50%);
+  white-space:nowrap;
+  text-align:center;
+  font-size:clamp(10px,1vw,13px);
+  letter-spacing:.06em;
+}
+#battleLayout .solo-fighter-art:has(.impact-evaded)::before {
+  content:"💨 EVADED";
+  border:1px solid #78eaff;
+  border-radius:7px;
+  color:#e9fbff;
+  background:linear-gradient(145deg,#174d62ee,#101d2fee);
+  box-shadow:0 0 12px #58dcff,inset 0 0 12px #d9f2ff33;
+  animation:solo-shield-flash 1.05s ease-out both;
+}
+#battleLayout .solo-fighter-art:has(.impact-blocked)::before {
+  animation:solo-shield-flash 1.05s ease-out both;
+}
+#battleLayout .solo-impact-overlay > span { animation-duration:1.9s; }
+#battleLayout .solo-effect-label { animation-duration:2.1s; }
