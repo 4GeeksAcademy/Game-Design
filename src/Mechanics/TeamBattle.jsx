@@ -523,7 +523,7 @@ export default function TeamBattle() {
     if (endedCombo >= 3 || comboBreakState) {
       window.setTimeout(() => setPhase("cpu-fighting"), 3300);
     } else {
-      queueCpuTurn();
+      setPhase("cpu-fighting");
     }
   }, [endComboStreak, comboBreakState]);
 
@@ -988,12 +988,7 @@ export default function TeamBattle() {
       );
 
       if (allFinished) {
-        const endedCombo = endComboStreak();
-        if (endedCombo >= 3 || comboBreakState) {
-          window.setTimeout(() => setPhase("cpu-fighting"), 3300);
-        } else {
-          queueCpuTurn();
-        }
+        queueCpuTurn();
         addLog("Your team is finished. The CPU is preparing its attacks.");
       } else {
         addLog(`${player.name} finished their turn.`);
