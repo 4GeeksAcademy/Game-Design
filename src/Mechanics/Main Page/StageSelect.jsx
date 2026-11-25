@@ -97,10 +97,10 @@ export default function StageSelect({ localPvP = false, onStart, onBack }) {
       let delta = 0;
       if (p1Keys.includes(key)) {
         playerId = "player1";
-        delta = key === "a" || key === "w" ? -1 : 1;
+        delta = key === "a" ? -1 : key === "d" ? 1 : key === "w" ? -4 : 4;
       } else if (p2Keys.includes(key)) {
-        playerId = "player2";
-        delta = key === "arrowleft" || key === "arrowup" ? -1 : 1;
+        playerId = localPvP ? "player2" : "player1";
+        delta = key === "arrowleft" ? -1 : key === "arrowright" ? 1 : key === "arrowup" ? -4 : 4;
       } else if (key === "enter" || key === " ") {
         event.preventDefault();
         confirmPlayer(playerId);
