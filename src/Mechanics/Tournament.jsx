@@ -195,11 +195,39 @@ export default function Tournament() {
     }});
   }
 
-  function watchRemaining() {
-    const updated = completeRemainingMatches({
+  async function watchRemaining() {
+    if (spectating || !tournament) return;
+    setSpectating(true);
+    const updated = {
       ...tournament,
       rounds: tournament.rounds.map((round) => round.map((match) => ({ ...match, fighters: [...match.fighters] }))),
-    });
+    };
+    const pause = () => new Promise((resolve) => window.setTimeout(resolve, 850));
+
+    for (let roundIndex = updated.currentRound; roundIndex < updated.rounds.length; roundIndex += 1) {
+      const round = updated.rounds[roundIndex];
+      if (roundIndex > 0) {
+        const previousWinners = updated.rounds[roundIndex - 1].map((match) => match.winner);
+        round.forEach((match, index) => {
+          if (!match.fighters[0]) {
+            match.fighters = [previousWinners[index * 2] || null, previousWinners[index * 2 + 1] || null];
+          }
+        });
+      }
+      setTournament({ ...updated, rounds: updated.rounds.map((items) => items.map((match) => ({ ...match, fighters: [...match.fighters] }))) });
+      await pause();
+
+      for (const match of round) {
+        if (match.winner || !match.fighters[0] || !match.fighters[1]) continue;
+        match.winner = simulateCpuMatch(match.fighters[0], match.fighters[1]);
+        setTournament({ ...updated, rounds: updated.rounds.map((items) => items.map((item) => ({ ...item, fighters: [...item.fighters] }))) });
+        await pause();
+      }
+    }
+
+    updated.complete = true;
+    updated.placements = getPlacements(updated);
+    updated.humanPlacement = updated.placements.findIndex((fighter) => fighter.id === updated.player.id) + 1 || updated.size;
     setTournament(updated);
     setShowResults(true);
     setSpectating(false);
@@ -288,7 +316,7 @@ export default function Tournament() {
           <section className="wc-tourney-spectator">
             <h2>YOUR RUN IS OVER — THE CHAMPIONSHIP CONTINUES</h2>
             <p>Stay and watch the remaining CPU matches determine the final podium, or return to the main menu.</p>
-            <button onClick={watchRemaining} disabled={spectating}>{spectating ? "SIMULATING MATCHES..." : "WATCH THE REST OF THE TOURNAMENT"}</button>
+            <button onClick={watchRemaining} disabled={spectating}>{spectating ? "WATCHING CPU MATCHES..." : "WATCH THE REST OF THE TOURNAMENT"}</button>
             <button className="wc-tourney-secondary" onClick={watchRemaining}>SKIP TO FINAL STANDINGS</button>
           </section>
         )}
