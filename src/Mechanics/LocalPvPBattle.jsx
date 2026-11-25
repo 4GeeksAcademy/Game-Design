@@ -316,6 +316,7 @@ export default function LocalPvPBattle() {
       setShowRoundIntro(true);
     }
     setActiveSide(nextSide);
+    resolvedRef.current = false;
     attackQueueRef.current = [];
     setAttackQueue([]);
     setPendingAttack(null);
@@ -544,6 +545,7 @@ export default function LocalPvPBattle() {
     turnTimeRef.current = TURN_SECONDS;
     setTurnTime(TURN_SECONDS);
     setPendingAttack(null);
+    resolvedRef.current = false;
     attackQueueRef.current = [];
     setAttackQueue([]);
     setAttackPhaseComplete(false);
