@@ -514,6 +514,7 @@ export default function TeamBattle() {
     if (count >= 3) setComboBreakState({ count, id: Date.now() + Math.random() });
     comboStreakRef.current = 0;
     setComboState(null);
+    return count;
   }, []);
 
   const recordComboOutcome = useCallback((successful) => {
@@ -524,6 +525,7 @@ export default function TeamBattle() {
     const nextCount = Math.min(10, comboStreakRef.current + 1);
     comboStreakRef.current = nextCount;
     if (nextCount >= 3) {
+      playComboSound(nextCount);
       const stage = nextCount >= 10 ? 10 : nextCount >= 8 ? 8 : nextCount;
       setComboState({ count: nextCount, stage, id: Date.now() + Math.random() });
       if (nextCount > highestComboRef.current) {
@@ -976,7 +978,12 @@ export default function TeamBattle() {
       );
 
       if (allFinished) {
-        setPhase("cpu-fighting");
+        const endedCombo = endComboStreak();
+        if (endedCombo >= 3) {
+          window.setTimeout(() => setPhase("cpu-fighting"), 3300);
+        } else {
+          setPhase("cpu-fighting");
+        }
         addLog("Your team is finished. The CPU is preparing its attacks.");
       } else {
         addLog(`${player.name} finished their turn.`);
@@ -1321,8 +1328,27 @@ export default function TeamBattle() {
     if (result.stunnedAttacks?.length) {
       appliedDebuffs.push({ stat: "stun", label: "STUN APPLIED" });
     }
-    recordComboOutcome(damageActuallyDealt > 0 || appliedDebuffs.length > 0);
-    const impactTier = damageActuallyDealt >= 70 ? "fatal" : damageActuallyDealt >= 45 ? "heavy" : damageActuallyDealt >= 20 ? "effective" : "light";
+    const physicalDamage = Math.max(0, Number(result.damageReceived) || 0);
+    const debuffDamage = Math.max(0, -Number(result.debuffsApplied?.health ?? 0));
+    const nonHealthDebuffs = appliedDebuffs.filter((effect) => effect.stat !== "health");
+    if (physicalDamage > 0) recordComboOutcome(true);
+    if (debuffDamage > 0) {
+      window.setTimeout(() => {
+        recordComboOutcome(true);
+        const followUpId = Date.now() + Math.random();
+        setCombatEffects((current) => ({ ...current, [defender.id]: {
+          id: followUpId, type: "damage", damage: debuffDamage,
+          tier: debuffDamage >= 70 ? "fatal" : debuffDamage >= 45 ? "heavy" : debuffDamage >= 20 ? "effective" : "light",
+          message: "DEBUFF HIT!", effects: appliedDebuffs.filter((effect) => effect.stat === "health"),
+        }}));
+        window.setTimeout(() => setCombatEffects((current) => current[defender.id]?.id === followUpId ? { ...current, [defender.id]: null } : current), 2200);
+      }, 420);
+    } else if (physicalDamage === 0 && nonHealthDebuffs.length > 0) {
+      recordComboOutcome(true);
+    } else if (physicalDamage === 0 && appliedDebuffs.length === 0) {
+      recordComboOutcome(false);
+    }
+    const impactTier = physicalDamage >= 70 ? "fatal" : physicalDamage >= 45 ? "heavy" : physicalDamage >= 20 ? "effective" : "light";
     const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : damageActuallyDealt > 0 ? "damage" : "status";
     const attackerEffectId = Date.now() + Math.random();
     const defenderEffectId = Date.now() + Math.random();
@@ -1339,10 +1365,10 @@ export default function TeamBattle() {
       [defender.id]: {
         id: defenderEffectId,
         type: impactType,
-        damage: damageActuallyDealt,
+        damage: physicalDamage,
         tier: impactTier,
         message: result.evaded ? "EVADED!" : result.action === "defend" ? "BLOCKED!" : "",
-        effects: appliedDebuffs,
+        effects: nonHealthDebuffs,
       },
     }));
     [[attacker.id, attackerEffectId], [defender.id, defenderEffectId]].forEach(([fighterId, effectId]) => {
