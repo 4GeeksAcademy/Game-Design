@@ -134,10 +134,7 @@ function Character({
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
               {combatEffect.damage > 0 && (
                 <strong className={`solo-damage-number damage-tier-${combatEffect.tier}`}>
-                  {combatEffect.tier === "light" ? `+${combatEffect.damage}` :
-                    combatEffect.tier === "effective" ? `!${combatEffect.damage}` :
-                    combatEffect.tier === "heavy" ? `!!${combatEffect.damage}` :
-                    `FATAL ${combatEffect.damage}`}
+                  {combatEffect.type === "heal" ? `+${combatEffect.damage}` : `-${combatEffect.damage}`}
                 </strong>
               )}
               {combatEffect.message && <span className={combatEffect.message === "STUNNED!" ? "solo-stunned-callout" : ""}>{combatEffect.message}</span>}
