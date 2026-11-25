@@ -735,6 +735,19 @@ function CharacterSelection() {
             </div>
             <strong className="character-chosen-number">{characterChosenCountdown || "GO!"}</strong>
             <p>PREPARING STAGE SELECTION</p>
+            <div className="character-chosen-actions">
+              {localPvP ? (
+                <>
+                  <button type="button" onClick={() => { setActiveSelectingPlayer("player1"); setPvpConfirmed({ player1: false, player2: true }); setPhase("player"); }}>P1 · CHANGE FIGHTER</button>
+                  <button type="button" onClick={() => { setActiveSelectingPlayer("player2"); setPvpConfirmed({ player1: true, player2: false }); setPhase("player"); }}>P2 · CHANGE FIGHTER</button>
+                </>
+              ) : (
+                <>
+                  <button type="button" onClick={() => { setCpuIndices([]); setPhase("player"); }}>CHANGE MY FIGHTER</button>
+                  <button type="button" onClick={() => { setCpuIndices([]); setPhase("cpu"); }}>REROLL CPU</button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
