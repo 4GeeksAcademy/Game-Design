@@ -22,7 +22,7 @@ import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName } from 
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
-import { playComboSound } from "../audio/audioManager.js";
+import { playComboSound, playComboBreakSound } from "../audio/audioManager.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
@@ -289,7 +289,10 @@ function BattleMatch() {
 
   const endComboStreak = useCallback(() => {
     const count = comboStreakRef.current;
-    if (count >= 3) setComboBreakState({ count, id: Date.now() + Math.random() });
+    if (count >= 3) {
+      playComboBreakSound(count);
+      setComboBreakState({ count, id: Date.now() + Math.random() });
+    }
     comboStreakRef.current = 0;
     setComboState(null);
     return count;
