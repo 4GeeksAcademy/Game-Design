@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { storyBackgrounds } from "./Story/StoryBackgrounds.js";
+import { preloadStoryImages } from "./Story/PreloadStoryImages.js";
 import "./StageSelect.css";
 
 const STAGES = [
@@ -23,6 +24,8 @@ export default function StageSelect({ localPvP = false, onStart, onBack }) {
   const [showdown, setShowdown] = useState(false);
   const [showdownStage, setShowdownStage] = useState("arena");
   const [transitioning, setTransitioning] = useState(false);
+  const [transitionExiting, setTransitionExiting] = useState(false);
+  const transitionStartedRef = useRef(false);
   const [transitionStage, setTransitionStage] = useState("arena");
   const [transitionLabel, setTransitionLabel] = useState("PREPARING THE ARENA");
   const intervalRef = useRef(null);
@@ -34,19 +37,33 @@ export default function StageSelect({ localPvP = false, onStart, onBack }) {
     timeoutRefs.current = [];
   };
 
-  useEffect(() => () => clearTimers(), []);
+  useEffect(() => {
+    preloadStoryImages(storyBackgrounds);
+    return () => clearTimers();
+  }, []);
 
   const getResolvedChoice = (playerId) => {
     const id = STAGE_TILES[selected[playerId]]?.id ?? "arena";
     return id === "mystery" ? randomStage() : id;
   };
 
-  const beginBattleTransition = (stageId) => {
-    if (transitioning) return;
+  const beginBattleTransition = async (stageId) => {
+    if (transitionStartedRef.current) return;
+    transitionStartedRef.current = true;
     setTransitionStage(stageId);
-    setTransitionLabel("THE BATTLE IS ABOUT TO BEGIN");
+    setTransitionLabel("LOADING THE ARENA");
     setTransitioning(true);
-    timeoutRefs.current.push(window.setTimeout(() => onStart?.(stageId), 1050));
+
+    // Preload every stage background before leaving the selection screen.
+    await preloadStoryImages(storyBackgrounds);
+    setTransitionLabel("THE BATTLE IS ABOUT TO BEGIN");
+
+    // Hold the reveal briefly, then fade the whole screen to black before
+    // mounting the battle so its portraits and stage can appear cleanly.
+    timeoutRefs.current.push(window.setTimeout(() => {
+      setTransitionExiting(true);
+      timeoutRefs.current.push(window.setTimeout(() => onStart?.(stageId), 760));
+    }, 650));
   };
 
   const confirmPlayer = (playerId) => {
@@ -210,7 +227,7 @@ export default function StageSelect({ localPvP = false, onStart, onBack }) {
       )}
 
       {transitioning && (
-        <div className="stage-battle-transition" role="status" aria-live="assertive">
+        <div className={`stage-battle-transition ${transitionExiting ? "is-exiting" : ""}`} role="status" aria-live="assertive">
           <div className="stage-transition-art" style={{ backgroundImage: `url("${storyBackgrounds[transitionStage]}")` }} />
           <div className="stage-transition-content"><span>WILD CARDS</span><h2>{transitionLabel}</h2><p>{STAGES.find((stage) => stage.id === transitionStage)?.name}</p><i /></div>
         </div>
