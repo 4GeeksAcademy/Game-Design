@@ -41,7 +41,7 @@ function makeTournament(size, player) {
     count /= 2;
     roundNumber += 1;
   }
-  return { size, player, participants, rounds, currentRound: 0, playerEliminated: false, complete: false, rewardClaimed: false };
+  return { size, player, participants, rounds, currentRound: 0, started: false, playerEliminated: false, complete: false, rewardClaimed: false };
 }
 
 function simulateRound(round, playerId = null) {
@@ -151,9 +151,7 @@ export default function Tournament() {
       });
       simulateRound(nextRound, updated.player.id);
       updated.currentRound = nextIndex;
-    } else if (!result.won) {
-      completeRemainingMatches(updated);
-    } else {
+    } else if (result.won) {
       completeRemainingMatches(updated);
     }
     setTournament(updated);
@@ -170,6 +168,14 @@ export default function Tournament() {
       setShowResults(false);
       setRevealing(false);
     }, 1400);
+  }
+
+  function startTournament() {
+    setRevealing(true);
+    window.setTimeout(() => {
+      setTournament((current) => ({ ...current, started: true }));
+      setRevealing(false);
+    }, 1200);
   }
 
   function enterMatch(match) {
@@ -253,16 +259,25 @@ export default function Tournament() {
           <TournamentFighter fighter={tournament.player} player />
           <div><small>YOUR FIGHTER · STILL IN THE SPOTLIGHT</small><strong>{fighterName(tournament.player)}</strong><p>Your portrait stays visible for the entire tournament.</p></div>
         </section>
+        {!tournament.started && (
+          <section className="wc-tourney-start-panel">
+            <p>YOUR OPPONENTS ARE STILL UNDER WRAPS.</p>
+            <button className="wc-tourney-start" onClick={startTournament} disabled={revealing}>
+              {revealing ? "REVEALING CONTENDERS..." : "START TOURNAMENT · REVEAL CPU FIGHTERS"}
+            </button>
+            {revealing && <div className="wc-tourney-reveal"><span>?</span><strong>THE CONTENDERS ARE ENTERING THE ARENA</strong></div>}
+          </section>
+        )}
         <div className="wc-tourney-rounds">
           {tournament.rounds.map((round, index) => (
             <section className="wc-tourney-round" key={index}>
               <h2>{roundLabels[index] || "ROUND " + (index + 1)}</h2>
               {round.map((match) => (
                 <article className="wc-tourney-match" key={match.id}>
-                  <TournamentFighter fighter={match.fighters[0]} mystery={!match.fighters[0]} player={match.fighters[0]?.id === tournament.player.id} eliminated={Boolean(match.winner && match.winner.id !== match.fighters[0]?.id)} champion={match.winner?.id === tournament.player.id && tournament.complete} />
+                  <TournamentFighter fighter={match.fighters[0]} mystery={!match.fighters[0] || (!tournament.started && match.fighters[0]?.id !== tournament.player.id)} player={match.fighters[0]?.id === tournament.player.id} eliminated={Boolean(match.winner && match.winner.id !== match.fighters[0]?.id)} champion={match.winner?.id === tournament.player.id && tournament.complete} />
                   <div className="wc-tourney-vs">VS</div>
-                  <TournamentFighter fighter={match.fighters[1]} mystery={!match.fighters[1]} player={match.fighters[1]?.id === tournament.player.id} eliminated={Boolean(match.winner && match.winner.id !== match.fighters[1]?.id)} champion={match.winner?.id === tournament.player.id && tournament.complete} />
-                  {match.isPlayerMatch && !match.winner && <button onClick={() => enterMatch(match)}>FIGHT THIS MATCH ▶</button>}
+                  <TournamentFighter fighter={match.fighters[1]} mystery={!match.fighters[1] || (!tournament.started && match.fighters[1]?.id !== tournament.player.id)} player={match.fighters[1]?.id === tournament.player.id} eliminated={Boolean(match.winner && match.winner.id !== match.fighters[1]?.id)} champion={match.winner?.id === tournament.player.id && tournament.complete} />
+                  {tournament.started && match.isPlayerMatch && !match.winner && <button onClick={() => enterMatch(match)}>FIGHT THIS MATCH ▶</button>}
                   {match.winner && <strong className="wc-tourney-winner">WINNER: {fighterName(match.winner)}</strong>}
                 </article>
               ))}
