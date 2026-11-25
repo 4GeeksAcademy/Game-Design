@@ -1209,11 +1209,11 @@ const stunOptions = {
             )}
             <div id="battleArena">
               {/* Story background behind both fighters. */}
-              {isStoryMode && (
+              {(isStoryMode || levelConfig.stageBackground) && (
                 <div
                   className="story-battle-background"
                   style={{
-                    backgroundImage: `url("${storyBackgrounds[levelConfig.background] || storyBackgrounds.arena}")`,
+                    backgroundImage: `url("${storyBackgrounds[isStoryMode ? levelConfig.background : levelConfig.stageBackground] || storyBackgrounds.arena}")`,
                   }}
                   aria-hidden="true"
                 />
