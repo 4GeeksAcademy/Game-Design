@@ -473,23 +473,13 @@ function BattleMatch() {
     setIsKnockoutFadingOut(false);
     setShowResults(false);
 
-    // Match the 2v2 knockout cutscene: hold, fade, then continue.
-    const koFadeTimer = setTimeout(() => {
-      setIsKnockoutFadingOut(true);
-    }, 2100);
-
-    const finishTimer = setTimeout(() => {
-      setShowFinishOverlay(true);
-    }, 2600);
-
-    // Fade the final cards out before showing the original result screen.
-    const fadeTimer = setTimeout(() => {
-      setIsFinishFadingOut(true);
-    }, 5000);
-
-    const resultsTimer = setTimeout(() => {
-      setShowResults(true);
-    }, 5600);
+    // Let the combo-break rating finish before the K.O. cutscene takes over.
+    const comboDelay = comboBreakState || comboStreakRef.current >= 3 ? 3300 : 0;
+    if (comboStreakRef.current >= 3) endComboStreak();
+    const koFadeTimer = setTimeout(() => setIsKnockoutFadingOut(true), comboDelay + 2100);
+    const finishTimer = setTimeout(() => setShowFinishOverlay(true), comboDelay + 2600);
+    const fadeTimer = setTimeout(() => setIsFinishFadingOut(true), comboDelay + 5000);
+    const resultsTimer = setTimeout(() => setShowResults(true), comboDelay + 5600);
 
     return () => {
       clearTimeout(koFadeTimer);
@@ -497,7 +487,7 @@ function BattleMatch() {
       clearTimeout(fadeTimer);
       clearTimeout(resultsTimer);
     };
-  }, [knockout]);
+  }, [knockout, comboBreakState, endComboStreak]);
 
   // Detect a knockout only once and save the fighters for the animations.
   useEffect(() => {
