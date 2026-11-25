@@ -14,7 +14,7 @@ const STAGES = [
 
 const randomStage = () => STAGES[Math.floor(Math.random() * STAGES.length)];
 
-export default function StageSelect({ localPvP = false, onStart }) {
+export default function StageSelect({ localPvP = false, onStart, onBack }) {
   const [singleChoice, setSingleChoice] = useState("arena");
   const [choices, setChoices] = useState({ player1: "arena", player2: "leafVillage" });
   const [ready, setReady] = useState({ player1: false, player2: false });
@@ -85,6 +85,7 @@ export default function StageSelect({ localPvP = false, onStart }) {
   return (
     <section className="wild-stage-select" aria-label="Choose battle stage">
       <header className="stage-select-heading">
+        {onBack && <button type="button" className="stage-select-back" onClick={onBack}>← CHARACTER SELECT</button>}
         <p>THE ARENA IS YOURS</p>
         <h2>SELECT YOUR STAGE</h2>
         <span>Choose where this battle will become legendary.</span>
