@@ -40,6 +40,7 @@ import {
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
+import { playComboSound } from "../audio/audioManager.js";
 import BattleResultScreen from "./BattleResultScreen.jsx";
 import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import KnockoutOverlay from "./KnockoutOverlay.jsx";
