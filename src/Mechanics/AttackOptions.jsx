@@ -179,7 +179,7 @@ function AttackOptions({
 
       onCombatEffect?.({
         target: "opponent",
-        type: result.action === "defend" ? "blocked" : result.action === "evade" ? "evaded" : damage > 0 ? "damage" : damageAndDebuffs.length ? "status" : "attack",
+        type: result.action === "defend" ? "blocked" : result.action === "evade" ? "evaded" : physicalDamage > 0 ? "damage" : damageAndDebuffs.length ? "status" : "attack",
         damage: physicalDamage,
         tier,
         message: result.action === "defend" ? "BLOCKED!" : result.action === "evade" ? (result.evaded ? "EVADED!" : "FAILED TO EVADE!") : "",
