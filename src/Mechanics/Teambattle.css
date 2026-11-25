@@ -4350,3 +4350,13 @@ battlefield > .local-coop-incoming {
 .fighter-impact-overlay.impact-heal .fighter-impact-number { color:#a7ffc5; text-shadow:0 0 9px #35ff83,0 0 25px #19d66b; }
 .fighter-impact-overlay.impact-debuff-drain .fighter-impact-number { color:#ffad83; text-shadow:0 0 9px #ff642e,0 0 25px #ff3159; }
 @keyframes team-heal-glow {0%,100%{filter:brightness(1)}25%,65%{filter:brightness(1.8) drop-shadow(0 0 22px #42ff91)}}
+.fighter-art-button:has(.impact-debuff-drain) .fighter-portrait-wrapper::after {
+  content:"";position:absolute;inset:0;z-index:6;pointer-events:none;
+  background:linear-gradient(110deg,transparent 12%,#ffb36b22 35%,#ff6b3dce 50%,#ffd08a55 58%,transparent 78%);
+  mix-blend-mode:screen;animation:team-durability-drain .5s ease-out both;
+}
+@keyframes team-durability-drain {
+  0%{opacity:0;transform:translateX(-35%) scaleX(.65)}
+  24%{opacity:1}
+  100%{opacity:0;transform:translateX(35%) scaleX(1.15)}
+}
