@@ -192,3 +192,27 @@
   .shared-stage-grid .stage-card-art { height:92px; }
 }
 
+/* Final blackout: keep the selected stage visible while it fades away. */
+.stage-battle-transition.is-exiting {
+  animation: stage-transition-fade-out .72s ease-in forwards;
+  pointer-events: none;
+}
+.stage-battle-transition.is-exiting .stage-transition-content {
+  animation: stage-transition-content-out .55s ease-in forwards;
+}
+.stage-battle-transition.is-exiting .stage-transition-art {
+  animation: stage-transition-art-out .72s ease-in forwards;
+}
+@keyframes stage-transition-fade-out {
+  from { opacity:1; }
+  to { opacity:0; }
+}
+@keyframes stage-transition-content-out {
+  from { opacity:1; transform:scale(1); filter:blur(0); }
+  to { opacity:0; transform:scale(1.04); filter:blur(8px); }
+}
+@keyframes stage-transition-art-out {
+  from { opacity:1; filter:brightness(.32) blur(0); transform:scale(1); }
+  to { opacity:0; filter:brightness(0) blur(5px); transform:scale(1.08); }
+}
+
