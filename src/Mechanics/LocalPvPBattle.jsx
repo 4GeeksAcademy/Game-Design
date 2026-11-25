@@ -679,7 +679,7 @@ export default function LocalPvPBattle() {
       </div>
 
       {phase === "defending" && pendingAttack && (
-        <section className="local-pvp-defense" role="dialog" aria-live="assertive">
+        <section className={"local-pvp-defense " + (defendingSide === "player" ? "local-pvp-defense-player1" : "local-pvp-defense-player2")} role="dialog" aria-live="assertive">
           <p>INCOMING ATTACK</p>
           <h2>{pendingAttack.attackName}</h2>
           <span>{teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.name} — CHOOSE YOUR DEFENSE</span>
