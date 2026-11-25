@@ -40,7 +40,7 @@ import {
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
-import { playComboSound } from "../audio/audioManager.js";
+import { playComboSound, playComboBreakSound } from "../audio/audioManager.js";
 import BattleResultScreen from "./BattleResultScreen.jsx";
 import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import KnockoutOverlay from "./KnockoutOverlay.jsx";
@@ -224,6 +224,7 @@ function FighterPreview({
             <div className={`fighter-portrait-wrapper ${hasStunnedAttacks ? "fighter-stunned" : ""}`}>
               <img key={combatEffect?.id ?? "idle"} className="fighter-portrait" src={fighter.image} alt="" />
               {hasStunnedAttacks && <span className="team-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
+              {combatEffect?.type === "debuff-drain" && <span key={combatEffect.id} className="durability-drain-visual" aria-hidden="true"><i /><i /><i /></span>}
             </div>
           )}
           {combatEffect && (
@@ -512,7 +513,10 @@ export default function TeamBattle() {
   const highestComboRef = useRef(0);
   const endComboStreak = useCallback(() => {
     const count = comboStreakRef.current;
-    if (count >= 3) setComboBreakState({ count, id: Date.now() + Math.random() });
+    if (count >= 3) {
+      playComboBreakSound(count);
+      setComboBreakState({ count, id: Date.now() + Math.random() });
+    }
     comboStreakRef.current = 0;
     setComboState(null);
     return count;
