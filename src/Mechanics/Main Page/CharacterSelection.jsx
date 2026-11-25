@@ -670,6 +670,27 @@ function CharacterSelection() {
     );
   };
 
+  if (phase === "ready" && !isStoryMode) {
+    return (
+      <main className="character-select-screen stage-select-screen">
+        <header className="select-header">
+          <button type="button" className="select-back-button" onClick={() => {
+            setPhase("player");
+            if (localPvP) setPvpConfirmed({ player1: false, player2: false });
+          }}>
+            ← BACK TO CHARACTER SELECT
+          </button>
+          <div className="select-match-info">
+            <span>{teamSize} MATCH</span>
+            <span>{localPvP ? "LOCAL PVP" : `AI: ${difficulty.toUpperCase()}`}</span>
+          </div>
+          <span className="stage-select-tab-label">STAGE SELECT</span>
+        </header>
+        <StageSelect localPvP={localPvP} onStart={startBattle} />
+      </main>
+    );
+  }
+
   return (
     <main className="character-select-screen">
       <header className="select-header">
