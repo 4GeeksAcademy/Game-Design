@@ -980,7 +980,7 @@ export default function TeamBattle() {
 
       if (allFinished) {
         const endedCombo = endComboStreak();
-        if (endedCombo >= 3) {
+        if (endedCombo >= 3 || comboBreakState) {
           window.setTimeout(() => setPhase("cpu-fighting"), 3300);
         } else {
           setPhase("cpu-fighting");
@@ -1350,7 +1350,7 @@ export default function TeamBattle() {
       recordComboOutcome(false);
     }
     const impactTier = physicalDamage >= 70 ? "fatal" : physicalDamage >= 45 ? "heavy" : physicalDamage >= 20 ? "effective" : "light";
-    const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : damageActuallyDealt > 0 ? "damage" : "status";
+    const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : physicalDamage > 0 ? "damage" : nonHealthDebuffs.length ? "status" : "attack";
     const attackerEffectId = Date.now() + Math.random();
     const defenderEffectId = Date.now() + Math.random();
     setCombatEffects((current) => ({
