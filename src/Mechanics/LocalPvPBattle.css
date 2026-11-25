@@ -148,3 +148,17 @@
 @media(max-width:600px) {
  .local-pvp-fighter-defense { position:relative; top:auto; left:auto !important; right:auto !important; width:100%; margin-top:8px; }
 }
+
+.local-pvp-player-screen { position:relative; }
+.local-pvp-one-on-one-defense { position:absolute; z-index:9; top:58%; width:min(82%,360px); padding:12px; border:1px solid var(--lp-gold); border-radius:10px; color:white; background:#101925f7; box-shadow:0 12px 30px #000c; }
+.local-pvp-player-one .local-pvp-one-on-one-defense { right:10px; border-right:5px solid var(--lp-cyan); }
+.local-pvp-player-two .local-pvp-one-on-one-defense { left:10px; border-left:5px solid var(--lp-red); }
+.local-pvp-one-on-one-defense > strong { display:block; color:var(--lp-gold); font-size:.68rem; }
+.local-pvp-one-on-one-defense h4 { margin:8px 0; font-size:.9rem; }
+.local-pvp-one-on-one-defense p { font:700 .65rem Arial,sans-serif; }
+.local-pvp-one-on-one-defense > div { display:grid; gap:6px; }
+.local-pvp-one-on-one-defense button { padding:8px; border:1px solid #718399; border-radius:6px; color:white; background:#26394d; font-size:.65rem; font-weight:900; }
+.local-pvp-one-on-one-defense button:disabled { opacity:.4; }
+@media(max-width:600px) {
+ .local-pvp-one-on-one-defense { position:relative; top:auto; left:auto !important; right:auto !important; width:100%; margin-top:10px; }
+}
