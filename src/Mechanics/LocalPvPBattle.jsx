@@ -5,7 +5,6 @@ import { getCharacterImage } from "./SkinManager.js";
 import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import AttackOptions from "./AttackOptions.jsx";
-import LocalPvPFighterPanel from "./LocalPvPFighterPanel.jsx";
 import { aiChooseStunTargets } from "./AI.js";
 import {
   attackCharacter,
@@ -126,6 +125,7 @@ export default function LocalPvPBattle() {
   const [showRoundIntro, setShowRoundIntro] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const resolvedRef = useRef(false);
+  const attackQueueRef = useRef([]);
   const turnTimeRef = useRef(TURN_SECONDS);
   const defenseTimeRef = useRef(DEFENSE_SECONDS);
 
