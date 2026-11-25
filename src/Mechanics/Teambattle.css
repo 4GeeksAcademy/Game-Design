@@ -4489,3 +4489,40 @@ battlefield > .local-coop-incoming {
   #battleLayout .solo-portrait-wrapper > img,
   .team-battle .fighter-portrait-wrapper > .fighter-portrait { animation:none !important; }
 }
+
+
+/* Defensive callouts are centered and sized to stay within the portrait frame. */
+.team-battle .fighter-portrait-stage::before {
+  max-width:calc(100% - 18px);
+  box-sizing:border-box;
+  white-space:nowrap;
+  text-align:center;
+}
+.team-battle .fighter-art-button:has(.impact-blocked) .fighter-portrait-stage::before,
+.team-battle .fighter-art-button:has(.impact-evaded) .fighter-portrait-stage::before {
+  left:50%;
+  top:50%;
+  width:max-content;
+  padding:7px 11px;
+  transform:translate(-50%,-50%);
+  font-size:clamp(10px,1vw,13px);
+}
+.team-battle .fighter-art-button:has(.impact-evaded) .fighter-portrait-stage::before {
+  content:"💨 EVADED";
+  position:absolute;
+  z-index:7;
+  border:1px solid #78eaff;
+  border-radius:7px;
+  color:#e9fbff;
+  background:linear-gradient(145deg,#174d62ee,#101d2fee);
+  box-shadow:0 0 12px #58dcff,inset 0 0 12px #d9f2ff33;
+  animation:team-shield-flash 1.05s ease-out both;
+}
+.team-battle .fighter-art-button:has(.impact-blocked) .fighter-portrait-stage::before {
+  animation:team-shield-flash 1.05s ease-out both;
+}
+.team-battle .fighter-impact-overlay > span { animation-duration:1.9s; }
+.team-battle .fighter-impact-status { animation-duration:2.1s; }
+.team-battle .durability-drain-visual { animation-duration:.85s; }
+.team-battle .durability-drain-visual::before { animation-duration:.85s; }
+.team-battle .durability-drain-visual i { animation-duration:.85s; }
