@@ -180,19 +180,14 @@
 }
 .wild-combo-break-spark.spark-a { top: 12px; left: 13px; }
 .wild-combo-break-spark.spark-b { right: 13px; bottom: 12px; }
-.combo-break-disappointed { --break-edge:#9aa7b3; --break-glow:#74839199; animation: combo-break-disappointed .72s ease-out both; }
-.combo-break-good { --break-edge:#f7ed52; --break-glow:#f7c52ebb; animation: combo-break-good .72s cubic-bezier(.16,1,.3,1) both; }
-.combo-break-excellent { --break-edge:#a5f51b; --break-glow:#69ff8acc; animation: combo-break-excellent .82s cubic-bezier(.16,1,.3,1) both; }
-.combo-break-crazy {
-  --break-edge:#fff;
-  --break-glow:#6deaff;
-  border-image: linear-gradient(110deg,#ff3159,#ffb52e,#f7ed52,#5bff8a,#35eaff,#5574ff,#d45bff) 1;
-  animation: combo-break-crazy .95s cubic-bezier(.16,1,.3,1) both;
-}
+.combo-break-nice { --break-edge:#54eaff; --break-glow:#35dfffaa; animation: combo-break-nice .72s cubic-bezier(.16,1,.3,1) both; }
+.combo-break-excellent { --break-edge:#f7ed52; --break-glow:#f7c52ebb; animation: combo-break-excellent .82s cubic-bezier(.16,1,.3,1) both; }
+.combo-break-epic { --break-edge:#ff668f; --break-glow:#ff3159dd; animation: combo-break-epic .9s cubic-bezier(.16,1,.3,1) both; }
+.combo-break-crazy { --break-edge:#fff; --break-glow:#6deaff; border:2px solid transparent; background:linear-gradient(115deg,#081522f7,#172d43f7 55%,#081522f7) padding-box,linear-gradient(90deg,#ff3159,#ffb52e,#f7ed52,#5bff8a,#35eaff,#5574ff,#d45bff,#ff3159) border-box; background-size:auto,300% 100%; animation:combo-break-crazy 1.2s ease-in-out infinite; }
 @keyframes combo-break-enter { 0% { opacity:0; transform:translateY(-25px) scale(.7); filter:blur(5px); } 55% { opacity:1; transform:translateY(4px) scale(1.08); filter:blur(0); } 100% { transform:translateY(0) scale(1); } }
 @keyframes combo-break-sweep { from { transform:translateX(-75%) rotate(12deg); opacity:0; } 35% { opacity:.3; } to { transform:translateX(75%) rotate(12deg); opacity:0; } }
-@keyframes combo-break-disappointed { 0% { opacity:0; transform:translateY(-10px) scale(.9); } 45% { opacity:1; transform:translateY(3px) scale(1.02); } 100% { transform:translateY(0) scale(1); } }
-@keyframes combo-break-good { 0% { opacity:0; transform:scale(1.35); filter:brightness(1.8); } 55% { opacity:1; transform:scale(.96); } 100% { transform:scale(1); filter:brightness(1); } }
-@keyframes combo-break-excellent { 0% { opacity:0; transform:translateX(45px) skewX(-10deg) scale(.8); } 45% { opacity:1; transform:translateX(-5px) skewX(2deg) scale(1.1); } 100% { transform:translateX(0) skewX(0) scale(1); } }
-@keyframes combo-break-crazy { 0% { opacity:0; transform:scale(.45) rotate(-8deg); filter:brightness(2) hue-rotate(0); } 45% { opacity:1; transform:scale(1.16) rotate(2deg); filter:brightness(1.5) hue-rotate(100deg); } 100% { transform:scale(1) rotate(0); filter:brightness(1) hue-rotate(220deg); } }
+@keyframes combo-break-nice { 0% { opacity:0; transform:translateY(-10px) scale(.9); } 45% { opacity:1; transform:translateY(3px) scale(1.02); } 100% { transform:translateY(0) scale(1); } }
+@keyframes combo-break-excellent { 0% { opacity:0; transform:scale(1.35); filter:brightness(1.8); } 55% { opacity:1; transform:scale(.96); } 100% { transform:scale(1); filter:brightness(1); } }
+@keyframes combo-break-epic { 0% { opacity:0; transform:translateX(55px) skewX(-12deg) scale(.7); filter:blur(6px); } 38% { opacity:1; transform:translateX(-7px) skewX(3deg) scale(1.14); filter:blur(0) brightness(1.6); } 62% { transform:translateX(5px) skewX(-2deg) scale(1.04); } 100% { transform:translateX(0) skewX(0) scale(1); filter:brightness(1); } }
+@keyframes combo-break-crazy { 0%,100% { opacity:1; transform:translate(0,0) scale(1); filter:brightness(1.1) hue-rotate(0deg); background-position:0 0,0% 50%; box-shadow:0 0 18px #ff3159,0 0 36px #35eaff,inset 0 0 22px #ffffff22; } 20% { transform:translate(-3px,1px) scale(1.035); filter:brightness(1.55) hue-rotate(70deg); } 40% { transform:translate(3px,-2px) scale(1.015); background-position:0 0,45% 50%; } 60% { transform:translate(-2px,2px) scale(1.04); filter:brightness(1.7) hue-rotate(190deg); } 80% { transform:translate(2px,-1px) scale(1.02); background-position:0 0,100% 50%; } }
 @media (prefers-reduced-motion: reduce) { .wild-combo-break-popup, .wild-combo-break-popup::before { animation:none !important; } }
