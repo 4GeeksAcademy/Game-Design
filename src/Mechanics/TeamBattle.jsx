@@ -2941,7 +2941,7 @@ export default function TeamBattle() {
   }
 
   return (
-    <main className={`team-battle ${comboState ? "team-combo-active" : ""}`}>
+    <main className={`team-battle ${comboState ? "team-combo-active" : ""} ${isLocalCoop ? "is-local-coop" : ""}`}>
       <FestivalChallengePopup />
       <ComboPopup combo={comboState} />
       <ComboBreakPopup combo={comboBreakState ? { ...comboBreakState, onDismiss: () => setComboBreakState(null) } : null} />
@@ -3539,7 +3539,7 @@ export default function TeamBattle() {
             if (!attacker || !target) return null;
 
             return (
-              <section className="player-attack-popup" aria-live="polite">
+              <section className="player-attack-popup is-opponent-side" aria-live="polite">
                 <div className="ally-popup-label">⚔ PLAYER ATTACK</div>
 
                 <div className="ally-popup-matchup">
