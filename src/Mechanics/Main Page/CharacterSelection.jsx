@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getCharacterImage } from "../SkinManager.js";
 import StageSelect from "./StageSelect.jsx";
+import { storyExpressions } from "./Story/StoryExpressions.js";
+import { storyBackgrounds } from "./Story/StoryBackgrounds.js";
+import { preloadStoryImages } from "./Story/PreloadStoryImages.js";
 import { loadKeybinds, normalizeKey } from "./keybinds.js";
 import Toga from "../All_Character_Stats/TogaStats.js";
 import TogaImage from "../../assets/img/Toga.png";
@@ -276,6 +279,12 @@ function CharacterSelection() {
     : [];
 
   const storyOpponentId = storyOpponentIds[0] ?? null;
+
+  useEffect(() => {
+    // Match the Story Level 1 preload pattern: warm all character, expression,
+    // and stage artwork while the player is still on character selection.
+    preloadStoryImages(storyBackgrounds, storyExpressions, roster);
+  }, []);
 
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
 
