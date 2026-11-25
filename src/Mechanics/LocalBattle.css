@@ -1,0 +1,74 @@
+/* Isolated horizontal layout refinements for local co-op.
+   Kept separate from the main team battle stylesheet to avoid broad overrides. */
+.team-battle.is-local-coop .battle-bottom {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
+}
+.team-battle.is-local-coop .battle-bottom > .combat-log {
+  display: none !important;
+}
+.team-battle.is-local-coop .battle-bottom .player-attack-panel {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  align-self: stretch;
+}
+.team-battle.is-local-coop .battlefield {
+  position: relative;
+  isolation: isolate;
+}
+.team-battle.is-local-coop .local-coop-incoming {
+  position: absolute;
+  z-index: 35;
+  top: 50%;
+  width: min(310px, 28%);
+  max-height: min(78%, 540px);
+  overflow-y: auto;
+  transform: translateY(-50%);
+  margin: 0;
+  box-shadow: 0 16px 42px #000b, 0 0 20px #ff315955;
+}
+.team-battle.is-local-coop .local-coop-incoming.is-first {
+  left: 12px;
+  right: auto;
+}
+.team-battle.is-local-coop .local-coop-incoming.is-second {
+  right: 12px;
+  left: auto;
+}
+.team-battle.is-local-coop .player-attack-popup.is-opponent-side {
+  position: absolute;
+  z-index: 34;
+  top: 50%;
+  right: 12px;
+  left: auto;
+  width: min(310px, 28%);
+  transform: translateY(-50%);
+  margin: 0;
+}
+.team-battle.is-local-coop .battle-center {
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .team-battle.is-local-coop .local-coop-incoming,
+  .team-battle.is-local-coop .player-attack-popup.is-opponent-side {
+    width: min(260px, 42%);
+  }
+}
+@media (max-width: 650px) {
+  .team-battle.is-local-coop .battle-bottom {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .team-battle.is-local-coop .local-coop-incoming,
+  .team-battle.is-local-coop .player-attack-popup.is-opponent-side {
+    position: relative;
+    inset: auto;
+    width: min(100%, 360px);
+    max-height: none;
+    transform: none;
+    margin: 10px auto;
+  }
+}
