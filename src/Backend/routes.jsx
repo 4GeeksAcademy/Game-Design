@@ -16,6 +16,7 @@ import CharacterSelection from "../Mechanics/Main Page/CharacterSelection.jsx";
 import Shop from "../Mechanics/Main Page/Shop.jsx";
 import BotSimulator from "../Mechanics/BotSimulator.jsx";
 import WatchMode from "../Mechanics/WatchMode";
+import Tournament from "../Mechanics/Tournament.jsx";
 import StoryMode from "../Mechanics/Main Page/Story/StoryMode.jsx";
 import Festival from "../Mechanics/Main Page/Festival/Festival.jsx";
 import StoryRewardScreen from "../Mechanics/Main Page/Story/StoryRewardScreen.jsx";
@@ -42,6 +43,7 @@ export const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/watch-mode" element={<WatchMode />} />
+      <Route path="/tournament" element={<Tournament />} />
       <Route path="/bot-simulator" element={<BotSimulator />} />
       <Route path="/" element={<Homescreen />} />
       <Route path="/shop" element={<Shop />} />
