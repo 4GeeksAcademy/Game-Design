@@ -66,7 +66,7 @@ export default function BattleResultScreen({
         <div><span>DIFFICULTY</span><strong>{difficulty.toUpperCase()} ×{multiplier}</strong></div>
         <div><span>COMBO MULTIPLIER</span><strong>×{combo}</strong></div>
         <div className="wild-result-score"><span>TOTAL SCORE</span><strong>{score}</strong></div>
-        <div className="wild-result-score"><span>COINS EARNED</span><strong>+{score}</strong></div>
+        <div className="wild-result-score"><span>{onTournamentComplete ? "TOURNAMENT MATCH SCORE" : "COINS EARNED"}</span><strong>{onTournamentComplete ? score : `+${score}`}</strong></div>
       </section>
 
       <div className="wild-result-actions">
