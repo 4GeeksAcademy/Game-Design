@@ -133,7 +133,6 @@ export default function LocalPvPBattle() {
   const activeTeam = teams[activeSide];
   const defendingSide = activeSide === "player" ? "opponent" : "player";
   const opposingTeam = teams[defendingSide];
-  const activeLiving = activeTeam.filter((fighter) => fighter && fighter.health > 0);
   const defendingLiving = opposingTeam.filter((fighter) => fighter && fighter.health > 0);
   const isFinal = phase === "victory" || phase === "defeat";
 
@@ -326,7 +325,7 @@ export default function LocalPvPBattle() {
     setTurnTime(TURN_SECONDS);
   };
 
-  const endTeamTurn = (timedOut = false) => {
+  const endTeamTurn = () => {
     if (phase !== "fighting" || attackPhaseComplete || isFinal) return;
     setTeams((current) => ({
       ...current,
