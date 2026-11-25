@@ -1286,7 +1286,7 @@ const stunOptions = {
                 onClick={() => {
                   const comboCount = endComboStreak();
                   setCharacter({ ...character, turnFinished: true });
-                  if (comboCount >= 3) window.setTimeout(() => setCurrentTurn("ai"), 3300);
+                  if (comboCount >= 3 || comboBreakState) window.setTimeout(() => setCurrentTurn("ai"), 3300);
                   else setCurrentTurn("ai");
                 }}
               >
