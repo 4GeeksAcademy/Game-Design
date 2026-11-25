@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getCharacterImage } from "../SkinManager.js";
+import StageSelect from "./StageSelect.jsx";
 import { loadKeybinds, normalizeKey } from "./keybinds.js";
 import Toga from "../All_Character_Stats/TogaStats.js";
 import TogaImage from "../../assets/img/Toga.png";
@@ -626,7 +627,7 @@ function CharacterSelection() {
     return () => clearInterval(animation);
   }, [phase, selectedIndices, unlockedIds, requiredFighters, teamControl]);
 
-  const startBattle = () => {
+  const startBattle = (stageBackground = "arena") => {
     if (
       phase !== "ready" ||
       selectedIndices.length !== requiredFighters ||
@@ -660,6 +661,7 @@ function CharacterSelection() {
           teamControl,
           localPvP,
           playerCount: localPvP ? 2 : 1,
+          stageBackground: isStoryMode ? undefined : stageBackground,
           gameMode: isStoryMode ? "story" : (levelConfig.gameMode ?? "quick"),
           // Keep the currently playing Story Mode soundtrack when battle opens.
           preserveMusicOnBattle: isStoryMode,
@@ -853,6 +855,8 @@ function CharacterSelection() {
           {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
           <span>▶</span>
         </button>
+      ) : phase === "ready" && !isStoryMode ? (
+        <StageSelect localPvP={localPvP} onStart={startBattle} />
       ) : (
         <button
           className="confirm-fighter-button"
