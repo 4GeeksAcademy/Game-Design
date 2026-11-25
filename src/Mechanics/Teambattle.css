@@ -4340,3 +4340,13 @@ battlefield > .local-coop-incoming {
   100% { opacity:0; background-position:100% 50%; }
 }
 
+
+
+/* Brief impact feedback, with durability-drain and healing states. */
+.fighter-impact-number,.fighter-impact-overlay > span,.fighter-impact-status { animation-duration:.82s !important; }
+.fighter-art-button:has(.impact-damage) .fighter-portrait,.fighter-art-button:has(.impact-debuff-drain) .fighter-portrait { animation-duration:.55s !important; }
+.fighter-art-button:has(.impact-debuff-drain) .fighter-portrait { filter:brightness(1.22) sepia(.35) saturate(1.8) hue-rotate(325deg); }
+.fighter-art-button:has(.impact-heal) .fighter-portrait { animation:team-heal-glow .82s ease-out both !important; }
+.fighter-impact-overlay.impact-heal .fighter-impact-number { color:#a7ffc5; text-shadow:0 0 9px #35ff83,0 0 25px #19d66b; }
+.fighter-impact-overlay.impact-debuff-drain .fighter-impact-number { color:#ffad83; text-shadow:0 0 9px #ff642e,0 0 25px #ff3159; }
+@keyframes team-heal-glow {0%,100%{filter:brightness(1)}25%,65%{filter:brightness(1.8) drop-shadow(0 0 22px #42ff91)}}
