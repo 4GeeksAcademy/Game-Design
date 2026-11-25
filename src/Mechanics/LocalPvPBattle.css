@@ -128,3 +128,9 @@
  .local-pvp-fighter img { height:105px; }
  .local-pvp-incoming #defensiveActions { grid-template-columns:1fr; }
 }
+
+.local-pvp-queue-counter { display:flex; align-items:center; gap:7px; padding:7px 10px; border:1px dashed #74879a; border-radius:8px; background:#111b27; }
+.local-pvp-queue-counter strong { color:var(--lp-gold); font-size:1.2rem; }
+.local-pvp-queue-counter span { color:#c5d2df; font-size:.58rem; letter-spacing:1px; }
+.local-pvp-defense-player1 { left:2%; right:auto; border-left:5px solid var(--lp-cyan); }
+.local-pvp-defense-player2 { right:2%; left:auto; border-right:5px solid var(--lp-red); }
