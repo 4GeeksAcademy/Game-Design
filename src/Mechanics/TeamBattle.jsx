@@ -3047,11 +3047,11 @@ export default function TeamBattle() {
       )}
 
       <header className="battle-header">
-        <div className="header-team-label cpu-label">CPU TEAM</div>
+        <div className="header-team-label cpu-label">{levelConfig.localPvP ? "PLAYER 2" : "CPU TEAM"}</div>
         <h1>
           TEAM BATTLE <span>ROUND {roundNumber}</span>
         </h1>
-        <div className="header-team-label player-label">PLAYER TEAM</div>
+        <div className="header-team-label player-label">{levelConfig.localPvP ? "PLAYER 1" : "PLAYER TEAM"}</div>
       </header>
 
       {phase === "selecting" && (
@@ -3214,7 +3214,7 @@ export default function TeamBattle() {
         <div className="battle-team cpu-team">
           <div className="team-heading">
             <span className="team-indicator" />
-            <h2>CPU TEAM</h2>
+            <h2>{levelConfig.localPvP ? "PLAYER 2 TEAM" : "CPU TEAM"}</h2>
           </div>
 
           <div className="fighter-grid">
