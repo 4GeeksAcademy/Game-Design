@@ -601,6 +601,7 @@ export default function LocalPvPBattle() {
           <div className="local-pvp-one-on-one-defense" role="dialog" aria-live="assertive">
             <strong>⚠ INCOMING ATTACK · {defenseTime}s</strong>
             <h4>{pendingAttack.attackName}</h4>
+            {pendingAttack.attackImage && <img className="local-pvp-defense-attack-image" src={pendingAttack.attackImage} alt={pendingAttack.attackName} />}
             <p>{pendingAttack.damage} DAMAGE · {pendingAttack.speed} SPEED</p>
             <div>
               <button disabled={getModifiedCharacterStat(owner, "cooldown") <= 0 || defenseTime <= 0} onClick={() => resolveAttack("defend")}>BLOCK</button>
@@ -700,6 +701,7 @@ function FighterStatus({ fighter, pendingAttack, defenseTime, onResolve }) {
         <div className="local-pvp-fighter-defense" role="dialog" aria-live="assertive">
           <strong>⚠ INCOMING ATTACK · {defenseTime}s</strong>
           <h4>{pendingAttack.attackName}</h4>
+          {pendingAttack.attackImage && <img className="local-pvp-defense-attack-image" src={pendingAttack.attackImage} alt={pendingAttack.attackName} />}
           <p>{pendingAttack.damage} DAMAGE · {pendingAttack.speed} SPEED</p>
           <div>
             <button disabled={getModifiedCharacterStat(fighter, "cooldown") <= 0 || defenseTime <= 0} onClick={() => onResolve("defend")}>BLOCK</button>
