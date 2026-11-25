@@ -518,6 +518,15 @@ export default function TeamBattle() {
     return count;
   }, []);
 
+  const queueCpuTurn = useCallback(() => {
+    const endedCombo = endComboStreak();
+    if (endedCombo >= 3 || comboBreakState) {
+      window.setTimeout(() => setPhase("cpu-fighting"), 3300);
+    } else {
+      queueCpuTurn();
+    }
+  }, [endComboStreak, comboBreakState]);
+
   const recordComboOutcome = useCallback((successful) => {
     if (!successful) {
       endComboStreak();
@@ -955,7 +964,7 @@ export default function TeamBattle() {
         (player) => player.health <= 0 || player.turnFinished,
       )
     ) {
-      setPhase("cpu-fighting");
+      queueCpuTurn();
     } else {
       setPhase("fighting");
     }
@@ -983,7 +992,7 @@ export default function TeamBattle() {
         if (endedCombo >= 3 || comboBreakState) {
           window.setTimeout(() => setPhase("cpu-fighting"), 3300);
         } else {
-          setPhase("cpu-fighting");
+          queueCpuTurn();
         }
         addLog("Your team is finished. The CPU is preparing its attacks.");
       } else {
@@ -1253,7 +1262,7 @@ export default function TeamBattle() {
           (fighter) => fighter.health <= 0 || fighter.turnFinished,
         )
       ) {
-        setPhase("cpu-fighting");
+        queueCpuTurn();
         addLog("Your team is finished. The CPU is preparing its attacks.");
       }
 
@@ -1440,7 +1449,7 @@ export default function TeamBattle() {
         (fighter) => fighter.health <= 0 || fighter.turnFinished,
       )
     ) {
-      setPhase("cpu-fighting");
+      queueCpuTurn();
       addLog("Your team is finished. The CPU is preparing its attacks.");
     }
 
@@ -1487,7 +1496,7 @@ export default function TeamBattle() {
             (fighter) => fighter.health <= 0 || fighter.turnFinished,
           )
         ) {
-          setPhase("cpu-fighting");
+          queueCpuTurn();
         }
       }
     }
@@ -1519,7 +1528,7 @@ export default function TeamBattle() {
     //   );
 
     //   if (allFinished) {
-    //     setPhase("cpu-fighting");
+    //     queueCpuTurn();
     //     addLog(
     //       "Your team has no remaining actions. The CPU is preparing to attack.",
     //     );
@@ -1593,12 +1602,12 @@ export default function TeamBattle() {
     if (
       playersAfter.every((player) => player.health <= 0 || player.turnFinished)
     ) {
-      setPhase("cpu-fighting");
+      queueCpuTurn();
       addLog(
         "Your team has no remaining targets. The CPU is preparing its attacks.",
       );
     }
-  }, [phase, pendingAllyAttack, teams.player, teams.opponent, roundTargets]);
+  }, [phase, pendingAllyAttack, teams.player, teams.opponent, roundTargets, queueCpuTurn]);
 
   const runCpuTeammateTurn = () => {
     if (isPaused || !isCpuAssist || phase !== "fighting" || pendingAllyAttack) return;
