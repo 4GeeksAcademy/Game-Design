@@ -13,6 +13,7 @@ export default function BattleResultScreen({
   comboMultiplier = 1,
   onRematch,
   onMainMenu,
+  onTournamentComplete,
 }) {
   const navigate = useNavigate();
   const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[difficulty] ?? 1;
