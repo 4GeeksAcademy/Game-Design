@@ -1206,7 +1206,7 @@ export default function TeamBattle() {
         window.setTimeout(() => setCombatEffects((current) =>
           current[recipient.id]?.id === healEffectId
             ? { ...current, [recipient.id]: null } : current
-        ), 850);
+        ), 1900);
         addLog(`💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`, "buff");
         describeEffects(result.buffsApplied, recipient.name, "buff").forEach(
           (message) => addLog(message, "buff"),
@@ -1352,8 +1352,8 @@ export default function TeamBattle() {
           tier: debuffDamage >= 70 ? "fatal" : debuffDamage >= 45 ? "heavy" : debuffDamage >= 20 ? "effective" : "light",
           message: "DEBUFF HIT!", effects: appliedDebuffs.filter((effect) => effect.stat === "health"),
         }}));
-        window.setTimeout(() => setCombatEffects((current) => current[defender.id]?.id === followUpId ? { ...current, [defender.id]: null } : current), 500);
-      }, 500);
+        window.setTimeout(() => setCombatEffects((current) => current[defender.id]?.id === followUpId ? { ...current, [defender.id]: null } : current), 1500);
+      }, 850);
     } else if (physicalDamage === 0 && nonHealthDebuffs.length > 0) {
       recordComboOutcome(true);
     } else if (physicalDamage === 0 && appliedDebuffs.length === 0) {
@@ -1389,7 +1389,7 @@ export default function TeamBattle() {
             ? { ...current, [fighterId]: null }
             : current,
         );
-      }, 900);
+      }, 2100);
     });
     if (!attacker.isCpuTeammate && damageActuallyDealt > 0) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
