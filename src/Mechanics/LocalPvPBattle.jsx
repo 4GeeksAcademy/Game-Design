@@ -162,7 +162,7 @@ export default function LocalPvPBattle() {
       setTurnTime(Math.max(0, remaining));
       if (remaining <= 0) {
         window.clearInterval(timer);
-        endTeamTurn(true);
+        endTeamTurn();
       }
     }, 1000);
     return () => window.clearInterval(timer);
@@ -262,7 +262,7 @@ export default function LocalPvPBattle() {
     if (phase !== "fighting" || attackPhaseComplete) return;
     const living = teams[activeSide].filter((fighter) => fighter?.health > 0);
     if (living.length && living.every((fighter) => fighter.turnFinished)) {
-      endTeamTurn(false);
+      endTeamTurn();
     }
   }, [teams, phase, activeSide, attackPhaseComplete]);
 
