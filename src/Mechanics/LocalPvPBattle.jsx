@@ -25,8 +25,6 @@ import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges.js"
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives.js";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup.jsx";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
-import "./Teambattle.css";
-import "./BattleUI.css";
 import "./LocalPvPBattle.css";
 
 const TURN_SECONDS = 20;
@@ -128,6 +126,7 @@ export default function LocalPvPBattle() {
   const [showRoundIntro, setShowRoundIntro] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const resolvedRef = useRef(false);
+  const attackQueueRef = useRef([]);
   const turnTimeRef = useRef(TURN_SECONDS);
   const defenseTimeRef = useRef(DEFENSE_SECONDS);
 
@@ -317,6 +316,7 @@ export default function LocalPvPBattle() {
       setShowRoundIntro(true);
     }
     setActiveSide(nextSide);
+    attackQueueRef.current = [];
     setAttackQueue([]);
     setPendingAttack(null);
     setAttackPhaseComplete(false);
@@ -334,8 +334,8 @@ export default function LocalPvPBattle() {
       ),
     }));
     setAttackPhaseComplete(true);
-    if (attackQueue.length > 0) {
-      setPendingAttack(attackQueue[0]);
+    if (attackQueueRef.current.length > 0) {
+      setPendingAttack(attackQueueRef.current[0]);
       setPhase("defending");
       defenseTimeRef.current = DEFENSE_SECONDS;
       setDefenseTime(DEFENSE_SECONDS);
@@ -362,7 +362,9 @@ export default function LocalPvPBattle() {
       return;
     }
     const cost = getModifiedAttackStat(attack, attacker, "cost");
-    if (attacker.mana < cost) {
+    const queuedForFighter = attackQueueRef.current.filter((entry) => entry.attackerId === fighterId);
+    const reservedMana = queuedForFighter.reduce((total, entry) => total + entry.cost, 0);
+    if (attacker.mana - reservedMana < cost) {
       addLog(`${attacker.name} does not have enough mana.`);
       return;
     }
@@ -407,6 +409,10 @@ export default function LocalPvPBattle() {
       addLog("Choose a living opponent first.");
       return;
     }
+    if (queuedForFighter.some((entry) => entry.attackIndex === attackIndex)) {
+      addLog("That attack is already in your queue.");
+      return;
+    }
     const queued = {
       attackerId: fighterId,
       targetId,
@@ -419,7 +425,9 @@ export default function LocalPvPBattle() {
       hasHeal: Boolean(attack.heal),
       selectedAttackIds,
     };
-    setAttackQueue((current) => [...current, queued]);
+    const nextQueue = [...attackQueueRef.current, queued];
+    attackQueueRef.current = nextQueue;
+    setAttackQueue(nextQueue);
     addLog(`${attacker.name} queued ${attack.name} against ${target.name}.`);
   };
 
@@ -437,8 +445,18 @@ export default function LocalPvPBattle() {
     const attack = attacker?.attacks?.[pendingAttack.attackIndex];
     if (!attacker || !defender || !attack || !canUseAttack(attack) ||
         (choice === "defend" && getModifiedCharacterStat(defender, "cooldown") <= 0)) {
-      setPendingAttack(null);
-      setPhase("fighting");
+      const remainingQueue = attackQueueRef.current.slice(1);
+      attackQueueRef.current = remainingQueue;
+      setAttackQueue(remainingQueue);
+      if (remainingQueue.length) {
+        setPendingAttack(remainingQueue[0]);
+        resolvedRef.current = false;
+        defenseTimeRef.current = DEFENSE_SECONDS;
+        setDefenseTime(DEFENSE_SECONDS);
+      } else {
+        setPendingAttack(null);
+        advanceTeamTurn();
+      }
       return;
     }
     const allFighters = [...next.player, ...next.opponent];
@@ -491,12 +509,14 @@ export default function LocalPvPBattle() {
           : `${attack.name} dealt ${damage} damage.`);
       if (defender.health <= 0) addLog(`${defender.name} is K.O.!`);
     }
-    const remainingQueue = attackQueue.slice(1);
+    const remainingQueue = attackQueueRef.current.slice(1);
+    attackQueueRef.current = remainingQueue;
     setAttackQueue(remainingQueue);
     const playerAlive = next.player.some((fighter) => fighter?.health > 0);
     const opponentAlive = next.opponent.some((fighter) => fighter?.health > 0);
     if (!playerAlive || !opponentAlive) {
       setPendingAttack(null);
+      attackQueueRef.current = [];
       setAttackQueue([]);
       setPhase(playerAlive ? "victory" : "defeat");
       return;
@@ -524,6 +544,7 @@ export default function LocalPvPBattle() {
     turnTimeRef.current = TURN_SECONDS;
     setTurnTime(TURN_SECONDS);
     setPendingAttack(null);
+    attackQueueRef.current = [];
     setAttackQueue([]);
     setAttackPhaseComplete(false);
     setPhase("fighting");
