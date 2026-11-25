@@ -161,13 +161,13 @@ function AttackOptions({
           onComboEvent?.(true);
           onCombatEffect?.({
             target: "opponent",
-            type: "damage",
+            type: "debuff-drain",
             damage: debuffDamage,
             tier: debuffDamage >= 70 ? "fatal" : debuffDamage >= 45 ? "heavy" : debuffDamage >= 20 ? "effective" : "light",
             message: "DEBUFF HIT!",
             effects: damageAndDebuffs.filter((effect) => effect.stat === "health"),
           });
-        }, 420);
+        }, 500);
       } else if (physicalDamage === 0 && debuffDamage === 0 && hasOtherDebuff) {
         onComboEvent?.(true);
       } else if (physicalDamage === 0 && debuffDamage === 0 && damageAndDebuffs.length === 0) {
@@ -185,14 +185,15 @@ function AttackOptions({
         message: result.action === "defend" ? "BLOCKED!" : result.action === "evade" ? (result.evaded ? "EVADED!" : "FAILED TO EVADE!") : "",
         effects: damageAndDebuffs.filter((effect) => effect.stat !== "health"),
       });
-      if (selfBuffs.length || damage > 0) {
+      const healingReceived = Math.max(0, Number(result.buffsApplied?.health) || 0);
+      if (healingReceived > 0 || selfBuffs.length || damage > 0) {
         onCombatEffect?.({
           target: "player",
-          type: damage > 0 ? "attack" : "status",
-          damage: 0,
+          type: healingReceived > 0 ? "heal" : damage > 0 ? "attack" : "status",
+          damage: healingReceived,
           tier: "light",
-          message: "",
-          effects: selfBuffs,
+          message: healingReceived > 0 ? "HEALED!" : "",
+          effects: selfBuffs.filter((effect) => effect.stat !== "health"),
         });
       }
 
