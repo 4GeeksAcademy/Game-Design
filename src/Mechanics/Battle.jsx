@@ -21,7 +21,7 @@ import { addCoins } from "./Currency.js";
 import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
-import ComboPopup from "./ComboPopup.jsx";
+import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
@@ -281,14 +281,21 @@ function BattleMatch() {
   const [aiAttack, setAiAttack] = useState(null);
   const [combatEffects, setCombatEffects] = useState({});
   const [comboState, setComboState] = useState(null);
+  const [comboBreakState, setComboBreakState] = useState(null);
   const [highestCombo, setHighestCombo] = useState(0);
   const comboStreakRef = useRef(0);
   const highestComboRef = useRef(0);
 
+  const endComboStreak = useCallback(() => {
+    const count = comboStreakRef.current;
+    if (count >= 3) setComboBreakState({ count, id: Date.now() + Math.random() });
+    comboStreakRef.current = 0;
+    setComboState(null);
+  }, []);
+
   const recordComboOutcome = useCallback((successful) => {
     if (!successful) {
-      comboStreakRef.current = 0;
-      setComboState(null);
+      endComboStreak();
       return;
     }
     const nextCount = Math.min(10, comboStreakRef.current + 1);
@@ -301,14 +308,11 @@ function BattleMatch() {
         setHighestCombo(nextCount);
       }
     }
-  }, []);
+  }, [endComboStreak]);
 
   useEffect(() => {
-    if (currentTurn !== "player") {
-      comboStreakRef.current = 0;
-      setComboState(null);
-    }
-  }, [currentTurn]);
+    if (currentTurn !== "player") endComboStreak();
+  }, [currentTurn, endComboStreak]);
 
   const resetBattle = useCallback(() => {
     aiControllerRef.current?.stop();
@@ -318,7 +322,7 @@ function BattleMatch() {
     setOpponent(createBattleFighter(opponentId, "opponent", location.state?.difficulty ?? "Easy"));
     setDamageDealt(0); setCombatDefense(0); setAttacksUsed(0);
     comboStreakRef.current = 0; highestComboRef.current = 0;
-    setComboState(null); setHighestCombo(0);
+    setComboState(null); setComboBreakState(null); setHighestCombo(0);
     lastRewardedDamage.current = 0; lastRecordedAttacks.current = 0;
     rewardPaidRef.current = false;
     festivalBattleRecorded.current = false;
@@ -934,6 +938,7 @@ const stunOptions = {
     <div className={`container-fluid mt-3 ${comboState ? "solo-combo-active" : ""}`} id="gameContainer">
       <FestivalChallengePopup />
       <ComboPopup combo={comboState} />
+      <ComboBreakPopup combo={comboBreakState ? { ...comboBreakState, onDismiss: () => setComboBreakState(null) } : null} />
       {combatMessages.length > 0 && (
         <div id="combatPopupContainer" aria-live="polite">
           {combatMessages.slice(0, 3).map((entry, index) => (
