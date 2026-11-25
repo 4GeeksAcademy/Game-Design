@@ -150,8 +150,28 @@ function AttackOptions({
       const damageAndDebuffs = effectStats
         .filter((effect) => effect.kind === "debuff")
         .map(({ stat, amount, kind }) => ({ stat, kind, label: stat === "stun" ? "STUN APPLIED" : `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
-      // A combo advances only when damage lands or an opponent debuff/stun is applied.
-      onComboEvent?.(damage > 0 || damageAndDebuffs.length > 0);
+      // The physical strike is the first hit. A health-draining debuff is
+      // a distinct follow-up impact, presented just after the physical hit.
+      const debuffDamage = Math.max(0, -Number(result.debuffsApplied?.health ?? 0));
+      const hasOtherDebuff = damageAndDebuffs.some((effect) => effect.stat !== "health");
+      if (damage > 0) onComboEvent?.(true);
+      if (debuffDamage > 0) {
+        window.setTimeout(() => {
+          onComboEvent?.(true);
+          onCombatEffect?.({
+            target: "opponent",
+            type: "damage",
+            damage: debuffDamage,
+            tier: debuffDamage >= 70 ? "fatal" : debuffDamage >= 45 ? "heavy" : debuffDamage >= 20 ? "effective" : "light",
+            message: "DEBUFF HIT!",
+            effects: damageAndDebuffs.filter((effect) => effect.stat === "health"),
+          });
+        }, 420);
+      } else if (damage === 0 && hasOtherDebuff) {
+        onComboEvent?.(true);
+      } else if (damage === 0 && damageAndDebuffs.length === 0) {
+        onComboEvent?.(false);
+      }
       const selfBuffs = effectStats
         .filter((effect) => effect.kind === "buff")
         .map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
