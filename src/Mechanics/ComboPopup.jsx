@@ -30,7 +30,7 @@ export function ComboBreakPopup({ combo }) {
     if (!combo) return undefined;
     const timer = window.setTimeout(() => combo.onDismiss?.(), 2300);
     return () => window.clearTimeout(timer);
-  }, [combo]);
+  }, [combo?.id]);
 
   if (!combo || combo.count < 3) return null;
 
