@@ -660,12 +660,12 @@ export default function LocalPvPBattle() {
       <div className="local-pvp-matchup">
         <section className="local-pvp-side local-pvp-player2">
           <h2>PLAYER 2 <span>TEAM</span></h2>
-          {teams.opponent.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} />)}
+          {teams.opponent.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} pendingAttack={pendingAttack} defenseTime={defenseTime} onResolve={resolveAttack} />)}
         </section>
         <div className="local-pvp-vs">VS</div>
         <section className="local-pvp-side local-pvp-player1">
           <h2>PLAYER 1 <span>TEAM</span></h2>
-          {teams.player.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} />)}
+          {teams.player.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} pendingAttack={pendingAttack} defenseTime={defenseTime} onResolve={resolveAttack} />)}
         </section>
       </div>
 
@@ -679,19 +679,6 @@ export default function LocalPvPBattle() {
         ))}
       </div>
 
-      {phase === "defending" && pendingAttack && (
-        <section className={"local-pvp-defense " + (defendingSide === "player" ? "local-pvp-defense-player1" : "local-pvp-defense-player2")} role="dialog" aria-live="assertive">
-          <p>INCOMING ATTACK</p>
-          <h2>{pendingAttack.attackName}</h2>
-          <span>{teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.name} — CHOOSE YOUR DEFENSE</span>
-          <div className="local-pvp-defense-timer">{defenseTime}s</div>
-          <div>
-            <button onClick={() => resolveAttack("defend")} disabled={getModifiedCharacterStat(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId), "cooldown") <= 0}>DEFEND</button>
-            <button onClick={() => resolveAttack("evade")}>EVADE</button>
-            <button onClick={() => resolveAttack("take-damage")}>TAKE DAMAGE</button>
-          </div>
-        </section>
-      )}
 
       <section className="local-pvp-attacks">
         <div className="local-pvp-player2-panels">
@@ -709,7 +696,7 @@ export default function LocalPvPBattle() {
   );
 }
 
-function FighterStatus({ fighter }) {
+function FighterStatus({ fighter, pendingAttack, defenseTime, onResolve }) {
   const hp = Math.max(0, fighter.health);
   const mp = Math.max(0, fighter.mana);
   return (
@@ -722,6 +709,18 @@ function FighterStatus({ fighter }) {
         <span>MP {mp}/{fighter.maximumMana}</span>
         <div className="local-pvp-meter mana"><i style={{ width: `${Math.max(0, mp / fighter.maximumMana * 100)}%` }} /></div>
       </div>
+      {pendingAttack?.targetId === fighter.id && (
+        <div className="local-pvp-fighter-defense" role="dialog" aria-live="assertive">
+          <strong>⚠ INCOMING ATTACK · {defenseTime}s</strong>
+          <h4>{pendingAttack.attackName}</h4>
+          <p>{pendingAttack.damage} DAMAGE · {pendingAttack.speed} SPEED</p>
+          <div>
+            <button disabled={getModifiedCharacterStat(fighter, "cooldown") <= 0 || defenseTime <= 0} onClick={() => onResolve("defend")}>BLOCK</button>
+            <button disabled={defenseTime <= 0} onClick={() => onResolve("evade")}>EVADE</button>
+            <button disabled={defenseTime <= 0} onClick={() => onResolve("take-damage")}>TAKE DAMAGE</button>
+          </div>
+        </div>
+      )}
     </article>
   );
 }
