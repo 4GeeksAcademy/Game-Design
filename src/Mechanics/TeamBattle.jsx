@@ -45,6 +45,7 @@ import BattleResultScreen from "./BattleResultScreen.jsx";
 import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
 import KnockoutOverlay from "./KnockoutOverlay.jsx";
 import "./Teambattle.css";
+import "./LocalBattle.css";
 
 function createBattleFighter(id, isCpuControlled = false) {
   const selected = roster.find((fighter) => fighter.id === id);
