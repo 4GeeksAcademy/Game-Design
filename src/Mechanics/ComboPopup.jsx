@@ -28,7 +28,7 @@ export default function ComboPopup({ combo }) {
 export function ComboBreakPopup({ combo }) {
   useEffect(() => {
     if (!combo) return undefined;
-    const timer = window.setTimeout(() => combo.onDismiss?.(), 2300);
+    const timer = window.setTimeout(() => combo.onDismiss?.(), 3200);
     return () => window.clearTimeout(timer);
   }, [combo?.id]);
 
@@ -38,10 +38,10 @@ export function ComboBreakPopup({ combo }) {
   const tier = count >= 10
     ? { className: "combo-break-crazy", title: "CRAZY!!!", subtitle: "THAT WAS INSANE!" }
     : count >= 7
-      ? { className: "combo-break-excellent", title: "EXCELLENT!", subtitle: "WHAT A PERFORMANCE!" }
+      ? { className: "combo-break-epic", title: "EPIC!", subtitle: "ABSOLUTE DOMINATION!" }
       : count >= 5
-        ? { className: "combo-break-good", title: "GOOD JOB!", subtitle: "NICE COMBO!" }
-        : { className: "combo-break-disappointed", title: "DISAPPOINTING...", subtitle: "YOU HAD MORE IN YOU." };
+        ? { className: "combo-break-excellent", title: "EXCELLENT!", subtitle: "BEAUTIFULLY EXECUTED!" }
+        : { className: "combo-break-nice", title: "NICE!", subtitle: "GOOD COMBO!" };
 
   return (
     <div className="wild-combo-break-anchor" aria-live="assertive" aria-atomic="true">
