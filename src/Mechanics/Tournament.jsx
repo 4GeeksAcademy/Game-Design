@@ -278,7 +278,7 @@ export default function Tournament() {
     return (
       <main className="wc-tournament">
         <header className="wc-tourney-header">
-          <button onClick={() => navigate("/")}>← EXIT</button>
+          <button onClick={() => tournament.playerEliminated ? watchRemaining() : navigate("/")}>{tournament.playerEliminated ? "SKIP TO RESULTS" : "← EXIT"}</button>
           <p>WILD CARDS · GRAND CHAMPIONSHIP</p>
           <span>{tournament.size} FIGHTERS</span>
         </header>
@@ -318,6 +318,12 @@ export default function Tournament() {
             <p>Stay and watch the remaining CPU matches determine the final podium, or return to the main menu.</p>
             <button onClick={watchRemaining} disabled={spectating}>{spectating ? "WATCHING CPU MATCHES..." : "WATCH THE REST OF THE TOURNAMENT"}</button>
             <button className="wc-tourney-secondary" onClick={watchRemaining}>SKIP TO FINAL STANDINGS</button>
+            <button className="wc-tourney-secondary" onClick={() => {
+              setTournament(null);
+              setShowResults(false);
+              setSpectating(false);
+              navigate("/tournament", { replace: true, state: null });
+            }}>RESTART TOURNAMENT</button>
           </section>
         )}
       </main>
