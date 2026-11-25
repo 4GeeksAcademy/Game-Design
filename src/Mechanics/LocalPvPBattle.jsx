@@ -157,7 +157,7 @@ export default function LocalPvPBattle() {
   }, []);
 
   useEffect(() => {
-    if (phase !== "fighting" || attackPhaseComplete || isFinal || isPaused) return;
+    if (phase !== "fighting" || attackPhaseComplete || isFinal || isPaused || showRoundIntro) return;
     const timer = window.setInterval(() => {
       const remaining = turnTimeRef.current - 1;
       turnTimeRef.current = remaining;
@@ -168,7 +168,7 @@ export default function LocalPvPBattle() {
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [phase, activeSide, attackPhaseComplete, round, isPaused]);
+  }, [phase, activeSide, attackPhaseComplete, round, isPaused, showRoundIntro]);
 
   useEffect(() => {
     if (phase !== "defending" || !pendingAttack || isPaused) return;
