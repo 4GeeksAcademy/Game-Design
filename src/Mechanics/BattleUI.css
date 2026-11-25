@@ -2432,3 +2432,15 @@ body {
   100% { opacity:0; background-position:100% 50%; }
 }
 
+
+
+/* Shorter impact feedback and restorative visuals. */
+.solo-damage-number { animation-duration:.82s !important; }
+.solo-damage-number.damage-tier-effective { animation-duration:.86s !important; }
+.solo-damage-number.damage-tier-heavy,.solo-damage-number.damage-tier-fatal { animation-duration:.95s !important; }
+.solo-impact-overlay > span,.solo-effect-label { animation-duration:.82s !important; }
+#battleLayout .combat-effect-damage,#battleLayout .combat-effect-blocked,#battleLayout .combat-effect-evaded,#battleLayout .combat-effect-status,#battleLayout .combat-effect-attack { animation-duration:.72s !important; }
+#battleLayout .combat-effect-heal { animation:solo-heal-glow .82s ease-out both !important; }
+.solo-impact-overlay.impact-heal .solo-damage-number { color:#9dffbf; text-shadow:0 0 8px #37ff86,0 0 25px #19d66b; }
+.solo-impact-overlay.impact-debuff-drain .solo-damage-number { color:#ff9b70; text-shadow:0 0 10px #ff642e,0 0 25px #ff3159; }
+@keyframes solo-heal-glow {0%,100%{filter:brightness(1)}25%,65%{filter:brightness(1.8) drop-shadow(0 0 22px #42ff91)}}
