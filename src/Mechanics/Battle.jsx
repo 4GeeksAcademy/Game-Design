@@ -22,6 +22,7 @@ import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName } from 
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
+import { playComboSound } from "../audio/audioManager.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
@@ -291,6 +292,7 @@ function BattleMatch() {
     if (count >= 3) setComboBreakState({ count, id: Date.now() + Math.random() });
     comboStreakRef.current = 0;
     setComboState(null);
+    return count;
   }, []);
 
   const recordComboOutcome = useCallback((successful) => {
@@ -301,6 +303,7 @@ function BattleMatch() {
     const nextCount = Math.min(10, comboStreakRef.current + 1);
     comboStreakRef.current = nextCount;
     if (nextCount >= 3) {
+      playComboSound(nextCount);
       const stage = nextCount >= 10 ? 10 : nextCount >= 8 ? 8 : nextCount;
       setComboState({ count: nextCount, stage, id: Date.now() + Math.random() });
       if (nextCount > highestComboRef.current) {
@@ -425,7 +428,7 @@ function BattleMatch() {
     characterRef.current = character;
     opponentRef.current = opponent;
     knockoutRef.current = knockout;
-  }, [character, opponent, knockout]);
+  }, [character, opponent, knockout, comboBreakState]);
 
   // Display one queued message at a time.
   const firstMessageId = combatMessages[0]?.id;
@@ -447,7 +450,8 @@ function BattleMatch() {
       opponent.turnFinished &&
       character.health > 0 &&
       opponent.health > 0 &&
-      !knockout
+      !knockout &&
+      !comboBreakState
     ) {
       turn(character, opponent);
 
@@ -1280,8 +1284,10 @@ const stunOptions = {
                 className="solo-finish-turn-button"
                 disabled={currentTurn !== "player"}
                 onClick={() => {
+                  const comboCount = endComboStreak();
                   setCharacter({ ...character, turnFinished: true });
-                  setCurrentTurn("ai");
+                  if (comboCount >= 3) window.setTimeout(() => setCurrentTurn("ai"), 3300);
+                  else setCurrentTurn("ai");
                 }}
               >
                 FINISH TURN <span aria-hidden="true">➜</span>
