@@ -146,7 +146,8 @@ function AttackOptions({
       if (result.stunnedAttacks?.length) {
         effectStats.push({ stat: "stun", amount: 1, kind: "debuff" });
       }
-      const tier = damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light";
+      const physicalDamage = Math.max(0, Number(result.damageReceived) || 0);
+      const tier = physicalDamage >= 70 ? "fatal" : physicalDamage >= 45 ? "heavy" : physicalDamage >= 20 ? "effective" : "light";
       const damageAndDebuffs = effectStats
         .filter((effect) => effect.kind === "debuff")
         .map(({ stat, amount, kind }) => ({ stat, kind, label: stat === "stun" ? "STUN APPLIED" : `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
@@ -154,7 +155,7 @@ function AttackOptions({
       // a distinct follow-up impact, presented just after the physical hit.
       const debuffDamage = Math.max(0, -Number(result.debuffsApplied?.health ?? 0));
       const hasOtherDebuff = damageAndDebuffs.some((effect) => effect.stat !== "health");
-      if (damage > 0) onComboEvent?.(true);
+      if (physicalDamage > 0) onComboEvent?.(true);
       if (debuffDamage > 0) {
         window.setTimeout(() => {
           onComboEvent?.(true);
@@ -167,9 +168,9 @@ function AttackOptions({
             effects: damageAndDebuffs.filter((effect) => effect.stat === "health"),
           });
         }, 420);
-      } else if (damage === 0 && hasOtherDebuff) {
+      } else if (physicalDamage === 0 && debuffDamage === 0 && hasOtherDebuff) {
         onComboEvent?.(true);
-      } else if (damage === 0 && damageAndDebuffs.length === 0) {
+      } else if (physicalDamage === 0 && debuffDamage === 0 && damageAndDebuffs.length === 0) {
         onComboEvent?.(false);
       }
       const selfBuffs = effectStats
@@ -179,10 +180,10 @@ function AttackOptions({
       onCombatEffect?.({
         target: "opponent",
         type: result.action === "defend" ? "blocked" : result.action === "evade" ? "evaded" : damage > 0 ? "damage" : damageAndDebuffs.length ? "status" : "attack",
-        damage,
+        damage: physicalDamage,
         tier,
         message: result.action === "defend" ? "BLOCKED!" : result.action === "evade" ? (result.evaded ? "EVADED!" : "FAILED TO EVADE!") : "",
-        effects: damageAndDebuffs,
+        effects: damageAndDebuffs.filter((effect) => effect.stat !== "health"),
       });
       if (selfBuffs.length || damage > 0) {
         onCombatEffect?.({
