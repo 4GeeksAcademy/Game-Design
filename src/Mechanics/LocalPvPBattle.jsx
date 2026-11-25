@@ -24,7 +24,6 @@ import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges.js";
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives.js";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup.jsx";
-import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import "./LocalPvPBattle.css";
 
 const TURN_SECONDS = 20;
