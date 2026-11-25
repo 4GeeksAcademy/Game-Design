@@ -230,7 +230,7 @@ function FighterPreview({
             <div key={combatEffect.id} className={`fighter-impact-overlay impact-${combatEffect.type}`}>
               {combatEffect.damage > 0 && (
                 <strong className={`fighter-impact-number damage-tier-${combatEffect.tier}`}>
-                  {combatEffect.tier === "light" ? `+${combatEffect.damage}` : combatEffect.tier === "effective" ? `!${combatEffect.damage}` : combatEffect.tier === "heavy" ? `!!${combatEffect.damage}` : `FATAL ${combatEffect.damage}`}
+                  {combatEffect.type === "heal" ? `+${combatEffect.damage}` : `-${combatEffect.damage}`}
                 </strong>
               )}
               {combatEffect.message && <span className={combatEffect.message === "STUNNED!" ? "team-stunned-callout" : ""}>{combatEffect.message}</span>}
@@ -595,24 +595,21 @@ export default function TeamBattle() {
       return undefined;
     }
 
-    // Start the fade-out after the K.O. message has been visible.
+    // Let the combo-break rating finish before the K.O. cutscene takes over.
+    const comboDelay = comboBreakState || comboStreakRef.current >= 3 ? 3300 : 0;
+    if (comboStreakRef.current >= 3) endComboStreak();
     setIsKnockoutFadingOut(false);
-
-    const fadeTimer = setTimeout(() => {
-      setIsKnockoutFadingOut(true);
-    }, 2100);
-
-    // Remove the overlay after the fade-out finishes.
+    const fadeTimer = setTimeout(() => setIsKnockoutFadingOut(true), comboDelay + 2100);
     const removeTimer = setTimeout(() => {
       setKnockout(null);
       setIsKnockoutFadingOut(false);
-    }, 2600);
+    }, comboDelay + 2600);
 
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(removeTimer);
     };
-  }, [knockout]);
+  }, [knockout, comboBreakState, endComboStreak]);
 
   useEffect(() => {
     // The individual K.O. cutscene must finish before the team face-off begins.
@@ -1196,12 +1193,17 @@ export default function TeamBattle() {
       // Apply healing and buffs to each recipient.
       recipients.forEach((recipient) => {
         const result = applyHeal(attack, recipient);
-
-        addLog(
-          `💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`,
-          "buff",
-        );
-
+        const healEffectId = Date.now() + Math.random();
+        setCombatEffects((current) => ({ ...current, [recipient.id]: {
+          id: healEffectId, type: "heal",
+          damage: Math.max(0, Number(result.healed) || 0),
+          tier: "light", message: "HEALED!", effects: [],
+        }}));
+        window.setTimeout(() => setCombatEffects((current) =>
+          current[recipient.id]?.id === healEffectId
+            ? { ...current, [recipient.id]: null } : current
+        ), 850);
+        addLog(`💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`, "buff");
         describeEffects(result.buffsApplied, recipient.name, "buff").forEach(
           (message) => addLog(message, "buff"),
         );
@@ -1342,12 +1344,12 @@ export default function TeamBattle() {
         recordComboOutcome(true);
         const followUpId = Date.now() + Math.random();
         setCombatEffects((current) => ({ ...current, [defender.id]: {
-          id: followUpId, type: "damage", damage: debuffDamage,
+          id: followUpId, type: "debuff-drain", damage: debuffDamage,
           tier: debuffDamage >= 70 ? "fatal" : debuffDamage >= 45 ? "heavy" : debuffDamage >= 20 ? "effective" : "light",
           message: "DEBUFF HIT!", effects: appliedDebuffs.filter((effect) => effect.stat === "health"),
         }}));
-        window.setTimeout(() => setCombatEffects((current) => current[defender.id]?.id === followUpId ? { ...current, [defender.id]: null } : current), 2200);
-      }, 420);
+        window.setTimeout(() => setCombatEffects((current) => current[defender.id]?.id === followUpId ? { ...current, [defender.id]: null } : current), 500);
+      }, 500);
     } else if (physicalDamage === 0 && nonHealthDebuffs.length > 0) {
       recordComboOutcome(true);
     } else if (physicalDamage === 0 && appliedDebuffs.length === 0) {
@@ -1383,7 +1385,7 @@ export default function TeamBattle() {
             ? { ...current, [fighterId]: null }
             : current,
         );
-      }, 3000);
+      }, 900);
     });
     if (!attacker.isCpuTeammate && damageActuallyDealt > 0) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
