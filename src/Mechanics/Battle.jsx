@@ -497,6 +497,8 @@ function BattleMatch() {
     if (knockout) return;
 
     if (character.health <= 0) {
+      // Finish the combo-break celebration before mounting the K.O. cutscene.
+      if (comboStreakRef.current >= 3) endComboStreak();
       setKnockout({
         defeated: character.name,
         winner: opponent.name,
@@ -507,6 +509,8 @@ function BattleMatch() {
         defeatedTeam: "player",
       });
     } else if (opponent.health <= 0) {
+      // Finish the combo-break celebration before mounting the K.O. cutscene.
+      if (comboStreakRef.current >= 3) endComboStreak();
       setKnockout({
         defeated: opponent.name,
         winner: character.name,
@@ -957,7 +961,7 @@ const stunOptions = {
       )}
 
       {/* Individual K.O. cutscene. */}
-      {knockout && !showFinishOverlay && !showResults && (
+      {knockout && !comboBreakState && !showFinishOverlay && !showResults && (
         <KnockoutOverlay
           fighter={{ name: knockout.defeated, image: knockout.defeatedImage }}
           defeatedTeam={knockout.defeatedTeam}
@@ -966,7 +970,7 @@ const stunOptions = {
       )}
 
       {/* Final winner-versus-defeated cards. */}
-      {knockout && showFinishOverlay && !showResults && (
+      {knockout && !comboBreakState && showFinishOverlay && !showResults && (
         <div
           className={`battle-finish-overlay ${
             knockout.defeatedTeam === "player"
