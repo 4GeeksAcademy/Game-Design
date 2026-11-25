@@ -274,18 +274,35 @@ export function playGameSound(name) {
 }
 
 
-// Escalating arcade-style combo sting: the same motif rises from 3x through 10x.
+// Strong arcade combo sting: every count raises the pitch and each sting
+// itself climbs through a quick four-note fighting-game flourish.
 export function playComboSound(comboCount = 3) {
   const count = Math.max(3, Math.min(10, Number(comboCount) || 3));
   const ctx = ensureAudio();
   if (!ctx || settings.muted || settings.effects <= 0) return;
   const level = count - 3;
-  const base = 360 + level * 58;
-  const volume = Math.min(0.105, 0.052 + level * 0.007);
-  makeTone(base, 0.095, "square", volume, 0);
-  makeTone(base * 1.25, 0.105, "triangle", volume * 0.82, 0.075);
-  makeTone(base * 1.5, 0.14, "sawtooth", volume * 0.52, 0.15);
-  if (count >= 7) makeTone(base * 2, 0.18, "triangle", volume * 0.42, 0.22);
+  const base = 520 + level * 105;
+  const notes = [base, base * 1.22, base * 1.5, base * 1.92];
+  const play = () => {
+    if (settings.muted || settings.effects <= 0 || !masterGain) return;
+    const now = ctx.currentTime;
+    notes.forEach((frequency, index) => {
+      const start = now + index * 0.065;
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = index === 0 ? "square" : "triangle";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime((0.16 + level * 0.012) * settings.master * settings.effects, start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.19);
+      oscillator.connect(gain);
+      gain.connect(masterGain);
+      oscillator.start(start);
+      oscillator.stop(start + 0.22);
+    });
+  };
+  if (ctx.state === "suspended") ctx.resume().then(play).catch(() => {});
+  else play();
 }
 
 export function playUISound(kind = "click") {
