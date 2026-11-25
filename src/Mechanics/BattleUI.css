@@ -2540,3 +2540,172 @@ body {
   0%,100% { transform:translateY(0) scale(1); }
   50% { transform:translateY(-1.5px) scale(1.004); }
 }
+
+
+/* Restore the large portrait-card scale from the original battle layout.
+   The card owns the frame; the artwork fills the card instead of shrinking inside it. */
+#battleLayout .solo-portrait-wrapper {
+  position:relative;
+  display:block;
+  flex:0 0 auto;
+  align-self:center;
+  width:clamp(205px,19vw,250px);
+  height:clamp(300px,36vh,380px);
+  min-width:0;
+  min-height:0;
+  max-width:min(250px,100%);
+  max-height:100%;
+  margin-inline:auto;
+  overflow:hidden;
+  box-sizing:border-box;
+  border:1px solid color-mix(in srgb,var(--fighter-accent) 70%,#ffffff 12%);
+  border-radius:11px;
+  background:#091321;
+  box-shadow:0 8px 22px #0009,0 0 12px color-mix(in srgb,var(--fighter-accent) 20%,transparent),inset 0 0 0 1px #ffffff12;
+}
+#battleLayout .solo-portrait-wrapper > img {
+  position:relative;
+  z-index:1;
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  object-fit:cover;
+  object-position:center center;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  transform-origin:center center;
+  animation:solo-fighter-card-idle 6.8s ease-in-out infinite;
+}
+#battleLayout .solo-fighter-art:hover .solo-portrait-wrapper > img,
+#battleLayout .solo-fighter-art:focus-visible .solo-portrait-wrapper > img {
+  transform:scale(1.01);
+}
+#battleLayout .solo-portrait-wrapper.fighter-stunned > img {
+  animation:stunned-electric-glow 1s ease-in-out infinite alternate !important;
+}
+#battleLayout .solo-portrait-wrapper .durability-drain-visual {
+  width:100%;
+  height:100%;
+  border-radius:inherit;
+}
+#battleLayout .solo-fighter-art { align-items:center; }
+@media (max-height:720px) and (min-width:701px) {
+  #battleLayout .solo-portrait-wrapper { width:clamp(190px,17vw,225px); height:min(34vh,310px); }
+}
+@media (max-width:700px) {
+  #battleLayout .solo-portrait-wrapper { width:min(42vw,205px); height:clamp(245px,34vh,310px); }
+}
+
+/* Fit every attack detail inside the actual attack-options viewport. */
+#battleLayout > #battleAttackPanel {
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  overflow:hidden;
+}
+#battleLayout > #battleAttackPanel > #attackSection,
+#battleLayout #attack,
+#battleLayout #attackBody {
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:column;
+  min-height:0;
+  overflow:hidden;
+}
+#battleLayout #attackBody { padding:5px 8px 4px; }
+#battleLayout #attackList {
+  flex:1 1 auto;
+  align-items:stretch;
+  height:auto;
+  min-height:0;
+  padding:4px 4px 7px;
+  gap:8px;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+#battleLayout .attack-card-wrapper {
+  flex:0 0 145px;
+  width:145px;
+  min-width:145px;
+  min-height:0;
+  height:100%;
+}
+#battleLayout .attack-card {
+  box-sizing:border-box;
+  justify-content:flex-start;
+  align-items:stretch;
+  gap:3px;
+  min-height:0;
+  height:100%;
+  padding:6px !important;
+  overflow:hidden;
+  border-radius:10px !important;
+  white-space:normal;
+}
+#battleLayout .attack-card .attack-image,
+#battleLayout .attack-card [id^="attackImage"] {
+  flex:0 0 52px;
+  width:100%;
+  height:52px;
+  min-height:52px;
+  max-height:52px;
+  margin:0;
+  object-fit:cover;
+}
+#battleLayout .attack-card h5,
+#battleLayout .attack-card [id^="attackName"] {
+  display:-webkit-box;
+  flex:0 0 auto;
+  min-height:24px;
+  max-height:24px;
+  margin:1px 0;
+  overflow:hidden;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  font-size:9px;
+  line-height:1.15;
+}
+#battleLayout .attack-card .attack-stats {
+  display:flex;
+  flex:0 0 auto;
+  flex-direction:column;
+  gap:3px;
+  width:100%;
+}
+#battleLayout .attack-card .attack-damage,
+#battleLayout .attack-card .attack-speed {
+  display:flex;
+  flex:0 0 auto;
+  justify-content:center;
+  min-height:17px;
+  padding:3px 2px;
+  border-radius:5px;
+  font-size:8px;
+  line-height:1.1;
+}
+#battleLayout .attack-card .attack-cost {
+  display:flex;
+  flex:0 0 auto;
+  flex-direction:column;
+  gap:2px;
+  width:100%;
+  margin-top:auto;
+  padding:4px 3px;
+  border-radius:5px;
+  font-size:7px;
+  line-height:1.15;
+  overflow-wrap:anywhere;
+}
+#battleLayout .attack-card .attack-cost span {
+  display:block;
+  font-size:7px;
+  line-height:1.15;
+}
+#battleLayout .attack-card-wrapper .attack-effects-popup { z-index:20; }
+@media (max-width:700px) {
+  #battleLayout .attack-card-wrapper { flex-basis:138px; width:138px; min-width:138px; }
+  #battleLayout .attack-card .attack-image { flex-basis:48px; height:48px; min-height:48px; }
+}
