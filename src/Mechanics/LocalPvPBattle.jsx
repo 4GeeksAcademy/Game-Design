@@ -623,7 +623,7 @@ export default function LocalPvPBattle() {
                 <div id="defenseTimerTrack"><div id="defenseTimerFill" style={{ width: defenseTime * 10 + "%" }} /></div>
               </div>
               <div id="aiAttackInfo">
-                <h5 id="aiAttackName">{pendingAttack.attackName}</h5>
+                <h5 id="aiAttackName">{pendingAttack.attackName}</h5><p className="local-pvp-target-name">TARGET: {teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.name}</p>
                 {pendingAttack.attackImage && <div className="incoming-attack-image"><img src={pendingAttack.attackImage} alt={pendingAttack.attackName} /></div>}
                 <div id="aiAttackStats">
                   <div className={"attack-threat-badge " + getDamageThreat(pendingAttack.damage).className}><span className="threat-label">DAMAGE</span><strong>{pendingAttack.damage}</strong><span className="threat-rating">{getDamageThreat(pendingAttack.damage).label}</span></div>
