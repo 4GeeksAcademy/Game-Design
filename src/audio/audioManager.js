@@ -276,6 +276,42 @@ export function playGameSound(name) {
 
 // Strong arcade combo sting: every count raises the pitch and each sting
 // itself climbs through a quick four-note fighting-game flourish.
+// A separate victory-style flourish when a combo is broken. Each rating tier
+// gets its own melodic signature so the end-of-combo sound is distinct from hits.
+export function playComboBreakSound(comboCount = 3) {
+  const count = Math.max(3, Math.min(10, Number(comboCount) || 3));
+  const ctx = ensureAudio();
+  if (!ctx || settings.muted || settings.effects <= 0) return;
+  const tier = count >= 10 ? 3 : count >= 7 ? 2 : count >= 5 ? 1 : 0;
+  const motifs = [
+    [660, 784, 988],
+    [740, 932, 1175, 1397],
+    [587, 784, 1175, 1568],
+    [784, 1047, 1319, 1760, 2093],
+  ];
+  const notes = motifs[tier];
+  const play = () => {
+    if (settings.muted || settings.effects <= 0 || !masterGain) return;
+    const now = ctx.currentTime;
+    notes.forEach((frequency, index) => {
+      const start = now + index * (tier === 0 ? 0.105 : 0.085);
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = tier === 0 ? "sine" : tier === 1 ? "triangle" : index % 2 ? "sine" : "triangle";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime((0.095 + tier * 0.025) * settings.effects, start + 0.018);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + (tier === 3 ? 0.42 : 0.32));
+      oscillator.connect(gain);
+      gain.connect(masterGain);
+      oscillator.start(start);
+      oscillator.stop(start + (tier === 3 ? 0.45 : 0.35));
+    });
+  };
+  if (ctx.state === "suspended") ctx.resume().then(play).catch(() => {});
+  else play();
+}
+
 export function playComboSound(comboCount = 3) {
   const count = Math.max(3, Math.min(10, Number(comboCount) || 3));
   const ctx = ensureAudio();
