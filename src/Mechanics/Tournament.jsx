@@ -734,6 +734,7 @@ export default function Tournament() {
         matchNumber={activeCpuMatch.matchNumber}
         onComplete={finishWatchedCpuMatch}
         onLeaveTournament={leaveTournament}
+        onRestartTournament={restartTournament}
       />
     );
   }
