@@ -197,7 +197,7 @@ function TournamentFighter({
       winner ? "match-winner" : "",
       revealing ? "is-revealing" : "",
     ].filter(Boolean).join(" ")}>
-      <div className="wc-tourney-portrait">
+      <div className={"wc-tourney-portrait" + (mystery ? " is-mystery" : "")}>
         {mystery
           ? <span>?</span>
           : fighter
