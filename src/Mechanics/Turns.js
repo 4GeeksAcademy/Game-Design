@@ -47,28 +47,22 @@ function recoverCooldown(character) {
 
 function resetAttacks(attacks, fighters = []) {
   return attacks.map((attack) => {
-    let cooldownRemaining = attack.cooldownRemaining ?? 0;
-    let stunRemaining = attack.stunned?.remainingRounds ?? 0;
+    let cooldownRemaining = Math.max(0, Number(attack.cooldownRemaining) || 0);
+    let stunRemaining = Math.max(0, Number(attack.stunned?.remainingRounds) || 0);
 
-    // Track whether each restriction started during this round.
-    const cooldownStartedThisRound =
-      attack.cooldownStartedThisRound === true;
-
-    
-
+    // A cooldown is not reduced at the end of the same round in which it
+    // began. Keep at least the configured duration if a counter was cleared.
+    const cooldownStartedThisRound = attack.cooldownStartedThisRound === true;
+    const configuredCooldown = Math.max(0, Number(attack.turnCooldown) || 0);
     const previousCooldown = cooldownRemaining;
 
-    // Cooldown and stun have independent countdowns.
-// Cooldown does not decrease during the round it was started.
-// Stun duration includes the round in which it was applied.
-    if (!cooldownStartedThisRound && cooldownRemaining > 0) {
-      cooldownRemaining -= 1;
+    if (cooldownStartedThisRound && configuredCooldown > 0) {
+      cooldownRemaining = Math.max(cooldownRemaining, configuredCooldown);
+    } else if (cooldownRemaining > 0) {
+      cooldownRemaining = Math.max(0, cooldownRemaining - 1);
     }
 
-    // Stun duration includes the round in which it was applied.
-if (stunRemaining > 0) {
-  stunRemaining -= 1;
-}
+    if (stunRemaining > 0) stunRemaining -= 1;
 
     const usesAvailable =
       attack.remainingUses === undefined ||
@@ -78,49 +72,35 @@ if (stunRemaining > 0) {
     let activeEffects = attack.activeEffects ?? [];
 
     // Reverse temporary effects when the cooldown finishes.
-    // Stun may already have removed these effects, so this
-    // also safely handles an empty activeEffects array.
     if (
       !cooldownStartedThisRound &&
       previousCooldown > 0 &&
       cooldownRemaining === 0
     ) {
       activeEffects.forEach(({ targetId, effects }) => {
-        const target = fighters.find(
-          (fighter) => fighter.id === targetId,
-        );
-
-        if (target) {
-          applyEffects(effects, target, -1);
-        }
+        const target = fighters.find((fighter) => fighter.id === targetId);
+        if (target) applyEffects(effects, target, -1);
       });
-
       activeEffects = [];
     }
 
     return {
       ...attack,
-
       cooldownRemaining,
-
       stunned:
         stunRemaining > 0
           ? { ...attack.stunned, remainingRounds: stunRemaining }
           : null,
-
       cooldownStartedThisRound: false,
-
-
       activeEffects,
-
       state:
         usesAvailable &&
         cooldownRemaining <= 0 &&
-        stunRemaining <= 0,
+        stunRemaining <= 0 &&
+        !cooldownStartedThisRound,
     };
   });
 }
-
 
 function turn(playerOne, playerTwo) {
   if (playerOne.turnFinished && playerTwo.turnFinished) {
