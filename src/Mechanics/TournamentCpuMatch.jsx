@@ -256,6 +256,7 @@ export default function TournamentCpuMatch({
     if (!battleView?.finished) return;
     setPlaying(false);
     playUISound("victory");
+    finishMatch();
   }, [battleView?.finished]);
 
   function finishMatch() {
@@ -263,7 +264,6 @@ export default function TournamentCpuMatch({
 
     completedRef.current = true;
     const winner = resolveWinner(battleRef.current, match);
-    playUISound("confirm");
     onComplete?.(winner);
   }
 
@@ -496,44 +496,6 @@ export default function TournamentCpuMatch({
         </div>
       </div>
 
-      {battleView?.finished && (
-        <div className="wc-cpu-ko-backdrop" role="presentation">
-          <section className="wc-cpu-ko-dialog" role="dialog" aria-modal="true" aria-labelledby="wcCpuKoTitle">
-            <p className="wc-cpu-ko-eyebrow">TOURNAMENT RESULT · {roundLabel}</p>
-            <h2 id="wcCpuKoTitle">{isKnockout ? "K.O.!" : "MATCH COMPLETE"}</h2>
-            <p className="wc-cpu-ko-subtitle">
-              {nameOf(winnerParticipant)} ADVANCES TO THE NEXT ROUND
-            </p>
-
-            <div className="wc-cpu-ko-matchup">
-              <div className="wc-cpu-ko-fighter is-winner">
-                <span>WINNER</span>
-                <img src={imageOf(winnerParticipant)} alt={nameOf(winnerParticipant)} />
-                <strong>{nameOf(winnerParticipant)}</strong>
-                <small>{Math.max(0, winnerSnapshot?.health || 0)} HP LEFT</small>
-              </div>
-              <b className="wc-cpu-ko-vs">VS</b>
-              <div className="wc-cpu-ko-fighter is-defeated">
-                <span>DEFEATED</span>
-                <img src={imageOf(match.fighters[loserIndex])} alt={nameOf(match.fighters[loserIndex])} />
-                <strong>{nameOf(match.fighters[loserIndex])}</strong>
-                <small>{Math.max(0, loserSnapshot?.health || 0)} HP LEFT</small>
-              </div>
-            </div>
-
-            <div className="wc-cpu-ko-options">
-              <p>WHAT WOULD YOU LIKE TO DO?</p>
-              <button type="button" className="wc-cpu-ko-continue" onClick={finishMatch}>
-                CONTINUE TO BRACKET <span>▶</span>
-              </button>
-              <div className="wc-cpu-ko-secondary">
-                <button type="button" onClick={onRestartTournament}>RESTART TOURNAMENT</button>
-                <button type="button" onClick={onLeaveTournament}>LEAVE TOURNAMENT</button>
-              </div>
-            </div>
-          </section>
-        </div>
-      )}
     </main>
   );
 }
