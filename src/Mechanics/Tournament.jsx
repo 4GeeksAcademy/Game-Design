@@ -582,6 +582,12 @@ export default function Tournament() {
     }, 350);
   }
 
+  function exitUnstartedTournament() {
+    window.clearInterval(revealIntervalRef.current);
+    revealIntervalRef.current = null;
+    navigate("/");
+  }
+
   function enterMatch(match) {
     const opponent = match.fighters.find((fighter) => fighter.id !== tournament.player.id);
     if (!opponent) return;
@@ -811,8 +817,15 @@ export default function Tournament() {
     return (
       <main className={"wc-tournament wc-tournament-bracket" + (restarting ? " is-restarting" : "")}>
         <header className="wc-tourney-header">
-          <button className="wc-tourney-exit" onClick={leaveTournament}>
-            {tournament.playerEliminated ? "SKIP TO STANDINGS" : "LEAVE & SEE STANDINGS"}
+          <button
+            className="wc-tourney-exit"
+            onClick={tournament.started ? leaveTournament : exitUnstartedTournament}
+          >
+            {!tournament.started
+              ? "← EXIT TO MENU"
+              : tournament.playerEliminated
+                ? "SKIP TO STANDINGS"
+                : "LEAVE & SEE STANDINGS"}
           </button>
           <div className="wc-tourney-header-title">
             <span>WILD CARDS</span>
