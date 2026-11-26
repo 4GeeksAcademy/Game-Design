@@ -619,6 +619,7 @@ export default function Tournament() {
   const revealIntervalRef = useRef(null);
   const celebrationPlayedRef = useRef("");
   const roundTransitionResolveRef = useRef(null);
+  const buzzerRevealRef = useRef("");
   const unlockedIds = getUnlockedCharacters();
   const unlockedKey = unlockedIds.join("|");
   const available = useMemo(
@@ -648,6 +649,7 @@ export default function Tournament() {
 
     if (!ranking.entries.length || !standings.length) return Promise.resolve();
 
+    buzzerRevealRef.current = "";
     setRoundTransition({
       phase: "eliminators",
       revealIndex: 0,
@@ -674,7 +676,12 @@ export default function Tournament() {
     if (!roundTransition || roundTransition.phase === "ready") return undefined;
 
     if (roundTransition.phase === "eliminators") {
-      playAGTBuzzerSound();
+      const revealFighter = roundTransition.eliminators[roundTransition.revealIndex]?.fighter;
+      const revealKey = `${roundTransition.revealIndex}:${revealFighter?.id || ""}`;
+      if (revealFighter && buzzerRevealRef.current !== revealKey) {
+        buzzerRevealRef.current = revealKey;
+        playAGTBuzzerSound();
+      }
       const timer = window.setTimeout(() => {
         setRoundTransition((current) => {
           if (!current || current.phase !== "eliminators") return current;
