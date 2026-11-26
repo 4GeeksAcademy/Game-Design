@@ -695,65 +695,90 @@ function TournamentFinalStandings({ tournament }) {
   );
 }
 
-function TournamentStartPrompt({ tournament, previewFighters, revealing, onStart, onExit }) {
-  const firstRound = tournament.rounds[0] || [];
+function TournamentStartPrompt({
+  tournament,
+  drawParticipants,
+  drawComplete,
+  revealing,
+  onDraw,
+  onStart,
+  onExit,
+}) {
+  const firstOpponent = drawParticipants?.find(
+    (fighter) => fighter && fighter.id !== tournament.player.id,
+  );
 
   return (
     <div className="wc-tourney-start-backdrop">
-      <section className="wc-tourney-start-dialog" role="dialog" aria-modal="true" aria-labelledby="wcTourneyStartTitle">
+      <section className="wc-tourney-start-dialog wc-tourney-draw-dialog" role="dialog" aria-modal="true" aria-labelledby="wcTourneyStartTitle">
         <p className="wc-tourney-start-kicker">WILD CARDS · GRAND CHAMPIONSHIP</p>
-        <h2 id="wcTourneyStartTitle">{revealing ? "THE DRAW IS UNDERWAY" : "THE BRACKET IS READY"}</h2>
+        <h2 id="wcTourneyStartTitle">
+          {revealing ? "THE CONTENDERS ARE BEING DRAWN" : drawComplete ? "THE FIELD IS SET" : "READY FOR THE DRAW?"}
+        </h2>
         <p className="wc-tourney-start-copy">
           {revealing
-            ? "The contenders are being revealed and their opening matches are being locked in."
-            : "Review the opening matchups. Your tournament begins when you are ready."}
+            ? "The tournament roster is being revealed. Your opening opponent will be announced below."
+            : drawComplete
+              ? "Your tournament roster is locked in. Here is the fighter standing across from you in the opening round."
+              : "Draw the remaining contenders to reveal the full tournament field and your first opponent."}
         </p>
 
         <div className="wc-tourney-start-preview-heading">
-          <span>OPENING ROUND</span>
-          <strong>{tournament.size} FIGHTERS · {firstRound.length} MATCHES</strong>
+          <span>TOURNAMENT CONTENDERS</span>
+          <strong>{tournament.size} FIGHTERS</strong>
         </div>
 
-        <div className="wc-tourney-start-preview">
-          {firstRound.map((match, index) => {
-            const preview = previewFighters?.[match.id];
-            const first = preview?.[0] || match.fighters[0];
-            const second = preview?.[1] || match.fighters[1];
-            const firstIsPlayer = first?.id === tournament.player.id;
-            const secondIsPlayer = second?.id === tournament.player.id;
-
+        <ol className="wc-tourney-contender-list">
+          {(drawParticipants || [tournament.player]).map((fighter, index) => {
+            const isPlayer = fighter.id === tournament.player.id;
+            const isFirstOpponent = drawComplete && fighter.id === firstOpponent?.id;
             return (
-              <article className="wc-tourney-start-match" key={match.id}>
-                <span className="wc-tourney-start-match-number">MATCH {String(index + 1).padStart(2, "0")}</span>
-                <div className="wc-tourney-start-entrant">
-                  <div className="wc-tourney-start-portrait">
-                    {first
-                      ? <img src={fighterImage(first)} alt={fighterName(first)} />
-                      : <span>?</span>}
-                  </div>
-                  <strong>{first ? fighterName(first) : "UNKNOWN"}</strong>
-                  {firstIsPlayer && <small>YOU</small>}
-                </div>
-                <b className="wc-tourney-start-vs">VS</b>
-                <div className="wc-tourney-start-entrant">
-                  <div className="wc-tourney-start-portrait">
-                    {second
-                      ? <img src={fighterImage(second)} alt={fighterName(second)} />
-                      : <span>?</span>}
-                  </div>
-                  <strong>{second ? fighterName(second) : "UNKNOWN"}</strong>
-                  {secondIsPlayer && <small>YOU</small>}
-                </div>
-                <div className="wc-tourney-start-advance" aria-hidden="true">↓</div>
-              </article>
+              <li
+                className={
+                  "wc-tourney-contender-row" +
+                  (isPlayer ? " is-player" : "") +
+                  (isFirstOpponent ? " is-first-opponent" : "") +
+                  (revealing ? " is-revealing" : "")
+                }
+                key={fighter.id}
+                style={{ "--reveal-order": index }}
+              >
+                <span className="wc-tourney-contender-number">{String(index + 1).padStart(2, "0")}</span>
+                <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
+                <strong>{fighterName(fighter)}</strong>
+                <small>{isPlayer ? "YOU" : isFirstOpponent ? "FIRST OPPONENT" : "CONTENDER"}</small>
+              </li>
             );
           })}
-        </div>
+          {!drawParticipants && Array.from({ length: tournament.size - 1 }, (_, index) => (
+            <li className="wc-tourney-contender-row is-unknown" key={"unknown-" + index}>
+              <span className="wc-tourney-contender-number">{String(index + 2).padStart(2, "0")}</span>
+              <span className="wc-tourney-contender-question">?</span>
+              <strong>UNKNOWN CONTENDER</strong>
+              <small>AWAITING DRAW</small>
+            </li>
+          ))}
+        </ol>
+
+        {drawComplete && firstOpponent && (
+          <section className="wc-tourney-first-opponent" aria-label="Your first opponent">
+            <span>YOUR FIRST ROUND OPPONENT</span>
+            <div>
+              <img src={fighterImage(firstOpponent)} alt={fighterName(firstOpponent)} />
+              <strong>{fighterName(firstOpponent)}</strong>
+            </div>
+            <small>YOU WILL FACE THIS FIGHTER IN THE OPENING ROUND</small>
+          </section>
+        )}
 
         <div className="wc-tourney-start-footer">
-          <span>{revealing ? "DRAWING CONTENDERS…" : "ONE CHAMPION WILL CLAIM THE CROWN"}</span>
-          <button type="button" onClick={onStart} disabled={revealing}>
-            {revealing ? <><i className="wc-tourney-start-spinner" /> DRAWING THE BRACKET…</> : <>START TOURNAMENT <span>▶</span></>}
+          <span>{revealing ? "DRAWING CONTENDERS…" : drawComplete ? "THE OPENING MATCH IS READY" : "ONE CHAMPION WILL CLAIM THE CROWN"}</span>
+          <button type="button" onClick={drawComplete ? onStart : onDraw} disabled={revealing}>
+            {revealing
+              ? <><i className="wc-tourney-start-spinner" /> DRAWING THE FIELD…</>
+              : drawComplete
+                ? <>START TOURNAMENT <span>▶</span></>
+                : <>DRAW CONTENDERS <span>▶</span></>}
           </button>
           <button type="button" className="wc-tourney-start-cancel" onClick={onExit} disabled={revealing}>
             ← BACK TO MENU
@@ -837,7 +862,7 @@ export default function Tournament() {
   const [selectedId, setSelectedId] = useState("");
   const [tournament, setTournament] = useState(location.state?.tournament || null);
   const [revealing, setRevealing] = useState(false);
-  const [revealPreview, setRevealPreview] = useState(null);
+  const [revealPreview, setRevealPreview] = useState(null);\n  const [drawParticipants, setDrawParticipants] = useState(null);\n  const [drawComplete, setDrawComplete] = useState(false);
   const [showResults, setShowResults] = useState(Boolean(location.state?.showResults));
   const [showEliminationScreen, setShowEliminationScreen] = useState(false);
   const [showEliminationPopup, setShowEliminationPopup] = useState(false);
@@ -1366,66 +1391,66 @@ export default function Tournament() {
     }, 1000);
   }
 
-  function createRevealPreview() {
-    if (!tournament) return null;
-    const pool = cpuPool.filter((fighter) => fighter.id !== tournament.player.id);
-    const previews = {};
+  function drawTournament() {
+    if (!tournament || revealing || drawComplete) return;
 
-    tournament.rounds[0].forEach((match) => {
-      previews[match.id] = match.fighters.map((fighter) => {
-        if (fighter?.id === tournament.player.id) return fighter;
-        return pool[Math.floor(Math.random() * pool.length)] || fighter;
-      });
-    });
-    return previews;
-  }
-
-  function startTournament() {
-    if (!tournament || revealing || tournament.started) return;
-    setRevealing(true);
-    playUISound("confirm");
-    let step = 0;
-    window.clearInterval(revealIntervalRef.current);
-
-    // The actual CPU draw happens now, not when the empty bracket was generated.
     const selectedCpu = [...cpuPool]
       .filter((fighter) => fighter.id !== tournament.player.id)
       .sort(() => Math.random() - 0.5)
       .slice(0, tournament.size - 1);
+
+    if (selectedCpu.length !== tournament.size - 1) {
+      console.error("[Wild Cards Tournament] Not enough unlocked contenders to complete this draw.");
+      return;
+    }
+
     const finalParticipants = [
       tournament.player,
       selectedCpu[0],
       ...selectedCpu.slice(1).sort(() => Math.random() - 0.5),
     ];
 
+    setDrawParticipants(finalParticipants);
+    setRevealing(true);
+    playUISound("confirm");
+    let step = 0;
+    window.clearInterval(revealIntervalRef.current);
+
     revealIntervalRef.current = window.setInterval(() => {
-      setRevealPreview(createRevealPreview());
       playUISound("click");
       step += 1;
 
       if (step >= 6) {
         window.clearInterval(revealIntervalRef.current);
         revealIntervalRef.current = null;
-        setRevealPreview(null);
-        setTournament((current) => {
-          if (!current) return current;
-          const firstRound = current.rounds[0].map((match, index) => ({
-            ...match,
-            fighters: [finalParticipants[index * 2], finalParticipants[index * 2 + 1]],
-            isPlayerMatch: [finalParticipants[index * 2], finalParticipants[index * 2 + 1]]
-              .some((fighter) => fighter?.id === current.player.id),
-          }));
-          return {
-            ...current,
-            participants: finalParticipants,
-            rounds: [firstRound, ...current.rounds.slice(1)],
-            started: true,
-          };
-        });
+        setDrawComplete(true);
         setRevealing(false);
         playUISound("victory");
       }
     }, 350);
+  }
+
+  function startTournament() {
+    if (!tournament || revealing || !drawComplete || !drawParticipants) return;
+
+    const finalParticipants = drawParticipants;
+    const firstRound = tournament.rounds[0].map((match, index) => ({
+      ...match,
+      fighters: [finalParticipants[index * 2], finalParticipants[index * 2 + 1]],
+      isPlayerMatch: [finalParticipants[index * 2], finalParticipants[index * 2 + 1]]
+        .some((fighter) => fighter?.id === tournament.player.id),
+    }));
+
+    setTournament((current) => current ? ({
+      ...current,
+      participants: finalParticipants,
+      rounds: [firstRound, ...current.rounds.slice(1)],
+      started: true,
+    }) : current);
+    setDrawComplete(false);
+    setRevealPreview(null);
+    setRevealing(false);
+    playUISound("confirm");
   }
 
   function exitUnstartedTournament() {
