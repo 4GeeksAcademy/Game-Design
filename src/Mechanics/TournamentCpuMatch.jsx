@@ -320,41 +320,14 @@ export default function TournamentCpuMatch({
           <strong>MATCH {String(matchNumber).padStart(2, "0")}</strong>
         </div>
 
-        <div className="wc-cpu-header-actions">
+        <div className="wc-cpu-header-actions wc-cpu-skip-only">
           <button
             type="button"
-            className="wc-cpu-tool-button"
-            onClick={() => setPlaying((value) => !value)}
-            disabled={Boolean(battleView?.finished)}
-          >
-            {playing ? "Ⅱ PAUSE" : "▶ RESUME"}
-          </button>
-          <button
-            type="button"
-            className="wc-cpu-tool-button"
+            className="wc-cpu-tool-button wc-cpu-skip-button"
             onClick={skipMatch}
             disabled={Boolean(battleView?.finished)}
           >
-            SKIP
-          </button>
-          <div className="wc-cpu-speed" aria-label="Simulation speed">
-            {SPEEDS.map((option, index) => (
-              <button
-                type="button"
-                key={option.label}
-                className={speed === index ? "active" : ""}
-                onClick={() => setSpeed(index)}
-                aria-pressed={speed === index}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-          <button type="button" className="wc-cpu-exit-button" onClick={onRestartTournament}>
-            RESTART
-          </button>
-          <button type="button" className="wc-cpu-exit-button" onClick={onLeaveTournament}>
-            LEAVE
+            SKIP MATCH <span>▶▶</span>
           </button>
         </div>
       </header>
