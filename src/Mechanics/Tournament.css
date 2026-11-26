@@ -4016,3 +4016,390 @@
     width: 82%;
   }
 }
+
+
+/* The player's contender identity is presented as a collectible character card. */
+.wc-tourney-bracket-title {
+  align-items: center;
+  min-height: 0;
+  gap: clamp(16px, 3vw, 34px);
+}
+
+.wc-tourney-player-card {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: clamp(190px, 19vw, 232px);
+  height: clamp(220px, 27vh, 268px);
+  overflow: hidden;
+  border: 2px solid rgba(19, 213, 255, .78);
+  border-radius: 13px 6px 13px 6px;
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(19, 213, 255, .2), transparent 62%),
+    linear-gradient(155deg, #142f35, #090f12 72%);
+  box-shadow:
+    0 0 0 4px rgba(19, 213, 255, .08),
+    0 13px 32px #0009,
+    inset 0 0 22px rgba(19, 213, 255, .08);
+}
+
+.wc-tourney-player-card::before,
+.wc-tourney-player-card::after {
+  position: absolute;
+  z-index: 2;
+  width: 19px;
+  height: 19px;
+  content: "";
+  pointer-events: none;
+}
+
+.wc-tourney-player-card::before {
+  top: 6px;
+  left: 6px;
+  border-top: 2px solid #8af0ff;
+  border-left: 2px solid #8af0ff;
+}
+
+.wc-tourney-player-card::after {
+  right: 6px;
+  bottom: 6px;
+  border-right: 2px solid #8af0ff;
+  border-bottom: 2px solid #8af0ff;
+}
+
+.wc-tourney-player-card-art {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(120, 235, 255, .24), transparent 58%),
+    linear-gradient(180deg, #193942, #0c171a 92%);
+}
+
+.wc-tourney-player-card-art::after {
+  position: absolute;
+  inset: 40% 0 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(3, 9, 11, .58));
+}
+
+.wc-tourney-player-card-art img {
+  width: 100%;
+  height: 100%;
+  padding: 8px 8px 0;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 7px 9px #000c);
+}
+
+.wc-tourney-player-card-art > span {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 34px);
+  padding: 4px 7px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(105, 227, 246, .46);
+  border-radius: 3px;
+  color: #b8f6ff;
+  background: rgba(4, 18, 22, .78);
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .45rem;
+  font-weight: 1000;
+  letter-spacing: .14em;
+  white-space: nowrap;
+}
+
+.wc-tourney-player-card-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 12px 11px;
+  border-top: 1px solid rgba(19, 213, 255, .4);
+  background: linear-gradient(100deg, rgba(6, 24, 29, .98), rgba(12, 18, 20, .98));
+}
+
+.wc-tourney-player-card-copy small {
+  color: #76e6f7;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .58rem;
+  font-weight: 1000;
+  letter-spacing: .12em;
+}
+
+.wc-tourney-player-card-copy strong {
+  overflow: hidden;
+  color: #f4f6ed;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .94rem;
+  font-weight: 1000;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-tourney-player-card-copy > span {
+  color: #d6c899;
+  font-size: .47rem;
+  font-weight: 950;
+  letter-spacing: .15em;
+}
+
+@media (max-width: 700px) {
+  .wc-tourney-bracket-title {
+    align-items: flex-start;
+  }
+
+  .wc-tourney-player-card {
+    align-self: center;
+    width: min(100%, 310px);
+    height: 230px;
+  }
+}
+
+/* Ranked eliminations stay together as a list; the KO card is a single
+   viewport-centered announcement over the full board. */
+.wc-round-eliminators {
+  width: min(820px, 100%);
+  max-height: min(48vh, 470px);
+  overflow-y: auto;
+  padding: 3px 5px 8px;
+  scrollbar-color: #8d4950 #160f10;
+}
+
+.wc-round-eliminator {
+  grid-template-columns: 92px 72px minmax(0, 1fr) 100px 56px;
+  gap: 10px;
+  min-height: 78px;
+  padding: 6px 11px;
+  animation-delay: calc(var(--reveal-order, 0) * .12s);
+}
+
+.wc-round-eliminator.is-revealing {
+  border-color: #ff6577;
+  box-shadow: inset 4px 0 #ff3e58, 0 0 18px rgba(255, 57, 82, .3);
+  transform: translateX(3px);
+}
+
+.wc-round-eliminator-rank {
+  color: #ffe0a0;
+  font-size: .68rem;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+.wc-round-eliminator img {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.wc-round-eliminator-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  text-align: left;
+}
+
+.wc-round-eliminator-details strong {
+  overflow: hidden;
+  color: #fff0e4;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .88rem;
+  font-weight: 1000;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-round-eliminator-details small {
+  overflow: hidden;
+  color: #c59b8d;
+  font-size: .48rem;
+  font-weight: 950;
+  letter-spacing: .1em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-round-eliminator-status {
+  color: #ff9aa8;
+  font-size: .5rem;
+  font-weight: 1000;
+  letter-spacing: .12em;
+  text-align: center;
+}
+
+.wc-round-eliminator-status.is-pending {
+  color: #f4d48b;
+}
+
+.wc-round-eliminator-ko {
+  display: grid;
+  place-items: center;
+  min-height: 31px;
+  border: 1px solid #ff6577a8;
+  border-radius: 3px;
+  color: #fff0f0;
+  background: linear-gradient(110deg, #7c1828, #280b11);
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .7rem;
+  font-weight: 1000;
+  font-style: italic;
+  letter-spacing: .1em;
+}
+
+.wc-round-ko-popup {
+  position: fixed;
+  z-index: 9600;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  width: min(440px, calc(100vw - 30px));
+  min-height: 190px;
+  padding: 13px;
+  transform: translate(-50%, -50%) rotate(-3deg) scale(.35);
+  border: 3px solid #ffe1e4;
+  border-radius: 10px 4px 10px 4px;
+  color: #fff;
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(255, 92, 111, .25), transparent 55%),
+    linear-gradient(135deg, #671522, #160b0e 76%);
+  box-shadow:
+    0 0 0 5px rgba(239, 53, 78, .24),
+    0 20px 58px #000e,
+    inset 0 0 0 1px rgba(255, 255, 255, .12);
+  text-align: left;
+  animation: wcRoundKoPopup 1.12s cubic-bezier(.12, .82, .22, 1) both;
+  pointer-events: none;
+}
+
+.wc-round-ko-card-art {
+  display: grid;
+  place-items: end center;
+  height: 160px;
+  overflow: hidden;
+  border: 1px solid #ff9ca9;
+  border-radius: 5px;
+  background:
+    radial-gradient(ellipse at 50% 15%, #fa6c7c55, transparent 70%),
+    #16090c;
+}
+
+.wc-round-ko-card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 5px 8px #000c);
+}
+
+.wc-round-ko-card-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+}
+
+.wc-round-ko-card-copy span {
+  color: #ffc0c7;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .52rem;
+  font-weight: 1000;
+  letter-spacing: .17em;
+}
+
+.wc-round-ko-card-copy strong {
+  color: #fff;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(3.7rem, 10vw, 5.8rem);
+  font-weight: 1000;
+  font-style: italic;
+  line-height: .88;
+  letter-spacing: -.04em;
+  text-shadow: 4px 4px 0 #500d19, 0 0 22px #ff526b;
+}
+
+.wc-round-ko-card-copy small {
+  max-width: 100%;
+  overflow: hidden;
+  color: #ffe0e3;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .59rem;
+  font-weight: 1000;
+  letter-spacing: .08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes wcRoundKoPopup {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-10deg) scale(1.25); }
+  18% { opacity: 1; transform: translate(-50%, -50%) rotate(-3deg) scale(.94); }
+  32%, 76% { opacity: 1; transform: translate(-50%, -50%) rotate(-3deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(.96); }
+}
+
+@media (max-width: 700px) {
+  .wc-round-eliminators {
+    max-height: 46vh;
+  }
+
+  .wc-round-eliminator {
+    grid-template-columns: 68px 52px minmax(0, 1fr) 58px;
+    gap: 6px;
+    min-height: 66px;
+    padding: 4px 5px;
+  }
+
+  .wc-round-eliminator img {
+    width: 50px;
+    height: 58px;
+  }
+
+  .wc-round-eliminator-details strong {
+    font-size: .68rem;
+  }
+
+  .wc-round-eliminator-details small {
+    font-size: .41rem;
+  }
+
+  .wc-round-eliminator-status {
+    display: none;
+  }
+
+  .wc-round-eliminator-ko {
+    min-height: 27px;
+    font-size: .58rem;
+  }
+
+  .wc-round-ko-popup {
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 8px;
+    min-height: 154px;
+    padding: 9px;
+  }
+
+  .wc-round-ko-card-art {
+    height: 132px;
+  }
+
+  .wc-round-ko-card-copy span {
+    font-size: .43rem;
+  }
+}
