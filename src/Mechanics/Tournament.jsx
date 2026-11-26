@@ -833,6 +833,7 @@ export default function Tournament() {
   const navigate = useNavigate();
   const location = useLocation();
   const [size, setSize] = useState(4);
+  const [showFormatPicker, setShowFormatPicker] = useState(false);
   const [selectedId, setSelectedId] = useState("");
   const [tournament, setTournament] = useState(location.state?.tournament || null);
   const [revealing, setRevealing] = useState(false);
@@ -1322,8 +1323,15 @@ export default function Tournament() {
     return () => window.clearTimeout(timer);
   }, [showResults, tournament?.complete, tournament?.id]);
 
+  function openFormatPicker() {
+    if (!selectedFighter) return;
+    playUISound("click");
+    setShowFormatPicker(true);
+  }
+
   function generateBracket() {
     if (!selectedFighter || cpuPool.filter((fighter) => fighter.id !== selectedFighter.id).length < size - 1) return;
+    setShowFormatPicker(false);
     skipCpuQueueRef.current = false;
     processedMatch.current = null;
     celebrationPlayedRef.current = "";
@@ -1862,18 +1870,6 @@ export default function Tournament() {
         <p>Choose your bracket size, select your fighter, and fight your way to the crown.</p>
       </section>
 
-      <section className="wc-tourney-size-picker">
-        <span className="wc-tourney-section-label">CHAMPIONSHIP FORMAT</span>
-        <div>
-          <button className={size === 4 ? "active" : ""} onClick={() => setSize(4)}>
-            <strong>04</strong><span>FIGHTERS</span><small>2 ROUNDS</small>
-          </button>
-          <button className={size === 8 ? "active" : ""} onClick={() => setSize(8)}>
-            <strong>08</strong><span>FIGHTERS</span><small>3 ROUNDS</small>
-          </button>
-        </div>
-      </section>
-
       <section className="wc-tourney-character-picker">
         <div className="wc-tourney-section-heading">
           <div>
@@ -1922,10 +1918,63 @@ export default function Tournament() {
           <strong>{fighterName(selectedFighter)}</strong>
           <span>YOUR CHAMPIONSHIP PICK</span>
         </div>
-        <button className={"wc-tourney-primary-action" + (revealing ? " is-loading" : "")} disabled={!selectedFighter || revealing} onClick={generateBracket}>
-          {revealing ? "DRAWING THE CONTENDERS..." : "GENERATE BRACKET"} <span>▶</span>
+        <button className={"wc-tourney-primary-action" + (revealing ? " is-loading" : "")} disabled={!selectedFighter || revealing} onClick={openFormatPicker}>
+          GENERATE BRACKET <span>▶</span>
         </button>
       </footer>
+
+      {showFormatPicker && (
+        <div className="wc-tourney-format-backdrop">
+          <section className="wc-tourney-format-dialog" role="dialog" aria-modal="true" aria-labelledby="wcTourneyFormatTitle">
+            <p className="wc-tourney-format-kicker">WILD CARDS · GRAND CHAMPIONSHIP</p>
+            <h2 id="wcTourneyFormatTitle">CHOOSE YOUR BRACKET</h2>
+            <p className="wc-tourney-format-copy">Select how many fighters will compete before the tournament bracket is generated.</p>
+
+            <div className="wc-tourney-format-options">
+              <button
+                type="button"
+                className={"wc-tourney-format-option" + (size === 4 ? " selected" : "")}
+                onClick={() => setSize(4)}
+                aria-pressed={size === 4}
+                disabled={cpuPool.filter((fighter) => fighter.id !== selectedFighter?.id).length < 3}
+              >
+                <span className="wc-tourney-format-number">04</span>
+                <strong>FIGHTERS</strong>
+                <small>2 ROUNDS TO THE CROWN</small>
+                <i>SEMIFINALS → GRAND FINAL</i>
+                <b>{size === 4 ? "SELECTED FORMAT ✓" : "SELECT 4 FIGHTERS"}</b>
+              </button>
+              <button
+                type="button"
+                className={"wc-tourney-format-option" + (size === 8 ? " selected" : "")}
+                onClick={() => setSize(8)}
+                aria-pressed={size === 8}
+                disabled={cpuPool.filter((fighter) => fighter.id !== selectedFighter?.id).length < 7}
+              >
+                <span className="wc-tourney-format-number">08</span>
+                <strong>FIGHTERS</strong>
+                <small>3 ROUNDS TO THE CROWN</small>
+                <i>QUARTERFINALS → SEMIFINALS → FINAL</i>
+                <b>{size === 8 ? "SELECTED FORMAT ✓" : "SELECT 8 FIGHTERS"}</b>
+              </button>
+            </div>
+
+            <div className="wc-tourney-format-footer">
+              <button type="button" className="wc-tourney-format-back" onClick={() => setShowFormatPicker(false)}>
+                BACK
+              </button>
+              <button
+                type="button"
+                className="wc-tourney-format-confirm"
+                onClick={generateBracket}
+                disabled={!selectedFighter || cpuPool.filter((fighter) => fighter.id !== selectedFighter.id).length < size - 1}
+              >
+                GENERATE {String(size).padStart(2, "0")}-FIGHTER BRACKET <span>▶</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
