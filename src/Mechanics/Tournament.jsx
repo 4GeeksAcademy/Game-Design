@@ -366,6 +366,7 @@ function RoundTransition({ transition, onContinue }) {
                   <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
                   <strong>{fighterName(fighter)}</strong>
                   <small>ELIMINATED</small>
+                  <span className="wc-round-eliminator-ko">K.O.</span>
                 </article>
               ))}
             </div>
