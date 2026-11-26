@@ -4896,3 +4896,143 @@
   from { transform: scaleX(.05); opacity: .25; }
   to { transform: scaleX(1); opacity: 1; }
 }
+
+/* Elimination recap: show the full ranked list together without a K.O. overlay. */
+.wc-round-transition.phase-eliminators .wc-round-transition-panel {
+  width: min(980px, 100%);
+  max-height: min(94vh, 980px);
+  overflow-y: auto;
+  padding: clamp(18px, 2.6vw, 30px);
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminators {
+  width: min(880px, 100%);
+  max-height: none;
+  overflow: visible;
+  gap: 8px;
+  padding: 4px 5px 10px;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator {
+  grid-template-columns: 100px 68px minmax(0, 1fr) 116px;
+  min-height: 72px;
+  gap: 12px;
+  padding: 5px 12px;
+  opacity: 1 !important;
+  border-color: rgba(218, 183, 111, .42);
+  background: linear-gradient(105deg, #29251a, #14130f 78%);
+  box-shadow: inset 3px 0 rgba(218, 183, 111, .72), 0 5px 14px #0007;
+  transform: none;
+  animation: none !important;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator::after {
+  display: none !important;
+  animation: none !important;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator.is-revealing {
+  border-color: rgba(218, 183, 111, .42);
+  box-shadow: inset 3px 0 rgba(218, 183, 111, .72), 0 5px 14px #0007;
+  transform: none;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator-rank {
+  color: #f4d58b;
+  font-size: .72rem;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator img {
+  width: 62px;
+  height: 64px;
+  filter: drop-shadow(0 3px 6px #000b);
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  text-align: left;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator-details strong {
+  color: #fff1d7;
+  font-size: .9rem;
+  text-shadow: none;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator-details small {
+  color: #b9a98b;
+  font-size: .52rem;
+  letter-spacing: .1em;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator-status {
+  display: inline-flex !important;
+  justify-content: center;
+  color: #e6c778;
+  font-size: .58rem;
+  letter-spacing: .1em;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator-status.is-pending {
+  color: #f4d48b;
+}
+
+.wc-round-eliminator-ko,
+.wc-round-ko-popup {
+  display: none !important;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-transition-progress {
+  margin-top: 8px;
+  color: #ddc17f;
+  animation: none;
+}
+
+@media (max-width: 700px) {
+  .wc-round-transition.phase-eliminators .wc-round-transition-panel {
+    max-height: 94vh;
+    padding: 15px 9px;
+  }
+
+  .wc-round-transition.phase-eliminators .wc-round-eliminators {
+    gap: 6px;
+    padding: 2px 1px 7px;
+  }
+
+  .wc-round-transition.phase-eliminators .wc-round-eliminator {
+    grid-template-columns: 64px 46px minmax(0, 1fr) 68px;
+    min-height: 62px;
+    gap: 5px;
+    padding: 4px 5px;
+  }
+
+  .wc-round-transition.phase-eliminators .wc-round-eliminator-rank {
+    font-size: .56rem;
+    white-space: normal;
+  }
+
+  .wc-round-transition.phase-eliminators .wc-round-eliminator img {
+    width: 44px;
+    height: 54px;
+  }
+
+  .wc-round-transition.phase-eliminators .wc-round-eliminator-details strong {
+    font-size: .68rem;
+  }
+
+  .wc-round-transition.phase-eliminators .wc-round-eliminator-details small {
+    font-size: .39rem;
+    letter-spacing: .04em;
+  }
+
+  .wc-round-transition.phase-eliminators .wc-round-eliminator-status {
+    font-size: .42rem;
+    letter-spacing: .04em;
+  }
+}
+
