@@ -890,7 +890,7 @@ export default function Tournament() {
   if (showResults && tournament?.complete) {
     const placement = tournament.humanPlacement;
     const suffix = placement === 1 ? "ST" : placement === 2 ? "ND" : placement === 3 ? "RD" : "TH";
-    const reward = REWARDS[placement] || 0;
+    const reward = getRewardAmount(tournament.size, placement);
 
     return (
       <main className={"wc-tournament wc-tournament-results" + (restarting ? " is-restarting" : "")}>
@@ -925,7 +925,7 @@ export default function Tournament() {
           </div>
           <span>{placement}{suffix} PLACE</span>
         </section>
-        <Podium placements={tournament.placements} showRewards />
+        <Podium placements={tournament.placements} showRewards size={tournament.size} />
         <section className="wc-tourney-reward-receipt">
           <div>
             <span>YOUR FINISH</span>
@@ -1043,14 +1043,25 @@ export default function Tournament() {
           <section className="wc-tourney-elimination-panel">
             <div className="wc-tourney-elimination-mark">K.O.</div>
             <div>
-              <strong>YOUR RUN HAS ENDED</strong>
-              <span>The championship is still alive. Choose how you want to finish the tournament.</span>
+              <strong>{tournament.placementOpportunity?.type === "bronze" ? "A SHOT AT THIRD PLACE REMAINS" : "YOUR RUN HAS ENDED"}</strong>
+              <span>
+                {tournament.placementOpportunity?.type === "bronze"
+                  ? "Play the bronze-medal match to earn third place, or forfeit and secure third automatically."
+                  : "Continue to see your final 5th–8th place ranking, or forfeit and accept eighth place."}
+              </span>
             </div>
+            {tournament.placementOpportunity?.type === "bronze" && (
+              <button className="wc-tourney-watch-button" onClick={enterPlacementMatch}>
+                PLAY FOR 3RD PLACE
+              </button>
+            )}
             <button className="wc-tourney-watch-button" onClick={watchRemaining} disabled={spectating}>
               {spectating ? "STARTING WATCH MODE..." : "WATCH REMAINING MATCHES"}
             </button>
-            <button className="wc-tourney-skip-button" onClick={leaveTournament}>
-              LEAVE & SEE RESULTS
+            <button className="wc-tourney-skip-button" onClick={forfeitPlacement} disabled={spectating}>
+              {tournament.placementOpportunity?.type === "bronze"
+                ? "FORFEIT & CLAIM 3RD"
+                : "FORFEIT · ACCEPT 8TH"}
             </button>
             <button className="wc-tourney-restart-button" onClick={restartTournament}>
               RESTART
@@ -1130,7 +1141,7 @@ export default function Tournament() {
           </div>
           <span>CLAIM YOUR PLACE IN HISTORY</span>
         </div>
-        <Podium showRewards />
+        <Podium showRewards size={size} />
       </section>
 
       <footer className="wc-tourney-setup-footer">
