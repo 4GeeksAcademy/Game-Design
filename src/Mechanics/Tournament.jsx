@@ -1891,10 +1891,13 @@ export default function Tournament() {
         )}
 
 
+        {!tournament.started && (
           <TournamentStartPrompt
             tournament={tournament}
-            previewFighters={revealPreview}
+            drawParticipants={drawParticipants}
+            drawComplete={drawComplete}
             revealing={revealing}
+            onDraw={drawTournament}
             onStart={startTournament}
             onExit={exitUnstartedTournament}
           />
