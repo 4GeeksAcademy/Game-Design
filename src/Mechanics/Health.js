@@ -360,19 +360,16 @@ function canUseAttack(attack) {
   if (!attack || attack.state !== true) return false;
 
   const remainingUses = attack.remainingUses ?? attack.uses;
+  if (Number.isInteger(attack.uses) && remainingUses <= 0) return false;
 
-  if (Number.isInteger(attack.uses) && remainingUses <= 0) {
+  const cooldownRemaining = Math.max(0, Number(attack.cooldownRemaining) || 0);
+  // A move remains locked for the entire round in which it was activated,
+  // even if another code path accidentally clears the visible counter.
+  if (cooldownRemaining > 0 || attack.cooldownStartedThisRound === true) {
     return false;
   }
 
-  if ((attack.cooldownRemaining ?? 0) > 0) {
-    return false;
-  }
-
-  if ((attack.stunned?.remainingRounds ?? 0) > 0) {
-    return false;
-  }
-
+  if ((attack.stunned?.remainingRounds ?? 0) > 0) return false;
   return true;
 }
 
@@ -385,9 +382,13 @@ function consumeAttack(attack) {
     );
   }
 
-  // Start the configured turn cooldown.
-  if (Number(attack.turnCooldown) > 0) {
-    attack.cooldownRemaining = Number(attack.turnCooldown);
+  // Start the configured turn cooldown. Never shorten an existing lock.
+  const turnCooldown = Math.max(0, Number(attack.turnCooldown) || 0);
+  if (turnCooldown > 0) {
+    attack.cooldownRemaining = Math.max(
+      Math.max(0, Number(attack.cooldownRemaining) || 0),
+      turnCooldown,
+    );
     attack.cooldownStartedThisRound = true;
   }
 
