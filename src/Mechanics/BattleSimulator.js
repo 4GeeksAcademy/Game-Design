@@ -98,9 +98,13 @@ function cloneFighter(fighter) {
       })),
       stunned: attack.stunned ? { ...attack.stunned } : null,
       remainingUses: attack.remainingUses ?? attack.uses,
-      cooldownRemaining: attack.cooldownRemaining ?? 0,
-      cooldownStartedThisRound: false,
-      state: true,
+      cooldownRemaining: Math.max(0, Number(attack.cooldownRemaining) || 0),
+      cooldownStartedThisRound: attack.cooldownStartedThisRound === true,
+      state:
+        (attack.remainingUses ?? attack.uses ?? 1) > 0 &&
+        (Number(attack.cooldownRemaining) || 0) <= 0 &&
+        (attack.stunned?.remainingRounds ?? 0) <= 0 &&
+        attack.cooldownStartedThisRound !== true,
     })),
   };
 }
@@ -151,6 +155,14 @@ function resolveBotAttack(
   defender,
   fighters = [attacker, defender],
 ) {
+  // Selection and execution both enforce cooldowns; never trust a queued move.
+  if (
+    !canUseAttack(attack) ||
+    attacker.mana < getModifiedAttackStat(attack, attacker, "cost")
+  ) {
+    return null;
+  }
+
   const selectedAttackIds = aiChooseStunTargets(defender, attack.stun);
 
   const options = {
