@@ -856,7 +856,7 @@ export default function Tournament() {
   }
 
   function claimReward() {
-    const amount = REWARDS[tournament.humanPlacement] || 0;
+    const amount = getRewardAmount(tournament.size, tournament.humanPlacement);
     if (!tournament.rewardClaimed && amount > 0) {
       addCoins(amount);
       playGameSound("purchase");
