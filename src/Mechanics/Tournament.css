@@ -1597,44 +1597,56 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  color: transparent;
-  background: radial-gradient(circle at 50% 25%,#88734c66,transparent 52%),linear-gradient(145deg,#29251c,#11100e);
+  display: grid;
+  place-items: center;
+  color: #f4d894;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(211, 174, 103, .2), transparent 56%),
+    linear-gradient(145deg, #29251c, #11100e);
 }
 .wc-tourney-portrait.is-mystery::before {
   position: absolute;
-  z-index: -1;
-  top: 5px;
+  z-index: 0;
+  top: 15%;
   left: 50%;
-  width: 10px;
-  height: 10px;
+  width: 34%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(221, 190, 128, .5);
   border-radius: 50%;
   content: "";
   transform: translateX(-50%);
-  background: linear-gradient(145deg,#87775a,#3b3325);
-  box-shadow: 0 0 12px rgba(197,160,93,.2);
+  background: linear-gradient(145deg, #a18a60, #443923 78%);
+  box-shadow: 0 0 18px rgba(197, 160, 93, .22);
 }
 .wc-tourney-portrait.is-mystery::after {
   position: absolute;
-  z-index: -1;
+  z-index: 0;
   left: 50%;
-  bottom: -5px;
-  width: 24px;
-  height: 20px;
-  border-radius: 13px 13px 2px 2px;
+  bottom: -9%;
+  width: 76%;
+  height: 59%;
+  border: 1px solid rgba(221, 190, 128, .38);
+  border-bottom: 0;
+  border-radius: 48% 48% 8% 8%;
   content: "";
   transform: translateX(-50%);
-  background: linear-gradient(145deg,#756447,#30291d);
+  background: linear-gradient(145deg, #756447, #30291d 78%);
 }
 .wc-tourney-portrait.is-mystery span {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 1;
-  color: #f4d894;
-  font-size: .74rem;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border: 1px solid rgba(244, 216, 148, .7);
+  border-radius: 50%;
+  color: #fff0c2;
+  background: rgba(13, 13, 10, .82);
+  box-shadow: 0 2px 10px #000b, 0 0 12px #d5ad5a44;
+  font-size: .9rem;
   font-weight: 1000;
   text-shadow: 0 1px 5px #000;
-  transform: translate(-50%,-50%);
 }
 
 .wc-tourney-primary-action.is-loading::after,
