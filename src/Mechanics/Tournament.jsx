@@ -136,20 +136,20 @@ function getPlaceLabel(place) {
 
 // Resolve placement matches once when the elimination board is revealed. Reuse
 // those results later so the podium cannot contradict the reveal animation.
-function getEliminationRankings(tournament) {
-  const rounds = tournament.rounds || [];
-  const semifinalRound = rounds[rounds.length - 2] || [];
-  const semifinalLosers = semifinalRound
-    .map((match) => (match.fighters || []).find(
-      (fighter) => fighter && fighter.id !== match.winner?.id,
-    ))
-    .filter(Boolean);
-  const placementResults = { ...(tournament.placementResults || {}) };
-  const bronzePending = tournament.placementOpportunity?.type === "bronze" &&
-    !placementResults.bronzeWinner;
-  const entries = [];
+function shouldPresentEliminationList(size, completedRoundIndex) {
+  return size === 8
+    ? completedRoundIndex === 0 || completedRoundIndex === 1
+    : completedRoundIndex === 0;
+}
 
-  if (tournament.size === 8) {
+function getEliminationRankings(tournament, completedRoundIndex) {
+  const rounds = tournament.rounds || [];
+  const placementResults = { ...(tournament.placementResults || {}) };
+  const entries = [];
+  const semifinalRoundIndex = rounds.length - 2;
+
+  // Quarterfinal eliminations get their own checkpoint before semifinals begin.
+  if (tournament.size === 8 && completedRoundIndex === 0) {
     const quarterfinalLosers = (rounds[0] || [])
       .map((match) => (match.fighters || []).find(
         (fighter) => fighter && fighter.id !== match.winner?.id,
@@ -189,16 +189,11 @@ function getEliminationRankings(tournament) {
           { fighter: sixthPlace, place: 6, rankLabel: getPlaceLabel(6), detail: "FINAL TOURNAMENT POSITION" },
           { fighter: fifthPlaceWinner, place: 5, rankLabel: getPlaceLabel(5), detail: "FINAL TOURNAMENT POSITION" },
         );
-      } else {
-        quarterfinalLosers.forEach((fighter) => entries.push({
-          fighter,
-          place: null,
-          rankLabel: "5TH–8TH",
-          detail: "QUARTERFINAL ELIMINATION",
-        }));
       }
-    } else {
-      // Keep the semifinal recap available even if a consolation pairing is incomplete.
+    }
+
+    // This still guarantees a useful recap if a consolation matchup is incomplete.
+    if (!entries.length) {
       quarterfinalLosers.forEach((fighter) => entries.push({
         fighter,
         place: null,
@@ -206,7 +201,24 @@ function getEliminationRankings(tournament) {
         detail: "QUARTERFINAL ELIMINATION",
       }));
     }
+
+    return { entries, placementResults };
   }
+
+  // The semifinal checkpoint only ranks the two fighters who lost their semifinals.
+  if (completedRoundIndex !== semifinalRoundIndex) {
+    return { entries, placementResults };
+  }
+
+  const semifinalRound = rounds[semifinalRoundIndex] || [];
+  const semifinalLosers = semifinalRound
+    .filter((match) => match.winner)
+    .map((match) => (match.fighters || []).find(
+      (fighter) => fighter && fighter.id !== match.winner.id,
+    ))
+    .filter(Boolean);
+  const bronzePending = tournament.placementOpportunity?.type === "bronze" &&
+    !placementResults.bronzeWinner;
 
   if (bronzePending) {
     semifinalLosers.forEach((fighter) => entries.push({
@@ -220,19 +232,13 @@ function getEliminationRankings(tournament) {
     const bronzeWinner = placementResults.bronzeWinner ||
       resolveCpuWinner(semifinalLosers[0], semifinalLosers[1]);
     const bronzeLoser = semifinalLosers.find((fighter) => fighter.id !== bronzeWinner?.id);
+
     if (bronzeWinner && bronzeLoser) {
       placementResults.bronzeWinner = bronzeWinner;
       entries.push(
         { fighter: bronzeLoser, place: 4, rankLabel: getPlaceLabel(4), detail: "FINAL TOURNAMENT POSITION" },
         { fighter: bronzeWinner, place: 3, rankLabel: getPlaceLabel(3), detail: "FINAL TOURNAMENT POSITION" },
       );
-    } else {
-      semifinalLosers.forEach((fighter) => entries.push({
-        fighter,
-        place: null,
-        rankLabel: "3RD / 4TH",
-        detail: "SEMIFINAL ELIMINATION",
-      }));
     }
   } else {
     semifinalLosers.forEach((fighter) => entries.push({
@@ -244,10 +250,100 @@ function getEliminationRankings(tournament) {
   }
 
   return {
-    entries: entries.filter((entry) => entry.fighter),
+    entries,
     placementResults,
   };
 }
+
+
+function getTournamentFinalStandings(tournament) {
+  const standings = [];
+  const seen = new Set();
+  const semifinalRoundIndex = tournament.rounds.length - 2;
+
+  if (tournament.size === 8) {
+    const quarterfinals = getEliminationRankings(tournament, 0);
+    quarterfinals.entries.forEach((entry) => {
+      if (!seen.has(entry.fighter.id)) {
+        seen.add(entry.fighter.id);
+        standings.push({
+          ...entry,
+          position: entry.place ? String(entry.place) : "5–8",
+          status: entry.pending ? "PENDING" : "ELIMINATED",
+          sortPlace: entry.place || 8.5,
+        });
+      }
+    });
+  }
+
+  const semifinals = getEliminationRankings(tournament, semifinalRoundIndex);
+  semifinals.entries.forEach((entry) => {
+    if (!seen.has(entry.fighter.id)) {
+      seen.add(entry.fighter.id);
+      standings.push({
+        ...entry,
+        position: entry.place ? String(entry.place) : "3–4",
+        status: entry.pending ? "PENDING" : "ELIMINATED",
+        sortPlace: entry.place || 3.5,
+      });
+    }
+  });
+
+  const finalMatch = tournament.rounds[tournament.rounds.length - 1]?.[0];
+  if (finalMatch) {
+    const finalists = finalMatch.fighters || [];
+    const champion = finalMatch.winner;
+    const runnerUp = champion
+      ? finalists.find((fighter) => fighter && fighter.id !== champion.id)
+      : null;
+
+    if (champion && !seen.has(champion.id)) {
+      seen.add(champion.id);
+      standings.push({
+        fighter: champion,
+        place: 1,
+        position: "1",
+        rankLabel: getPlaceLabel(1),
+        detail: "TOURNAMENT CHAMPION",
+        status: "CHAMPION",
+        sortPlace: 1,
+      });
+    }
+
+    if (runnerUp && !seen.has(runnerUp.id)) {
+      seen.add(runnerUp.id);
+      standings.push({
+        fighter: runnerUp,
+        place: 2,
+        position: "2",
+        rankLabel: getPlaceLabel(2),
+        detail: "TOURNAMENT RUNNER-UP",
+        status: "RUNNER-UP",
+        sortPlace: 2,
+      });
+    }
+
+    if (!champion) {
+      finalists.forEach((fighter, index) => {
+        if (fighter && !seen.has(fighter.id)) {
+          seen.add(fighter.id);
+          standings.push({
+            fighter,
+            place: index + 1,
+            position: "1–2",
+            rankLabel: "1ST / 2ND",
+            detail: "FINALIST · CHAMPIONSHIP PENDING",
+            status: "FINALIST",
+            sortPlace: index + 1,
+          });
+        }
+      });
+    }
+  }
+
+  return standings.sort((a, b) => a.sortPlace - b.sortPlace);
+}
+
 function buildPlacements(tournament) {
   const rounds = tournament.rounds;
   const finalMatch = rounds[rounds.length - 1][0];
@@ -572,6 +668,33 @@ function RoundTransition({ transition, onContinue }) {
     </div>
   );
 }
+
+function TournamentFinalStandings({ tournament }) {
+  const standings = getTournamentFinalStandings(tournament);
+
+  return (
+    <aside className="wc-tourney-finals-standings" aria-label="Current tournament standings">
+      <header className="wc-tourney-finals-standings-header">
+        <span>CHAMPIONSHIP TABLE</span>
+        <h3>CURRENT STANDINGS</h3>
+        <small>{tournament.size} CONTENDERS · FINAL ROUND</small>
+      </header>
+      <ol className="wc-tourney-finals-standings-list">
+        {standings.map((entry) => (
+          <li className={"wc-tourney-finals-standing" + (entry.status === "FINALIST" ? " is-finalist" : "")} key={entry.fighter.id}>
+            <span className="wc-tourney-finals-standing-place">{entry.position}</span>
+            <img src={fighterImage(entry.fighter)} alt={fighterName(entry.fighter)} />
+            <span className="wc-tourney-finals-standing-copy">
+              <strong>{fighterName(entry.fighter)}</strong>
+              <small>{entry.status}</small>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </aside>
+  );
+}
+
 function TournamentStartPrompt({ tournament, previewFighters, revealing, onStart, onExit }) {
   const firstRound = tournament.rounds[0] || [];
 
@@ -747,41 +870,40 @@ export default function Tournament() {
     });
   }
 
-  async function presentRoundTransition(completedRounds, nextRound, nextRoundIndex, bracketSize, sourceTournament) {
+  async function presentRoundTransition(completedRound, nextRound, nextRoundIndex, bracketSize, sourceTournament, completedRoundIndex) {
     let ranking = {
       entries: [],
       placementResults: { ...(sourceTournament.placementResults || {}) },
     };
 
     try {
-      ranking = getEliminationRankings(sourceTournament);
+      ranking = getEliminationRankings(sourceTournament, completedRoundIndex);
     } catch (error) {
       console.error("[Wild Cards Tournament] Could not calculate exact elimination places:", error);
     }
 
     const standings = (nextRound || []).map((match) => [...(match.fighters || [])]);
-    const fallbackEliminators = (completedRounds || [])
-      .flatMap((round) => round.map((match) => ({
+    const fallbackEliminators = (completedRound || [])
+      .map((match) => ({
         fighter: (match.fighters || []).find(
           (fighter) => fighter && fighter.id !== match.winner?.id,
         ),
         place: null,
         rankLabel: "ELIMINATED",
         detail: "FINAL TOURNAMENT POSITION",
-      })))
+      }))
       .filter((entry) => entry.fighter);
     const eliminators = ranking.entries?.length ? ranking.entries : fallbackEliminators;
 
     sourceTournament.placementResults = ranking.placementResults || sourceTournament.placementResults || {};
-    publishTournament(sourceTournament);
 
     if (!standings.length || !eliminators.length) {
       console.warn("[Wild Cards Tournament] The round transition had no complete matchup or elimination data.");
-      return Promise.resolve();
+      return;
     }
 
     // Keep the completed round visible long enough for each winner's fork to draw.
-    sourceTournament.displayRoundIndex = Math.max(0, nextRoundIndex - 1);
+    sourceTournament.displayRoundIndex = completedRoundIndex;
     publishTournament(sourceTournament);
     await new Promise((resolve) => window.setTimeout(resolve, 1500));
     if (skipCpuQueueRef.current) return;
@@ -789,7 +911,9 @@ export default function Tournament() {
     setRoundTransition({
       phase: "eliminators",
       revealIndex: 0,
-      completedRoundLabel: bracketSize === 4 ? "SEMIFINALS COMPLETE" : "QUARTERFINALS & SEMIFINALS COMPLETE",
+      completedRoundLabel: bracketSize === 8 && completedRoundIndex === 0
+        ? "QUARTERFINALS COMPLETE"
+        : "SEMIFINALS COMPLETE",
       nextRoundLabel: getRoundLabel(bracketSize, nextRoundIndex),
       eliminators,
       standings,
@@ -897,8 +1021,7 @@ export default function Tournament() {
       const round = draft.rounds[roundIndex];
 
       if (roundIndex > 0) {
-        const completedRound = draft.rounds[roundIndex - 1];
-        const previousWinners = completedRound.map((match) => match.winner);
+        const previousWinners = draft.rounds[roundIndex - 1].map((match) => match.winner);
         round.forEach((match, index) => {
           if (!match.fighters[0] || !match.fighters[1]) {
             match.fighters = [
@@ -908,26 +1031,11 @@ export default function Tournament() {
           }
           match.isPlayerMatch = false;
         });
-
-        draft.currentRound = roundIndex;
-        draft.displayRoundIndex = roundIndex;
-        publishTournament(draft);
-        const isFinalRound = roundIndex === draft.rounds.length - 1;
-        if (isFinalRound && draft.lastTransitionRoundIndex !== roundIndex - 1) {
-          draft.lastTransitionRoundIndex = roundIndex - 1;
-          await presentRoundTransition(draft.rounds.slice(0, roundIndex), round, roundIndex, draft.size, draft);
-          if (skipCpuQueueRef.current) {
-            setSpectating(false);
-            return;
-          }
-          draft.displayRoundIndex = roundIndex;
-          publishTournament(draft);
-        }
-      } else {
-        draft.currentRound = roundIndex;
-        draft.displayRoundIndex = roundIndex;
-        publishTournament(draft);
       }
+
+      draft.currentRound = roundIndex;
+      draft.displayRoundIndex = roundIndex;
+      publishTournament(draft);
 
       const completed = await playCpuRound(round, roundIndex, draft.player.id);
       if (!completed || skipCpuQueueRef.current) {
@@ -936,6 +1044,44 @@ export default function Tournament() {
       }
 
       publishTournament(draft);
+
+      const nextRoundIndex = roundIndex + 1;
+      if (
+        nextRoundIndex < draft.rounds.length &&
+        shouldPresentEliminationList(draft.size, roundIndex) &&
+        draft.lastTransitionRoundIndex !== roundIndex
+      ) {
+        const nextRound = draft.rounds[nextRoundIndex];
+        const winners = round.map((match) => match.winner);
+        nextRound.forEach((match, index) => {
+          if (!match.fighters[0] || !match.fighters[1]) {
+            match.fighters = [
+              winners[index * 2] || null,
+              winners[index * 2 + 1] || null,
+            ];
+          }
+          match.isPlayerMatch = false;
+        });
+
+        draft.lastTransitionRoundIndex = roundIndex;
+        publishTournament(draft);
+        await presentRoundTransition(
+          round,
+          nextRound,
+          nextRoundIndex,
+          draft.size,
+          draft,
+          roundIndex,
+        );
+        if (skipCpuQueueRef.current) {
+          setSpectating(false);
+          return;
+        }
+
+        draft.displayRoundIndex = nextRoundIndex;
+        publishTournament(draft);
+      }
+
       if (roundIndex === draft.rounds.length - 1) {
         completeTournament(draft);
         return;
@@ -951,8 +1097,7 @@ export default function Tournament() {
       const round = draft.rounds[roundIndex];
 
       if (roundIndex > 0) {
-        const completedRound = draft.rounds[roundIndex - 1];
-        const previousWinners = completedRound.map((match) => match.winner);
+        const previousWinners = draft.rounds[roundIndex - 1].map((match) => match.winner);
         round.forEach((match, index) => {
           if (!match.fighters[0] || !match.fighters[1]) {
             match.fighters = [
@@ -964,26 +1109,52 @@ export default function Tournament() {
             (fighter) => fighter?.id === draft.player.id,
           );
         });
-
-        draft.currentRound = roundIndex;
-        draft.displayRoundIndex = roundIndex;
-        publishTournament(draft);
-        const isFinalRound = roundIndex === draft.rounds.length - 1;
-        if (isFinalRound && draft.lastTransitionRoundIndex !== roundIndex - 1) {
-          draft.lastTransitionRoundIndex = roundIndex - 1;
-          await presentRoundTransition(draft.rounds.slice(0, roundIndex), round, roundIndex, draft.size, draft);
-          if (skipCpuQueueRef.current) return;
-          draft.displayRoundIndex = roundIndex;
-          publishTournament(draft);
-        }
-      } else {
-        draft.currentRound = roundIndex;
-        draft.displayRoundIndex = roundIndex;
-        publishTournament(draft);
       }
+
+      draft.currentRound = roundIndex;
+      draft.displayRoundIndex = roundIndex;
+      publishTournament(draft);
 
       const completedCpuMatches = await playCpuRound(round, roundIndex, draft.player.id);
       if (!completedCpuMatches || skipCpuQueueRef.current) return;
+
+      publishTournament(draft);
+
+      const nextRoundIndex = roundIndex + 1;
+      if (
+        nextRoundIndex < draft.rounds.length &&
+        shouldPresentEliminationList(draft.size, roundIndex) &&
+        draft.lastTransitionRoundIndex !== roundIndex
+      ) {
+        const nextRound = draft.rounds[nextRoundIndex];
+        const winners = round.map((match) => match.winner);
+        nextRound.forEach((match, index) => {
+          if (!match.fighters[0] || !match.fighters[1]) {
+            match.fighters = [
+              winners[index * 2] || null,
+              winners[index * 2 + 1] || null,
+            ];
+          }
+          match.isPlayerMatch = !draft.playerEliminated && match.fighters.some(
+            (fighter) => fighter?.id === draft.player.id,
+          );
+        });
+
+        draft.lastTransitionRoundIndex = roundIndex;
+        publishTournament(draft);
+        await presentRoundTransition(
+          round,
+          nextRound,
+          nextRoundIndex,
+          draft.size,
+          draft,
+          roundIndex,
+        );
+        if (skipCpuQueueRef.current) return;
+
+        draft.displayRoundIndex = nextRoundIndex;
+        publishTournament(draft);
+      }
 
       const nextHumanMatch = round.find((match) =>
         match.isPlayerMatch &&
@@ -991,7 +1162,6 @@ export default function Tournament() {
         match.fighters.some((fighter) => fighter?.id === draft.player.id)
       );
 
-      publishTournament(draft);
       if (playerStillIn && nextHumanMatch) {
         setSpectating(false);
         setShowEliminationScreen(false);
@@ -1082,16 +1252,19 @@ export default function Tournament() {
         updated.displayRoundIndex = nextRoundIndex;
         publishTournament(updated);
 
-        const isFinalRound = nextRoundIndex === updated.rounds.length - 1;
-        if (isFinalRound && updated.lastTransitionRoundIndex !== updated.currentRound) {
+        if (
+          shouldPresentEliminationList(updated.size, updated.currentRound) &&
+          updated.lastTransitionRoundIndex !== updated.currentRound
+        ) {
           updated.lastTransitionRoundIndex = updated.currentRound;
           publishTournament(updated);
           await presentRoundTransition(
-            updated.rounds.slice(0, nextRoundIndex),
+            currentRound,
             nextRound,
             nextRoundIndex,
             updated.size,
             updated,
+            updated.currentRound,
           );
           if (skipCpuQueueRef.current) return;
           updated.displayRoundIndex = nextRoundIndex;
@@ -1578,8 +1751,24 @@ export default function Tournament() {
           </div>
         )}
 
-        <section className="wc-tourney-rounds wc-tourney-single-round" aria-label={roundLabels[activeRoundIndex] + " matchups"}>
-          <section className="wc-tourney-round" key={activeRoundIndex}>
+        <section
+          className={
+            "wc-tourney-rounds wc-tourney-single-round" +
+            (activeRoundIndex === tournament.rounds.length - 1 ? " wc-tourney-finals-layout" : "")
+          }
+          aria-label={roundLabels[activeRoundIndex] + " matchups"}
+        >
+          <section
+            className={"wc-tourney-round" + (activeRoundIndex === tournament.rounds.length - 1 ? " wc-tourney-finals-round" : "")}
+            key={activeRoundIndex}
+          >
+            {activeRoundIndex === tournament.rounds.length - 1 && (
+              <div className="wc-tourney-finals-intro" aria-label="Grand final round">
+                <span>THE LAST BATTLE</span>
+                <strong>GRAND FINALS</strong>
+                <small>ONE MATCH · ONE CHAMPION</small>
+              </div>
+            )}
             <div className="wc-tourney-round-title">
               <span>ROUND {activeRoundIndex + 1} OF {tournament.rounds.length}</span>
               <h2>{roundLabels[activeRoundIndex] || "CHAMPIONSHIP"}</h2>
@@ -1600,6 +1789,9 @@ export default function Tournament() {
               ))}
             </div>
           </section>
+          {activeRoundIndex === tournament.rounds.length - 1 && (
+            <TournamentFinalStandings tournament={tournament} />
+          )}
         </section>
 
         {tournament.playerEliminated && showEliminationScreen && !tournament.complete && (
