@@ -1084,3 +1084,22 @@
   }
 }
 
+
+/* Watch Mode intentionally keeps only the current-match skip control. */
+.wc-cpu-skip-only {
+  justify-content: flex-end;
+}
+.wc-cpu-skip-button {
+  min-width: 112px;
+  min-height: 34px;
+  border-color: #d9f48b;
+  color: #18210d;
+  background: linear-gradient(135deg, #e7ff9c, #91ce35);
+  box-shadow: 0 0 15px rgba(165, 255, 25, .2);
+  font-weight: 950;
+  letter-spacing: .1em;
+}
+.wc-cpu-skip-button span {
+  margin-left: 6px;
+  font-size: .8rem;
+}
