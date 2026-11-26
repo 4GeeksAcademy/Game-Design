@@ -274,7 +274,7 @@ function Podium({ placements, showRewards = false }) {
             {fighter
               ? <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
               : <div className="wc-podium-empty">?</div>}
-            <strong>{fighterName(fighter)}</strong>
+            <strong>{fighter ? fighterName(fighter) : (rank === 1 ? "THE CHAMPION" : rank === 2 ? "RUNNER-UP" : "THIRD PLACE")}</strong>
             <span>{rank === 1 ? "CHAMPION" : rank + (rank === 2 ? "ND" : "RD") + " PLACE"}</span>
             {showRewards && (
               <b className="wc-podium-prize">
@@ -532,7 +532,7 @@ export default function Tournament() {
         <section className="wc-tourney-results-title">
           <p className="wc-tourney-kicker">THE FINAL BELL HAS RUNG</p>
           <h1>THE PODIUM</h1>
-          <p>Eight? Four? Only three make the podium.</p>
+          <p>The fighters who earned the top three places.</p>
         </section>
         <Podium placements={tournament.placements} />
         <section className="wc-tourney-reward-receipt">
