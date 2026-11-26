@@ -950,7 +950,23 @@ const stunOptions = {
         </div>
       )}
       {!knockout && <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>}
-      {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: location.state })} onMainMenu={() => navigate("/")} />}
+      {isPaused && <BattlePauseMenu
+        tournamentMode={Boolean(levelConfig.tournament)}
+        onResume={() => setIsPaused(false)}
+        onRestart={resetBattle}
+        onCharacterSelect={() => navigate("/character-select", { state: location.state })}
+        onMainMenu={() => levelConfig.tournament
+          ? navigate("/tournament", {
+              state: {
+                tournament: levelConfig.tournament,
+                tournamentResult: {
+                  matchId: levelConfig.tournamentMatchId,
+                  won: false,
+                },
+              },
+            })
+          : navigate("/")}
+      />}
       {showRoundIntro && !knockout && (
         <RoundIntroOverlay
           roundNumber={roundNumber}
