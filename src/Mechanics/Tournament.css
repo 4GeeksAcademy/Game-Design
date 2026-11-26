@@ -1950,3 +1950,899 @@
     height: 40px;
   }
 }
+
+
+/* =========================================================
+   ROUND-BY-ROUND CHAMPIONSHIP BRACKET
+   Large character cards, vertical match list, and clear advancement forks.
+   ========================================================= */
+.wc-tournament-bracket {
+  gap: 12px;
+}
+
+.wc-tourney-bracket-title {
+  width: min(100%, 1160px);
+  margin-inline: auto;
+}
+
+.wc-tourney-rounds.wc-tourney-current-round {
+  width: min(100%, 1160px);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 8px 16px;
+  scrollbar-color: #98763f #171511;
+  scrollbar-width: thin;
+}
+
+.wc-tourney-current-round-title {
+  position: sticky;
+  z-index: 4;
+  top: 0;
+  flex: 0 0 42px;
+  justify-content: center;
+  gap: 18px;
+  padding: 6px 12px;
+  border: 1px solid rgba(214, 174, 93, .26);
+  border-radius: 7px;
+  background: linear-gradient(100deg, rgba(22, 19, 13, .98), rgba(35, 28, 17, .98), rgba(22, 19, 13, .98));
+  box-shadow: 0 8px 18px #0008;
+}
+
+.wc-tourney-current-round-title h2 {
+  color: #f7d98b;
+  font-size: clamp(.95rem, 1.5vw, 1.3rem);
+  font-weight: 1000;
+  letter-spacing: .2em;
+}
+
+.wc-tourney-round-matches.wc-tourney-current-round-matches {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 0 24px;
+}
+
+.wc-tourney-current-round .wc-tourney-match {
+  flex: 0 0 auto;
+  min-height: 0;
+  padding: 12px clamp(10px, 2vw, 22px) 14px;
+  border: 1px solid rgba(181, 148, 87, .42);
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse at 0% 50%, rgba(19, 213, 255, .06), transparent 38%),
+    linear-gradient(110deg, rgba(40, 34, 24, .97), rgba(13, 14, 13, .99) 52%, rgba(33, 25, 18, .97));
+  box-shadow: 0 12px 28px #0007, inset 0 1px #fff1;
+  animation: wcCurrentMatchEnter .5s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-tourney-current-round .wc-tourney-match:nth-child(2) { animation-delay: .12s; }
+.wc-tourney-current-round .wc-tourney-match:nth-child(3) { animation-delay: .24s; }
+.wc-tourney-current-round .wc-tourney-match:nth-child(4) { animation-delay: .36s; }
+
+.wc-tourney-current-round .wc-tourney-match.is-player-match {
+  border-color: rgba(19, 213, 255, .8);
+  box-shadow: inset 4px 0 #13d5ff, 0 0 24px rgba(19, 213, 255, .12), 0 12px 28px #0007;
+}
+
+.wc-tourney-current-round .wc-tourney-match-heading {
+  min-height: 20px;
+  padding: 0 3px 7px;
+  border-bottom: 1px solid #ffffff12;
+  color: #c2a66c;
+  font-size: .62rem;
+  letter-spacing: .15em;
+}
+
+.wc-tourney-current-round .wc-tourney-match-heading span:last-child {
+  color: #a5a08f;
+}
+
+.wc-tourney-current-round .wc-tourney-matchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 86px minmax(155px, .3fr);
+  align-items: stretch;
+  gap: clamp(8px, 1.8vw, 20px);
+  min-height: 0;
+  padding: 12px 0 4px;
+}
+
+.wc-tourney-fighter-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.wc-tourney-current-round .wc-tourney-fighter {
+  position: relative;
+  min-width: 0;
+  height: 156px;
+  min-height: 156px;
+  display: grid;
+  grid-template-columns: clamp(112px, 13vw, 158px) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 14px;
+  padding: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(176, 153, 110, .36);
+  border-radius: 7px;
+  background:
+    linear-gradient(100deg, rgba(33, 43, 36, .9), rgba(15, 18, 17, .98) 68%),
+    #101310;
+  box-shadow: inset 0 1px #ffffff12, 0 5px 15px #0006;
+  transition: border-color .2s ease, filter .2s ease, opacity .2s ease;
+}
+
+.wc-tourney-current-round .wc-tourney-fighter.player-entry {
+  border-color: #13d5ffad;
+  background: linear-gradient(100deg, rgba(8, 61, 72, .72), rgba(13, 19, 20, .98) 70%);
+  box-shadow: inset 3px 0 #13d5ff, 0 0 17px #13d5ff18;
+}
+
+.wc-tourney-current-round .wc-tourney-fighter.match-winner {
+  border-color: #e8c56e;
+  background: linear-gradient(100deg, rgba(83, 63, 27, .62), rgba(18, 18, 14, .98) 72%);
+  box-shadow: inset 3px 0 #f0cf7f, 0 0 18px #e6c66a1b;
+}
+
+.wc-tourney-current-round .wc-tourney-fighter.eliminated {
+  opacity: .42;
+  filter: grayscale(1);
+}
+
+.wc-tourney-current-round .wc-tourney-portrait {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  flex: initial;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border: 1px solid rgba(222, 188, 117, .3);
+  border-radius: 4px;
+  color: #e8cf93;
+  background:
+    radial-gradient(ellipse at 50% 90%, rgba(225, 188, 100, .19), transparent 65%),
+    linear-gradient(180deg, #20251f, #090d0b);
+  font-size: 3.4rem;
+}
+
+.wc-tourney-current-round .wc-tourney-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 7px 8px #000c);
+}
+
+.wc-tourney-current-round .wc-tourney-portrait.is-mystery {
+  background: radial-gradient(circle at 50% 45%, #70572a, #1b1811 72%);
+}
+
+.wc-tourney-fighter-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 10px 8px 0;
+}
+
+.wc-tourney-fighter-seed {
+  color: #b29b6e;
+  font-size: .61rem;
+  font-weight: 950;
+  letter-spacing: .16em;
+}
+
+.wc-tourney-fighter-name {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  color: #fff3d2;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(1.05rem, 2vw, 1.65rem);
+  font-weight: 1000;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+.wc-tourney-fighter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wc-tourney-current-round .wc-tourney-fighter-tags small {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 4px 9px;
+  border: 1px solid #13d5ff75;
+  border-radius: 4px;
+  color: #8ceeff;
+  background: #13d5ff12;
+  font-size: .57rem;
+  font-weight: 1000;
+  letter-spacing: .12em;
+}
+
+.wc-tourney-current-round .wc-tourney-fighter.match-winner .wc-tourney-fighter-tags small {
+  border-color: #e9cb80;
+  color: #f5d98d;
+  background: #e9cb8017;
+}
+
+.wc-tourney-versus {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 25px;
+  color: #d6b66e;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .72rem;
+  font-weight: 1000;
+  letter-spacing: .18em;
+}
+
+.wc-tourney-versus::before,
+.wc-tourney-versus::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c09b5a, transparent);
+}
+
+.wc-tourney-versus span {
+  padding: 0 13px;
+}
+
+.wc-tourney-bracket-fork {
+  position: relative;
+  min-width: 0;
+  min-height: 322px;
+}
+
+.wc-tourney-bracket-fork i {
+  position: absolute;
+  display: block;
+  background: linear-gradient(90deg, #8e713d, #ddbd75);
+  box-shadow: 0 0 7px #d5ae5d33;
+}
+
+.wc-tourney-bracket-fork .fork-upper {
+  top: 25%;
+  left: 0;
+  width: 35%;
+  height: 2px;
+}
+
+.wc-tourney-bracket-fork .fork-lower {
+  bottom: 25%;
+  left: 0;
+  width: 35%;
+  height: 2px;
+}
+
+.wc-tourney-bracket-fork .fork-stem {
+  top: 25%;
+  bottom: 25%;
+  left: 35%;
+  width: 2px;
+  background: linear-gradient(180deg, #ddbd75, #8e713d);
+}
+
+.wc-tourney-bracket-fork .fork-out {
+  top: calc(50% - 1px);
+  left: 35%;
+  right: 0;
+  height: 2px;
+}
+
+.wc-tourney-advance-slot {
+  min-width: 0;
+  min-height: 322px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 9px;
+  border: 1px dashed rgba(201, 168, 100, .4);
+  border-radius: 7px;
+  background: linear-gradient(145deg, rgba(28, 25, 19, .9), rgba(9, 12, 10, .96));
+  text-align: center;
+}
+
+.wc-tourney-advance-slot > span {
+  color: #bba16b;
+  font-size: .6rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.wc-tourney-advance-portrait {
+  width: min(100%, 130px);
+  height: 155px;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border: 1px solid #d5b56f88;
+  border-radius: 5px;
+  background: radial-gradient(ellipse at 50% 85%, #d5b56f2a, transparent 65%), #13150f;
+}
+
+.wc-tourney-advance-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.wc-tourney-advance-slot > strong {
+  color: #f2d98e;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .95rem;
+  font-weight: 1000;
+}
+
+.wc-tourney-advance-slot > small {
+  color: #a78a50;
+  font-size: .54rem;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+.wc-tourney-advance-pending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: min(100%, 130px);
+  height: 155px;
+  border: 1px solid #a58a5640;
+  border-radius: 5px;
+  color: #d6b66e;
+  background: radial-gradient(circle, #6a542b55, #11120e 72%);
+}
+
+.wc-tourney-advance-pending span {
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 3.1rem;
+  font-weight: 1000;
+}
+
+.wc-tourney-advance-pending strong {
+  color: #e1ca91;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .8rem;
+}
+
+.wc-tourney-advance-pending small {
+  color: #9a8968;
+  font-size: .48rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+
+.wc-tourney-current-round .wc-tourney-fight-button {
+  min-height: 42px;
+  margin-top: 9px;
+  padding: 8px 20px;
+  border: 1px solid #a5f3ff;
+  border-radius: 5px;
+  color: #05141b;
+  background: linear-gradient(105deg, #83efff, #13b9e8);
+  box-shadow: 0 0 18px #13d5ff32;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .76rem;
+  font-weight: 1000;
+  letter-spacing: .12em;
+}
+
+.wc-tourney-current-round .wc-tourney-fight-button:hover {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+}
+
+@keyframes wcCurrentMatchEnter {
+  from { opacity: 0; transform: translateY(22px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Round-end presentation: eliminators -> next-round pairings -> ready prompt. */
+.wc-round-transition {
+  position: fixed;
+  z-index: 9500;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 20px;
+  background:
+    radial-gradient(ellipse at 50% 10%, rgba(176, 127, 46, .28), transparent 54%),
+    rgba(3, 6, 8, .94);
+  backdrop-filter: blur(12px);
+  animation: wcRoundTransitionFade .35s ease both;
+}
+
+.wc-round-transition-panel {
+  width: min(1040px, 100%);
+  max-height: min(92vh, 940px);
+  overflow-y: auto;
+  padding: clamp(20px, 3vw, 38px);
+  border: 1px solid rgba(218, 183, 111, .72);
+  border-radius: 12px 4px;
+  color: #f4f0e5;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(121, 87, 38, .35), transparent 52%),
+    linear-gradient(145deg, #1a1a14, #090d0c 65%, #11100b);
+  box-shadow: 0 30px 100px #000e, 0 0 0 5px #d0a85a16, 0 0 38px #d0a85a28;
+  text-align: center;
+  animation: wcRoundPanelEnter .5s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-round-transition-kicker {
+  margin: 0 0 8px;
+  color: #e0be72;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .68rem;
+  font-weight: 950;
+  letter-spacing: .2em;
+}
+
+.wc-round-transition-panel > h2,
+.wc-round-ready h2 {
+  margin: 0;
+  color: #ffe5a1;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(2rem, 6vw, 4.2rem);
+  font-weight: 1000;
+  letter-spacing: .09em;
+  text-shadow: 0 0 22px #c79b4e55, 3px 3px #5a3c17;
+}
+
+.wc-round-transition-caption {
+  margin: 8px 0 20px;
+  color: #b9b09e;
+  font-size: .75rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+.wc-round-eliminators {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(690px, 100%);
+  margin: 0 auto 16px;
+}
+
+.wc-round-eliminator {
+  display: grid;
+  grid-template-columns: 38px 66px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 76px;
+  padding: 5px 12px 5px 6px;
+  border: 1px solid #70434a88;
+  border-radius: 6px;
+  background: linear-gradient(100deg, #3a171d, #151310 78%);
+  text-align: left;
+  animation: wcEliminatorReveal .55s calc(var(--reveal-order, 0) * .22s) cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-round-eliminator-rank {
+  color: #c99e71;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 1000;
+  text-align: center;
+}
+
+.wc-round-eliminator img {
+  width: 62px;
+  height: 66px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: grayscale(.75) drop-shadow(0 3px 5px #0009);
+}
+
+.wc-round-eliminator strong {
+  overflow: hidden;
+  color: #f2dfd0;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .95rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-round-eliminator small {
+  color: #ff8c9d;
+  font-size: .57rem;
+  font-weight: 1000;
+  letter-spacing: .14em;
+}
+
+.wc-round-transition-progress {
+  display: inline-block;
+  margin-top: 4px;
+  color: #a78e5c;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .6rem;
+  font-weight: 900;
+  letter-spacing: .18em;
+  animation: wcRoundProgressPulse 1s ease-in-out infinite alternate;
+}
+
+.wc-round-standings {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  width: min(820px, 100%);
+  margin: 0 auto 16px;
+}
+
+.wc-round-standing-match {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 10px;
+  min-height: 108px;
+  padding: 8px;
+  border: 1px solid #96783d88;
+  border-radius: 7px;
+  background: linear-gradient(105deg, #1e2920, #10150f 55%, #201a10);
+  animation: wcStandingReveal .55s calc(var(--reveal-order, 0) * .18s) cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-round-standing-fighter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  text-align: left;
+}
+
+.wc-round-standing-fighter img {
+  flex: 0 0 auto;
+  width: 76px;
+  height: 88px;
+  object-fit: contain;
+  object-position: center bottom;
+  border: 1px solid #d7b86e55;
+  border-radius: 4px;
+  background: #0d120d;
+}
+
+.wc-round-standing-fighter strong {
+  overflow: hidden;
+  color: #f2e5bf;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .88rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+}
+
+.wc-round-standing-match > span {
+  color: #e2c273;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .9rem;
+  font-weight: 1000;
+}
+
+.wc-round-standing-fork {
+  position: relative;
+  height: 68px;
+}
+
+.wc-round-standing-fork i {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #c9a85e;
+  box-shadow: 0 0 8px #c9a85e55;
+}
+
+.wc-round-standing-fork i:first-child { top: 10px; }
+.wc-round-standing-fork i:nth-child(2) { top: 56px; }
+.wc-round-standing-fork i:last-child {
+  top: 10px;
+  left: 50%;
+  width: 2px;
+  height: 48px;
+  background: linear-gradient(180deg, #c9a85e, #8d6c37);
+}
+
+.wc-round-ready {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: clamp(18px, 4vw, 48px) 10px;
+  animation: wcRoundReadyEnter .8s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-round-ready-emblem {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border: 1px solid #e3c579;
+  border-radius: 50%;
+  color: #ffdf87;
+  background: radial-gradient(circle, #76602e, #18140c 72%);
+  box-shadow: 0 0 28px #d0a85a55, inset 0 0 16px #f9e0a333;
+  font-size: 2.8rem;
+}
+
+.wc-round-ready .wc-round-transition-caption {
+  margin: 0 0 8px;
+}
+
+.wc-round-ready button {
+  min-height: 52px;
+  padding: 12px 26px;
+  border: 1px solid #fff0ab;
+  border-radius: 6px 3px;
+  color: #151208;
+  background: linear-gradient(110deg, #fff0a1, #d9a83e);
+  box-shadow: 0 0 22px #e2bb5a44;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .82rem;
+  font-weight: 1000;
+  letter-spacing: .14em;
+  cursor: pointer;
+  transition: transform .16s ease, filter .16s ease;
+}
+
+.wc-round-ready button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.wc-round-ready button span {
+  margin-left: 12px;
+  font-size: 1rem;
+}
+
+@keyframes wcRoundTransitionFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes wcRoundPanelEnter {
+  from { opacity: 0; transform: translateY(20px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes wcEliminatorReveal {
+  from { opacity: 0; transform: translateX(-24px) scale(.97); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes wcStandingReveal {
+  from { opacity: 0; transform: translateY(18px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes wcRoundReadyEnter {
+  0% { opacity: 0; transform: scale(.75); }
+  65% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes wcRoundProgressPulse {
+  from { opacity: .55; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .wc-tourney-current-round .wc-tourney-matchup {
+    grid-template-columns: minmax(0, 1fr) 58px minmax(125px, .3fr);
+    gap: 8px;
+  }
+
+  .wc-tourney-current-round .wc-tourney-fighter {
+    grid-template-columns: 112px minmax(0, 1fr);
+    height: 140px;
+    min-height: 140px;
+    gap: 10px;
+  }
+
+  .wc-tourney-bracket-fork,
+  .wc-tourney-advance-slot {
+    min-height: 290px;
+  }
+
+  .wc-tourney-advance-portrait,
+  .wc-tourney-advance-pending {
+    height: 128px;
+  }
+}
+
+@media (max-width: 640px) {
+  .wc-tourney-bracket-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .wc-tourney-current-round-title {
+    position: static;
+    flex-wrap: wrap;
+    min-height: 54px;
+    gap: 5px 10px;
+  }
+
+  .wc-tourney-current-round .wc-tourney-matchup {
+    grid-template-columns: minmax(0, 1fr) 30px minmax(88px, .33fr);
+    gap: 5px;
+  }
+
+  .wc-tourney-current-round .wc-tourney-fighter {
+    grid-template-columns: 88px minmax(0, 1fr);
+    height: 118px;
+    min-height: 118px;
+    gap: 7px;
+    padding: 5px;
+  }
+
+  .wc-tourney-current-round .wc-tourney-portrait {
+    min-height: 106px;
+  }
+
+  .wc-tourney-fighter-meta {
+    gap: 5px;
+  }
+
+  .wc-tourney-fighter-seed {
+    font-size: .44rem;
+    letter-spacing: .08em;
+  }
+
+  .wc-tourney-fighter-name {
+    font-size: .9rem;
+  }
+
+  .wc-tourney-current-round .wc-tourney-fighter-tags small {
+    min-height: 18px;
+    padding: 3px 5px;
+    font-size: .45rem;
+  }
+
+  .wc-tourney-bracket-fork {
+    min-height: 244px;
+  }
+
+  .wc-tourney-advance-slot {
+    min-height: 244px;
+    gap: 5px;
+    padding: 5px 3px;
+  }
+
+  .wc-tourney-advance-slot > span {
+    font-size: .44rem;
+  }
+
+  .wc-tourney-advance-portrait,
+  .wc-tourney-advance-pending {
+    height: 100px;
+  }
+
+  .wc-tourney-advance-slot > strong {
+    font-size: .69rem;
+    overflow-wrap: anywhere;
+  }
+
+  .wc-tourney-advance-slot > small {
+    font-size: .4rem;
+  }
+
+  .wc-tourney-current-round .wc-tourney-fight-button {
+    width: 100%;
+    min-height: 38px;
+    font-size: .65rem;
+  }
+
+  .wc-round-transition {
+    padding: 9px;
+  }
+
+  .wc-round-transition-panel {
+    padding: 16px 11px;
+  }
+
+  .wc-round-eliminator {
+    grid-template-columns: 26px 54px minmax(0, 1fr) auto;
+    gap: 7px;
+    min-height: 65px;
+    padding-right: 7px;
+  }
+
+  .wc-round-eliminator img {
+    width: 52px;
+    height: 56px;
+  }
+
+  .wc-round-eliminator strong {
+    font-size: .76rem;
+  }
+
+  .wc-round-eliminator small {
+    font-size: .44rem;
+  }
+
+  .wc-round-standing-match {
+    grid-template-columns: minmax(0, 1fr) 26px minmax(0, 1fr);
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .wc-round-standing-fighter {
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+  }
+
+  .wc-round-standing-fighter img {
+    width: 65px;
+    height: 72px;
+  }
+
+  .wc-round-standing-fighter strong {
+    max-width: 100%;
+    font-size: .66rem;
+  }
+
+  .wc-round-standing-match > span {
+    font-size: .7rem;
+  }
+
+  .wc-round-standing-fork {
+    display: none;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 641px) {
+  .wc-tourney-current-round .wc-tourney-fighter {
+    height: 132px;
+    min-height: 132px;
+  }
+
+  .wc-tourney-current-round .wc-tourney-matchup {
+    gap: 10px;
+  }
+
+  .wc-tourney-bracket-fork,
+  .wc-tourney-advance-slot {
+    min-height: 274px;
+  }
+
+  .wc-tourney-advance-portrait,
+  .wc-tourney-advance-pending {
+    height: 124px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-tourney-current-round .wc-tourney-match,
+  .wc-round-transition *,
+  .wc-round-transition *::before,
+  .wc-round-transition *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
