@@ -1286,3 +1286,47 @@
     font-size: .88rem;
   }
 }
+
+/* Vertical connector spine keeps the match list reading as one bracket. */
+.wc-tourney-round-matches {
+  position: relative;
+  padding-left: 17px;
+}
+.wc-tourney-round-matches::before {
+  position: absolute;
+  content: "";
+  top: 7px;
+  bottom: 7px;
+  left: 5px;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(222, 183, 103, .68) 12%, rgba(222, 183, 103, .48) 88%, transparent);
+}
+.wc-tourney-match::before {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: -13px;
+  width: 12px;
+  height: 1px;
+  background: rgba(222, 183, 103, .55);
+}
+.wc-podium-bonus {
+  margin-top: -2px;
+  color: #d4b66f;
+  font-size: .43rem;
+  font-style: normal;
+  font-weight: 950;
+  letter-spacing: .1em;
+}
+.wc-tournament-results .wc-tourney-round-matches {
+  padding-left: 0;
+}
+@media (max-width: 700px) {
+  .wc-tourney-round-matches {
+    padding-left: 14px;
+  }
+  .wc-tourney-match::before {
+    left: -10px;
+    width: 9px;
+  }
+}
