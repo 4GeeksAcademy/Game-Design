@@ -6,7 +6,7 @@ import {
 import { getAudioSettings, updateAudioSettings } from "../audio/audioManager.js";
 import "./BattlePauseMenu.css";
 
-export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect, onMainMenu }) {
+export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect, onMainMenu, tournamentMode = false }) {
   const [tab, setTab] = useState("pause");
   const [keybinds, setKeybinds] = useState(() => loadKeybinds());
   const [audio, setAudio] = useState(() => getAudioSettings());
@@ -79,9 +79,11 @@ export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect
       {tab === "pause" && <div className="battle-pause-actions">
         <button className="primary" onClick={onResume}>RESUME MATCH</button>
         <button onClick={() => setTab("settings")}>SETTINGS</button>
-        <button onClick={onRestart}>RESTART MATCH</button>
-        <button onClick={onCharacterSelect}>CHARACTER SELECT</button>
-        <button className="danger" onClick={onMainMenu}>MAIN MENU</button>
+        {!tournamentMode && <button onClick={onRestart}>RESTART MATCH</button>}
+        {!tournamentMode && <button onClick={onCharacterSelect}>CHARACTER SELECT</button>}
+        <button className="danger" onClick={onMainMenu}>
+          {tournamentMode ? "FORFEIT TOURNAMENT" : "MAIN MENU"}
+        </button>
       </div>}
       {tab === "settings" && <div className="battle-pause-settings battle-pause-all-settings">
         <p>Choose a binding and press the key you want. Navigation keys may overlap; attacks and combat actions must remain unique.</p>
