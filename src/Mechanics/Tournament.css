@@ -1636,3 +1636,21 @@
   text-shadow: 0 1px 5px #000;
   transform: translate(-50%,-50%);
 }
+
+.wc-tourney-primary-action.is-loading::after,
+.wc-tourney-reveal-button:disabled::after {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 10px;
+  border: 2px solid rgba(31,23,10,.25);
+  border-top-color: #281d0a;
+  border-radius: 50%;
+  content: "";
+  vertical-align: -1px;
+  animation: wcRevealSpin .65s linear infinite;
+}
+.wc-tourney-reveal-button:disabled::after {
+  border-color: rgba(255,236,190,.2);
+  border-top-color: #ffe6a0;
+}
