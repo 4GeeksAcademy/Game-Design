@@ -784,6 +784,7 @@ export default function Tournament() {
     sourceTournament.displayRoundIndex = Math.max(0, nextRoundIndex - 1);
     publishTournament(sourceTournament);
     await new Promise((resolve) => window.setTimeout(resolve, 1500));
+    if (skipCpuQueueRef.current) return;
 
     setRoundTransition({
       phase: "eliminators",
@@ -818,7 +819,7 @@ export default function Tournament() {
             ? { ...current, phase: "standings" }
             : { ...current, revealIndex: current.revealIndex + 1 };
         });
-      }, 900);
+      }, lastEntry ? 1750 : 1450);
       return () => window.clearTimeout(timer);
     }
 
