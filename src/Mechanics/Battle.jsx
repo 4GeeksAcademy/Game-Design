@@ -1069,6 +1069,7 @@ const stunOptions = {
               tournamentResult: {
                 matchId: levelConfig.tournamentMatchId,
                 won: knockout.defeatedTeam === "opponent",
+                placementType: levelConfig.tournamentPlacement?.type ?? null,
               },
             },
           }) : undefined}
