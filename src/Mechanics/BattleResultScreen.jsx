@@ -71,10 +71,7 @@ export default function BattleResultScreen({
 
       <div className="wild-result-actions">
         {onTournamentComplete ? (
-          <>
-            <button type="button" className="wild-result-rematch" onClick={onTournamentComplete}>RETURN TO BRACKET ▶</button>
-            <button type="button" className="wild-result-menu" onClick={() => navigate("/")}>⌂ MAIN MENU</button>
-          </>
+          <button type="button" className="wild-result-rematch" onClick={onTournamentComplete}>RETURN TO BRACKET ▶</button>
         ) : (
           <>
             <button type="button" className="wild-result-rematch" onClick={onRematch}>↻ REMATCH</button>
