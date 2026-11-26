@@ -413,7 +413,7 @@ function RoundTransition({ transition, onContinue }) {
   );
 }
 
-function TournamentStartPrompt({ tournament, previewFighters, revealing, onStart }) {
+function TournamentStartPrompt({ tournament, previewFighters, revealing, onStart, onExit }) {
   const firstRound = tournament.rounds[0] || [];
 
   return (
@@ -472,6 +472,9 @@ function TournamentStartPrompt({ tournament, previewFighters, revealing, onStart
           <span>{revealing ? "DRAWING CONTENDERS…" : "ONE CHAMPION WILL CLAIM THE CROWN"}</span>
           <button type="button" onClick={onStart} disabled={revealing}>
             {revealing ? <><i className="wc-tourney-start-spinner" /> DRAWING THE BRACKET…</> : <>START TOURNAMENT <span>▶</span></>}
+          </button>
+          <button type="button" className="wc-tourney-start-cancel" onClick={onExit} disabled={revealing}>
+            ← BACK TO MENU
           </button>
         </div>
       </section>
@@ -922,6 +925,8 @@ export default function Tournament() {
 
   useEffect(() => () => {
     window.clearInterval(revealIntervalRef.current);
+    roundTransitionResolveRef.current?.();
+    roundTransitionResolveRef.current = null;
   }, []);
 
   useEffect(() => {
@@ -1400,6 +1405,7 @@ export default function Tournament() {
             previewFighters={revealPreview}
             revealing={revealing}
             onStart={startTournament}
+            onExit={exitUnstartedTournament}
           />
         )}
 
