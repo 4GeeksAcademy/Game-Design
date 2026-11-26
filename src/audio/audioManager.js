@@ -341,6 +341,41 @@ export function playComboSound(comboCount = 3) {
   else play();
 }
 
+// Loud, original arcade buzzer inspired by live elimination-show buzzers.
+export function playAGTBuzzerSound() {
+  const ctx = ensureAudio();
+  if (!ctx || settings.muted || settings.effects <= 0 || !masterGain) return;
+
+  const play = () => {
+    if (settings.muted || settings.effects <= 0 || !masterGain) return;
+    const now = ctx.currentTime;
+    const buzzLayers = [
+      { frequency: 118, delay: 0, duration: 0.56, volume: 0.15 },
+      { frequency: 94, delay: 0.025, duration: 0.52, volume: 0.12 },
+      { frequency: 72, delay: 0.075, duration: 0.44, volume: 0.10 },
+    ];
+
+    buzzLayers.forEach(({ frequency, delay, duration, volume }) => {
+      const start = now + delay;
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = "sawtooth";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.78, start + duration);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume * settings.effects), start + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(masterGain);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.035);
+    });
+  };
+
+  if (ctx.state === "suspended") ctx.resume().then(play).catch(() => {});
+  else play();
+}
+
 export function playUISound(kind = "click") {
   if (kind === "click") {
     playGameSound("click");
