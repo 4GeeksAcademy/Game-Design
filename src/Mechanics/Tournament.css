@@ -3633,3 +3633,23 @@
     height: clamp(135px, 21vh, 180px);
   }
 }
+
+
+.wc-tourney-start-footer .wc-tourney-start-cancel {
+  width: auto;
+  min-height: 32px;
+  padding: 5px 14px;
+  border: 1px solid #9d875c66;
+  color: #b8aa8d;
+  background: rgba(17, 17, 13, .7);
+  box-shadow: none;
+  font-size: .55rem;
+  letter-spacing: .12em;
+}
+
+.wc-tourney-start-footer .wc-tourney-start-cancel:hover:not(:disabled) {
+  border-color: #d8bd7c;
+  color: #f0dfb7;
+  background: rgba(49, 40, 23, .9);
+  box-shadow: none;
+}
