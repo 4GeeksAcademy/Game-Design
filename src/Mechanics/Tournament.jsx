@@ -1048,6 +1048,7 @@ export default function Tournament() {
       const nextRoundIndex = roundIndex + 1;
       if (
         nextRoundIndex < draft.rounds.length &&
+        round.every((match) => Boolean(match.winner)) &&
         shouldPresentEliminationList(draft.size, roundIndex) &&
         draft.lastTransitionRoundIndex !== roundIndex
       ) {
@@ -1123,6 +1124,7 @@ export default function Tournament() {
       const nextRoundIndex = roundIndex + 1;
       if (
         nextRoundIndex < draft.rounds.length &&
+        round.every((match) => Boolean(match.winner)) &&
         shouldPresentEliminationList(draft.size, roundIndex) &&
         draft.lastTransitionRoundIndex !== roundIndex
       ) {
