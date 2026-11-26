@@ -4403,3 +4403,472 @@
     font-size: .43rem;
   }
 }
+
+
+/* Championship bracket refresh: richer matchup cards and a clear winner fork. */
+.wc-tournament-bracket .wc-tourney-bracket-title {
+  position: relative;
+  width: min(1180px, 100%);
+  align-self: center;
+  padding: 13px 17px;
+  border: 1px solid rgba(218, 181, 103, .32);
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 12% 50%, rgba(226, 183, 91, .13), transparent 43%),
+    linear-gradient(110deg, rgba(33, 28, 20, .98), rgba(10, 12, 12, .98) 56%, rgba(19, 31, 32, .96));
+  box-shadow: 0 12px 30px #0007, inset 0 1px #fff1, inset 0 -1px rgba(228, 186, 95, .13);
+}
+
+.wc-tournament-bracket .wc-tourney-bracket-title > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding: 5px 8px;
+}
+
+.wc-tournament-bracket .wc-tourney-bracket-title h1 {
+  max-width: 680px;
+  font-size: clamp(1.3rem, 2.8vw, 2.4rem);
+  letter-spacing: .12em;
+}
+
+.wc-tournament-bracket .wc-tourney-bracket-title > div:first-child::after {
+  content: "THE ROAD TO THE CROWN · EVERY WIN MOVES YOU FORWARD";
+  color: #9f906d;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .48rem;
+  font-weight: 900;
+  letter-spacing: .15em;
+}
+
+.wc-tournament-bracket .wc-tourney-player-card {
+  width: clamp(190px, 19vw, 226px);
+  height: clamp(205px, 23vh, 238px);
+  border-radius: 12px 5px 12px 5px;
+  box-shadow:
+    0 0 0 4px rgba(19, 213, 255, .07),
+    0 15px 28px #0009,
+    inset 0 0 22px rgba(19, 213, 255, .09);
+}
+
+.wc-tourney-single-round {
+  width: min(1180px, 100%);
+  padding: 4px 10px 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color: #a17c42 #15120d;
+}
+
+.wc-tourney-single-round .wc-tourney-round {
+  gap: 13px;
+}
+
+.wc-tourney-single-round .wc-tourney-round-title {
+  position: relative;
+  flex: 0 0 52px;
+  min-height: 52px;
+  border: 1px solid rgba(218, 181, 103, .4);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(51, 39, 20, .95), rgba(19, 18, 15, .98) 46%, rgba(42, 32, 17, .95));
+  box-shadow: 0 7px 18px #0007, inset 0 1px #fff1;
+}
+
+.wc-tourney-single-round .wc-tourney-round-title span,
+.wc-tourney-single-round .wc-tourney-round-title small {
+  color: #c0a46b;
+  font-size: .54rem;
+}
+
+.wc-tourney-single-round .wc-tourney-round-title h2 {
+  color: #ffe3a1;
+  font-size: clamp(.9rem, 1.6vw, 1.22rem);
+  letter-spacing: .2em;
+  text-shadow: 0 0 18px rgba(235, 190, 103, .2);
+}
+
+.wc-tourney-single-round .wc-tourney-round-matches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(245px, auto);
+  align-items: stretch;
+  gap: 15px;
+  min-height: 0;
+  padding: 3px 0 10px;
+}
+
+.wc-tourney-single-round .wc-tourney-match {
+  min-height: 245px;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 12px 13px 11px;
+  border: 1px solid rgba(203, 165, 91, .38);
+  border-radius: 11px;
+  background:
+    radial-gradient(ellipse at 50% -15%, rgba(218, 177, 93, .12), transparent 56%),
+    linear-gradient(145deg, rgba(39, 34, 25, .98), rgba(11, 13, 13, .99) 56%, rgba(25, 30, 28, .98));
+  box-shadow: 0 12px 28px #0008, inset 0 1px #fff1, inset 0 -1px rgba(255, 220, 143, .08);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.wc-tourney-single-round .wc-tourney-match:hover {
+  border-color: rgba(230, 195, 117, .68);
+  box-shadow: 0 15px 31px #0009, 0 0 18px rgba(223, 181, 93, .08), inset 0 1px #fff1;
+  transform: translateY(-2px);
+}
+
+.wc-tourney-single-round .wc-tourney-match.is-player-match {
+  border-color: rgba(19, 213, 255, .72);
+  background:
+    radial-gradient(ellipse at 50% -15%, rgba(19, 213, 255, .16), transparent 58%),
+    linear-gradient(145deg, rgba(17, 46, 49, .98), rgba(10, 14, 15, .99) 60%, rgba(19, 29, 29, .98));
+  box-shadow: 0 12px 28px #0009, 0 0 22px rgba(19, 213, 255, .1), inset 3px 0 #13d5ff;
+}
+
+.wc-tourney-single-round .wc-tourney-match-heading {
+  min-height: 18px;
+  color: #b8a071;
+  font-size: .55rem;
+  letter-spacing: .13em;
+}
+
+.wc-tourney-single-round .wc-tourney-match-heading span:last-child {
+  padding: 3px 7px;
+  border: 1px solid rgba(216, 182, 110, .28);
+  border-radius: 3px;
+  color: #e2c783;
+  background: rgba(12, 12, 10, .58);
+  font-size: .45rem;
+}
+
+.wc-tourney-single-round .wc-tourney-matchup {
+  grid-template-columns: minmax(0, 1fr) 35px minmax(0, 1fr);
+  gap: 9px;
+  align-items: stretch;
+}
+
+.wc-tourney-single-round .wc-tourney-fighter {
+  height: 105px;
+  min-height: 105px;
+  grid-template-columns: minmax(70px, 36%) minmax(0, 1fr);
+  gap: 4px 8px;
+  padding: 6px;
+  border: 1px solid rgba(192, 171, 124, .24);
+  border-radius: 7px;
+  background: linear-gradient(145deg, rgba(9, 12, 12, .92), rgba(23, 22, 18, .92));
+  box-shadow: inset 0 1px #fff1, 0 5px 12px #0005;
+}
+
+.wc-tourney-single-round .wc-tourney-fighter.player-entry {
+  border-color: rgba(19, 213, 255, .55);
+  box-shadow: inset 3px 0 #13d5ff, 0 0 13px rgba(19, 213, 255, .08);
+}
+
+.wc-tourney-single-round .wc-tourney-fighter.match-winner {
+  border-color: rgba(255, 218, 125, .85);
+  background: linear-gradient(145deg, rgba(76, 58, 25, .58), rgba(22, 20, 14, .94));
+  box-shadow: inset 0 0 18px rgba(239, 194, 98, .11), 0 0 13px rgba(238, 194, 99, .12);
+}
+
+.wc-tourney-single-round .wc-tourney-portrait {
+  height: 91px;
+  border: 1px solid rgba(223, 188, 111, .2);
+  border-radius: 5px;
+}
+
+.wc-tourney-single-round .wc-tourney-portrait img {
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.wc-tourney-single-round .wc-tourney-fighter-name {
+  color: #fff2d8;
+  font-size: clamp(.62rem, .85vw, .8rem);
+  line-height: 1.15;
+  white-space: normal;
+}
+
+.wc-tourney-single-round .wc-tourney-fighter small {
+  justify-self: start;
+  padding: 3px 6px;
+  border-radius: 3px;
+  color: #f4d68f;
+  background: rgba(119, 88, 37, .2);
+  font-size: .44rem;
+}
+
+/* Two upper branches meet and feed a single advancing-winner card below. */
+.wc-tourney-advance-fork {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-top: 24px;
+}
+
+.wc-tourney-fork-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 25px;
+  pointer-events: none;
+}
+
+.wc-tourney-fork-lines i {
+  position: absolute;
+  display: block;
+  background: linear-gradient(180deg, #f1d28b, #9a7137);
+  box-shadow: 0 0 9px rgba(228, 183, 92, .32);
+}
+
+.wc-tourney-fork-lines .fork-branch {
+  top: 0;
+  width: 2px;
+  height: 10px;
+  transform-origin: top center;
+}
+
+.wc-tourney-fork-lines .fork-branch-left { left: 25%; }
+.wc-tourney-fork-lines .fork-branch-right { left: 75%; }
+
+.wc-tourney-fork-lines .fork-bridge {
+  top: 9px;
+  left: 25%;
+  width: 50%;
+  height: 2px;
+  transform-origin: center;
+}
+
+.wc-tourney-fork-lines .fork-stem {
+  top: 9px;
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 15px;
+  transform-origin: top center;
+}
+
+.wc-tourney-advance-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: min(88%, 370px);
+  min-height: 57px;
+  padding: 7px 12px;
+  border: 1px dashed rgba(220, 183, 104, .4);
+  border-radius: 6px;
+  color: #b5a37d;
+  background: linear-gradient(100deg, rgba(17, 17, 14, .98), rgba(29, 25, 17, .98));
+  box-shadow: inset 0 1px #fff1, 0 5px 13px #0005;
+}
+
+.wc-tourney-advance-card-crown {
+  color: #e2c078;
+  font-size: 1.4rem;
+  text-shadow: 0 0 12px rgba(234, 190, 99, .25);
+}
+
+.wc-tourney-advance-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wc-tourney-advance-card > div small,
+.wc-tourney-advance-card-label {
+  color: #a28b5b;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .44rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+}
+
+.wc-tourney-advance-card > div strong {
+  color: #e8d7ad;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .72rem;
+  font-weight: 1000;
+  letter-spacing: .1em;
+}
+
+.wc-tourney-advance-card.has-winner {
+  justify-content: flex-start;
+  border: 1px solid rgba(245, 205, 116, .75);
+  background:
+    radial-gradient(ellipse at 7% 50%, rgba(237, 194, 96, .16), transparent 48%),
+    linear-gradient(100deg, rgba(56, 43, 22, .98), rgba(17, 16, 13, .98));
+  box-shadow: 0 0 15px rgba(226, 176, 78, .13), inset 0 1px #fff2;
+  animation: wcTourneyWinnerCardEnter .65s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-tourney-advance-card.has-winner img {
+  flex: 0 0 43px;
+  width: 43px;
+  height: 49px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 3px 6px #000b);
+}
+
+.wc-tourney-advance-card.has-winner .wc-tourney-advance-card-label {
+  align-self: flex-start;
+  color: #f1d58f;
+}
+
+.wc-tourney-advance-card.has-winner > div strong {
+  color: #fff0bf;
+  font-size: .78rem;
+}
+
+.wc-tourney-advance-card.has-winner > div small {
+  color: #d2b36f;
+}
+
+@keyframes wcTourneyWinnerCardEnter {
+  from { opacity: .35; transform: translateY(-5px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.wc-tourney-single-round .wc-tourney-fight-button {
+  min-height: 32px;
+  margin-top: 1px;
+  padding: 5px 18px;
+  border-radius: 4px;
+  font-size: .61rem !important;
+  box-shadow: 0 5px 14px rgba(217, 172, 84, .15);
+}
+
+.wc-tourney-single-round .wc-tourney-match.is-player-match .wc-tourney-fight-button {
+  border-color: #79eaff;
+  background: linear-gradient(90deg, #c9f8ff, #4bb9ce 65%, #287f91);
+  box-shadow: 0 0 16px rgba(19, 213, 255, .18), 0 5px 14px #0005;
+}
+
+.wc-tourney-single-round .wc-tourney-match.is-player-match .wc-tourney-fight-button:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 0 24px rgba(19, 213, 255, .3);
+}
+
+@media (max-width: 900px) {
+  .wc-tourney-single-round .wc-tourney-round-matches {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .wc-tournament-bracket .wc-tourney-bracket-title {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .wc-tournament-bracket .wc-tourney-player-card {
+    align-self: flex-start;
+    width: min(100%, 320px);
+    height: 220px;
+  }
+
+  .wc-tourney-single-round {
+    padding: 3px 2px 12px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-round-title {
+    flex-wrap: wrap;
+    gap: 4px 9px;
+    min-height: 47px;
+    flex-basis: 47px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-match {
+    min-height: 0;
+    padding: 10px 8px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-matchup {
+    grid-template-columns: minmax(0, 1fr) 27px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-fighter {
+    height: 92px;
+    min-height: 92px;
+    grid-template-columns: minmax(52px, 35%) minmax(0, 1fr);
+    gap: 3px 5px;
+    padding: 4px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-portrait {
+    height: 82px;
+  }
+
+  .wc-tourney-advance-card {
+    width: 94%;
+    min-height: 53px;
+    padding: 6px 8px;
+  }
+
+  .wc-tourney-advance-card.has-winner img {
+    width: 36px;
+    height: 42px;
+    flex-basis: 36px;
+  }
+
+  .wc-tourney-advance-card > div strong {
+    font-size: .64rem;
+  }
+
+  .wc-tourney-advance-card.has-winner > div strong {
+    font-size: .7rem;
+  }
+
+  .wc-tourney-single-round .wc-tourney-fight-button {
+    width: 100%;
+    min-height: 37px;
+  }
+}
+
+/* Give the placement board time to read: a measured row reveal, one buzzer
+   card per row, and a longer pause before the next bracket is offered. */
+.wc-round-eliminators {
+  gap: 10px;
+  width: min(860px, 100%);
+  max-height: min(54vh, 540px);
+  padding: 5px 7px 12px;
+}
+
+.wc-round-eliminator {
+  opacity: 0;
+  animation-duration: .92s;
+  animation-timing-function: cubic-bezier(.16, 1, .3, 1);
+}
+
+.wc-round-eliminator.is-revealing {
+  border-color: #ff8290;
+  box-shadow: inset 4px 0 #ff3e58, 0 0 22px rgba(255, 57, 82, .32);
+  transform: translateX(3px);
+}
+
+.wc-round-ko-popup {
+  animation-duration: 1.32s;
+  width: min(460px, calc(100vw - 30px));
+}
+
+.wc-round-transition-progress {
+  margin-top: 10px;
+  animation: wcRoundProgressPulse 1.4s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-round-eliminator,
+  .wc-round-ko-popup,
+  .wc-tourney-advance-card.has-winner {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
