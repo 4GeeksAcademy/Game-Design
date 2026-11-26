@@ -366,7 +366,13 @@ export default function TournamentCpuMatch({
               <span className="wc-cpu-side-name">{nameOf(match.fighters[0])}</span>
               <small>CONTENDER A</small>
             </div>
-            <h1>WILD CARDS <span>{roundLabel}</span></h1>
+            <h1>
+              WILD CARDS
+              <span>{roundLabel}</span>
+              <small className="wc-cpu-battle-round-counter" aria-live="polite">
+                BATTLE ROUND {String(battleView?.round || 1).padStart(2, "0")}
+              </small>
+            </h1>
             <div className="solo-team-label solo-player-label">
               <span className="wc-cpu-side-name">{nameOf(match.fighters[1])}</span>
               <small>CONTENDER B</small>
