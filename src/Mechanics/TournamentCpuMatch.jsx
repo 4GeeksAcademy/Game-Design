@@ -100,6 +100,10 @@ export default function TournamentCpuMatch({
       if (updated.finished) {
         setPlaying(false);
         playUISound("victory");
+      } else if (updated.currentAction?.action === "defend") {
+        playUISound("block");
+      } else if (updated.currentAction?.action === "evade") {
+        playUISound("click");
       } else if (updated.currentAction?.damage > 0) {
         playGameSound("attack");
       }
@@ -140,6 +144,13 @@ export default function TournamentCpuMatch({
 
   const [first, second] = battleView?.fighters || [];
   const action = battleView?.currentAction;
+  const actionClass = (fighter) => {
+    if (!fighter || !action) return "";
+    if (action.attackerId === fighter.id && action.action !== "skipped") return " is-attacking";
+    if (action.defenderId === fighter.id && action.action === "evade") return " is-evading";
+    if (action.defenderId === fighter.id && action.damage > 0) return " is-taking-hit";
+    return "";
+  };
 
   return (
     <main className="wc-cpu-watch">
@@ -174,7 +185,7 @@ export default function TournamentCpuMatch({
 
       <section className="wc-cpu-arena">
         <div className="wc-cpu-arena-lights" />
-        <div className="wc-cpu-fighter-side wc-cpu-left">
+        <div className={"wc-cpu-fighter-side wc-cpu-left" + actionClass(first) + (first?.health <= 0 ? " is-knocked-out" : "")}>
           <div className="wc-cpu-portrait">
             {first && <img src={imageOf(match.fighters[0])} alt={nameOf(match.fighters[0])} />}
           </div>
@@ -205,7 +216,7 @@ export default function TournamentCpuMatch({
           </p>
         </div>
 
-        <div className="wc-cpu-fighter-side wc-cpu-right">
+        <div className={"wc-cpu-fighter-side wc-cpu-right" + actionClass(second) + (second?.health <= 0 ? " is-knocked-out" : "")}>
           <div className="wc-cpu-portrait">
             {second && <img src={imageOf(match.fighters[1])} alt={nameOf(match.fighters[1])} />}
           </div>
