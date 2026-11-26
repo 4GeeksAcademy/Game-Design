@@ -53,6 +53,8 @@ function HealthMeter({ fighter, color }) {
 
 export default function TournamentCpuMatch({
   match,
+  player,
+  playerEliminated = false,
   roundLabel,
   matchNumber,
   onComplete,
@@ -154,6 +156,15 @@ export default function TournamentCpuMatch({
           LEAVE TOURNAMENT
         </button>
       </header>
+
+      <section className="wc-cpu-player-persistent">
+        <img src={imageOf(player)} alt={nameOf(player)} />
+        <div>
+          <small>YOUR TOURNAMENT CONTENDER</small>
+          <strong>{nameOf(player)}</strong>
+        </div>
+        <span>{playerEliminated ? "ELIMINATED · STILL IN THE CHAMPIONSHIP STORY" : "AWAITING YOUR NEXT MATCH"}</span>
+      </section>
 
       <section className="wc-cpu-watch-title">
         <p>THE ROAD TO THE CROWN</p>
