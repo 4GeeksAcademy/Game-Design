@@ -42,11 +42,17 @@ function simulateCpuMatch(one, two) {
 }
 
 function makeTournament(size, player, cpuPool) {
-  const participants = [player, ...[...cpuPool]
+  const selectedCpu = [...cpuPool]
     .filter((fighter) => fighter.id !== player.id)
     .sort(() => Math.random() - 0.5)
-    .slice(0, size - 1)]
-    .sort(() => Math.random() - 0.5);
+    .slice(0, size - 1);
+  // Place the human in the left slot of Match 01. The remaining CPU
+  // contenders are shuffled so the rest of the bracket stays unpredictable.
+  const participants = [
+    player,
+    selectedCpu[0],
+    ...selectedCpu.slice(1).sort(() => Math.random() - 0.5),
+  ];
   const rounds = [];
   let matchCount = size / 2;
   let roundNumber = 1;
@@ -696,6 +702,8 @@ export default function Tournament() {
     return (
       <TournamentCpuMatch
         match={activeCpuMatch.match}
+        player={tournament.player}
+        playerEliminated={tournament.playerEliminated}
         roundLabel={roundLabels[activeCpuMatch.roundIndex] || "CHAMPIONSHIP"}
         matchNumber={activeCpuMatch.matchNumber}
         onComplete={finishWatchedCpuMatch}
