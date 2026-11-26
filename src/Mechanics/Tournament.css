@@ -4897,7 +4897,7 @@
   to { transform: scaleX(1); opacity: 1; }
 }
 
-/* Elimination recap: show the full ranked list together without a K.O. overlay. */
+/* Elimination recap: reveal ranked rows in sequence; remove only the large K.O. overlay. */
 .wc-round-transition.phase-eliminators .wc-round-transition-panel {
   width: min(980px, 100%);
   max-height: min(94vh, 980px);
@@ -4914,16 +4914,21 @@
 }
 
 .wc-round-transition.phase-eliminators .wc-round-eliminator {
-  grid-template-columns: 100px 68px minmax(0, 1fr) 116px;
+  grid-template-columns: 100px 68px minmax(0, 1fr) 116px 56px;
   min-height: 72px;
   gap: 12px;
   padding: 5px 12px;
-  opacity: 1 !important;
+  opacity: 0 !important;
   border-color: rgba(218, 183, 111, .42);
   background: linear-gradient(105deg, #29251a, #14130f 78%);
   box-shadow: inset 3px 0 rgba(218, 183, 111, .72), 0 5px 14px #0007;
   transform: none;
   animation: none !important;
+}
+
+.wc-round-transition.phase-eliminators .wc-round-eliminator.is-visible {
+  opacity: 1 !important;
+  animation: wcEliminatorReveal .7s cubic-bezier(.16, 1, .3, 1) both !important;
 }
 
 .wc-round-transition.phase-eliminators .wc-round-eliminator::after {
@@ -4982,7 +4987,10 @@
   color: #f4d48b;
 }
 
-.wc-round-eliminator-ko,
+.wc-round-eliminator-ko {
+  display: grid !important;
+}
+
 .wc-round-ko-popup {
   display: none !important;
 }
@@ -5005,7 +5013,7 @@
   }
 
   .wc-round-transition.phase-eliminators .wc-round-eliminator {
-    grid-template-columns: 64px 46px minmax(0, 1fr) 68px;
+    grid-template-columns: 58px 44px minmax(0, 1fr) 58px 34px;
     min-height: 62px;
     gap: 5px;
     padding: 4px 5px;
@@ -5033,6 +5041,11 @@
   .wc-round-transition.phase-eliminators .wc-round-eliminator-status {
     font-size: .42rem;
     letter-spacing: .04em;
+  }
+
+  .wc-round-transition.phase-eliminators .wc-round-eliminator-ko {
+    min-height: 25px;
+    font-size: .54rem;
   }
 }
 
