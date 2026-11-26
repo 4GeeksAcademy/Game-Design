@@ -621,13 +621,13 @@ export default function Tournament() {
     }, false);
   }
 
-  function prepareCpuFinish() {
-    if (!tournament) return null;
+  function prepareCpuFinish(source = tournament) {
+    if (!source) return null;
     const updated = {
-      ...tournament,
+      ...source,
       started: true,
       playerEliminated: true,
-      rounds: copyRounds(tournament.rounds),
+      rounds: copyRounds(source.rounds),
     };
     const activeRound = updated.rounds[updated.currentRound];
     const pendingPlayerMatch = activeRound?.find(
@@ -649,16 +649,24 @@ export default function Tournament() {
     revealIntervalRef.current = null;
     setRevealPreview(null);
     setRevealing(false);
-    if (activeCpuMatch && activeCpuResolveRef.current) {
+
+    let source = tournament;
+    if (activeCpuMatch) {
       const winner = simulateCpuMatch(
         activeCpuMatch.match.fighters[0],
         activeCpuMatch.match.fighters[1],
       );
-      activeCpuResolveRef.current(winner);
+      const rounds = copyRounds(tournament.rounds);
+      const activeMatch = rounds[activeCpuMatch.roundIndex]?.find(
+        (match) => match.id === activeCpuMatch.match.id,
+      );
+      if (activeMatch) activeMatch.winner = winner;
+      source = { ...tournament, rounds };
+      activeCpuResolveRef.current?.(winner);
       activeCpuResolveRef.current = null;
       setActiveCpuMatch(null);
     }
-    const finished = prepareCpuFinish();
+    const finished = prepareCpuFinish(source);
     if (!finished) return;
     setTournament(finished);
     setShowEliminationScreen(false);
