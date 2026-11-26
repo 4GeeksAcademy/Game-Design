@@ -747,7 +747,7 @@ export default function Tournament() {
     });
   }
 
-  function presentRoundTransition(completedRounds, nextRound, nextRoundIndex, bracketSize, sourceTournament) {
+  async function presentRoundTransition(completedRounds, nextRound, nextRoundIndex, bracketSize, sourceTournament) {
     let ranking = {
       entries: [],
       placementResults: { ...(sourceTournament.placementResults || {}) },
