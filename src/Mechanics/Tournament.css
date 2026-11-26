@@ -5537,3 +5537,281 @@
   }
 }
 
+/* Bracket size is chosen in a focused popup after Generate Bracket is pressed. */
+.wc-tourney-format-backdrop {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 18px;
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(226, 180, 86, .18), transparent 48%),
+    rgba(2, 4, 5, .84);
+  backdrop-filter: blur(8px);
+  animation: wcRoundTransitionFade .26s ease both;
+}
+
+.wc-tourney-format-dialog {
+  width: min(850px, 100%);
+  max-height: min(92vh, 780px);
+  overflow-y: auto;
+  padding: clamp(20px, 3vw, 34px);
+  border: 1px solid rgba(240, 207, 133, .82);
+  border-radius: 12px 4px;
+  color: #f8f0df;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(218, 173, 83, .27), transparent 53%),
+    linear-gradient(145deg, #292317, #0a0e0c 70%);
+  box-shadow:
+    0 28px 100px #000f,
+    0 0 0 5px rgba(209, 168, 75, .14),
+    0 0 54px rgba(223, 186, 104, .28);
+  text-align: center;
+  animation: wcRoundPanelEnter .48s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-tourney-format-kicker {
+  margin: 0 0 7px;
+  color: #f0d48c;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .63rem;
+  font-weight: 1000;
+  letter-spacing: .22em;
+}
+
+.wc-tourney-format-dialog > h2 {
+  margin: 0;
+  color: #fff0c2;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(1.7rem, 4.5vw, 3rem);
+  font-weight: 1000;
+  letter-spacing: .09em;
+  text-shadow: 0 0 24px rgba(223, 184, 93, .4);
+}
+
+.wc-tourney-format-copy {
+  max-width: 540px;
+  margin: 9px auto 22px;
+  color: #d0c4a8;
+  font-size: .82rem;
+  line-height: 1.45;
+}
+
+.wc-tourney-format-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 20px);
+}
+
+.wc-tourney-format-option {
+  position: relative;
+  min-width: 0;
+  min-height: 228px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 22px 15px 17px;
+  overflow: hidden;
+  border: 1px solid rgba(196, 158, 88, .48);
+  border-radius: 9px 3px;
+  color: #eadbb9;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(213, 172, 91, .17), transparent 58%),
+    linear-gradient(150deg, rgba(54, 43, 25, .94), rgba(12, 15, 13, .98) 72%);
+  box-shadow: 0 10px 24px #0007, inset 0 1px #fff1;
+  cursor: pointer;
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+.wc-tourney-format-option::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 20%, rgba(255, 238, 187, .13), transparent 78%);
+  transform: translateX(-70%);
+  transition: opacity .2s ease, transform .55s ease;
+}
+
+.wc-tourney-format-option:hover:not(:disabled) {
+  border-color: rgba(255, 226, 157, .9);
+  box-shadow: 0 14px 30px #0009, 0 0 24px rgba(229, 183, 94, .2), inset 0 1px #fff2;
+  transform: translateY(-4px);
+}
+
+.wc-tourney-format-option:hover:not(:disabled)::before {
+  opacity: 1;
+  transform: translateX(70%);
+}
+
+.wc-tourney-format-option.selected {
+  border-color: #ffe5a1;
+  color: #fff2cf;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(250, 211, 131, .28), transparent 58%),
+    linear-gradient(150deg, #594322, #19160f 76%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 229, 161, .2),
+    0 0 0 2px rgba(242, 208, 131, .12),
+    0 0 32px rgba(231, 185, 92, .24);
+}
+
+.wc-tourney-format-option:disabled {
+  opacity: .38;
+  filter: grayscale(.8);
+  cursor: not-allowed;
+}
+
+.wc-tourney-format-number {
+  color: #ffe29b;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(3.7rem, 7vw, 5.5rem);
+  font-weight: 1000;
+  line-height: .9;
+  text-shadow: 0 0 24px rgba(244, 201, 112, .36);
+}
+
+.wc-tourney-format-option > strong {
+  color: #fff0c4;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 1000;
+  letter-spacing: .22em;
+}
+
+.wc-tourney-format-option > small {
+  color: #d3ba85;
+  font-size: .62rem;
+  font-weight: 950;
+  letter-spacing: .15em;
+}
+
+.wc-tourney-format-option > i {
+  min-height: 28px;
+  color: #aaa087;
+  font-size: .53rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+.wc-tourney-format-option > b {
+  margin-top: 4px;
+  padding: 7px 13px;
+  border: 1px solid rgba(224, 191, 121, .42);
+  border-radius: 4px;
+  color: #e5c987;
+  background: rgba(6, 9, 8, .5);
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .57rem;
+  font-weight: 1000;
+  letter-spacing: .1em;
+}
+
+.wc-tourney-format-option.selected > b {
+  border-color: #f4d995;
+  color: #171207;
+  background: linear-gradient(100deg, #fff0bd, #d5a54e);
+}
+
+.wc-tourney-format-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(219, 179, 96, .24);
+}
+
+.wc-tourney-format-back,
+.wc-tourney-format-confirm {
+  min-height: 47px;
+  padding: 10px 19px;
+  border-radius: 4px;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .68rem;
+  font-weight: 1000;
+  letter-spacing: .13em;
+  cursor: pointer;
+  transition: filter .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.wc-tourney-format-back {
+  border: 1px solid rgba(208, 174, 107, .45);
+  color: #ddc99f;
+  background: rgba(26, 23, 17, .8);
+}
+
+.wc-tourney-format-confirm {
+  min-width: 275px;
+  border: 1px solid #ffedb4;
+  color: #201707;
+  background: linear-gradient(110deg, #fff0bd 0%, #e7bf6d 45%, #a97932 100%);
+  box-shadow: 0 5px 20px rgba(203, 155, 66, .24), inset 0 1px rgba(255, 255, 255, .4);
+}
+
+.wc-tourney-format-confirm span {
+  margin-left: 10px;
+}
+
+.wc-tourney-format-back:hover,
+.wc-tourney-format-confirm:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+}
+
+.wc-tourney-format-confirm:disabled {
+  opacity: .42;
+  cursor: not-allowed;
+}
+
+.wc-tourney-format-back:focus-visible,
+.wc-tourney-format-option:focus-visible,
+.wc-tourney-format-confirm:focus-visible {
+  outline: 2px solid #fff0b9;
+  outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+  .wc-tourney-format-backdrop {
+    padding: 10px;
+  }
+
+  .wc-tourney-format-dialog {
+    padding: 19px 12px;
+  }
+
+  .wc-tourney-format-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wc-tourney-format-option {
+    min-height: 174px;
+    padding: 15px 10px;
+  }
+
+  .wc-tourney-format-number {
+    font-size: 3.5rem;
+  }
+
+  .wc-tourney-format-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .wc-tourney-format-confirm {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
