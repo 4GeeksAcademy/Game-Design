@@ -4,7 +4,7 @@ import { roster } from "./Main Page/CharacterSelection.jsx";
 import { getUnlockedCharacters, addCoins } from "./Currency.js";
 import { createWatchBattle, nextWatchAction } from "./WatchBattle.js";
 import { getCharacterImage } from "./SkinManager.js";
-import { playGameSound, playUISound } from "../audio/audioManager.js";
+import { playGameSound, playUISound, playAGTBuzzerSound } from "../audio/audioManager.js";
 import TournamentCpuMatch from "./TournamentCpuMatch.jsx";
 import "./Tournament.css";
 
@@ -99,6 +99,82 @@ function simulateRound(round) {
   });
 }
 
+function getPlaceLabel(place) {
+  const suffix = place === 1 ? "ST" : place === 2 ? "ND" : place === 3 ? "RD" : "TH";
+  return `${place}${suffix} PLACE`;
+}
+
+// Resolve placement matches once when the elimination board is revealed. Reuse
+// those results later so the podium cannot contradict the reveal animation.
+function getEliminationRankings(tournament) {
+  const rounds = tournament.rounds || [];
+  const semifinalRound = rounds[rounds.length - 2] || [];
+  const semifinalLosers = semifinalRound
+    .map((match) => match.fighters.find((fighter) => fighter && fighter.id !== match.winner?.id))
+    .filter(Boolean);
+  const placementResults = { ...(tournament.placementResults || {}) };
+  const bronzePending = tournament.placementOpportunity?.type === "bronze" &&
+    !placementResults.bronzeWinner;
+  const entries = [];
+
+  if (tournament.size === 8) {
+    const quarterfinalLosers = (rounds[0] || [])
+      .map((match) => match.fighters.find((fighter) => fighter && fighter.id !== match.winner?.id))
+      .filter(Boolean);
+    const quarterPairs = [
+      quarterfinalLosers.slice(0, 2),
+      quarterfinalLosers.slice(2, 4),
+    ];
+    const consolationWinners = quarterPairs.map((pair, index) =>
+      placementResults.consolationWinners?.[index] || simulateCpuMatch(pair[0], pair[1])
+    );
+    const consolationLosers = quarterPairs.map((pair, index) =>
+      pair.find((fighter) => fighter.id !== consolationWinners[index].id)
+    );
+    const fifthPlaceWinner = placementResults.fifthPlaceWinner ||
+      simulateCpuMatch(consolationWinners[0], consolationWinners[1]);
+    const seventhPlaceWinner = placementResults.seventhPlaceWinner ||
+      simulateCpuMatch(consolationLosers[0], consolationLosers[1]);
+    const sixthPlace = consolationWinners.find((fighter) => fighter.id !== fifthPlaceWinner.id);
+    const eighthPlace = consolationLosers.find((fighter) => fighter.id !== seventhPlaceWinner.id);
+
+    placementResults.consolationWinners = consolationWinners;
+    placementResults.fifthPlaceWinner = fifthPlaceWinner;
+    placementResults.seventhPlaceWinner = seventhPlaceWinner;
+
+    entries.push(
+      { fighter: eighthPlace, place: 8, rankLabel: getPlaceLabel(8), detail: "FINAL TOURNAMENT POSITION" },
+      { fighter: seventhPlaceWinner, place: 7, rankLabel: getPlaceLabel(7), detail: "FINAL TOURNAMENT POSITION" },
+      { fighter: sixthPlace, place: 6, rankLabel: getPlaceLabel(6), detail: "FINAL TOURNAMENT POSITION" },
+      { fighter: fifthPlaceWinner, place: 5, rankLabel: getPlaceLabel(5), detail: "FINAL TOURNAMENT POSITION" },
+    );
+  }
+
+  if (bronzePending) {
+    semifinalLosers.forEach((fighter) => entries.push({
+      fighter,
+      place: null,
+      rankLabel: "3RD / 4TH",
+      detail: "BRONZE-MEDAL MATCH PENDING",
+      pending: true,
+    }));
+  } else if (semifinalLosers.length === 2) {
+    const bronzeWinner = placementResults.bronzeWinner ||
+      simulateCpuMatch(semifinalLosers[0], semifinalLosers[1]);
+    const bronzeLoser = semifinalLosers.find((fighter) => fighter.id !== bronzeWinner.id);
+    placementResults.bronzeWinner = bronzeWinner;
+    entries.push(
+      { fighter: bronzeLoser, place: 4, rankLabel: getPlaceLabel(4), detail: "FINAL TOURNAMENT POSITION" },
+      { fighter: bronzeWinner, place: 3, rankLabel: getPlaceLabel(3), detail: "FINAL TOURNAMENT POSITION" },
+    );
+  }
+
+  return {
+    entries: entries.filter((entry) => entry.fighter),
+    placementResults,
+  };
+}
+
 function buildPlacements(tournament) {
   const rounds = tournament.rounds;
   const finalMatch = rounds[rounds.length - 1][0];
@@ -134,12 +210,17 @@ function buildPlacements(tournament) {
     quarterfinalLosers.slice(0, 2),
     quarterfinalLosers.slice(2, 4),
   ];
-  const consolationWinners = quarterPairs.map((pair) => simulateCpuMatch(pair[0], pair[1]));
+  const consolationWinners = quarterPairs.map((pair, index) =>
+    tournament.placementResults?.consolationWinners?.[index] ||
+    simulateCpuMatch(pair[0], pair[1]),
+  );
   const consolationLosers = quarterPairs.map((pair, index) =>
     pair.find((fighter) => fighter.id !== consolationWinners[index].id),
   );
-  const fifthPlaceWinner = simulateCpuMatch(consolationWinners[0], consolationWinners[1]);
-  const seventhPlaceWinner = simulateCpuMatch(consolationLosers[0], consolationLosers[1]);
+  const fifthPlaceWinner = tournament.placementResults?.fifthPlaceWinner ||
+    simulateCpuMatch(consolationWinners[0], consolationWinners[1]);
+  const seventhPlaceWinner = tournament.placementResults?.seventhPlaceWinner ||
+    simulateCpuMatch(consolationLosers[0], consolationLosers[1]);
   const sixthPlace = consolationWinners.find((fighter) => fighter.id !== fifthPlaceWinner.id);
   const eighthPlace = consolationLosers.find((fighter) => fighter.id !== seventhPlaceWinner.id);
 
@@ -313,27 +394,35 @@ function TournamentMatch({
 
 function RoundTransition({ transition, onContinue }) {
   if (!transition) return null;
+  const eliminator = transition.eliminators?.[transition.revealIndex] || transition.eliminators?.[0];
+  const fighter = eliminator?.fighter;
 
   return (
     <div className={"wc-round-transition phase-" + transition.phase} role="presentation">
       <section className="wc-round-transition-panel" role="dialog" aria-modal="true" aria-labelledby="wcRoundTransitionTitle">
-        {transition.phase === "eliminators" && (
+        {transition.phase === "eliminators" && fighter && (
           <>
-            <p className="wc-round-transition-kicker">{transition.completedRoundLabel} · ELIMINATION STAGE COMPLETE</p>
-            <h2 id="wcRoundTransitionTitle">ELIMINATED CONTENDERS</h2>
-            <p className="wc-round-transition-caption">THEIR CHAMPIONSHIP RUN ENDS HERE</p>
-            <div className="wc-round-eliminators">
-              {transition.eliminators.map((fighter, index) => (
-                <article className="wc-round-eliminator" key={fighter.id} style={{ "--reveal-order": index, animationDelay: (index * 1.12) + "s" }}>
-                  <span className="wc-round-eliminator-rank">{String(index + 1).padStart(2, "0")}</span>
-                  <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
-                  <strong>{fighterName(fighter)}</strong>
-                  <small>ELIMINATED</small>
-                  <span className="wc-round-eliminator-ko">K.O.</span>
-                </article>
-              ))}
+            <p className="wc-round-transition-kicker">{transition.completedRoundLabel} · PLACEMENT REVEAL</p>
+            <h2 id="wcRoundTransitionTitle">THE ELIMINATION BOARD</h2>
+            <p className="wc-round-transition-caption">FINALISTS ADVANCE · EVERY OTHER CONTENDER EARNS A PLACE</p>
+            <div className="wc-round-elimination-stage" key={fighter.id + "-" + transition.revealIndex}>
+              <div className="wc-round-eliminator-spotlight">
+                <span className={"wc-round-eliminator-place" + (eliminator.pending ? " is-pending" : "")}>
+                  {eliminator.rankLabel}
+                </span>
+                <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
+                <strong>{fighterName(fighter)}</strong>
+                <small>{eliminator.detail}</small>
+              </div>
+              <div className="wc-round-ko-popup" key={transition.revealIndex} aria-live="assertive">
+                <span>CHAMPIONSHIP ELIMINATION</span>
+                <strong>K.O.</strong>
+                <small>{fighterName(fighter)}</small>
+              </div>
             </div>
-            <span className="wc-round-transition-progress">ADVANCING THE BRACKET…</span>
+            <span className="wc-round-transition-progress">
+              REVEAL {transition.revealIndex + 1} OF {transition.eliminators.length} · NEXT POSITION INCOMING
+            </span>
           </>
         )}
 
@@ -551,25 +640,23 @@ export default function Tournament() {
     });
   }
 
-  function presentRoundTransition(completedRounds, nextRound, nextRoundIndex, bracketSize) {
-    const eliminators = completedRounds.flatMap((round) =>
-      round.map((match) => match.fighters.find(
-        (fighter) => fighter && fighter.id !== match.winner?.id,
-      )).filter(Boolean)
-    );
+  function presentRoundTransition(completedRounds, nextRound, nextRoundIndex, bracketSize, sourceTournament) {
+    const ranking = getEliminationRankings(sourceTournament);
+    sourceTournament.placementResults = ranking.placementResults;
+    publishTournament(sourceTournament);
     const standings = nextRound.map((match) => [...match.fighters]);
 
-    if (!eliminators.length || !standings.length) return Promise.resolve();
+    if (!ranking.entries.length || !standings.length) return Promise.resolve();
 
     setRoundTransition({
       phase: "eliminators",
+      revealIndex: 0,
       completedRoundLabel: bracketSize === 4 ? "SEMIFINALS COMPLETE" : "QUARTERFINALS & SEMIFINALS COMPLETE",
       nextRoundLabel: getRoundLabel(bracketSize, nextRoundIndex),
-      eliminators,
+      eliminators: ranking.entries,
       standings,
     });
 
-    playUISound("unlock");
     return new Promise((resolve) => {
       roundTransitionResolveRef.current = resolve;
     });
@@ -586,20 +673,32 @@ export default function Tournament() {
   useEffect(() => {
     if (!roundTransition || roundTransition.phase === "ready") return undefined;
 
-    const nextPhase = roundTransition.phase === "eliminators" ? "standings" : "ready";
-    const duration = roundTransition.phase === "eliminators"
-      ? Math.max(4200, roundTransition.eliminators.length * 880 + 1900)
-      : 3800;
+    if (roundTransition.phase === "eliminators") {
+      playAGTBuzzerSound();
+      const timer = window.setTimeout(() => {
+        setRoundTransition((current) => {
+          if (!current || current.phase !== "eliminators") return current;
+          const lastReveal = current.revealIndex >= current.eliminators.length - 1;
+          return lastReveal
+            ? { ...current, phase: "standings" }
+            : { ...current, revealIndex: current.revealIndex + 1 };
+        });
+      }, 1550);
+      return () => window.clearTimeout(timer);
+    }
+
     const timer = window.setTimeout(() => {
-      setRoundTransition((current) => current ? { ...current, phase: nextPhase } : current);
+      setRoundTransition((current) => current ? { ...current, phase: "ready" } : current);
       playUISound("click");
-    }, duration);
+    }, 3800);
 
     return () => window.clearTimeout(timer);
-  }, [roundTransition?.phase]);
+  }, [roundTransition?.phase, roundTransition?.revealIndex]);
 
   function completeTournament(next) {
-    const finished = finishTournamentDraft(next);
+    const finished = next?.complete && Array.isArray(next.placements)
+      ? next
+      : finishTournamentDraft(next);
     setTournament(finished);
     setShowEliminationScreen(false);
     setShowResults(true);
@@ -677,7 +776,7 @@ export default function Tournament() {
         const isFinalRound = roundIndex === draft.rounds.length - 1;
         if (isFinalRound && draft.lastTransitionRoundIndex !== roundIndex - 1) {
           draft.lastTransitionRoundIndex = roundIndex - 1;
-          await presentRoundTransition(draft.rounds.slice(0, roundIndex), round, roundIndex, draft.size);
+          await presentRoundTransition(draft.rounds.slice(0, roundIndex), round, roundIndex, draft.size, draft);
           if (skipCpuQueueRef.current) {
             setSpectating(false);
             return;
@@ -848,6 +947,7 @@ export default function Tournament() {
             nextRound,
             nextRoundIndex,
             updated.size,
+            updated,
           );
           if (skipCpuQueueRef.current) return;
         }
@@ -1051,19 +1151,28 @@ export default function Tournament() {
     );
   }
 
-  async function forfeitPlacement() {
+  function forfeitPlacement() {
     if (!tournament || spectating) return;
     const guaranteedPlace =
       tournament.placementOpportunity?.type === "bronze" ? 3 : 8;
-    await finishRemainingCpuRounds(
-      {
-        ...tournament,
-        started: true,
-        rounds: copyRounds(tournament.rounds),
-      },
-      tournament.currentRound + 1,
-      guaranteedPlace,
-    );
+
+    // Forfeit is not Watch Mode: resolve unfinished matches immediately and
+    // open the final podium without mounting the CPU battle screen.
+    skipCpuQueueRef.current = true;
+    roundTransitionResolveRef.current?.();
+    roundTransitionResolveRef.current = null;
+    setRoundTransition(null);
+
+    const finished = completeRemainingMatches({
+      ...tournament,
+      started: true,
+      playerEliminated: true,
+      forcedPlacement: guaranteedPlace,
+      rounds: copyRounds(tournament.rounds),
+    });
+
+    playUISound("back");
+    completeTournament(finished);
   }
 
   function prepareCpuFinish(source = tournament) {
@@ -1262,6 +1371,14 @@ export default function Tournament() {
     const roundLabels = tournament.size === 4
       ? ["SEMIFINALS", "FINAL"]
       : ["QUARTERFINALS", "SEMIFINALS", "FINAL"];
+    const requestedRoundIndex = Number.isInteger(tournament.displayRoundIndex)
+      ? tournament.displayRoundIndex
+      : (tournament.currentRound || 0);
+    const activeRoundIndex = Math.min(
+      Math.max(0, requestedRoundIndex),
+      Math.max(0, tournament.rounds.length - 1),
+    );
+    const activeRound = tournament.rounds[activeRoundIndex] || [];
 
     return (
       <main className={"wc-tournament wc-tournament-bracket" + (restarting ? " is-restarting" : "")}>
@@ -1312,30 +1429,28 @@ export default function Tournament() {
           </div>
         )}
 
-        <section className="wc-tourney-rounds" aria-label="Tournament bracket">
-          {tournament.rounds.map((round, roundIndex) => (
-            <section className="wc-tourney-round" key={roundIndex} style={{ flex: round.length }}>
-              <div className="wc-tourney-round-title">
-                <span>ROUND {roundIndex + 1} OF {tournament.rounds.length}</span>
-                <h2>{roundLabels[roundIndex] || "CHAMPIONSHIP"}</h2>
-                <small>{round.length} MATCH{round.length === 1 ? "" : "ES"}</small>
-              </div>
-              <div className="wc-tourney-round-matches">
-                {round.map((match, matchIndex) => (
-                  <TournamentMatch
-                    key={match.id}
-                    match={match}
-                    matchIndex={matchIndex}
-                    tournament={tournament}
-                    revealing={revealing}
-                    previewFighters={revealPreview?.[match.id]}
-                    onEnterMatch={enterMatch}
-                    roundLabel={roundLabels[roundIndex] || "CHAMPIONSHIP"}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
+        <section className="wc-tourney-rounds wc-tourney-single-round" aria-label={roundLabels[activeRoundIndex] + " matchups"}>
+          <section className="wc-tourney-round" key={activeRoundIndex}>
+            <div className="wc-tourney-round-title">
+              <span>ROUND {activeRoundIndex + 1} OF {tournament.rounds.length}</span>
+              <h2>{roundLabels[activeRoundIndex] || "CHAMPIONSHIP"}</h2>
+              <small>{activeRound.length} MATCH{activeRound.length === 1 ? "" : "ES"}</small>
+            </div>
+            <div className="wc-tourney-round-matches">
+              {activeRound.map((match, matchIndex) => (
+                <TournamentMatch
+                  key={match.id}
+                  match={match}
+                  matchIndex={matchIndex}
+                  tournament={tournament}
+                  revealing={revealing}
+                  previewFighters={revealPreview?.[match.id]}
+                  onEnterMatch={enterMatch}
+                  roundLabel={roundLabels[activeRoundIndex] || "CHAMPIONSHIP"}
+                />
+              ))}
+            </div>
+          </section>
         </section>
 
         {tournament.playerEliminated && showEliminationScreen && !tournament.complete && (
