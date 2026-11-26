@@ -15,6 +15,23 @@ const REWARDS = {
 const getRewardAmount = (size, place) => REWARDS[size]?.[place] || 0;
 const fighterName = (fighter) => fighter?.data?.name || fighter?.name || "Unknown Fighter";
 const fighterImage = (fighter) => fighter ? getCharacterImage(fighter.id, fighter.image) : "";
+function getTournamentUsername(tournament) {
+  let savedUsername = "";
+  try {
+    savedUsername = typeof window !== "undefined"
+      ? (window.localStorage.getItem("wildCardsUsername") || "")
+      : "";
+  } catch {
+    savedUsername = "";
+  }
+  return String(
+    tournament?.username ||
+    tournament?.player?.username ||
+    tournament?.player?.userName ||
+    savedUsername ||
+    "PLAYER 1"
+  ).trim().replace(/^@/, "") || "PLAYER 1";
+}
 const getRoundLabel = (size, index) => (
   (size === 4 ? ["SEMIFINALS", "FINAL"] : ["QUARTERFINALS", "SEMIFINALS", "FINAL"])[index] || "CHAMPIONSHIP"
 );
@@ -196,9 +213,13 @@ function buildPlacements(tournament) {
 
   if (tournament.size === 4) {
     const placements = [champion, runnerUp, bronzeWinner, bronzeLoser];
+    const bronzeOpponent = semifinalLosers.find((fighter) => fighter.id !== tournament.player.id);
     if (tournament.forcedPlacement === 3) {
       placements[2] = tournament.player;
-      placements[3] = semifinalLosers.find((fighter) => fighter.id !== tournament.player.id);
+      placements[3] = bronzeOpponent;
+    } else if (tournament.forcedPlacement === 4) {
+      placements[2] = bronzeOpponent;
+      placements[3] = tournament.player;
     }
     return placements;
   }
@@ -238,6 +259,9 @@ function buildPlacements(tournament) {
   if (tournament.forcedPlacement === 3) {
     placements[2] = tournament.player;
     placements[3] = semifinalLosers.find((fighter) => fighter.id !== tournament.player.id);
+  } else if (tournament.forcedPlacement === 4) {
+    placements[2] = semifinalLosers.find((fighter) => fighter.id !== tournament.player.id);
+    placements[3] = tournament.player;
   } else if (tournament.forcedPlacement === 8) {
     const previousPlayerPlace = placements.findIndex(
       (fighter) => fighter?.id === tournament.player.id,
@@ -394,35 +418,50 @@ function TournamentMatch({
 
 function RoundTransition({ transition, onContinue }) {
   if (!transition) return null;
-  const eliminator = transition.eliminators?.[transition.revealIndex] || transition.eliminators?.[0];
-  const fighter = eliminator?.fighter;
+  const firstEliminator = transition.eliminators?.[0];
+  const firstFighter = firstEliminator?.fighter;
 
   return (
     <div className={"wc-round-transition phase-" + transition.phase} role="presentation">
       <section className="wc-round-transition-panel" role="dialog" aria-modal="true" aria-labelledby="wcRoundTransitionTitle">
-        {transition.phase === "eliminators" && fighter && (
+        {transition.phase === "eliminators" && (
           <>
-            <p className="wc-round-transition-kicker">{transition.completedRoundLabel} · PLACEMENT REVEAL</p>
-            <h2 id="wcRoundTransitionTitle">THE ELIMINATION BOARD</h2>
-            <p className="wc-round-transition-caption">FINALISTS ADVANCE · EVERY OTHER CONTENDER EARNS A PLACE</p>
-            <div className="wc-round-elimination-stage" key={fighter.id + "-" + transition.revealIndex}>
-              <div className="wc-round-eliminator-spotlight">
-                <span className={"wc-round-eliminator-place" + (eliminator.pending ? " is-pending" : "")}>
-                  {eliminator.rankLabel}
-                </span>
-                <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
-                <strong>{fighterName(fighter)}</strong>
-                <small>{eliminator.detail}</small>
-              </div>
-              <div className="wc-round-ko-popup" key={transition.revealIndex} aria-live="assertive">
-                <span>CHAMPIONSHIP ELIMINATION</span>
-                <strong>K.O.</strong>
-                <small>{fighterName(fighter)}</small>
-              </div>
+            <p className="wc-round-transition-kicker">{transition.completedRoundLabel} · FINAL PLACEMENTS</p>
+            <h2 id="wcRoundTransitionTitle">ELIMINATED CONTENDERS</h2>
+            <p className="wc-round-transition-caption">RANKED FROM THE BOTTOM OF THE FIELD UP</p>
+            <div className="wc-round-eliminators">
+              {transition.eliminators.map((entry, index) => (
+                <article
+                  className={"wc-round-eliminator" + (index === transition.revealIndex ? " is-revealing" : "")}
+                  key={entry.fighter.id}
+                  style={{ "--reveal-order": index, animationDelay: (index * .12) + "s" }}
+                >
+                  <span className="wc-round-eliminator-rank">{entry.rankLabel}</span>
+                  <img src={fighterImage(entry.fighter)} alt={fighterName(entry.fighter)} />
+                  <div className="wc-round-eliminator-details">
+                    <strong>{fighterName(entry.fighter)}</strong>
+                    <small>{entry.detail}</small>
+                  </div>
+                  <span className={"wc-round-eliminator-status" + (entry.pending ? " is-pending" : "")}>
+                    {entry.pending ? "PENDING" : "ELIMINATED"}
+                  </span>
+                  <span className="wc-round-eliminator-ko">K.O.</span>
+                </article>
+              ))}
             </div>
-            <span className="wc-round-transition-progress">
-              REVEAL {transition.revealIndex + 1} OF {transition.eliminators.length} · NEXT POSITION INCOMING
-            </span>
+            {firstFighter && (
+              <div className="wc-round-ko-popup" aria-live="assertive">
+                <div className="wc-round-ko-card-art">
+                  <img src={fighterImage(firstFighter)} alt="" />
+                </div>
+                <div className="wc-round-ko-card-copy">
+                  <span>WILD CARDS · ELIMINATION</span>
+                  <strong>K.O.</strong>
+                  <small>{firstEliminator.rankLabel} · {fighterName(firstFighter)}</small>
+                </div>
+              </div>
+            )}
+            <span className="wc-round-transition-progress">FINAL POSITIONS CONFIRMED · NEXT ROUND READY</span>
           </>
         )}
 
@@ -682,15 +721,15 @@ export default function Tournament() {
         buzzerRevealRef.current = revealKey;
         playAGTBuzzerSound();
       }
+      const lastReveal = roundTransition.revealIndex >= roundTransition.eliminators.length - 1;
       const timer = window.setTimeout(() => {
         setRoundTransition((current) => {
           if (!current || current.phase !== "eliminators") return current;
-          const lastReveal = current.revealIndex >= current.eliminators.length - 1;
           return lastReveal
             ? { ...current, phase: "standings" }
             : { ...current, revealIndex: current.revealIndex + 1 };
         });
-      }, 1550);
+      }, lastReveal ? 950 : 420);
       return () => window.clearTimeout(timer);
     }
 
@@ -1162,7 +1201,7 @@ export default function Tournament() {
   function forfeitPlacement() {
     if (!tournament || spectating) return;
     const guaranteedPlace =
-      tournament.placementOpportunity?.type === "bronze" ? 3 : 8;
+      tournament.placementOpportunity?.type === "bronze" ? 4 : 8;
 
     // Forfeit is not Watch Mode: resolve unfinished matches immediately and
     // open the final podium without mounting the CPU battle screen.
@@ -1420,13 +1459,16 @@ export default function Tournament() {
             <p className="wc-tourney-kicker">ONE BRACKET · ONE CHAMPION</p>
             <h1>THE ROAD TO THE CROWN</h1>
           </div>
-          <section className="wc-tourney-player-strip">
-            <img src={fighterImage(tournament.player)} alt={fighterName(tournament.player)} />
-            <div>
-              <small>YOUR CONTENDER</small>
-              <strong>{fighterName(tournament.player)}</strong>
+          <section className="wc-tourney-player-card" aria-label="Your tournament player card">
+            <div className="wc-tourney-player-card-art">
+              <img src={fighterImage(tournament.player)} alt={fighterName(tournament.player)} />
+              <span>WILD CARDS · PLAYER CARD</span>
             </div>
-            <span>{tournament.playerEliminated ? "ELIMINATED" : "IN THE RUNNING"}</span>
+            <div className="wc-tourney-player-card-copy">
+              <small>@{getTournamentUsername(tournament)}</small>
+              <strong>{fighterName(tournament.player)}</strong>
+              <span>{tournament.playerEliminated ? "ELIMINATED" : "IN THE RUNNING"}</span>
+            </div>
           </section>
         </div>
 
@@ -1468,7 +1510,7 @@ export default function Tournament() {
               <strong>{tournament.placementOpportunity?.type === "bronze" ? "A SHOT AT THIRD PLACE REMAINS" : "YOUR RUN HAS ENDED"}</strong>
               <span>
                 {tournament.placementOpportunity?.type === "bronze"
-                  ? "Play the bronze-medal match to earn third place, or forfeit and secure third automatically."
+                  ? "Play the bronze-medal match to earn third place, or forfeit and accept fourth."
                   : "Continue to see your final 5th–8th place ranking, or forfeit and accept eighth place."}
               </span>
             </div>
@@ -1482,7 +1524,7 @@ export default function Tournament() {
             </button>
             <button className="wc-tourney-skip-button" onClick={forfeitPlacement} disabled={spectating}>
               {tournament.placementOpportunity?.type === "bronze"
-                ? "FORFEIT & CLAIM 3RD"
+                ? "FORFEIT · ACCEPT 4TH"
                 : "FORFEIT · ACCEPT 8TH"}
             </button>
             <button className="wc-tourney-restart-button" onClick={restartTournament}>
