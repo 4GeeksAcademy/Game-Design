@@ -57,8 +57,8 @@ function makeTournament(size, player) {
         : [null, null],
       winner: null,
       isPlayerMatch: roundNumber === 1 && (
-        participants[index * 2].id === player.id ||
-        participants[index * 2 + 1].id === player.id
+        participants[index * 2]?.id === player.id ||
+        participants[index * 2 + 1]?.id === player.id
       ),
     })));
     matchCount /= 2;
@@ -653,6 +653,10 @@ export default function Tournament() {
   function leaveTournament() {
     if (!tournament) return;
     skipCpuQueueRef.current = true;
+    window.clearInterval(revealIntervalRef.current);
+    revealIntervalRef.current = null;
+    setRevealPreview(null);
+    setRevealing(false);
     if (activeCpuMatch && activeCpuResolveRef.current) {
       const winner = simulateCpuMatch(
         activeCpuMatch.match.fighters[0],
@@ -692,7 +696,6 @@ export default function Tournament() {
       setRestarting(false);
       setSelectedId("");
       setSize(4);
-      setTournament(null);
       processedMatch.current = null;
       navigate("/tournament", { replace: true, state: null });
     }, 480);
