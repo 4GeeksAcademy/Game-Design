@@ -3588,3 +3588,48 @@
     font-size: .72rem;
   }
 }
+
+
+/* The extended placement rail makes the final results page scroll instead of clipping. */
+.wc-tournament-results {
+  min-height: 0;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  justify-content: flex-start;
+  padding-bottom: 26px;
+  scrollbar-color: #98763f #171511;
+  scrollbar-width: thin;
+}
+
+.wc-tourney-final-standings-layout {
+  flex: 0 0 auto;
+}
+
+.wc-tourney-placement-list {
+  align-self: stretch;
+}
+
+.wc-tourney-vertical-fork .fork-left,
+.wc-tourney-vertical-fork .fork-right {
+  transform-origin: top center;
+}
+
+@media (max-height: 860px) and (min-width: 761px) {
+  .wc-tournament-results {
+    gap: 7px;
+    padding-top: 10px;
+  }
+
+  .wc-tournament-results .wc-podium-place {
+    height: clamp(150px, 24vh, 205px);
+  }
+
+  .wc-tournament-results .wc-podium-place.place-1 {
+    height: clamp(185px, 29vh, 250px);
+  }
+
+  .wc-tournament-results .wc-podium-place.place-3 {
+    height: clamp(135px, 21vh, 180px);
+  }
+}
