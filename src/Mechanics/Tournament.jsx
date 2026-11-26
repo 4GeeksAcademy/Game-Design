@@ -506,8 +506,15 @@ function RoundTransition({ transition, onContinue }) {
             <h2 id="wcRoundTransitionTitle">ELIMINATED CONTENDERS</h2>
             <p className="wc-round-transition-caption">EVERY ELIMINATED FIGHTER · FINAL TOURNAMENT PLACEMENTS</p>
             <div className="wc-round-eliminators">
-              {transition.eliminators.map((entry) => (
-                <article className="wc-round-eliminator" key={entry.fighter.id}>
+              {transition.eliminators.map((entry, index) => (
+                <article
+                  className={
+                    "wc-round-eliminator" +
+                    (index <= transition.revealIndex ? " is-visible" : "") +
+                    (index === transition.revealIndex ? " is-revealing" : "")
+                  }
+                  key={entry.fighter.id}
+                >
                   <span className="wc-round-eliminator-rank">{entry.rankLabel}</span>
                   <img src={fighterImage(entry.fighter)} alt={fighterName(entry.fighter)} />
                   <div className="wc-round-eliminator-details">
@@ -772,8 +779,14 @@ export default function Tournament() {
       return Promise.resolve();
     }
 
+    // Keep the completed round visible long enough for each winner's fork to draw.
+    sourceTournament.displayRoundIndex = Math.max(0, nextRoundIndex - 1);
+    publishTournament(sourceTournament);
+    await new Promise((resolve) => window.setTimeout(resolve, 1500));
+
     setRoundTransition({
       phase: "eliminators",
+      revealIndex: 0,
       completedRoundLabel: bracketSize === 4 ? "SEMIFINALS COMPLETE" : "QUARTERFINALS & SEMIFINALS COMPLETE",
       nextRoundLabel: getRoundLabel(bracketSize, nextRoundIndex),
       eliminators,
@@ -795,20 +808,26 @@ export default function Tournament() {
   useEffect(() => {
     if (!roundTransition || roundTransition.phase === "ready") return undefined;
 
-    const delay = roundTransition.phase === "eliminators" ? 6200 : 4800;
+    if (roundTransition.phase === "eliminators") {
+      const lastEntry = roundTransition.revealIndex >= roundTransition.eliminators.length - 1;
+      const timer = window.setTimeout(() => {
+        setRoundTransition((current) => {
+          if (!current || current.phase !== "eliminators") return current;
+          return lastEntry
+            ? { ...current, phase: "standings" }
+            : { ...current, revealIndex: current.revealIndex + 1 };
+        });
+      }, 900);
+      return () => window.clearTimeout(timer);
+    }
+
     const timer = window.setTimeout(() => {
-      setRoundTransition((current) => {
-        if (!current) return current;
-        return {
-          ...current,
-          phase: current.phase === "eliminators" ? "standings" : "ready",
-        };
-      });
-      if (roundTransition.phase === "standings") playUISound("click");
-    }, delay);
+      setRoundTransition((current) => current ? { ...current, phase: "ready" } : current);
+      playUISound("click");
+    }, 4800);
 
     return () => window.clearTimeout(timer);
-  }, [roundTransition?.phase]);
+  }, [roundTransition?.phase, roundTransition?.revealIndex]);
 
   function completeTournament(next) {
     const finished = next?.complete && Array.isArray(next.placements)
@@ -899,6 +918,8 @@ export default function Tournament() {
             setSpectating(false);
             return;
           }
+          draft.displayRoundIndex = roundIndex;
+          publishTournament(draft);
         }
       } else {
         draft.currentRound = roundIndex;
@@ -950,6 +971,8 @@ export default function Tournament() {
           draft.lastTransitionRoundIndex = roundIndex - 1;
           await presentRoundTransition(draft.rounds.slice(0, roundIndex), round, roundIndex, draft.size, draft);
           if (skipCpuQueueRef.current) return;
+          draft.displayRoundIndex = roundIndex;
+          publishTournament(draft);
         }
       } else {
         draft.currentRound = roundIndex;
@@ -1069,6 +1092,8 @@ export default function Tournament() {
             updated,
           );
           if (skipCpuQueueRef.current) return;
+          updated.displayRoundIndex = nextRoundIndex;
+          publishTournament(updated);
         }
       } else {
         playUISound("back");
