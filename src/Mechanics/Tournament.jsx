@@ -401,16 +401,38 @@ function TournamentMatch({
           revealing={revealing && !secondIsPlayer}
         />
       </div>
+      <div className={"wc-tourney-advance-fork" + (match.winner ? " is-complete" : "")}>
+        <div className="wc-tourney-fork-lines" aria-hidden="true">
+          <i className="fork-branch fork-branch-left" />
+          <i className="fork-branch fork-branch-right" />
+          <i className="fork-bridge" />
+          <i className="fork-stem" />
+        </div>
+        <div className={"wc-tourney-advance-card" + (match.winner ? " has-winner" : "")}>
+          {match.winner ? (
+            <>
+              <span className="wc-tourney-advance-card-label">ADVANCES TO NEXT ROUND</span>
+              <img src={fighterImage(match.winner)} alt={fighterName(match.winner)} />
+              <div>
+                <strong>{fighterName(match.winner)}</strong>
+                <small>WINNER · ADVANCING</small>
+              </div>
+            </>
+          ) : (
+            <>
+              <span className="wc-tourney-advance-card-crown">♛</span>
+              <div>
+                <small>ADVANCEMENT SLOT</small>
+                <strong>WINNER ADVANCES</strong>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
       {activePlayerMatch && (
         <button className="wc-tourney-fight-button" onClick={() => onEnterMatch(match)}>
           ENTER MATCH <span>▶</span>
         </button>
-      )}
-      {match.winner && (
-        <div className="wc-tourney-winner-line">
-          <span>ADVANCES</span>
-          <strong>{fighterName(match.winner)}</strong>
-        </div>
       )}
     </article>
   );
@@ -418,8 +440,10 @@ function TournamentMatch({
 
 function RoundTransition({ transition, onContinue }) {
   if (!transition) return null;
-  const firstEliminator = transition.eliminators?.[0];
-  const firstFighter = firstEliminator?.fighter;
+  const activeEliminator =
+    transition.eliminators?.[transition.revealIndex] ||
+    transition.eliminators?.[0];
+  const activeFighter = activeEliminator?.fighter;
 
   return (
     <div className={"wc-round-transition phase-" + transition.phase} role="presentation">
@@ -434,7 +458,7 @@ function RoundTransition({ transition, onContinue }) {
                 <article
                   className={"wc-round-eliminator" + (index === transition.revealIndex ? " is-revealing" : "")}
                   key={entry.fighter.id}
-                  style={{ "--reveal-order": index, animationDelay: (index * .12) + "s" }}
+                  style={{ "--reveal-order": index, animationDelay: (index * .34) + "s" }}
                 >
                   <span className="wc-round-eliminator-rank">{entry.rankLabel}</span>
                   <img src={fighterImage(entry.fighter)} alt={fighterName(entry.fighter)} />
@@ -449,15 +473,19 @@ function RoundTransition({ transition, onContinue }) {
                 </article>
               ))}
             </div>
-            {firstFighter && (
-              <div className="wc-round-ko-popup" aria-live="assertive">
+            {activeFighter && (
+              <div
+                className="wc-round-ko-popup"
+                key={activeFighter.id + "-" + transition.revealIndex}
+                aria-live="assertive"
+              >
                 <div className="wc-round-ko-card-art">
-                  <img src={fighterImage(firstFighter)} alt="" />
+                  <img src={fighterImage(activeFighter)} alt="" />
                 </div>
                 <div className="wc-round-ko-card-copy">
                   <span>WILD CARDS · ELIMINATION</span>
                   <strong>K.O.</strong>
-                  <small>{firstEliminator.rankLabel} · {fighterName(firstFighter)}</small>
+                  <small>{activeEliminator.rankLabel} · {fighterName(activeFighter)}</small>
                 </div>
               </div>
             )}
@@ -729,14 +757,14 @@ export default function Tournament() {
             ? { ...current, phase: "standings" }
             : { ...current, revealIndex: current.revealIndex + 1 };
         });
-      }, lastReveal ? 950 : 420);
+      }, lastReveal ? 1750 : 1450);
       return () => window.clearTimeout(timer);
     }
 
     const timer = window.setTimeout(() => {
       setRoundTransition((current) => current ? { ...current, phase: "ready" } : current);
       playUISound("click");
-    }, 3800);
+    }, 4800);
 
     return () => window.clearTimeout(timer);
   }, [roundTransition?.phase, roundTransition?.revealIndex]);
@@ -749,6 +777,9 @@ export default function Tournament() {
     setShowEliminationScreen(false);
     setShowResults(true);
     setSpectating(false);
+    setRoundTransition(null);
+    setActiveCpuMatch(null);
+    skipCpuQueueRef.current = true;
     navigate("/tournament", {
       replace: true,
       state: { tournament: finished, showResults: true },
@@ -876,7 +907,7 @@ export default function Tournament() {
         const isFinalRound = roundIndex === draft.rounds.length - 1;
         if (isFinalRound && draft.lastTransitionRoundIndex !== roundIndex - 1) {
           draft.lastTransitionRoundIndex = roundIndex - 1;
-          await presentRoundTransition(draft.rounds.slice(0, roundIndex), round, roundIndex, draft.size);
+          await presentRoundTransition(draft.rounds.slice(0, roundIndex), round, roundIndex, draft.size, draft);
           if (skipCpuQueueRef.current) return;
         }
       } else {
@@ -1340,7 +1371,7 @@ export default function Tournament() {
     );
   }
 
-  if (showResults && tournament?.complete) {
+  if (tournament?.complete) {
     const placement = tournament.humanPlacement;
     const suffix = placement === 1 ? "ST" : placement === 2 ? "ND" : placement === 3 ? "RD" : "TH";
     const reward = getRewardAmount(tournament.size, placement);
