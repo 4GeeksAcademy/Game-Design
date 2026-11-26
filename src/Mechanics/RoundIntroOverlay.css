@@ -1,0 +1,165 @@
+/* Shared round-intro screen. This is the former 2v2 intro design,
+   now used by both solo and team battles. */
+.round-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  overflow: hidden;
+  color: #fff;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(255, 49, 89, .22), transparent 45%),
+    radial-gradient(ellipse at 80% 50%, rgba(19, 213, 255, .20), transparent 45%),
+    rgba(3, 7, 17, .97);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .6s ease, visibility 0s linear .6s;
+}
+.round-intro.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .45s ease-out, visibility 0s linear 0s;
+}
+.round-intro.is-hiding {
+  opacity: 0;
+  visibility: visible;
+  pointer-events: none;
+  transition: opacity .6s ease, visibility 0s linear 0s;
+}
+.round-intro__eyebrow {
+  color: #a9b7ca;
+  font-size: .8rem;
+  font-weight: 800;
+  letter-spacing: .35em;
+}
+.round-intro__round {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 1000;
+  font-style: italic;
+  letter-spacing: .08em;
+  text-shadow: 0 0 24px rgba(255,255,255,.2);
+}
+.round-intro__matchup {
+  width: min(1100px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  align-items: center;
+  gap: clamp(12px,3vw,40px);
+}
+.round-intro__team { min-width: 0; }
+.round-intro__label {
+  margin-bottom: 14px;
+  font-size: .85rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+.round-intro__team--cpu .round-intro__label { color: #ff3159; }
+.round-intro__team--player .round-intro__label { color: #13d5ff; }
+.round-intro__fighters {
+  display: flex;
+  justify-content: center;
+  gap: clamp(8px,2vw,22px);
+}
+.round-intro__fighter {
+  flex: 1;
+  min-width: 0;
+  max-width: 190px;
+  animation: roundIntroFighterIn .65s ease-out both;
+  animation-delay: calc(var(--fighter-index, 0) * 90ms);
+}
+.round-intro__team--player .round-intro__fighter {
+  animation-name: roundIntroFighterInRight;
+}
+.round-intro__fighter img {
+  display: block;
+  width: 100%;
+  height: clamp(130px,24vh,250px);
+  object-fit: contain;
+  filter: drop-shadow(0 0 16px rgba(255,255,255,.12));
+}
+.round-intro__team--cpu .round-intro__fighter img { filter: drop-shadow(0 0 18px rgba(255,49,89,.35)); }
+.round-intro__team--player .round-intro__fighter img { filter: drop-shadow(0 0 18px rgba(19,213,255,.35)); }
+.round-intro__name {
+  display: block;
+  margin-top: 8px;
+  color: #fff;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.round-intro__status {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: clamp(.65rem,1.2vw,.85rem);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.round-intro__status.status-alive { color: #8fffc0; background: #176b4933; border: 1px solid #43d995; }
+.round-intro__status.status-ko {
+  color: #ff7187;
+  background: #b5092b33;
+  border: 1px solid #ff3159;
+  letter-spacing: .12em;
+  text-shadow: 0 0 8px #ff315966;
+}
+.round-intro__fighter.is-defeated img { filter: grayscale(1) brightness(.65); opacity: .75; }
+.round-intro__healthbar {
+  width: min(100%,160px);
+  height: 9px;
+  margin: 8px auto 0;
+  overflow: hidden;
+  background: #10131c;
+  border: 1px solid #ffffff55;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 3px #0009;
+}
+.round-intro__healthbar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 350ms ease, background-color 250ms ease, box-shadow 250ms ease;
+}
+.round-intro__healthbar.health-healthy .round-intro__healthbar-fill { background: #35df83; box-shadow: 0 0 8px #35df8380; }
+.round-intro__healthbar.health-warning .round-intro__healthbar-fill { background: #f4d438; box-shadow: 0 0 8px #f4d43880; }
+.round-intro__healthbar.health-danger .round-intro__healthbar-fill { background: #ff343f; box-shadow: 0 0 9px #ff343f99; }
+.round-intro__healthbar.health-critical .round-intro__healthbar-fill { background: #690018; box-shadow: 0 0 7px #690018; }
+.round-intro__fighter.is-defeated .round-intro__healthbar-fill { background: #25252b; box-shadow: none; }
+.round-intro__vs {
+  color: #fff;
+  font-size: clamp(2.5rem,7vw,5rem);
+  font-weight: 1000;
+  font-style: italic;
+  text-shadow: 0 0 12px rgba(255,255,255,.35), 0 0 32px rgba(255,49,89,.2);
+  animation: roundIntroVsPulse 1s ease-in-out infinite alternate;
+}
+.round-intro__footer {
+  color: #d5deeb;
+  font-size: .9rem;
+  font-weight: 900;
+  letter-spacing: .35em;
+  animation: roundIntroFooterPulse 1s ease-in-out infinite alternate;
+}
+@keyframes roundIntroFighterIn { from { opacity: 0; transform: translateX(-85px) scale(.9); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes roundIntroFighterInRight { from { opacity: 0; transform: translateX(85px) scale(.9); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes roundIntroVsPulse { from { opacity: .75; transform: scale(.96); } to { opacity: 1; transform: scale(1.04); } }
+@keyframes roundIntroFooterPulse { from { opacity: .65; } to { opacity: 1; } }
+@media (max-width: 650px) {
+  .round-intro { gap: 14px; padding: 14px; }
+  .round-intro__matchup { gap: 5px; }
+  .round-intro__fighters { gap: 5px; }
+  .round-intro__fighter img { height: clamp(110px,22vh,180px); }
+  .round-intro__label { font-size: .68rem; letter-spacing: .1em; }
+  .round-intro__name { font-size: .75rem; }
+  .round-intro__status { font-size: .6rem; padding: 3px 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .round-intro *, .round-intro *::before, .round-intro *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .round-intro__healthbar-fill { transition: none; }
+}

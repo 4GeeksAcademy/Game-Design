@@ -274,6 +274,108 @@ export function playGameSound(name) {
 }
 
 
+// Strong arcade combo sting: every count raises the pitch and each sting
+// itself climbs through a quick four-note fighting-game flourish.
+// A separate victory-style flourish when a combo is broken. Each rating tier
+// gets its own melodic signature so the end-of-combo sound is distinct from hits.
+export function playComboBreakSound(comboCount = 3) {
+  const count = Math.max(3, Math.min(10, Number(comboCount) || 3));
+  const ctx = ensureAudio();
+  if (!ctx || settings.muted || settings.effects <= 0) return;
+  const tier = count >= 10 ? 3 : count >= 7 ? 2 : count >= 5 ? 1 : 0;
+  const motifs = [
+    [660, 784, 988],
+    [740, 932, 1175, 1397],
+    [587, 784, 1175, 1568],
+    [784, 1047, 1319, 1760, 2093],
+  ];
+  const notes = motifs[tier];
+  const play = () => {
+    if (settings.muted || settings.effects <= 0 || !masterGain) return;
+    const now = ctx.currentTime;
+    notes.forEach((frequency, index) => {
+      const start = now + index * (tier === 0 ? 0.105 : 0.085);
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = tier === 0 ? "sine" : tier === 1 ? "triangle" : index % 2 ? "sine" : "triangle";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime((0.095 + tier * 0.025) * settings.effects, start + 0.018);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + (tier === 3 ? 0.42 : 0.32));
+      oscillator.connect(gain);
+      gain.connect(masterGain);
+      oscillator.start(start);
+      oscillator.stop(start + (tier === 3 ? 0.45 : 0.35));
+    });
+  };
+  if (ctx.state === "suspended") ctx.resume().then(play).catch(() => {});
+  else play();
+}
+
+export function playComboSound(comboCount = 3) {
+  const count = Math.max(3, Math.min(10, Number(comboCount) || 3));
+  const ctx = ensureAudio();
+  if (!ctx || settings.muted || settings.effects <= 0) return;
+  const level = count - 3;
+  const base = 520 + level * 105;
+  const notes = [base, base * 1.22, base * 1.5, base * 1.92];
+  const play = () => {
+    if (settings.muted || settings.effects <= 0 || !masterGain) return;
+    const now = ctx.currentTime;
+    notes.forEach((frequency, index) => {
+      const start = now + index * 0.065;
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = index === 0 ? "square" : "triangle";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime((0.16 + level * 0.012) * settings.master * settings.effects, start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.19);
+      oscillator.connect(gain);
+      gain.connect(masterGain);
+      oscillator.start(start);
+      oscillator.stop(start + 0.22);
+    });
+  };
+  if (ctx.state === "suspended") ctx.resume().then(play).catch(() => {});
+  else play();
+}
+
+// Loud, original arcade buzzer inspired by live elimination-show buzzers.
+export function playAGTBuzzerSound() {
+  const ctx = ensureAudio();
+  if (!ctx || settings.muted || settings.effects <= 0 || !masterGain) return;
+
+  const play = () => {
+    if (settings.muted || settings.effects <= 0 || !masterGain) return;
+    const now = ctx.currentTime;
+    const buzzLayers = [
+      { frequency: 118, delay: 0, duration: 0.56, volume: 0.15 },
+      { frequency: 94, delay: 0.025, duration: 0.52, volume: 0.12 },
+      { frequency: 72, delay: 0.075, duration: 0.44, volume: 0.10 },
+    ];
+
+    buzzLayers.forEach(({ frequency, delay, duration, volume }) => {
+      const start = now + delay;
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = "sawtooth";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.78, start + duration);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume * settings.effects), start + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(masterGain);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.035);
+    });
+  };
+
+  if (ctx.state === "suspended") ctx.resume().then(play).catch(() => {});
+  else play();
+}
+
 export function playUISound(kind = "click") {
   if (kind === "click") {
     playGameSound("click");

@@ -1,0 +1,1105 @@
+/* Tournament bot matches use the same battle shell and fighter HUD as Battle.jsx. */
+.wc-cpu-watch,
+.wc-cpu-watch * {
+  box-sizing: border-box;
+}
+
+.wc-cpu-watch {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow: hidden;
+  padding: 10px clamp(10px, 2vw, 24px);
+  color: #f1f5ff;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(27, 71, 54, .55), transparent 58%),
+    linear-gradient(180deg, #07120f 0%, #08130f 55%, #050a10 100%);
+  font-family: Rajdhani, Arial, sans-serif;
+}
+
+.wc-cpu-tournament-header {
+  flex: 0 0 48px;
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) auto minmax(0, auto);
+  align-items: center;
+  gap: clamp(8px, 1.6vw, 20px);
+  min-width: 0;
+  padding: 0 2px 7px;
+  border-bottom: 1px solid #a5ff193b;
+}
+
+.wc-cpu-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.wc-cpu-brand span {
+  color: #f4f2d9;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .82rem;
+  font-weight: 1000;
+  letter-spacing: .16em;
+  white-space: nowrap;
+  text-shadow: 0 0 12px #a5ff1930;
+}
+
+.wc-cpu-brand strong {
+  color: #a5ff19;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .52rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+.wc-cpu-player-persistent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 330px;
+  padding: 4px 9px;
+  border: 1px solid rgba(32, 217, 255, .38);
+  border-radius: 7px;
+  background: linear-gradient(100deg, rgba(7, 54, 62, .46), rgba(16, 17, 15, .95));
+  box-shadow: inset 3px 0 #20d9ff, 0 0 16px rgba(19, 213, 255, .06);
+}
+
+.wc-cpu-player-persistent img {
+  flex: 0 0 auto;
+  width: 29px;
+  height: 34px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 3px;
+  background: #151d1d;
+}
+
+.wc-cpu-player-persistent div {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wc-cpu-player-persistent small {
+  color: #71d7e8;
+  font-size: .46rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.wc-cpu-player-persistent strong {
+  overflow: hidden;
+  color: #f0eee4;
+  font-size: .75rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-cpu-player-persistent > span {
+  color: #a9bdaf;
+  font-size: .45rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-align: right;
+}
+
+.wc-cpu-match-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.wc-cpu-match-meta small {
+  color: #a5ff19;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .52rem;
+  font-weight: 900;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.wc-cpu-match-meta strong {
+  color: #f4f2d9;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .78rem;
+  font-weight: 1000;
+  letter-spacing: .12em;
+}
+
+.wc-cpu-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  min-width: 0;
+}
+
+.wc-cpu-tool-button,
+.wc-cpu-exit-button,
+.wc-cpu-speed button {
+  min-height: 31px;
+  padding: 5px 9px;
+  border: 1px solid #536b7a;
+  border-radius: 6px;
+  color: #e8f4ff;
+  background: linear-gradient(145deg, #1a2c3c, #101a27);
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .52rem;
+  font-weight: 950;
+  letter-spacing: .07em;
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease, border-color .15s ease;
+}
+
+.wc-cpu-tool-button:hover:not(:disabled),
+.wc-cpu-exit-button:hover,
+.wc-cpu-speed button:hover {
+  filter: brightness(1.18);
+  transform: translateY(-1px);
+  border-color: #20d9ff;
+}
+
+.wc-cpu-tool-button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.wc-cpu-tool-button:first-child {
+  border-color: #a5ff1970;
+  color: #eaffbc;
+}
+
+.wc-cpu-exit-button {
+  border-color: #695b3b;
+  color: #e9d8ac;
+  background: #201d16;
+}
+
+.wc-cpu-speed {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.wc-cpu-speed button {
+  min-width: 31px;
+  min-height: 29px;
+  padding-inline: 5px;
+  color: #a9bdcf;
+  background: #101b28;
+}
+
+.wc-cpu-speed button.active {
+  border-color: #a5ff19;
+  color: #12190d;
+  background: linear-gradient(145deg, #d7ff7b, #82ca20);
+  box-shadow: 0 0 12px #a5ff1935;
+}
+
+/* Use the exact Battle.jsx grid/areas, with the tournament controls kept above it. */
+.wc-cpu-game-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto !important;
+  padding: 0 !important;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+.wc-cpu-watch #battleLayout.wc-cpu-battle-layout {
+  height: 100%;
+  min-height: 0;
+  grid-template-columns: minmax(190px, .27fr) minmax(0, .73fr);
+  grid-template-rows: 35px minmax(190px, 1fr) minmax(132px, 22vh);
+  grid-template-areas:
+    "header header"
+    "arena arena"
+    "log attacks";
+  gap: 8px;
+  max-width: 1780px;
+}
+
+.wc-cpu-battle-header {
+  min-width: 0;
+}
+
+.wc-cpu-battle-header .solo-team-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  min-height: 32px;
+  padding: 3px 8px;
+  overflow: hidden;
+}
+
+.wc-cpu-battle-header .solo-team-label small {
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .13em;
+  opacity: .78;
+}
+
+.wc-cpu-battle-header .wc-cpu-side-name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-cpu-battle-header h1 {
+  font-size: clamp(14px, 1.4vw, 21px);
+}
+
+.wc-cpu-watch #battleLayout > #battleArena.wc-cpu-battle-arena {
+  min-height: 0;
+  height: 100%;
+  padding: 10px clamp(16px, 5vw, 90px) 8px;
+  overflow: hidden;
+  border-color: #287a5b;
+  background:
+    radial-gradient(ellipse at 50% 75%, rgba(39, 103, 67, .3), transparent 58%),
+    linear-gradient(145deg, #102117, #0c1a12 70%, #0c1912);
+  box-shadow: inset 0 0 28px #0007, 0 0 18px #12d98c12;
+}
+
+.wc-cpu-arena-grid {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: .25;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 100%, #a5ff1920, transparent 46%),
+    repeating-linear-gradient(0deg, transparent 0 44px, #d8e9ff0a 45px 46px);
+}
+
+.wc-cpu-watch #battleLayout > #battleArena > #opponentSection,
+.wc-cpu-watch #battleLayout > #battleArena > #characterSection {
+  max-width: 460px;
+  gap: clamp(6px, 1vh, 12px);
+}
+
+.wc-cpu-watch #battleLayout #opponent {
+  --fighter-accent: #ff526b;
+}
+
+.wc-cpu-watch #battleLayout #character {
+  --fighter-accent: #20d9ff;
+}
+
+.wc-cpu-watch #battleLayout .solo-fighter-art {
+  cursor: default;
+}
+
+.wc-cpu-watch #battleLayout .solo-fighter-art img {
+  pointer-events: none;
+}
+
+.wc-cpu-watch #battleLayout .wc-cpu-is-attacking .solo-fighter-art img {
+  animation: wcCpuBattleLunge .34s cubic-bezier(.2, .8, .2, 1);
+}
+
+.wc-cpu-watch #battleLayout #opponentSection.wc-cpu-is-attacking .solo-fighter-art img {
+  --wc-cpu-lunge: 15px;
+}
+
+.wc-cpu-watch #battleLayout #characterSection.wc-cpu-is-attacking .solo-fighter-art img {
+  --wc-cpu-lunge: -15px;
+}
+
+.wc-cpu-watch #battleLayout .wc-cpu-is-knocked-out .solo-fighter-art img {
+  filter: grayscale(1) brightness(.65) drop-shadow(0 0 8px #ff526b55);
+  opacity: .55;
+}
+
+.wc-cpu-live-action {
+  position: absolute;
+  z-index: 12;
+  top: 10px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: min(330px, 36%);
+  min-height: 44px;
+  padding: 6px 10px;
+  transform: translateX(-50%);
+  border: 1px solid #a5ff1945;
+  border-radius: 7px;
+  color: #edf5e9;
+  background: linear-gradient(145deg, rgba(15, 32, 24, .94), rgba(8, 14, 18, .94));
+  box-shadow: 0 5px 16px #0008, 0 0 14px #a5ff1910;
+  text-align: center;
+  pointer-events: none;
+}
+
+.wc-cpu-live-action > span {
+  color: #a5ff19;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .18em;
+}
+
+.wc-cpu-live-action strong {
+  max-width: 100%;
+  overflow: hidden;
+  color: #f7f5e7;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(8px, .9vw, 11px);
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-cpu-live-action small {
+  color: #ffacb8;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.wc-cpu-fighter-loading {
+  display: grid;
+  place-items: center;
+  color: #a5ff19;
+  font-family: Oxanium, Arial, sans-serif;
+}
+
+/* The bottom half matches Battle.jsx: combat history at left, attack cards at right. */
+.wc-cpu-watch #battleLayout > #combatLog.wc-cpu-combat-log {
+  grid-area: log;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #344b3d;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #14251b, #0a1510);
+  box-shadow: 0 5px 18px #0006;
+}
+
+.wc-cpu-watch #battleLayout #combatLogHeader {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 7px 9px;
+  border-bottom: 1px solid #a5ff1945;
+}
+
+.wc-cpu-watch #battleLayout #combatLogHeader h4 {
+  margin: 0;
+  color: #eaf2db;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.wc-cpu-watch #battleLayout #combatLogHeader span {
+  color: #a5ff19;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.wc-cpu-watch #battleLayout #combatLogEntries {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 4px 9px;
+  overflow-y: auto;
+  scrollbar-color: #50694d #101a13;
+  scrollbar-width: thin;
+}
+
+.wc-cpu-watch #battleLayout .combat-log-entry {
+  gap: 2px;
+  padding: 4px 1px;
+}
+
+.wc-cpu-watch #battleLayout .combat-log-time {
+  color: #a5ff19;
+  font-size: 7px;
+}
+
+.wc-cpu-watch #battleLayout .combat-log-text {
+  color: #d2dfd4;
+  font-size: 8px;
+  line-height: 1.2;
+}
+
+.wc-cpu-watch #battleLayout .combat-log-text strong {
+  color: #f3f6e8;
+}
+
+.wc-cpu-watch #battleLayout .combat-log-entry.hit .combat-log-text {
+  color: #ff9aa8;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel.wc-cpu-attack-panel {
+  grid-area: attacks;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #647d3b80;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #17271b, #0d1710);
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel #attackHeader {
+  padding: 6px 10px;
+  border-bottom-color: #a5ff19;
+  font-size: 9px;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel #attackBody {
+  padding: 5px 7px 2px;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel #attackList {
+  gap: 7px;
+  padding: 2px 2px 5px;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel .attack-card-wrapper {
+  flex-basis: 118px;
+  width: 118px;
+  min-width: 118px;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel .attack-card {
+  gap: 3px;
+  padding: 5px !important;
+  cursor: default;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel .attack-image,
+.wc-cpu-watch #battleLayout #battleAttackPanel .wc-cpu-attack-image-placeholder {
+  width: 100%;
+  height: clamp(36px, 6vh, 55px);
+  min-height: 36px;
+  max-height: 55px;
+  border: 1px solid #536b91;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.wc-cpu-attack-image-placeholder {
+  display: grid;
+  place-items: center;
+  color: #a5ff19;
+  background: linear-gradient(145deg, #263a27, #101a14);
+  font-size: 19px;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel .attack-card h5 {
+  min-height: 22px;
+  max-height: 22px;
+  margin: 0;
+  font-size: 8px;
+  line-height: 1.15;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel .attack-stats {
+  gap: 2px;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel .attack-stats span,
+.wc-cpu-watch #battleLayout #battleAttackPanel .attack-cost span {
+  font-size: 7px;
+}
+
+.wc-cpu-watch #battleLayout #battleAttackPanel .attack-damage,
+.wc-cpu-watch #battleLayout #battleAttackPanel .attack-speed {
+  padding: 3px 2px;
+}
+
+.wc-cpu-panel-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 9px 6px;
+  color: #a5ff19;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+.wc-cpu-empty-moves {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 180px;
+  color: #eaf2db;
+  text-align: center;
+}
+
+.wc-cpu-empty-moves strong {
+  color: #a5ff19;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 10px;
+}
+
+.wc-cpu-empty-moves span {
+  color: #a8b9ae;
+  font-size: 9px;
+}
+
+/* K.O. choices are presented in the center like a true match-end popup. */
+.wc-cpu-ko-backdrop {
+  position: fixed;
+  z-index: 11000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 18px;
+  background: rgba(2, 7, 12, .78);
+  backdrop-filter: blur(7px);
+  animation: wcCpuKoFadeIn .28s ease-out both;
+}
+
+.wc-cpu-ko-dialog {
+  position: relative;
+  width: min(670px, 100%);
+  max-height: min(92vh, 760px);
+  overflow-y: auto;
+  padding: clamp(18px, 3vw, 30px);
+  border: 1px solid #a5ff19a8;
+  border-radius: 15px 5px;
+  color: #f5f8ff;
+  background:
+    radial-gradient(ellipse at 50% 0%, #37602755, transparent 58%),
+    linear-gradient(145deg, #1a2b20, #0a111a 72%);
+  box-shadow: 0 22px 80px #000e, 0 0 0 4px #a5ff1917, 0 0 30px #a5ff1930;
+  text-align: center;
+  animation: wcCpuKoImpact .42s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-cpu-ko-eyebrow {
+  margin: 0 0 7px;
+  color: #a5ff19;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .65rem;
+  font-weight: 950;
+  letter-spacing: .2em;
+}
+
+.wc-cpu-ko-dialog > h2 {
+  margin: 0;
+  color: #fff;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(2.5rem, 8vw, 4.8rem);
+  font-weight: 1000;
+  font-style: italic;
+  line-height: .98;
+  text-shadow: 0 0 18px #ff315988, 3px 3px 0 #541624;
+}
+
+.wc-cpu-ko-subtitle {
+  margin: 9px 0 18px;
+  color: #d4e2d5;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .76rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+
+.wc-cpu-ko-matchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  max-width: 470px;
+  margin: 0 auto 18px;
+}
+
+.wc-cpu-ko-fighter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #ffffff22;
+  border-radius: 9px;
+  background: #07110caa;
+}
+
+.wc-cpu-ko-fighter > span {
+  color: #b7c5bc;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .13em;
+}
+
+.wc-cpu-ko-fighter img {
+  width: auto;
+  height: clamp(92px, 18vh, 145px);
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.wc-cpu-ko-fighter strong {
+  max-width: 100%;
+  overflow: hidden;
+  color: #f4f7ed;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-cpu-ko-fighter small {
+  color: #a5ff19;
+  font-size: .58rem;
+  font-weight: 900;
+}
+
+.wc-cpu-ko-fighter.is-winner {
+  border-color: #a5ff1970;
+  box-shadow: inset 0 0 15px #a5ff1912, 0 0 14px #a5ff1910;
+}
+
+.wc-cpu-ko-fighter.is-defeated {
+  border-color: #ff526b60;
+  filter: saturate(.6);
+}
+
+.wc-cpu-ko-fighter.is-defeated img {
+  filter: grayscale(.65);
+  opacity: .76;
+}
+
+.wc-cpu-ko-fighter.is-defeated small {
+  color: #ff9aa8;
+}
+
+.wc-cpu-ko-vs {
+  color: #f3d85a;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 1000;
+}
+
+.wc-cpu-ko-options {
+  padding-top: 14px;
+  border-top: 1px solid #ffffff1c;
+}
+
+.wc-cpu-ko-options > p {
+  margin: 0 0 10px;
+  color: #b3c2b2;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .15em;
+}
+
+.wc-cpu-ko-options button {
+  min-height: 40px;
+  border: 1px solid #627d4d;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #e8f1e8;
+  background: linear-gradient(145deg, #1b3325, #0f1b17);
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .62rem;
+  font-weight: 950;
+  letter-spacing: .08em;
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease;
+}
+
+.wc-cpu-ko-options button:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.wc-cpu-ko-options .wc-cpu-ko-continue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: min(100%, 350px);
+  min-height: 48px;
+  margin: 0 auto;
+  border-color: #e5f7a1;
+  color: #14200c;
+  background: linear-gradient(110deg, #e8ff9d, #9dde39);
+  box-shadow: 0 0 16px #a5ff193b;
+  font-size: .76rem;
+}
+
+.wc-cpu-ko-continue span {
+  font-size: 1rem;
+}
+
+.wc-cpu-ko-secondary {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.wc-cpu-ko-secondary button {
+  min-height: 34px;
+  font-size: .53rem;
+}
+
+@keyframes wcCpuBattleLunge {
+  0%, 100% { transform: translateX(0) scale(1); }
+  42% { transform: translateX(var(--wc-cpu-lunge, 12px)) scale(1.035); }
+}
+
+@keyframes wcCpuKoFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes wcCpuKoImpact {
+  0% { opacity: 0; transform: translateY(20px) scale(.92); }
+  70% { opacity: 1; transform: translateY(-2px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 1120px) and (min-width: 701px) {
+  .wc-cpu-tournament-header {
+    grid-template-columns: auto minmax(130px, 1fr) auto;
+  }
+
+  .wc-cpu-match-meta {
+    display: none;
+  }
+
+  .wc-cpu-header-actions {
+    grid-column: 3;
+  }
+
+  .wc-cpu-watch #battleLayout.wc-cpu-battle-layout {
+    grid-template-rows: 34px minmax(180px, 1fr) minmax(125px, 21vh);
+  }
+
+  .wc-cpu-watch #battleLayout > #battleArena.wc-cpu-battle-arena {
+    padding-inline: clamp(8px, 2vw, 24px);
+    gap: 10px;
+  }
+
+  .wc-cpu-live-action {
+    width: min(250px, 32%);
+  }
+}
+
+@media (max-width: 700px) {
+  .wc-cpu-watch {
+    min-height: 100%;
+    overflow-y: auto;
+    padding: 8px;
+  }
+
+  .wc-cpu-tournament-header {
+    flex: 0 0 auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px;
+  }
+
+  .wc-cpu-brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .wc-cpu-player-persistent {
+    grid-column: 1;
+    grid-row: 2;
+    max-width: none;
+  }
+
+  .wc-cpu-match-meta {
+    display: none;
+  }
+
+  .wc-cpu-header-actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 210px;
+  }
+
+  .wc-cpu-tool-button,
+  .wc-cpu-exit-button {
+    min-height: 27px;
+    padding: 4px 6px;
+    font-size: 7px;
+  }
+
+  .wc-cpu-speed button {
+    min-width: 25px;
+    min-height: 25px;
+    font-size: 7px;
+  }
+
+  .wc-cpu-game-container {
+    flex: 1 0 auto;
+    min-height: 640px;
+    overflow: visible;
+  }
+
+  .wc-cpu-watch #battleLayout.wc-cpu-battle-layout {
+    height: auto;
+    min-height: 640px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 34px minmax(340px, 46vh) 125px 175px;
+    grid-template-areas:
+      "header"
+      "arena"
+      "log"
+      "attacks";
+    gap: 7px;
+  }
+
+  .wc-cpu-battle-header {
+    gap: 4px;
+  }
+
+  .wc-cpu-battle-header h1 {
+    font-size: 11px;
+    letter-spacing: .5px;
+  }
+
+  .wc-cpu-battle-header h1 span {
+    display: block;
+    margin: 1px 0 0;
+    font-size: 7px;
+  }
+
+  .wc-cpu-battle-header .solo-team-label {
+    padding-inline: 4px;
+  }
+
+  .wc-cpu-battle-header .wc-cpu-side-name {
+    font-size: 8px;
+  }
+
+  .wc-cpu-battle-header .solo-team-label small {
+    font-size: 6px;
+  }
+
+  .wc-cpu-watch #battleLayout > #battleArena.wc-cpu-battle-arena {
+    gap: 8px;
+    padding: 8px 6px;
+  }
+
+  .wc-cpu-watch #battleLayout > #battleArena > #opponentSection,
+  .wc-cpu-watch #battleLayout > #battleArena > #characterSection {
+    gap: 6px;
+  }
+
+  .wc-cpu-watch #battleLayout .solo-fighter-hud {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .wc-cpu-watch #battleLayout .solo-fighter-name-row h2 {
+    font-size: 10px;
+  }
+
+  .wc-cpu-watch #battleLayout .solo-resource-row {
+    grid-template-columns: 17px minmax(0, 1fr) auto;
+    gap: 4px;
+  }
+
+  .wc-cpu-watch #battleLayout .solo-resource-row b {
+    min-width: 38px;
+    font-size: 7px;
+  }
+
+  .wc-cpu-watch #battleLayout .solo-segment-group {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
+  .wc-cpu-watch #battleLayout .solo-fighter-art {
+    min-height: 100px;
+  }
+
+  .wc-cpu-watch #battleLayout .solo-fighter-art img {
+    max-width: 100%;
+  }
+
+  .wc-cpu-live-action {
+    top: 5px;
+    width: min(170px, 34%);
+    min-height: 38px;
+    padding: 4px;
+  }
+
+  .wc-cpu-live-action > span {
+    font-size: 6px;
+  }
+
+  .wc-cpu-live-action strong {
+    font-size: 7px;
+  }
+
+  .wc-cpu-live-action small {
+    font-size: 6px;
+  }
+
+  .wc-cpu-watch #battleLayout #combatLogHeader {
+    padding: 5px 7px;
+  }
+
+  .wc-cpu-watch #battleLayout #combatLogEntries {
+    padding: 3px 7px;
+  }
+
+  .wc-cpu-watch #battleLayout #battleAttackPanel .attack-card-wrapper {
+    flex-basis: 105px;
+    width: 105px;
+    min-width: 105px;
+  }
+
+  .wc-cpu-ko-backdrop {
+    align-items: center;
+    padding: 10px;
+  }
+
+  .wc-cpu-ko-dialog {
+    padding: 16px 12px;
+  }
+
+  .wc-cpu-ko-subtitle {
+    font-size: .62rem;
+  }
+
+  .wc-cpu-ko-matchup {
+    gap: 6px;
+  }
+
+  .wc-cpu-ko-fighter {
+    padding: 6px 4px;
+  }
+
+  .wc-cpu-ko-fighter img {
+    height: 100px;
+  }
+
+  .wc-cpu-ko-fighter strong {
+    font-size: .62rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-cpu-watch *,
+  .wc-cpu-watch *::before,
+  .wc-cpu-watch *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* Keep the simulation round obvious even when the tournament phase is shown above it. */
+.wc-cpu-battle-header h1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1.02;
+}
+
+.wc-cpu-battle-header h1 .wc-cpu-battle-round-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 16px;
+  margin-top: 2px;
+  padding: 3px 9px;
+  border: 1px solid rgba(165, 255, 25, .48);
+  border-radius: 3px;
+  color: #d9ff91;
+  background: linear-gradient(90deg, rgba(56, 91, 20, .38), rgba(13, 25, 12, .88));
+  box-shadow: 0 0 13px rgba(165, 255, 25, .12), inset 0 1px rgba(255, 255, 255, .08);
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(7px, .65vw, 9px);
+  font-weight: 1000;
+  letter-spacing: .17em;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  animation: wcCpuRoundCounterUpdate .3s ease both;
+}
+
+@keyframes wcCpuRoundCounterUpdate {
+  from { opacity: .45; transform: translateY(-3px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 700px) {
+  .wc-cpu-battle-header h1 {
+    gap: 1px;
+    font-size: 10px;
+  }
+
+  .wc-cpu-battle-header h1 .wc-cpu-battle-round-counter {
+    min-height: 13px;
+    margin-top: 1px;
+    padding: 2px 5px;
+    font-size: 6px;
+    letter-spacing: .1em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-cpu-battle-header h1 .wc-cpu-battle-round-counter {
+    animation: none !important;
+  }
+}
+
+
+/* Watch Mode intentionally keeps only the current-match skip control. */
+.wc-cpu-skip-only {
+  justify-content: flex-end;
+}
+.wc-cpu-skip-button {
+  min-width: 112px;
+  min-height: 34px;
+  border-color: #d9f48b;
+  color: #18210d;
+  background: linear-gradient(135deg, #e7ff9c, #91ce35);
+  box-shadow: 0 0 15px rgba(165, 255, 25, .2);
+  font-weight: 950;
+  letter-spacing: .1em;
+}
+.wc-cpu-skip-button span {
+  margin-left: 6px;
+  font-size: .8rem;
+}

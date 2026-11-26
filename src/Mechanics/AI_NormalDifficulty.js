@@ -244,6 +244,7 @@ function createNormalAIController({
 
   let queue = [];
   let currentAttack = null;
+  let currentAttackKey = null;
   let timer = null;
   let stopped = false;
   let started = false;
@@ -253,6 +254,14 @@ function createNormalAIController({
       clearTimeout(timer);
       timer = null;
     }
+  }
+
+  function getAttackKey(attack) {
+    return attack?.id ?? attack?.name ?? attack;
+  }
+
+  function findLiveAttack(fighter, key) {
+    return fighter?.attacks?.find((attack) => getAttackKey(attack) === key) ?? null;
   }
 
   function isBattleOver() {
@@ -273,6 +282,7 @@ function createNormalAIController({
     stopped = true;
     clearAttackTimer();
     currentAttack = null;
+    currentAttackKey = null;
     queue = [];
 
     onShowAttack(null);
@@ -292,26 +302,39 @@ function createNormalAIController({
 
     const currentAI = readAI();
 
-    // Choose the next queued move that is still usable.
-    const index = queue.findIndex(
-      (attack) => canUseAttack(attack) && (attack.cost ?? 0) <= currentAI.mana,
-    );
+    // Resolve each queued ID against the fighter's current attack list.
+    // This prevents an outdated queue snapshot from bypassing cooldowns.
+    const index = queue.findIndex((key) => {
+      const liveAttack = findLiveAttack(currentAI, key);
+      return liveAttack &&
+        canUseAttack(liveAttack) &&
+        getModifiedAttackStat(liveAttack, currentAI, "cost") <= currentAI.mana;
+    });
 
     if (index === -1) {
       finishTurn();
       return;
     }
 
-    currentAttack = queue.splice(index, 1)[0];
+    currentAttackKey = queue.splice(index, 1)[0];
+    currentAttack = findLiveAttack(currentAI, currentAttackKey);
+
+    if (!currentAttack || !canUseAttack(currentAttack)) {
+      currentAttack = null;
+      currentAttackKey = null;
+      advance();
+      return;
+    }
 
     onShowAttack(currentAttack);
 
     timer = setTimeout(() => {
       if (stopped || !currentAttack) return;
 
-      const attack = currentAttack;
+      const queuedAttackKey = currentAttackKey;
       const attacker = readAI();
       const defender = readPlayer();
+      const attack = findLiveAttack(attacker, queuedAttackKey);
 
       timer = null;
 
@@ -325,6 +348,18 @@ function createNormalAIController({
         return;
       }
 
+      // Re-check the current move immediately before execution.
+      if (
+        !attack ||
+        !canUseAttack(attack) ||
+        getModifiedAttackStat(attack, attacker, "cost") > attacker.mana
+      ) {
+        currentAttack = null;
+        currentAttackKey = null;
+        advance();
+        return;
+      }
+
       const selectedAttackIds = aiChooseStunTargets(defender, attack.stun);
 
       const result = attackCharacter(attack, attacker, defender, 0, {
@@ -333,9 +368,10 @@ function createNormalAIController({
       });
 
       currentAttack = null;
+      currentAttackKey = null;
 
       if (result) {
-        onResolveAttack(attack, attacker, defender);
+        onResolveAttack(attack, attacker, defender, result);
       }
 
       if (isBattleOver()) {
@@ -353,7 +389,7 @@ function createNormalAIController({
     started = true;
 
     const currentAI = readAI();
-    queue = aiChooseNormalAttacks(currentAI);
+    queue = aiChooseNormalAttacks(currentAI).map(getAttackKey);
 
     if (queue.length === 0) {
       finishTurn();
@@ -377,6 +413,7 @@ function createNormalAIController({
     stopped = true;
     clearAttackTimer();
     currentAttack = null;
+    currentAttackKey = null;
     queue = [];
   }
 

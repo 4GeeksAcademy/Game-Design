@@ -360,19 +360,16 @@ function canUseAttack(attack) {
   if (!attack || attack.state !== true) return false;
 
   const remainingUses = attack.remainingUses ?? attack.uses;
+  if (Number.isInteger(attack.uses) && remainingUses <= 0) return false;
 
-  if (Number.isInteger(attack.uses) && remainingUses <= 0) {
+  const cooldownRemaining = Math.max(0, Number(attack.cooldownRemaining) || 0);
+  // A move remains locked for the entire round in which it was activated,
+  // even if another code path accidentally clears the visible counter.
+  if (cooldownRemaining > 0 || attack.cooldownStartedThisRound === true) {
     return false;
   }
 
-  if ((attack.cooldownRemaining ?? 0) > 0) {
-    return false;
-  }
-
-  if ((attack.stunned?.remainingRounds ?? 0) > 0) {
-    return false;
-  }
-
+  if ((attack.stunned?.remainingRounds ?? 0) > 0) return false;
   return true;
 }
 
@@ -385,9 +382,13 @@ function consumeAttack(attack) {
     );
   }
 
-  // Start the configured turn cooldown.
-  if (Number(attack.turnCooldown) > 0) {
-    attack.cooldownRemaining = Number(attack.turnCooldown);
+  // Start the configured turn cooldown. Never shorten an existing lock.
+  const turnCooldown = Math.max(0, Number(attack.turnCooldown) || 0);
+  if (turnCooldown > 0) {
+    attack.cooldownRemaining = Math.max(
+      Math.max(0, Number(attack.cooldownRemaining) || 0),
+      turnCooldown,
+    );
     attack.cooldownStartedThisRound = true;
   }
 
@@ -463,6 +464,17 @@ function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
   recordTemporaryEffects(ATK, attacker, buffsApplied);
   activateSelfModifiers(attacker, ATK);
 
+  // Resolve the physical strike first so its damage is independent from
+  // any health-draining debuff attached to the same attack.
+  let damageReceived = 0;
+  const attackDamage = getModifiedAttackStat(ATK, attacker, "damage");
+
+  if (attackDamage > 0 && defender.health > 0) {
+    damageReceived = Math.max(0, attackDamage - defense);
+    defender.health = Math.max(0, defender.health - damageReceived);
+  }
+
+  // Apply the debuff as a separate follow-up effect after physical damage.
   // By default, debuffs can still affect a defender who blocks.
   // Set debuffRequiresHit to make the debuff require a successful hit.
   const debuffNotAppliedReason =
@@ -471,15 +483,7 @@ function attackCharacter(ATK, attacker, defender, defense = 0, options = {}) {
   const debuffsApplied = debuffNotAppliedReason
     ? {}
     : applyEffects(ATK.debuff, defender, -1);
-  let damageReceived = 0;
   recordTemporaryEffects(ATK, defender, debuffsApplied);
-
-  const attackDamage = getModifiedAttackStat(ATK, attacker, "damage");
-
-  if (attackDamage > 0 && defender.health > 0) {
-    damageReceived = Math.max(0, attackDamage - defense);
-    defender.health = Math.max(0, defender.health - damageReceived);
-  }
 
   // Apply stun unless the attack requires a successful hit
   // and the defender successfully blocked it.

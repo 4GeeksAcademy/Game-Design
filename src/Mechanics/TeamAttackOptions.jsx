@@ -18,36 +18,65 @@ function AttackEffects({ attack }) {
   const buffs = Object.entries(attack.buff ?? {}).filter(
     ([, amount]) => typeof amount === "number" && amount !== 0,
   );
-
   const debuffs = Object.entries(attack.debuff ?? {}).filter(
     ([, amount]) => typeof amount === "number" && amount !== 0,
   );
+  const healEffects = Object.entries(attack.heal?.buff ?? {}).filter(
+    ([, amount]) => typeof amount === "number" && amount !== 0,
+  );
+  const hasStun = Boolean(attack.stun);
+  const hasSacrifice = Number(attack.sacrifice?.health) > 0;
+  const hasEffects =
+    buffs.length || debuffs.length || healEffects.length || hasStun || hasSacrifice;
 
-  if (!buffs.length && !debuffs.length) return null;
+  if (!hasEffects) return null;
 
   return (
-    <div className="team-attack-effects">
+    <div className="team-attack-effects" role="tooltip">
+      <h6 className="team-effects-title">ATTACK EFFECTS</h6>
       {buffs.length > 0 && (
-        <div>
+        <div className="team-effects-group">
           <span className="team-effect-heading buff-heading">BUFFS</span>
           {buffs.map(([stat, amount]) => (
             <span className="team-effect buff" key={`buff-${stat}`}>
-              {stat.toUpperCase()} {amount > 0 ? "+" : ""}
-              {amount}
+              {stat.toUpperCase()} {amount > 0 ? "+" : ""}{amount}
             </span>
           ))}
         </div>
       )}
-
       {debuffs.length > 0 && (
-        <div>
+        <div className="team-effects-group">
           <span className="team-effect-heading debuff-heading">DEBUFFS</span>
           {debuffs.map(([stat, amount]) => (
             <span className="team-effect debuff" key={`debuff-${stat}`}>
-              {stat.toUpperCase()} {amount > 0 ? "+" : ""}
-              {amount}
+              {stat.toUpperCase()} {amount > 0 ? "+" : ""}{amount}
             </span>
           ))}
+        </div>
+      )}
+      {healEffects.length > 0 && (
+        <div className="team-effects-group">
+          <span className="team-effect-heading heal-heading">HEAL / SUPPORT</span>
+          {healEffects.map(([stat, amount]) => (
+            <span className="team-effect heal" key={`heal-${stat}`}>
+              {stat.toUpperCase()} {amount > 0 ? "+" : ""}{amount}
+            </span>
+          ))}
+        </div>
+      )}
+      {hasStun && (
+        <div className="team-effects-group">
+          <span className="team-effect-heading debuff-heading">STUN</span>
+          <span className="team-effect debuff">
+            {attack.stun.type === "selected" ? "Selected attacks" : "Opponent attacks"}
+            {attack.stun.duration ? ` · ${attack.stun.duration} rounds` : ""}
+          </span>
+        </div>
+      )}
+      {hasSacrifice && (
+        <div className="team-effects-group">
+          <span className="team-effect-heading debuff-heading">SACRIFICE</span>
+          <span className="team-effect debuff">{attack.sacrifice.health} HEALTH COST</span>
         </div>
       )}
     </div>

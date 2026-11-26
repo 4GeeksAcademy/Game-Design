@@ -8,8 +8,9 @@ import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObj
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup";
 import Character from "./Character.jsx";
 import AttackOptions from "./AttackOptions.jsx";
-import VictoryScreen from "./VictoryScreen.jsx";
-import GameOverScreen from "./GameOverScreen.jsx";
+import BattleResultScreen from "./BattleResultScreen.jsx";
+import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
+import KnockoutOverlay from "./KnockoutOverlay.jsx";
 import { attackCharacter, evadeAttack } from "./Health.js";
 import { turn } from "./Turns.js";
 import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
@@ -17,9 +18,11 @@ import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { addCoins } from "./Currency.js";
-import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
+import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
+import { playComboSound, playComboBreakSound } from "../audio/audioManager.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
@@ -28,7 +31,11 @@ function createBattleFighter(characterId, battleId) {
   if (!selected?.data) return null;
 
   const data = selected.data;
-  const sourceAttacks = battleId === "player" ? getEquippedAttacks(selected.id, data.attacks ?? [], data.slot) : (data.attacks ?? []);
+  // Human equipment and CPU builds are independent. Bot kits are configured
+  // in Bot Simulator, so an empty player loadout cannot disable the opponent.
+  const sourceAttacks = battleId === "opponent"
+    ? getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+    : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
   const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)
       ? attack.uses
@@ -191,7 +198,7 @@ function RoundIntroHealthBar({ fighter }) {
   );
 }
 
-function App() {
+function BattleMatch() {
   const location = useLocation();
   const navigate = useNavigate();
   const levelConfig = location.state ?? {};
@@ -211,11 +218,11 @@ function App() {
       : "mina";
 
   const [character, setCharacter] = useState(() =>
-    createBattleFighter(playerId, "player"),
+    createBattleFighter(playerId, "player", location.state?.difficulty ?? "Easy"),
   );
 
   const [opponent, setOpponent] = useState(() =>
-    createBattleFighter(opponentId, "opponent"),
+    createBattleFighter(opponentId, "opponent", location.state?.difficulty ?? "Easy"),
   );
 
   const [damageDealt, setDamageDealt] = useState(0);
@@ -224,6 +231,7 @@ function App() {
   const rewardPaidRef = useRef(false);
 
   const aiControllerRef = useRef(null);
+  const aiAttackHealthBeforeRef = useRef(null);
 
   useEffect(() => {
     const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
@@ -261,6 +269,7 @@ function App() {
 
   const [knockout, setKnockout] = useState(null);
   const [showResults, setShowResults] = useState(false);
+  const [isKnockoutFadingOut, setIsKnockoutFadingOut] = useState(false);
 
   const [isRoundIntroFadingOut, setIsRoundIntroFadingOut] = useState(false);
 
@@ -271,20 +280,62 @@ function App() {
   const [combatMessages, setCombatMessages] = useState([]);
   const [combatLog, setCombatLog] = useState([]);
   const [aiAttack, setAiAttack] = useState(null);
+  const [combatEffects, setCombatEffects] = useState({});
+  const [comboState, setComboState] = useState(null);
+  const [comboBreakState, setComboBreakState] = useState(null);
+  const [highestCombo, setHighestCombo] = useState(0);
+  const comboStreakRef = useRef(0);
+  const highestComboRef = useRef(0);
+
+  const endComboStreak = useCallback(() => {
+    const count = comboStreakRef.current;
+    if (count >= 3) {
+      playComboBreakSound(count);
+      setComboBreakState({ count, id: Date.now() + Math.random() });
+    }
+    comboStreakRef.current = 0;
+    setComboState(null);
+    return count;
+  }, []);
+
+  const recordComboOutcome = useCallback((successful) => {
+    if (!successful) {
+      endComboStreak();
+      return;
+    }
+    const nextCount = Math.min(10, comboStreakRef.current + 1);
+    comboStreakRef.current = nextCount;
+    if (nextCount >= 3) {
+      playComboSound(nextCount);
+      const stage = nextCount >= 10 ? 10 : nextCount >= 8 ? 8 : nextCount;
+      setComboState({ count: nextCount, stage, id: Date.now() + Math.random() });
+      if (nextCount > highestComboRef.current) {
+        highestComboRef.current = nextCount;
+        setHighestCombo(nextCount);
+      }
+    }
+  }, [endComboStreak]);
+
+  useEffect(() => {
+    if (currentTurn !== "player") endComboStreak();
+  }, [currentTurn, endComboStreak]);
 
   const resetBattle = useCallback(() => {
     aiControllerRef.current?.stop();
     aiControllerRef.current = null;
-    setCharacter(createBattleFighter(playerId, "player"));
-    setOpponent(createBattleFighter(opponentId, "opponent"));
+    aiAttackHealthBeforeRef.current = null;
+    setCharacter(createBattleFighter(playerId, "player", location.state?.difficulty ?? "Easy"));
+    setOpponent(createBattleFighter(opponentId, "opponent", location.state?.difficulty ?? "Easy"));
     setDamageDealt(0); setCombatDefense(0); setAttacksUsed(0);
+    comboStreakRef.current = 0; highestComboRef.current = 0;
+    setComboState(null); setComboBreakState(null); setHighestCombo(0);
     lastRewardedDamage.current = 0; lastRecordedAttacks.current = 0;
     rewardPaidRef.current = false;
     festivalBattleRecorded.current = false;
     setDefenseTimeLeft(10); setCurrentTurn("intro"); setShowIncomingAttack(false);
-    setRoundNumber(1); setShowRoundIntro(true); setKnockout(null); setShowResults(false);
+    setRoundNumber(1); setShowRoundIntro(true); setKnockout(null); setShowResults(false); setIsKnockoutFadingOut(false);
     setIsRoundIntroFadingOut(false); setShowFinishOverlay(false); setIsFinishFadingOut(false);
-    setCombatMessages([]); setCombatLog([]); setAiAttack(null); setIsPaused(false);
+    setCombatMessages([]); setCombatLog([]); setAiAttack(null); setCombatEffects({}); setIsPaused(false);
   }, [playerId, opponentId]);
 
   useEffect(() => {
@@ -380,7 +431,7 @@ function App() {
     characterRef.current = character;
     opponentRef.current = opponent;
     knockoutRef.current = knockout;
-  }, [character, opponent, knockout]);
+  }, [character, opponent, knockout, comboBreakState]);
 
   // Display one queued message at a time.
   const firstMessageId = combatMessages[0]?.id;
@@ -402,7 +453,8 @@ function App() {
       opponent.turnFinished &&
       character.health > 0 &&
       opponent.health > 0 &&
-      !knockout
+      !knockout &&
+      !comboBreakState
     ) {
       turn(character, opponent);
 
@@ -421,34 +473,32 @@ function App() {
 
     setShowFinishOverlay(false);
     setIsFinishFadingOut(false);
+    setIsKnockoutFadingOut(false);
     setShowResults(false);
 
-    // Let the individual K.O. cutscene play first.
-    const finishTimer = setTimeout(() => {
-      setShowFinishOverlay(true);
-    }, 2600);
-
-    // Fade the final cards out before showing the original result screen.
-    const fadeTimer = setTimeout(() => {
-      setIsFinishFadingOut(true);
-    }, 5000);
-
-    const resultsTimer = setTimeout(() => {
-      setShowResults(true);
-    }, 5600);
+    // Let the combo-break rating finish before the K.O. cutscene takes over.
+    const comboDelay = comboBreakState || comboStreakRef.current >= 3 ? 3300 : 0;
+    if (comboStreakRef.current >= 3) endComboStreak();
+    const koFadeTimer = setTimeout(() => setIsKnockoutFadingOut(true), comboDelay + 2100);
+    const finishTimer = setTimeout(() => setShowFinishOverlay(true), comboDelay + 2600);
+    const fadeTimer = setTimeout(() => setIsFinishFadingOut(true), comboDelay + 5000);
+    const resultsTimer = setTimeout(() => setShowResults(true), comboDelay + 5600);
 
     return () => {
+      clearTimeout(koFadeTimer);
       clearTimeout(finishTimer);
       clearTimeout(fadeTimer);
       clearTimeout(resultsTimer);
     };
-  }, [knockout]);
+  }, [knockout, comboBreakState, endComboStreak]);
 
   // Detect a knockout only once and save the fighters for the animations.
   useEffect(() => {
     if (knockout) return;
 
     if (character.health <= 0) {
+      // Finish the combo-break celebration before mounting the K.O. cutscene.
+      if (comboStreakRef.current >= 3) endComboStreak();
       setKnockout({
         defeated: character.name,
         winner: opponent.name,
@@ -459,6 +509,8 @@ function App() {
         defeatedTeam: "player",
       });
     } else if (opponent.health <= 0) {
+      // Finish the combo-break celebration before mounting the K.O. cutscene.
+      if (comboStreakRef.current >= 3) endComboStreak();
       setKnockout({
         defeated: opponent.name,
         winner: character.name,
@@ -514,12 +566,43 @@ function App() {
         getPlayer: () => characterRef.current,
 
         onShowAttack: (attack) => {
+          if (attack) aiAttackHealthBeforeRef.current = characterRef.current?.health ?? 0;
           setAiAttack(attack);
         },
 
-        onResolveAttack: (attack, currentAI, currentPlayer) => {
-          showCombatMessage(`${currentAI.name} used ${attack.name}!`, "hit");
+        onResolveAttack: (attack, currentAI, currentPlayer, result) => {
+          const before = Number(aiAttackHealthBeforeRef.current ?? currentPlayer.health);
+          const damage = Math.max(0, before - Math.max(0, Number(currentPlayer.health) || 0));
+          const targetEffects = Object.entries(result?.debuffsApplied ?? {})
+            .filter(([, amount]) => Number(amount) !== 0)
+            .map(([stat, amount]) => ({ stat, kind: "debuff", label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+          if (result?.stunnedAttacks?.length || attack.stun) targetEffects.push({ stat: "stun", kind: "debuff", label: "STUN APPLIED" });
+          const selfEffects = Object.entries(result?.buffsApplied ?? {})
+            .filter(([, amount]) => Number(amount) !== 0)
+            .map(([stat, amount]) => ({ stat, kind: "buff", label: `↑ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
 
+          if (damage > 0 || targetEffects.length) {
+            triggerCombatEffect({
+              target: "player",
+              type: damage > 0 ? "damage" : "status",
+              damage,
+              tier: damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light",
+              message: "",
+              effects: targetEffects,
+            });
+          }
+          triggerCombatEffect({
+            target: "opponent",
+            type: selfEffects.length || attack.heal ? "status" : "attack",
+            damage: 0,
+            tier: "light",
+            message: attack.heal ? "RECOVERED!" : selfEffects.length ? "POWER UP!" : "",
+            effects: selfEffects,
+          });
+          showCombatMessage(`${currentAI.name} used ${attack.name}!`, damage > 0 ? "hit" : targetEffects.length ? "debuff" : selfEffects.length || attack.heal ? "buff" : "attack");
+          if (damage > 0) showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
+          if (targetEffects.length) showCombatMessage(`${currentPlayer.name} was affected by ${attack.name}!`, "debuff");
+          if (selfEffects.length || attack.heal) showCombatMessage(`${currentAI.name} gained a status effect!`, "buff");
           setOpponent({ ...currentAI });
           setCharacter({ ...currentPlayer });
         },
@@ -551,10 +634,44 @@ function App() {
 
     // Easy AI uses the same visible defense window, but can advance
     // immediately when the player blocks or evades.
-    const controller = aiTurn(opponent, character, setAiAttack, () => {
+    const controller = aiTurn(opponent, character, (attack) => { aiAttackHealthBeforeRef.current = characterRef.current?.health ?? 0; setAiAttack(attack); }, () => {
       setOpponent({ ...opponent });
       setCharacter({ ...character });
       setAiAttack(null);
+    }, 2, (attack, currentAI, currentPlayer, result) => {
+      const before = Number(aiAttackHealthBeforeRef.current ?? currentPlayer.health);
+      const damage = Math.max(0, before - Math.max(0, Number(currentPlayer.health) || 0));
+      const targetEffects = Object.entries(result?.debuffsApplied ?? {})
+        .filter(([, amount]) => Number(amount) !== 0)
+        .map(([stat, amount]) => ({ stat, kind: "debuff", label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+      if (result?.stunnedAttacks?.length || attack.stun) targetEffects.push({ stat: "stun", kind: "debuff", label: "STUN APPLIED" });
+      const selfEffects = Object.entries(result?.buffsApplied ?? {})
+        .filter(([, amount]) => Number(amount) !== 0)
+        .map(([stat, amount]) => ({ stat, kind: "buff", label: `↑ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+      if (damage > 0 || targetEffects.length) {
+        triggerCombatEffect({
+          target: "player",
+          type: damage > 0 ? "damage" : "status",
+          damage,
+          tier: damage >= 70 ? "fatal" : damage >= 45 ? "heavy" : damage >= 20 ? "effective" : "light",
+          message: result?.stunnedAttacks?.length || attack.stun ? "STUNNED!" : "",
+          effects: targetEffects,
+        });
+      }
+      triggerCombatEffect({
+        target: "opponent",
+        type: selfEffects.length || attack.heal ? "status" : "attack",
+        damage: 0,
+        tier: "light",
+        message: attack.heal ? "RECOVERED!" : selfEffects.length ? "POWER UP!" : "",
+        effects: selfEffects,
+      });
+      showCombatMessage(`${currentAI.name} used ${attack.name}!`, damage > 0 ? "hit" : targetEffects.length ? "debuff" : selfEffects.length || attack.heal ? "buff" : "attack");
+      if (damage > 0) showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
+      if (targetEffects.length) showCombatMessage(`${currentPlayer.name} was affected by ${attack.name}!`, "debuff");
+      if (selfEffects.length || attack.heal) showCombatMessage(`${currentAI.name} gained a status effect!`, "buff");
+      setOpponent({ ...currentAI });
+      setCharacter({ ...currentPlayer });
     });
     aiControllerRef.current = controller;
 
@@ -567,12 +684,12 @@ function App() {
   }, [currentTurn, isPaused]);
 
   useEffect(() => {
-    if (!isStoryMode && showResults && knockout && !rewardPaidRef.current) {
+    if (!isStoryMode && !levelConfig.tournament && showResults && knockout && !rewardPaidRef.current) {
       rewardPaidRef.current = true;
       const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[levelConfig.difficulty ?? "Easy"] ?? 1;
-      addCoins(Math.floor((damageDealt + combatDefense) * multiplier));
+      addCoins(Math.floor((damageDealt + combatDefense) * multiplier * Math.max(1, highestCombo)));
     }
-  }, [showResults, knockout, isStoryMode, levelConfig.difficulty, damageDealt, combatDefense]);
+  }, [showResults, knockout, isStoryMode, levelConfig.tournament, levelConfig.difficulty, damageDealt, combatDefense, highestCombo]);
 
   // Display the round announcement before allowing combat.
   useEffect(() => {
@@ -624,6 +741,22 @@ function App() {
 
     return () => clearInterval(timer);
   }, [aiAttack, knockout, character.health, opponent.health, isPaused]);
+
+  // Route a short-lived impact/status animation to the fighter actually affected.
+  function triggerCombatEffect(effect) {
+    const id = Date.now() + Math.random();
+    setCombatEffects((current) => ({
+      ...current,
+      [effect.target]: { ...effect, id },
+    }));
+    setTimeout(() => {
+      setCombatEffects((current) =>
+        current[effect.target]?.id === id
+          ? { ...current, [effect.target]: null }
+          : current,
+      );
+    }, 2100);
+  }
 
   // Add messages to the popup queue and permanent combat log.
   function showCombatMessage(text, type) {
@@ -705,6 +838,27 @@ const stunOptions = {
 
       setOpponent({ ...result.attacker });
       setCharacter({ ...result.defender });
+      const incomingDamage = Math.max(
+        0,
+        Math.max(0, Number(character.health) || 0) -
+          Math.max(0, Number(result.defender?.health) || 0),
+      );
+      triggerCombatEffect({
+        target: "opponent",
+        type: "attack",
+        damage: 0,
+        tier: "light",
+        message: "",
+        effects: [],
+      });
+      triggerCombatEffect({
+        target: "player",
+        type: choice === "defend" ? "blocked" : choice === "evade" && result.evaded ? "evaded" : incomingDamage > 0 ? "damage" : "status",
+        damage: incomingDamage,
+        tier: incomingDamage >= 70 ? "fatal" : incomingDamage >= 45 ? "heavy" : incomingDamage >= 20 ? "effective" : "light",
+        message: choice === "defend" ? "BLOCKED!" : choice === "evade" && result.evaded ? "EVADED!" : "",
+        effects: [],
+      });
 
       if (choice === "defend") {
         showCombatMessage("🛡️ BLOCKED!", "blocked");
@@ -782,103 +936,58 @@ const stunOptions = {
   }, [aiAttack]);
 
   return (
-    <div className="container-fluid mt-3" id="gameContainer">
+    <div className={`container-fluid mt-3 ${comboState ? "solo-combo-active" : ""}`} id="gameContainer">
       <FestivalChallengePopup />
-      {!knockout && <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>}
-      {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: location.state })} onMainMenu={() => navigate("/")} />}
-      {/* Full-screen round intro with both fighters and their health. */}
-      {showRoundIntro && !knockout && (
-        <div
-          id="roundIntroOverlay"
-          className={isRoundIntroFadingOut ? "is-fading-out" : ""}
-          role="status"
-          aria-live="polite"
-        >
-          <div id="roundIntroContent" className="battle-intro-enhanced">
-            <span id="roundIntroEyebrow">Wild Cards</span>
-
-            <h1 key={roundNumber}>ROUND {roundNumber}</h1>
-
-            <div className="battle-intro-matchup">
-              <div className="battle-intro-fighter battle-intro-opponent">
-                <span className="battle-intro-label">CPU OPPONENT</span>
-
-                {opponent.image && (
-                  <img src={opponent.image} alt={opponent.name} />
-                )}
-
-                <strong>{opponent.name}</strong>
-
-                <RoundIntroHealthBar fighter={opponent} />
-
-                <span className="battle-intro-hp">
-                  HP {Math.max(0, opponent.health)} / {opponent.maximumHealth}
-                </span>
-              </div>
-
-              <div className="battle-intro-vs">VS</div>
-
-              <div className="battle-intro-fighter battle-intro-player">
-                <span className="battle-intro-label">PLAYER</span>
-
-                {character.image && (
-                  <img src={character.image} alt={character.name} />
-                )}
-
-                <strong>{character.name}</strong>
-
-                <RoundIntroHealthBar fighter={character} />
-
-                <span className="battle-intro-hp">
-                  HP {Math.max(0, character.health)} / {character.maximumHealth}
-                </span>
-              </div>
+      <ComboPopup combo={comboState} />
+      <ComboBreakPopup combo={comboBreakState ? { ...comboBreakState, onDismiss: () => setComboBreakState(null) } : null} />
+      {combatMessages.length > 0 && (
+        <div id="combatPopupContainer" aria-live="polite">
+          {combatMessages.slice(0, 3).map((entry, index) => (
+            <div key={entry.id} className={`combat-popup ${entry.type}`} style={{ animationDelay: `${index * 0.15}s` }}>
+              {entry.text}
             </div>
-
-            <div id="roundIntroLine" />
-
-            <p>GET READY</p>
-          </div>
+          ))}
         </div>
+      )}
+      {!knockout && <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>}
+      {isPaused && <BattlePauseMenu
+        tournamentMode={Boolean(levelConfig.tournament)}
+        onResume={() => setIsPaused(false)}
+        onRestart={resetBattle}
+        onCharacterSelect={() => navigate("/character-select", { state: location.state })}
+        onMainMenu={() => levelConfig.tournament
+          ? navigate("/tournament", {
+              state: {
+                tournament: levelConfig.tournament,
+                tournamentResult: {
+                  matchId: levelConfig.tournamentMatchId,
+                  won: false,
+                  placementType: levelConfig.tournamentPlacement?.type ?? null,
+                },
+              },
+            })
+          : navigate("/")}
+      />}
+      {showRoundIntro && !knockout && (
+        <RoundIntroOverlay
+          roundNumber={roundNumber}
+          opponentTeam={[opponent]}
+          playerTeam={[character]}
+          isFadingOut={isRoundIntroFadingOut}
+        />
       )}
 
       {/* Individual K.O. cutscene. */}
-      {knockout && !showFinishOverlay && !showResults && (
-        <div
-          className={`battle-ko-overlay ko-${knockout.defeatedTeam} ${
-            isFinishFadingOut ? "is-fading-out" : ""
-          }`}
-          role="alert"
-          aria-live="assertive"
-        >
-          <div className="battle-ko-flash" />
-
-          <div className="battle-ko-content">
-            <p className="battle-ko-eyebrow">FIGHTER DEFEATED</p>
-
-            {knockout.defeatedImage && (
-              <img
-                className="battle-ko-portrait"
-                src={knockout.defeatedImage}
-                alt={knockout.defeated}
-              />
-            )}
-
-            <h1 className="battle-ko-title">K.O.!</h1>
-
-            <p className="battle-ko-name">{knockout.defeated}</p>
-
-            <p className="battle-ko-subtitle">
-              {knockout.defeatedTeam === "opponent"
-                ? "OPPONENT DOWN"
-                : "PLAYER DOWN"}
-            </p>
-          </div>
-        </div>
+      {knockout && !comboBreakState && !showFinishOverlay && !showResults && (
+        <KnockoutOverlay
+          fighter={{ name: knockout.defeated, image: knockout.defeatedImage }}
+          defeatedTeam={knockout.defeatedTeam}
+          isFadingOut={isKnockoutFadingOut}
+        />
       )}
 
       {/* Final winner-versus-defeated cards. */}
-      {knockout && showFinishOverlay && !showResults && (
+      {knockout && !comboBreakState && showFinishOverlay && !showResults && (
         <div
           className={`battle-finish-overlay ${
             knockout.defeatedTeam === "player"
@@ -904,7 +1013,7 @@ const stunOptions = {
             <div className="battle-finish-side defeated-side">
               <h2>DEFEATED</h2>
 
-              <div className="battle-finish-card">
+              <div className="battle-finish-card is-defeated-card">
                 {knockout.defeatedImage && (
                   <img src={knockout.defeatedImage} alt="" />
                 )}
@@ -919,7 +1028,7 @@ const stunOptions = {
             <div className="battle-finish-side winning-side">
               <h2>WINNER</h2>
 
-              <div className="battle-finish-card">
+              <div className="battle-finish-card is-winning-card">
                 {knockout.winnerImage && (
                   <img src={knockout.winnerImage} alt="" />
                 )}
@@ -944,17 +1053,37 @@ const stunOptions = {
           attacksUsed={attacksUsed}
           levelConfig={levelConfig}
         />
-      ) : knockout && !showResults ? null : !isStoryMode &&
-        character.health <= 0 ? (
-        <GameOverScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} onRematch={resetBattle} />
-      ) : !isStoryMode && opponent.health <= 0 ? (
-        <div id="victorySection">
-          <VictoryScreen damageDealt={damageDealt} combatDefense={combatDefense} difficulty={levelConfig.difficulty ?? "Easy"} attacksUsed={attacksUsed} onRematch={resetBattle} />
-        </div>
+      ) : !isStoryMode && knockout && showResults ? (
+        <BattleResultScreen
+          won={knockout.defeatedTeam === "opponent"}
+          defeated={knockout.defeatedTeam === "player" ? character : opponent}
+          winner={knockout.defeatedTeam === "player" ? opponent : character}
+          damageDealt={damageDealt}
+          combatDefense={combatDefense}
+          attacksUsed={attacksUsed}
+          difficulty={levelConfig.difficulty ?? "Easy"}
+          comboMultiplier={Math.max(1, highestCombo)}
+          onRematch={resetBattle}
+          onTournamentComplete={levelConfig.tournament ? () => navigate("/tournament", {
+            state: {
+              tournament: levelConfig.tournament,
+              tournamentResult: {
+                matchId: levelConfig.tournamentMatchId,
+                won: knockout.defeatedTeam === "opponent",
+                placementType: levelConfig.tournamentPlacement?.type ?? null,
+              },
+            },
+          }) : undefined}
+        />
       ) : knockout ? null : (
         <>
-          {/* Fighters and combat log share one layout. */}
+          {/* Horizontal arcade HUD matching the 2v2 battle foundation. */}
           <div id="battleLayout">
+            <header className="solo-battle-header">
+              <div className="solo-team-label solo-opponent-label">CPU OPPONENT</div>
+              <h1>WILD CARDS <span>ROUND {roundNumber}</span></h1>
+              <div className="solo-team-label solo-player-label">PLAYER</div>
+            </header>
             {/* Opponent's attack and defensive choices. */}
             {aiAttack && showIncomingAttack && (
               <div
@@ -1107,35 +1236,34 @@ const stunOptions = {
             )}
             <div id="battleArena">
               {/* Story background behind both fighters. */}
-              {isStoryMode && (
+              {(isStoryMode || levelConfig.stageBackground) && (
                 <div
                   className="story-battle-background"
                   style={{
-                    backgroundImage: `url("${storyBackgrounds[levelConfig.background] || storyBackgrounds.arena}")`,
+                    backgroundImage: `url("${storyBackgrounds[isStoryMode ? levelConfig.background : levelConfig.stageBackground] || storyBackgrounds.arena}")`,
                   }}
                   aria-hidden="true"
                 />
               )}
 
-              <div
-                id="opponentSection"
-                className={aiAttack ? "opponent-is-attacking" : ""}
-              >
-                <Opponent opponent={opponent} setOpponent={setOpponent} />
-              </div>
+              <Opponent
+                opponent={opponent}
+                setOpponent={setOpponent}
+                combatEffect={combatEffects.opponent}
+                isAttacking={Boolean(aiAttack)}
+              />
 
-              <div id="characterSection">
-                <Character
-                  character={character}
-                  setCharacter={setCharacter}
-                  currentTurn={currentTurn}
-                  combatMessages={combatMessages}
-                  setCurrentTurn={setCurrentTurn}
-                />
-              </div>
+              <Character
+                character={character}
+                setCharacter={setCharacter}
+                currentTurn={currentTurn}
+                combatEffect={combatEffects.player}
+                setCurrentTurn={setCurrentTurn}
+                showFinishTurnButton={false}
+              />
             </div>
 
-            {/* Permanent combat log beside the fighters. */}
+            {/* Bottom-left combat log, paired with the attack panel. */}
             <div id="combatLog">
               <div id="combatLogHeader">
                 <h4>📜 Combat Log</h4>
@@ -1159,10 +1287,8 @@ const stunOptions = {
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Player's attack cards stay below the battle layout. */}
-          <div id="attackSection">
+            <div id="battleAttackPanel">
             <AttackOptions
               character={character}
               opponent={opponent}
@@ -1174,12 +1300,56 @@ const stunOptions = {
               showCombatMessage={showCombatMessage}
               openingTurnActive={roundNumber === 1}
               difficulty={location.state?.difficulty ?? "Easy"}
+              onCombatEffect={triggerCombatEffect}
+              onComboEvent={recordComboOutcome}
             />
+              <button
+                type="button"
+                className="solo-finish-turn-button"
+                disabled={currentTurn !== "player"}
+                onClick={() => {
+                  const comboCount = endComboStreak();
+                  setCharacter({ ...character, turnFinished: true });
+                  if (comboCount >= 3 || comboBreakState) {
+                    setCurrentTurn("combo-break");
+                    window.setTimeout(() => setCurrentTurn("ai"), 3300);
+                  } else setCurrentTurn("ai");
+                }}
+              >
+                FINISH TURN <span aria-hidden="true">➜</span>
+              </button>
+            </div>
           </div>
         </>
       )}
     </div>
   );
+}
+
+function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const levelConfig = location.state ?? {};
+  const hasPlayer = roster.some((fighter) => fighter.id === levelConfig.playerId);
+  const hasOpponent = roster.some((fighter) => fighter.id === levelConfig.opponentId);
+
+  if (!hasPlayer || !hasOpponent) {
+    return (
+      <main className="battle-setup-error-screen">
+        <section className="battle-setup-error-card" role="alert">
+          <span className="battle-setup-error-icon" aria-hidden="true">?</span>
+          <p className="battle-setup-error-eyebrow">FIGHTER DATA NOT FOUND</p>
+          <h1>NO FIGHTERS SELECTED</h1>
+          <p>You haven't selected both characters for this match yet. Head back to character selection and choose your fighter and opponent before entering the arena.</p>
+          <button type="button" onClick={() => navigate("/character-select", { state: { ...levelConfig, teamSize: "1v1" } })}>
+            SELECT YOUR FIGHTERS <span>▶</span>
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  return <BattleMatch />;
 }
 
 export default App;

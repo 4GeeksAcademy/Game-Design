@@ -88,6 +88,8 @@ function AttackOptions({
   playerKey = "player1",
   canAttack = true,
   onPvPAttack,
+  onCombatEffect,
+  onComboEvent,
 }) {
   const [pendingStunAttack, setPendingStunAttack] = useState(null);
   const openingTurnAttackLimitReached =
@@ -117,6 +119,7 @@ function AttackOptions({
         selectedAttackIds,
       };
 
+      const opponentHealthBefore = Math.max(0, Number(opponent.health) || 0);
       const result =
         difficulty === "Normal"
           ? normalDefendOrEvade(attack, character, opponent, stunOptions)
@@ -130,8 +133,69 @@ function AttackOptions({
       setCharacter({ ...result.attacker });
       setOpponent({ ...result.defender });
 
-      const damage = result.damageReceived ?? 0;
+      const damage = Math.max(
+        0,
+        opponentHealthBefore - Math.max(0, Number(result.defender?.health) || 0),
+      );
       if (damage > 0) setDamageDealt((previous) => previous + damage);
+
+      const effectStats = [
+        ...Object.entries(result.buffsApplied ?? {}).map(([stat, amount]) => ({ stat, amount, kind: "buff" })),
+        ...Object.entries(result.debuffsApplied ?? {}).map(([stat, amount]) => ({ stat, amount, kind: "debuff" })),
+      ].filter((effect) => Number(effect.amount) !== 0);
+      if (result.stunnedAttacks?.length) {
+        effectStats.push({ stat: "stun", amount: 1, kind: "debuff" });
+      }
+      const physicalDamage = Math.max(0, Number(result.damageReceived) || 0);
+      const tier = physicalDamage >= 70 ? "fatal" : physicalDamage >= 45 ? "heavy" : physicalDamage >= 20 ? "effective" : "light";
+      const damageAndDebuffs = effectStats
+        .filter((effect) => effect.kind === "debuff")
+        .map(({ stat, amount, kind }) => ({ stat, kind, label: stat === "stun" ? "STUN APPLIED" : `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+      // The physical strike is the first hit. A health-draining debuff is
+      // a distinct follow-up impact, presented just after the physical hit.
+      const debuffDamage = Math.max(0, -Number(result.debuffsApplied?.health ?? 0));
+      const hasOtherDebuff = damageAndDebuffs.some((effect) => effect.stat !== "health");
+      if (physicalDamage > 0) onComboEvent?.(true);
+      if (debuffDamage > 0) {
+        window.setTimeout(() => {
+          onComboEvent?.(true);
+          onCombatEffect?.({
+            target: "opponent",
+            type: "debuff-drain",
+            damage: debuffDamage,
+            tier: debuffDamage >= 70 ? "fatal" : debuffDamage >= 45 ? "heavy" : debuffDamage >= 20 ? "effective" : "light",
+            message: "DEBUFF HIT!",
+            effects: damageAndDebuffs.filter((effect) => effect.stat === "health"),
+          });
+        }, 500);
+      } else if (physicalDamage === 0 && debuffDamage === 0 && hasOtherDebuff) {
+        onComboEvent?.(true);
+      } else if (physicalDamage === 0 && debuffDamage === 0 && damageAndDebuffs.length === 0) {
+        onComboEvent?.(false);
+      }
+      const selfBuffs = effectStats
+        .filter((effect) => effect.kind === "buff")
+        .map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+
+      onCombatEffect?.({
+        target: "opponent",
+        type: result.action === "defend" ? "blocked" : result.action === "evade" ? "evaded" : physicalDamage > 0 ? "damage" : damageAndDebuffs.length ? "status" : "attack",
+        damage: physicalDamage,
+        tier,
+        message: result.action === "defend" ? "BLOCKED!" : result.action === "evade" ? (result.evaded ? "EVADED!" : "FAILED TO EVADE!") : "",
+        effects: damageAndDebuffs.filter((effect) => effect.stat !== "health"),
+      });
+      const healingReceived = Math.max(0, Number(result.buffsApplied?.health) || 0);
+      if (healingReceived > 0 || selfBuffs.length || damage > 0) {
+        onCombatEffect?.({
+          target: "player",
+          type: healingReceived > 0 ? "heal" : damage > 0 ? "attack" : "status",
+          damage: healingReceived,
+          tier: "light",
+          message: healingReceived > 0 ? "HEALED!" : "",
+          effects: selfBuffs.filter((effect) => effect.stat !== "health"),
+        });
+      }
 
       setAttacksUsed((previous) => previous + 1);
       showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
@@ -191,6 +255,8 @@ function AttackOptions({
       localPvP,
       canAttack,
       onPvPAttack,
+      onCombatEffect,
+      onComboEvent,
     ],
   );
 
@@ -324,7 +390,7 @@ function AttackOptions({
                           : ""
                       } ${!isAttackAvailable(attack) ? "attack-unavailable" : ""}
 ${(attack.stunned?.remainingRounds ?? 0) > 0 ? "attack-stunned" : ""}`}
-                      style={{ minWidth: "200px" }}
+                      style={{ minWidth: "158px" }}
                       disabled={
                         (!localPvP && currentTurn !== "player") ||
                         (localPvP && !canAttack) ||

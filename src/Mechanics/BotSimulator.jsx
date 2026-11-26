@@ -6,10 +6,10 @@ import { getUnlockedCharacters } from "./Currency.js";
 import {
   getAttackKey,
   getAttackSlotLimit,
-  getEquippedAttackKeys,
-  getEquippedAttacks,
+  getBotEquippedAttackKeys,
+  getBotEquippedAttacks,
   isAttackUnlocked,
-  saveEquippedAttackKeys,
+  saveBotEquippedAttackKeys,
 } from "./AttackLoadouts.js";
 import { simulateBattle, simulateTeamBattle } from "./BattleSimulator.js";
 
@@ -48,11 +48,8 @@ function getTeamMaximumHealth(team) {
 function getFighterWithEquippedAttacks(fighter) {
   const data = getFighterData(fighter);
   const slotLimit = getAttackSlotLimit(data);
-  const equippedAttacks = getEquippedAttacks(
-    fighter.id,
-    data.attacks ?? [],
-    data.slot,
-  ).slice(0, slotLimit);
+  const equippedAttacks = getBotEquippedAttacks(fighter.id, data.attacks ?? [], data.slot)
+    .slice(0, slotLimit);
 
   return {
     ...data,
@@ -64,7 +61,7 @@ function getEquippedAttackLabel(fighter) {
   if (!fighter) return "No fighter";
   const data = getFighterData(fighter);
   const slotLimit = getAttackSlotLimit(data);
-  const attacks = getEquippedAttacks(
+  const attacks = getBotEquippedAttacks(
     fighter.id,
     data.attacks ?? [],
     data.slot,
@@ -142,7 +139,7 @@ function createLoadoutOptimizationPlan(fighters) {
       isAttackUnlocked(fighter.id, attack),
     );
     const slotLimit = getAttackSlotLimit(data);
-    const currentKeys = getEquippedAttackKeys(
+    const currentKeys = getBotEquippedAttackKeys(
       fighter.id,
       data.attacks ?? [],
       data.slot,
@@ -261,7 +258,7 @@ async function optimizeLoadoutsForSimulation(plan, onProgress) {
   // Save only after every character has been evaluated against the same
   // baseline roster, then let the normal ranking simulations resume.
   for (const { fighter, data, best } of optimized) {
-    saveEquippedAttackKeys(fighter.id, best.keys, data.attacks ?? [], data.slot);
+    saveBotEquippedAttackKeys(fighter.id, best.keys, data.attacks ?? [], data.slot);
   }
 
   return optimized;
@@ -340,8 +337,8 @@ async function runStartingOrderSeries(
 
   for (let i = 0; i < requestedCount; i++) {
     const result = simulateBattle(
-      getFighterWithEquippedAttacks(firstFighter),
-      getFighterWithEquippedAttacks(secondFighter),
+      getFighterWithEquippedAttacks(firstFighter, firstDifficulty),
+      getFighterWithEquippedAttacks(secondFighter, secondDifficulty),
       {
         difficultyOne: firstDifficulty,
         difficultyTwo: secondDifficulty,
@@ -998,7 +995,7 @@ function BotSimulator() {
 
     const candidateLimit = Math.min(40, Math.max(1, Number(loadoutCandidateLimit) || 12));
     const repeats = Math.min(20, Math.max(1, Number(loadoutRepeats) || 1));
-    const currentKeys = getEquippedAttackKeys(
+    const currentKeys = getBotEquippedAttackKeys(
       loadoutFighter.id,
       loadoutFighter.data.attacks ?? [],
       loadoutFighter.data.slot,
@@ -1116,7 +1113,7 @@ function BotSimulator() {
       }
 
       if (best) {
-        saveEquippedAttackKeys(
+        saveBotEquippedAttackKeys(
           loadoutFighter.id,
           best.keys,
           loadoutFighter.data.attacks ?? [],
@@ -1286,8 +1283,8 @@ function BotSimulator() {
         for (const order of startingOrders) {
           for (let battle = 0; battle < requestedCount; battle++) {
             const result = simulateBattle(
-              getFighterWithEquippedAttacks(order.first),
-              getFighterWithEquippedAttacks(order.second),
+              getFighterWithEquippedAttacks(order.first, order.firstDifficulty),
+              getFighterWithEquippedAttacks(order.second, order.secondDifficulty),
               {
                 difficultyOne: order.firstDifficulty,
                 difficultyTwo: order.secondDifficulty,
@@ -1488,8 +1485,8 @@ function BotSimulator() {
         for (const order of startingOrders) {
           for (let battle = 0; battle < requestedCount; battle++) {
             const result = simulateTeamBattle(
-              order.first.map(getFighterWithEquippedAttacks),
-              order.second.map(getFighterWithEquippedAttacks),
+              order.first.map((fighter) => getFighterWithEquippedAttacks(fighter, order.firstDifficulty)),
+              order.second.map((fighter) => getFighterWithEquippedAttacks(fighter, order.secondDifficulty)),
               {
                 difficultyOne: order.firstDifficulty,
                 difficultyTwo: order.secondDifficulty,
@@ -1964,7 +1961,7 @@ function BotSimulator() {
               <p>
                 Choose a fighter, define the unlocked attacks the optimizer may use,
                 then select opponents. Every tested combination obeys the fighter's
-                attack-slot limit. The winning combination becomes the fighter's equipped loadout.
+                attack-slot limit. The winning combination becomes that fighter's CPU loadout.
               </p>
             </div>
 
@@ -2092,7 +2089,7 @@ function BotSimulator() {
                   <span> · {loadoutResults.best.wins} wins / {loadoutResults.best.losses} losses / {loadoutResults.best.draws} draws</span>
                 </p>
                 <p className="loadout-saved-note">
-                  <strong>Saved to equipped slots.</strong> Standard 1v1 and 2v2 simulations now use this legal loadout for this fighter.
+                  <strong>Saved to CPU loadout.</strong> Standard 1v1 and 2v2 simulations now use this legal loadout for this fighter.
                 </p>
                 <div className="loadout-best-attacks">
                   {loadoutResults.best.attacks.map((attack, index) => (
@@ -2199,10 +2196,10 @@ function BotSimulator() {
 
             <p>
               The simulator tests each unique pair of unlocked fighters in both
-              starting positions. Every fighter uses only their unlocked, equipped
-              attacks, limited by their character's slot capacity. Run the Loadout
-              Lab for each fighter first if you want the rankings to compare each
-              character's optimized build.
+              starting positions. Every CPU uses its independent Bot Simulator
+              loadout, limited by the character's slot capacity. Run the Loadout
+              Lab to configure CPU builds; Inventory equipment does not affect
+              CPU performance.
             </p>
 
             <p>

@@ -18,12 +18,10 @@ import {
   tickSelfModifiers,
 } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
-import { getEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
 import { addCoins } from "./Currency.js";
 import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
-import VictoryScreen from "./VictoryScreen.jsx";
-import GameOverScreen from "./GameOverScreen.jsx";
 import TeamAttackOptions from "./TeamAttackOptions.jsx";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
@@ -41,9 +39,15 @@ import {
 } from "./AI_NormalDifficulty.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
+import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
+import { playComboSound, playComboBreakSound } from "../audio/audioManager.js";
+import BattleResultScreen from "./BattleResultScreen.jsx";
+import RoundIntroOverlay from "./RoundIntroOverlay.jsx";
+import KnockoutOverlay from "./KnockoutOverlay.jsx";
 import "./Teambattle.css";
+import "./LocalBattle.css";
 
-function createBattleFighter(id, applyLoadout = false) {
+function createBattleFighter(id, isCpuControlled = false) {
   const selected = roster.find((fighter) => fighter.id === id);
   if (!selected?.data) return null;
 
@@ -64,7 +68,11 @@ function createBattleFighter(id, applyLoadout = false) {
       typeof data.defense === "object" && data.defense
         ? { ...data.defense }
         : data.defense,
-    attacks: (applyLoadout ? getEquippedAttacks(selected.id, data.attacks ?? [], data.slot) : (data.attacks ?? [])).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
+    // CPU fighters use their independent Bot Simulator build.
+    attacks: (isCpuControlled
+      ? getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+      : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+    ).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
         ? attack.uses
         : attack.remainingUses;
@@ -123,81 +131,54 @@ function describeEffects(effects, targetName, kind) {
     });
 }
 
-function RoundIntroHealthBar({ fighter }) {
-  const maximumHealth = Number(fighter.maximumHealth) || 1;
-  const health = Math.max(0, Number(fighter.health) || 0);
-
-  const percent = Math.max(0, Math.min(100, (health / maximumHealth) * 100));
-
-  const healthLevel =
-    percent <= 10
-      ? "critical"
-      : percent <= 30
-        ? "danger"
-        : percent <= 50
-          ? "warning"
-          : "healthy";
-
-  return (
-    <div
-      className={`team-round-intro__healthbar health-${healthLevel}`}
-      role="img"
-      aria-label={`${health} of ${maximumHealth} health remaining`}
-    >
-      <div
-        className="team-round-intro__healthbar-fill"
-        style={{ width: `${percent}%` }}
-      />
-    </div>
-  );
-}
-
 function FighterPreview({
   fighter,
   team,
   isSelected,
   onClick,
   canSelect = false,
+  combatEffect = null,
 }) {
   const percent = (value, maximum) =>
     maximum > 0
       ? Math.max(0, Math.min(100, (Number(value) / maximum) * 100))
       : 0;
-  const hasStunnedAttacks = fighter.attacks?.some(
+  const stunnedAttackCount = fighter.attacks?.filter(
     (attack) => (attack.stunned?.remainingRounds ?? 0) > 0,
+  ).length ?? 0;
+  const hasStunnedAttacks = stunnedAttackCount > 0;
+  const cooldownMaximum = Math.max(0, Number(fighter.maximumCooldown) || 0);
+  const cooldownCurrent = Math.max(
+    0,
+    Math.min(
+      cooldownMaximum,
+      Number(getModifiedCharacterStat(fighter, "cooldown")) || 0,
+    ),
   );
-  return (
-    <button
-      type="button"
-      className={`fighter-card fighter-${team} ${
-        isSelected ? "is-selected" : ""
-      } ${fighter.health <= 0 ? "is-defeated" : ""} ${
-        fighter.blocked ? "is-blocking" : ""
-      }`}
-      onClick={onClick}
-      disabled={fighter.health <= 0 || (team === "opponent" && !canSelect)}
-      aria-label={`${fighter.name}, ${fighter.health} health`}
-    >
-      <div className="fighter-card-heading">
-        <h3>{fighter.name}</h3>
-        {isSelected && <span className="selected-mark">ACTIVE</span>}
-      </div>
+  const recoveryMaximum = Math.max(1, Number(fighter.maximumRecovery) || 10);
+  const recoveryCurrent = Math.max(
+    0,
+    Math.min(
+      recoveryMaximum,
+      Number(getModifiedCharacterStat(fighter, "recovery")) || 0,
+    ),
+  );
+  const activeModifiers = fighter.activeModifiers ?? [];
+  const slotCount = Number.isFinite(Number(fighter.slot))
+    ? Number(fighter.slot)
+    : fighter.attacks?.length ?? 0;
 
-      {fighter.image && (
-        <div
-          className={`fighter-portrait-wrapper ${
-            hasStunnedAttacks ? "fighter-stunned" : ""
-          }`}
-        >
-          <img className="fighter-portrait" src={fighter.image} alt="" />
+  return (
+    <div
+      className={`fighter-unit fighter-${team} ${isSelected ? "is-selected" : ""} ${fighter.health <= 0 ? "is-defeated" : ""} ${fighter.blocked ? "is-blocking" : ""}`}
+    >
+      <div className="fighter-hud">
+        <div className="fighter-hud-heading">
+          <h3>{fighter.name}</h3>
+          {isSelected && <span className="selected-mark">ACTIVE</span>}
+          {fighter.isCpuTeammate && <span className="fighter-control-tag">CPU ALLY</span>}
         </div>
-      )}
-      {fighter.health <= 0 && (
-        <span className="fighter-ko-badge" aria-label="Knocked out">
-          K.O.
-        </span>
-      )}
-      <div className="fighter-bars">
+
         <ResourceBar
           label="HP"
           value={Math.max(0, fighter.health)}
@@ -207,52 +188,107 @@ function FighterPreview({
         />
         <ResourceBar
           label="MP"
-          value={fighter.mana}
+          value={Math.max(0, fighter.mana)}
           maximum={fighter.maximumMana}
-          percent={percent(fighter.mana, fighter.maximumMana)}
+          percent={percent(Math.max(0, fighter.mana), fighter.maximumMana)}
           type="mana"
         />
-      </div>
 
-      <div className="fighter-stat-bars">
-        <StatBar
-          label="DEF"
-          value={getModifiedCharacterStat(fighter, "defense")}
-          maximum={fighter.maximumDefense ?? 100}
-          color="defense"
-        />
-        <StatBar
-          label="AGI"
-          value={getModifiedCharacterStat(fighter, "agility")}
-          maximum={fighter.maximumAgility ?? 100}
-          color="agility"
-        />
-        <StatBar
-          label="REGEN"
-          value={getModifiedCharacterStat(fighter, "manaRegen")}
-          maximum={fighter.maximumManaRegen ?? 100}
-          color="regen"
-        />
-        <StatBar
-          label="REC"
-          value={getModifiedCharacterStat(fighter, "recovery")}
-          maximum={fighter.maximumRecovery ?? 10}
-          color="recovery"
-        />
-        <StatBar
-          label="CD"
-          value={getModifiedCharacterStat(fighter, "cooldown")}
-          maximum={fighter.maximumCooldown ?? 10}
-          color="cooldown"
-        />
+        <div className="fighter-charge-row" aria-label="Cooldown and recovery">
+          <SegmentedMeter
+            label="CD"
+            value={cooldownCurrent}
+            maximum={cooldownMaximum}
+            type="cooldown"
+            title={`Cooldown charges: ${cooldownCurrent}/${cooldownMaximum}`}
+          />
+          <SegmentedMeter
+            label="REC"
+            value={recoveryCurrent}
+            maximum={recoveryMaximum}
+            type="recovery"
+            title={`Recovery: ${recoveryCurrent}/${recoveryMaximum}`}
+          />
+        </div>
       </div>
-    </button>
+      <div className="fighter-hud-pointer" aria-hidden="true" />
+
+      <button
+        type="button"
+        className={`fighter-card fighter-art-button ${isSelected ? "is-selected" : ""} ${fighter.health <= 0 ? "is-defeated" : ""} ${fighter.blocked ? "is-blocking" : ""} ${hasStunnedAttacks ? "has-stunned-attacks" : ""}`}
+        onClick={onClick}
+        disabled={fighter.health <= 0 || (team === "opponent" && !canSelect)}
+        aria-label={`${fighter.name}, ${fighter.health} of ${fighter.maximumHealth} health, ${fighter.mana} of ${fighter.maximumMana} mana. Hover or focus for fighter stats.`}
+      >
+        <div className="fighter-portrait-stage">
+          {fighter.image && (
+            <div className={`fighter-portrait-wrapper ${hasStunnedAttacks ? "fighter-stunned" : ""}`}>
+              <img key={combatEffect?.id ?? "idle"} className="fighter-portrait" src={fighter.image} alt="" />
+              {hasStunnedAttacks && <span className="team-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
+              {combatEffect?.type === "debuff-drain" && <span key={combatEffect.id} className="durability-drain-visual" aria-hidden="true"><i /><i /><i /></span>}
+            </div>
+          )}
+          {combatEffect && (
+            <div key={combatEffect.id} className={`fighter-impact-overlay impact-${combatEffect.type}`}>
+              {combatEffect.damage > 0 && (
+                <strong className={`fighter-impact-number damage-tier-${combatEffect.tier}`}>
+                  {combatEffect.type === "heal" ? `+${combatEffect.damage}` : `-${combatEffect.damage}`}
+                </strong>
+              )}
+              {combatEffect.message && <span className={combatEffect.message === "STUNNED!" ? "team-stunned-callout" : ""}>{combatEffect.message}</span>}
+              {(combatEffect.effects ?? []).map((effect, index) => (
+                <b key={index} className={`fighter-impact-status effect-${effect.stat}`} style={{ animationDelay: `${index * 650}ms` }}>{effect.label}</b>
+              ))}
+            </div>
+          )}
+          {fighter.health <= 0 && (
+            <span className="fighter-ko-badge" aria-label="Knocked out">K.O.</span>
+          )}
+          {isSelected && fighter.health > 0 && (
+            <span className="fighter-active-indicator">ACTIVE FIGHTER</span>
+          )}
+        </div>
+
+        <div className="fighter-info-popup" role="tooltip">
+          <div className="fighter-info-popup-heading">
+            <strong>{fighter.name}</strong>
+            <span>FIGHTER STATUS</span>
+          </div>
+          <div className="fighter-info-stat-grid">
+            <div><span>DEFENSE</span><b>{getModifiedCharacterStat(fighter, "defense")}</b></div>
+            <div><span>AGILITY</span><b>{getModifiedCharacterStat(fighter, "agility")}</b></div>
+            <div><span>MANA REGEN</span><b>{getModifiedCharacterStat(fighter, "manaRegen")}</b></div>
+            <div><span>RECOVERY</span><b>{getModifiedCharacterStat(fighter, "recovery")}</b></div>
+            <div><span>MAX HEALTH</span><b>{fighter.maximumHealth}</b></div>
+            <div><span>MAX MANA</span><b>{fighter.maximumMana}</b></div>
+            <div><span>ATTACK SLOTS</span><b>{fighter.attacks?.length ?? 0}/{slotCount}</b></div>
+            <div><span>COOLDOWN</span><b>{cooldownCurrent}/{cooldownMaximum}</b></div>
+          </div>
+
+          {activeModifiers.length > 0 && (
+            <div className="fighter-info-effects">
+              <strong>ACTIVE EFFECTS</strong>
+              {activeModifiers.map((modifier, index) => (
+                <span key={modifier.id ?? index}>
+                  {modifier.sourceAttackName ?? modifier.id ?? "Active modifier"}
+                  {modifier.remainingDuration != null ? ` · ${modifier.remainingDuration} turns` : ""}
+                </span>
+              ))}
+            </div>
+          )}
+          {hasStunnedAttacks && (
+            <div className="fighter-info-stun">STUNNED ATTACKS</div>
+          )}
+          <span className="fighter-info-hint">Hovering shows current modified stats</span>
+        </div>
+      </button>
+    </div>
   );
 }
 
 function ResourceBar({ label, value, maximum, percent, type }) {
   return (
-    <div className="resource-row">
+    <div className={`resource-row resource-${type}`}>
       <span className="resource-label">{label}</span>
       <div className="resource-track">
         <div
@@ -267,41 +303,39 @@ function ResourceBar({ label, value, maximum, percent, type }) {
   );
 }
 
-function StatBar({ label, value, maximum, color }) {
-  const amount = Number(value) || 0;
-  const max = Number(maximum) || 1;
-  const percent = Math.max(0, Math.min(100, (amount / max) * 100));
-
+function SegmentedMeter({ label, value, maximum, type, title }) {
+  const safeMaximum = Math.min(12, Math.max(0, Math.floor(maximum)));
+  const filled = Math.min(safeMaximum, Math.max(0, Math.floor(value)));
   return (
-    <div
-      className={`stat-bar-row stat-${color}`}
-      title={`${label}: ${amount}/${max}`}
-    >
-      <span>{label}</span>
-      <div className="stat-bar-track">
-        <div className="stat-bar-fill" style={{ width: `${percent}%` }} />
+    <div className={`fighter-segmented-meter meter-${type}`} title={title}>
+      <span className="fighter-segmented-label">{label}</span>
+      <div className="fighter-segments" aria-label={title}>
+        {Array.from({ length: safeMaximum }, (_, index) => (
+          <span
+            key={index}
+            className={index < filled ? "is-filled" : ""}
+          />
+        ))}
+        {safeMaximum === 0 && <i className="fighter-no-segments">—</i>}
       </div>
-      <b>
-        {amount}/{max}
-      </b>
+      <b>{value}/{maximum}</b>
     </div>
   );
 }
 
-function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist) {
+function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty = "Normal") {
   const player = playerTeamIds.map((id, index) => {
-    const fighter = createBattleFighter(id, true);
+    const isCpuTeammate = isCpuAssist && index === 1;
+    const fighter = createBattleFighter(id, isCpuTeammate);
 
     if (!fighter) return null;
 
-    return isCpuAssist && index === 1
-      ? { ...fighter, isCpuTeammate: true }
-      : fighter;
+    return isCpuTeammate ? { ...fighter, isCpuTeammate: true } : fighter;
   });
 
   return {
     player,
-    opponent: opponentTeamIds.map((id) => createBattleFighter(id, false)),
+    opponent: opponentTeamIds.map((id) => createBattleFighter(id, true)),
   };
 }
 
@@ -394,7 +428,7 @@ export default function TeamBattle() {
     difficulty === "Easy" ? 2 : Number.POSITIVE_INFINITY;
 
   const [teams, setTeams] = useState(() =>
-    createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist),
+    createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty),
   );
   const [knockout, setKnockout] = useState(null);
   const [isKnockoutFadingOut, setIsKnockoutFadingOut] = useState(false);
@@ -461,6 +495,7 @@ export default function TeamBattle() {
     "Choose your fighters' targets.",
   );
   const [combatPopups, setCombatPopups] = useState([]);
+  const [combatEffects, setCombatEffects] = useState({});
   const popupTimerRef = useRef(null);
   const teammateTargetTimerRef = useRef(null);
   // Remember which opponents the CPU teammate has faced during this battle.
@@ -472,14 +507,61 @@ export default function TeamBattle() {
   const [damageDealt, setDamageDealt] = useState(0);
   const [combatDefense, setCombatDefense] = useState(0);
   const [attacksUsed, setAttacksUsed] = useState(0);
+  const [comboState, setComboState] = useState(null);
+  const [comboBreakState, setComboBreakState] = useState(null);
+  const [highestCombo, setHighestCombo] = useState(0);
+  const comboStreakRef = useRef(0);
+  const highestComboRef = useRef(0);
+  const endComboStreak = useCallback(() => {
+    const count = comboStreakRef.current;
+    if (count >= 3) {
+      playComboBreakSound(count);
+      setComboBreakState({ count, id: Date.now() + Math.random() });
+    }
+    comboStreakRef.current = 0;
+    setComboState(null);
+    return count;
+  }, []);
+
+  const queueCpuTurn = useCallback(() => {
+    const endedCombo = endComboStreak();
+    if (endedCombo >= 3 || comboBreakState) {
+      window.setTimeout(() => setPhase("cpu-fighting"), 3300);
+    } else {
+      setPhase("cpu-fighting");
+    }
+  }, [endComboStreak, comboBreakState]);
+
+  const recordComboOutcome = useCallback((successful) => {
+    if (!successful) {
+      endComboStreak();
+      return;
+    }
+    const nextCount = Math.min(10, comboStreakRef.current + 1);
+    comboStreakRef.current = nextCount;
+    if (nextCount >= 3) {
+      playComboSound(nextCount);
+      const stage = nextCount >= 10 ? 10 : nextCount >= 8 ? 8 : nextCount;
+      setComboState({ count: nextCount, stage, id: Date.now() + Math.random() });
+      if (nextCount > highestComboRef.current) {
+        highestComboRef.current = nextCount;
+        setHighestCombo(nextCount);
+      }
+    }
+  }, [endComboStreak]);
+
+  useEffect(() => {
+    if (phase !== "fighting") endComboStreak();
+  }, [phase, endComboStreak]);
+
   const teamRewardPaidRef = useRef(false);
   useEffect(() => {
     if (!isStoryMode && (phase === "victory" || phase === "defeat") && !teamRewardPaidRef.current) {
       teamRewardPaidRef.current = true;
       const multiplier = ({ Easy: 1, Normal: 2, Hard: 3 })[difficulty] ?? 1;
-      addCoins(Math.floor((damageDealt + combatDefense) * multiplier));
+      addCoins(Math.floor((damageDealt + combatDefense) * multiplier * Math.max(1, highestCombo)));
     }
-  }, [phase, isStoryMode, difficulty, damageDealt, combatDefense]);
+  }, [phase, isStoryMode, difficulty, damageDealt, combatDefense, highestCombo]);
 
   // Prevent previously recorded damage from being counted again.
   const lastFestivalDamage = useRef(0);
@@ -518,27 +600,25 @@ export default function TeamBattle() {
       return undefined;
     }
 
-    // Start the fade-out after the K.O. message has been visible.
+    // Let the combo-break rating finish before the K.O. cutscene takes over.
+    const comboDelay = comboBreakState || comboStreakRef.current >= 3 ? 3300 : 0;
+    if (comboStreakRef.current >= 3) endComboStreak();
     setIsKnockoutFadingOut(false);
-
-    const fadeTimer = setTimeout(() => {
-      setIsKnockoutFadingOut(true);
-    }, 2100);
-
-    // Remove the overlay after the fade-out finishes.
+    const fadeTimer = setTimeout(() => setIsKnockoutFadingOut(true), comboDelay + 2100);
     const removeTimer = setTimeout(() => {
       setKnockout(null);
       setIsKnockoutFadingOut(false);
-    }, 2600);
+    }, comboDelay + 2600);
 
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(removeTimer);
     };
-  }, [knockout]);
+  }, [knockout, comboBreakState, endComboStreak]);
 
   useEffect(() => {
-    if (!isFinalTeamPhase) {
+    // The individual K.O. cutscene must finish before the team face-off begins.
+    if (!isFinalTeamPhase || knockout) {
       setTeamFinishComplete(false);
       setIsTeamFinishFadingOut(false);
       return undefined;
@@ -547,19 +627,21 @@ export default function TeamBattle() {
     setTeamFinishComplete(false);
     setIsTeamFinishFadingOut(false);
 
+    // Give the winner/defeated showcase a full 3.2 seconds, then transition
+    // into the points/results screen.
     const fadeTimer = setTimeout(() => {
       setIsTeamFinishFadingOut(true);
-    }, 2600);
+    }, 3200);
 
     const completeTimer = setTimeout(() => {
       setTeamFinishComplete(true);
-    }, 3200);
+    }, 3800);
 
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(completeTimer);
     };
-  }, [isFinalTeamPhase, phase]);
+  }, [isFinalTeamPhase, phase, knockout]);
 
   useEffect(() => {
     if (!combatPopups.length) return undefined;
@@ -569,7 +651,7 @@ export default function TeamBattle() {
     const timer = setTimeout(() => {
       setPendingAllyAttack(null);
       setCombatPopups((current) => current.slice(displayedCount));
-    }, 2800);
+    }, 3400);
 
     return () => clearTimeout(timer);
   }, [combatPopups]);
@@ -646,6 +728,8 @@ export default function TeamBattle() {
     const defeatedFighter = defeatedOpponent ?? defeatedPlayer;
 
     if (defeatedFighter) {
+      // The combo-break celebration has absolute priority over the K.O. overlay.
+      if (comboStreakRef.current >= 3) endComboStreak();
       setKnockout({
         ...defeatedFighter,
         defeatedTeam: defeatedOpponent ? "opponent" : "player",
@@ -673,6 +757,21 @@ export default function TeamBattle() {
       return;
     }
 
+    // Clicking the currently selected opponent again deselects that target.
+    if (roundTargets[fighterId] === opponentId) {
+      setRoundTargets((current) => {
+        const updated = { ...current };
+        delete updated[fighterId];
+        return updated;
+      });
+      if (player.isCpuTeammate && teammateTargetTimerRef.current) {
+        clearTimeout(teammateTargetTimerRef.current);
+        teammateTargetTimerRef.current = null;
+      }
+      addLog(`${player.name} is no longer assigned to ${opponent.name}.`);
+      return;
+    }
+
     if (player.isCpuTeammate && teammateTargetTimerRef.current) {
       clearTimeout(teammateTargetTimerRef.current);
       teammateTargetTimerRef.current = null;
@@ -694,7 +793,7 @@ export default function TeamBattle() {
     const removeTimer = setTimeout(() => {
       setShowRoundIntro(false);
       setIsIntroFadingOut(false);
-    }, 3000);
+    }, 7000);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -869,7 +968,7 @@ export default function TeamBattle() {
         (player) => player.health <= 0 || player.turnFinished,
       )
     ) {
-      setPhase("cpu-fighting");
+      queueCpuTurn();
     } else {
       setPhase("fighting");
     }
@@ -893,7 +992,7 @@ export default function TeamBattle() {
       );
 
       if (allFinished) {
-        setPhase("cpu-fighting");
+        queueCpuTurn();
         addLog("Your team is finished. The CPU is preparing its attacks.");
       } else {
         addLog(`${player.name} finished their turn.`);
@@ -1023,8 +1122,24 @@ export default function TeamBattle() {
     }
 
     const attack = attacker.attacks[attackIndex];
+    const rosterFighter = roster.find((entry) => entry.id === attacker.id);
+    const cpuControlled = attacker.isCpuTeammate ||
+      teams.opponent.some((fighter) => fighter.id === attacker.id);
+    const allowedAttackKeys = new Set(
+      (cpuControlled
+        ? getBotEquippedAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
+        : getEquippedAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
+      ).map(getAttackKey),
+    );
 
-    if (!attack || !canUseAttack(attack)) {
+    // Never trust an AI-selected index alone: validate the actual move against
+    // this fighter's saved, unlocked, equipped loadout immediately before use.
+    if (!attack || !allowedAttackKeys.has(getAttackKey(attack))) {
+      addLog(`${attacker.name} tried to use an attack outside its equipped loadout.`);
+      return;
+    }
+
+    if (!canUseAttack(attack)) {
       addLog("That attack is unavailable or still on cooldown.");
       return;
     }
@@ -1050,6 +1165,8 @@ export default function TeamBattle() {
     // ==========================================
 
     if (attack.heal) {
+      // A healing action does not connect with an opponent, so it ends the hit streak.
+      recordComboOutcome(false);
       let recipients = [];
 
       if (attack.heal.target === "all") {
@@ -1083,12 +1200,17 @@ export default function TeamBattle() {
       // Apply healing and buffs to each recipient.
       recipients.forEach((recipient) => {
         const result = applyHeal(attack, recipient);
-
-        addLog(
-          `💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`,
-          "buff",
-        );
-
+        const healEffectId = Date.now() + Math.random();
+        setCombatEffects((current) => ({ ...current, [recipient.id]: {
+          id: healEffectId, type: "heal",
+          damage: Math.max(0, Number(result.healed) || 0),
+          tier: "light", message: "HEALED!", effects: [],
+        }}));
+        window.setTimeout(() => setCombatEffects((current) =>
+          current[recipient.id]?.id === healEffectId
+            ? { ...current, [recipient.id]: null } : current
+        ), 1900);
+        addLog(`💚 ${attacker.name} healed ${recipient.name} for ${result.healed} HP!`, "buff");
         describeEffects(result.buffsApplied, recipient.name, "buff").forEach(
           (message) => addLog(message, "buff"),
         );
@@ -1144,7 +1266,7 @@ export default function TeamBattle() {
           (fighter) => fighter.health <= 0 || fighter.turnFinished,
         )
       ) {
-        setPhase("cpu-fighting");
+        queueCpuTurn();
         addLog("Your team is finished. The CPU is preparing its attacks.");
       }
 
@@ -1210,6 +1332,68 @@ export default function TeamBattle() {
 
     const damageActuallyDealt = Math.max(0, healthBefore - Math.max(0, defender.health));
     setDamageDealt((value) => value + damageActuallyDealt);
+
+    const appliedBuffs = Object.entries(result.buffsApplied ?? {})
+      .filter(([, amount]) => Number(amount) !== 0)
+      .map(([stat, amount]) => ({ stat, label: `↑ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+    const appliedDebuffs = Object.entries(result.debuffsApplied ?? {})
+      .filter(([, amount]) => Number(amount) !== 0)
+      .map(([stat, amount]) => ({ stat, label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
+    if (result.stunnedAttacks?.length) {
+      appliedDebuffs.push({ stat: "stun", label: "STUN APPLIED" });
+    }
+    const physicalDamage = Math.max(0, Number(result.damageReceived) || 0);
+    const debuffDamage = Math.max(0, -Number(result.debuffsApplied?.health ?? 0));
+    const nonHealthDebuffs = appliedDebuffs.filter((effect) => effect.stat !== "health");
+    if (physicalDamage > 0) recordComboOutcome(true);
+    if (debuffDamage > 0) {
+      window.setTimeout(() => {
+        recordComboOutcome(true);
+        const followUpId = Date.now() + Math.random();
+        setCombatEffects((current) => ({ ...current, [defender.id]: {
+          id: followUpId, type: "debuff-drain", damage: debuffDamage,
+          tier: debuffDamage >= 70 ? "fatal" : debuffDamage >= 45 ? "heavy" : debuffDamage >= 20 ? "effective" : "light",
+          message: "DEBUFF HIT!", effects: appliedDebuffs.filter((effect) => effect.stat === "health"),
+        }}));
+        window.setTimeout(() => setCombatEffects((current) => current[defender.id]?.id === followUpId ? { ...current, [defender.id]: null } : current), 1500);
+      }, 850);
+    } else if (physicalDamage === 0 && nonHealthDebuffs.length > 0) {
+      recordComboOutcome(true);
+    } else if (physicalDamage === 0 && appliedDebuffs.length === 0) {
+      recordComboOutcome(false);
+    }
+    const impactTier = physicalDamage >= 70 ? "fatal" : physicalDamage >= 45 ? "heavy" : physicalDamage >= 20 ? "effective" : "light";
+    const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : physicalDamage > 0 ? "damage" : nonHealthDebuffs.length ? "status" : "attack";
+    const attackerEffectId = Date.now() + Math.random();
+    const defenderEffectId = Date.now() + Math.random();
+    setCombatEffects((current) => ({
+      ...current,
+      [attacker.id]: {
+        id: attackerEffectId,
+        type: damageActuallyDealt > 0 ? "attack" : "status",
+        damage: 0,
+        tier: "light",
+        message: "",
+        effects: appliedBuffs,
+      },
+      [defender.id]: {
+        id: defenderEffectId,
+        type: impactType,
+        damage: physicalDamage,
+        tier: impactTier,
+        message: result.evaded ? "EVADED!" : result.action === "defend" ? "BLOCKED!" : "",
+        effects: nonHealthDebuffs,
+      },
+    }));
+    [[attacker.id, attackerEffectId], [defender.id, defenderEffectId]].forEach(([fighterId, effectId]) => {
+      setTimeout(() => {
+        setCombatEffects((current) =>
+          current[fighterId]?.id === effectId
+            ? { ...current, [fighterId]: null }
+            : current,
+        );
+      }, 2100);
+    });
     if (!attacker.isCpuTeammate && damageActuallyDealt > 0) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
 
@@ -1269,7 +1453,7 @@ export default function TeamBattle() {
         (fighter) => fighter.health <= 0 || fighter.turnFinished,
       )
     ) {
-      setPhase("cpu-fighting");
+      queueCpuTurn();
       addLog("Your team is finished. The CPU is preparing its attacks.");
     }
 
@@ -1316,7 +1500,7 @@ export default function TeamBattle() {
             (fighter) => fighter.health <= 0 || fighter.turnFinished,
           )
         ) {
-          setPhase("cpu-fighting");
+          queueCpuTurn();
         }
       }
     }
@@ -1348,7 +1532,7 @@ export default function TeamBattle() {
     //   );
 
     //   if (allFinished) {
-    //     setPhase("cpu-fighting");
+    //     queueCpuTurn();
     //     addLog(
     //       "Your team has no remaining actions. The CPU is preparing to attack.",
     //     );
@@ -1422,12 +1606,12 @@ export default function TeamBattle() {
     if (
       playersAfter.every((player) => player.health <= 0 || player.turnFinished)
     ) {
-      setPhase("cpu-fighting");
+      queueCpuTurn();
       addLog(
         "Your team has no remaining targets. The CPU is preparing its attacks.",
       );
     }
-  }, [phase, pendingAllyAttack, teams.player, teams.opponent, roundTargets]);
+  }, [phase, pendingAllyAttack, teams.player, teams.opponent, roundTargets, queueCpuTurn]);
 
   const runCpuTeammateTurn = () => {
     if (isPaused || !isCpuAssist || phase !== "fighting" || pendingAllyAttack) return;
@@ -2380,6 +2564,7 @@ export default function TeamBattle() {
         }, 1000);
         return;
       }
+      const defenderHealthBefore = Math.max(0, Number(currentDefender.health) || 0);
       const stunOptions = {
         fighters: allFighters,
         selectedAttackIds: aiChooseStunTargets(currentDefender, attack.stun),
@@ -2416,6 +2601,43 @@ export default function TeamBattle() {
       }
 
       defenseResolvedRef.current = true;
+
+      if (result) {
+        const actualDamage = Math.max(
+          0,
+          defenderHealthBefore - Math.max(0, Number(currentDefender.health) || 0),
+        );
+        const cpuAttackerEffectId = Date.now() + Math.random();
+        const playerDefenderEffectId = Date.now() + Math.random();
+        setCombatEffects((current) => ({
+          ...current,
+          [currentAttacker.id]: {
+            id: cpuAttackerEffectId,
+            type: "attack",
+            damage: 0,
+            tier: "light",
+            message: "",
+            effects: [],
+          },
+          [currentDefender.id]: {
+            id: playerDefenderEffectId,
+            type: choice === "defend" ? "blocked" : choice === "evade" && result.evaded ? "evaded" : actualDamage > 0 ? "damage" : "status",
+            damage: actualDamage,
+            tier: actualDamage >= 70 ? "fatal" : actualDamage >= 45 ? "heavy" : actualDamage >= 20 ? "effective" : "light",
+            message: choice === "defend" ? "BLOCKED!" : choice === "evade" && result.evaded ? "EVADED!" : "",
+            effects: Object.entries(result.debuffsApplied ?? {}).filter(([, amount]) => Number(amount) !== 0).map(([stat, amount]) => ({ stat, label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` })),
+          },
+        }));
+        [[currentAttacker.id, cpuAttackerEffectId], [currentDefender.id, playerDefenderEffectId]].forEach(([fighterId, effectId]) => {
+          setTimeout(() => {
+            setCombatEffects((current) =>
+              current[fighterId]?.id === effectId
+                ? { ...current, [fighterId]: null }
+                : current,
+            );
+          }, 3000);
+        });
+      }
 
       if (!result) {
         addLog("The defensive action could not be completed.");
@@ -2610,7 +2832,7 @@ export default function TeamBattle() {
     if (popupTimerRef.current) clearTimeout(popupTimerRef.current);
     if (teammateTargetTimerRef.current) clearTimeout(teammateTargetTimerRef.current);
     if (allyAttackTimerRef.current) clearTimeout(allyAttackTimerRef.current);
-    setTeams(createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist));
+    setTeams(createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty));
     setRoundNumber(1);
     setRoundTargets({});
     setCpuTargets({});
@@ -2622,6 +2844,8 @@ export default function TeamBattle() {
     setDamageDealt(0);
     setCombatDefense(0);
     setAttacksUsed(0);
+    comboStreakRef.current = 0; highestComboRef.current = 0;
+    setComboState(null); setComboBreakState(null); setHighestCombo(0);
     teamRewardPaidRef.current = false;
     setCombatLog(["Choose your fighters' targets."]);
     setCombatMessage("Choose your fighters' targets.");
@@ -2629,6 +2853,7 @@ export default function TeamBattle() {
     setShowRoundIntro(true);
     setIsIntroFadingOut(false);
     setCombatPopups([]);
+    setCombatEffects({});
     lastFestivalDamage.current = 0;
     lastFestivalAttacks.current = 0;
     defenseResolvedRef.current = false;
@@ -2700,47 +2925,32 @@ export default function TeamBattle() {
       );
     }
 
-    return won ? (
-      <VictoryScreen
-        damageDealt={damageDealt}
-        combatDefense={combatDefense}
-        difficulty={difficulty}
-        attacksUsed={attacksUsed}
-        message="Your team has defeated the opposing team!"
-        onRematch={resetBattle}
-      />
-    ) : (
-      <GameOverScreen
-        damageDealt={damageDealt}
-        combatDefense={combatDefense}
-        difficulty={difficulty}
-        attacksUsed={attacksUsed}
-        message="Your entire team has been defeated."
-        onRematch={resetBattle}
-      />
-    );
-  }
-
-  if (phase === "defeat" && !knockout && teamFinishComplete) {
     return (
-      <GameOverScreen
+      <BattleResultScreen
+        won={won}
+        defeated={defeatedTeam}
+        winner={winningTeam}
         damageDealt={damageDealt}
         combatDefense={combatDefense}
-        difficulty={difficulty}
         attacksUsed={attacksUsed}
-        message="Your entire team has been defeated."
+        difficulty={difficulty}
+        comboMultiplier={Math.max(1, highestCombo)}
         onRematch={resetBattle}
+        onMainMenu={() => navigate("/")}
       />
     );
   }
 
   return (
-    <main className="team-battle">
+    <main className={`team-battle ${comboState ? "team-combo-active" : ""} ${isLocalCoop ? "is-local-coop" : ""} ${levelConfig.localPvP ? "is-local-pvp" : ""}`}>
       <FestivalChallengePopup />
+      <ComboPopup combo={comboState} />
+      <ComboBreakPopup combo={comboBreakState ? { ...comboBreakState, onDismiss: () => setComboBreakState(null) } : null} />
       <button type="button" className="battle-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match"><span className="battle-pause-icon">Ⅱ</span><span>PAUSE</span></button>
       {isPaused && <BattlePauseMenu onResume={() => setIsPaused(false)} onRestart={resetBattle} onCharacterSelect={() => navigate("/character-select", { state: levelConfig })} onMainMenu={() => navigate("/")} />}
-      {isFinalTeamPhase && (
-        <div
+
+      {isFinalTeamPhase && !knockout && (
+<div
           className={`team-finish-overlay ${
             phase === "victory" ? "finish-victory" : "finish-defeat"
           } ${isTeamFinishFadingOut ? "is-fading-out" : ""}`}
@@ -2807,131 +3017,20 @@ export default function TeamBattle() {
         </div>
       )}
 
-      {knockout && (
-        <div
-          className={`team-ko-overlay ko-${knockout.defeatedTeam} ${
-            isKnockoutFadingOut ? "is-fading-out" : ""
-          }`}
-          role="alert"
-          aria-live="assertive"
-        >
-          <div className="team-ko-flash" />
-
-          <div className="team-ko-content">
-            <p className="team-ko-eyebrow">FIGHTER DEFEATED</p>
-
-            {knockout.image && (
-              <img
-                className="team-ko-portrait"
-                src={knockout.image}
-                alt={knockout.name}
-              />
-            )}
-
-            <h1 className="team-ko-title">K.O.!</h1>
-
-            <p className="team-ko-name">{knockout.name}</p>
-
-            <p className="team-ko-subtitle">
-              {knockout.defeatedTeam === "opponent"
-                ? "OPPONENT DOWN"
-                : "PLAYER DOWN"}
-            </p>
-          </div>
-        </div>
+      {knockout && !comboBreakState && (
+        <KnockoutOverlay
+          fighter={knockout}
+          defeatedTeam={knockout.defeatedTeam}
+          isFadingOut={isKnockoutFadingOut}
+        />
       )}
       {(showRoundIntro || isIntroFadingOut) && (
-        <div
-          className={`team-round-intro ${
-            isIntroFadingOut ? "is-hiding" : "is-visible"
-          }`}
-          role="status"
-          aria-hidden={isIntroFadingOut}
-        >
-          <div className="team-round-intro__eyebrow">Wild Cards</div>
-
-          <h1 className="team-round-intro__round">ROUND {roundNumber}</h1>
-
-          <div className="team-round-intro__matchup">
-            <div className="team-round-intro__team team-round-intro__team--cpu">
-              <div className="team-round-intro__label">CPU TEAM</div>
-
-              <div className="team-round-intro__fighters">
-                {teams.opponent.map((fighter) => {
-                  const isKO = fighter.health <= 0;
-
-                  return (
-                    <div
-                      className={`team-round-intro__fighter ${
-                        isKO ? "is-defeated" : "is-alive"
-                      }`}
-                      key={fighter.id}
-                    >
-                      {fighter.image && <img src={fighter.image} alt="" />}
-
-                      <RoundIntroHealthBar fighter={fighter} />
-
-                      <span className="team-round-intro__name">
-                        {fighter.name}
-                      </span>
-
-                      <span
-                        className={`team-round-intro__status ${
-                          isKO ? "status-ko" : "status-alive"
-                        }`}
-                      >
-                        {isKO
-                          ? "K.O."
-                          : `HP ${Math.max(0, fighter.health)} / ${fighter.maximumHealth}`}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="team-round-intro__vs">VS</div>
-
-            <div className="team-round-intro__team team-round-intro__team--player">
-              <div className="team-round-intro__label">PLAYER TEAM</div>
-
-              <div className="team-round-intro__fighters">
-                {teams.player.map((fighter) => {
-                  const isKO = fighter.health <= 0;
-
-                  return (
-                    <div
-                      className={`team-round-intro__fighter ${
-                        isKO ? "is-defeated" : "is-alive"
-                      }`}
-                      key={fighter.id}
-                    >
-                      {fighter.image && <img src={fighter.image} alt="" />}
-
-                      <RoundIntroHealthBar fighter={fighter} />
-
-                      <span className="team-round-intro__name">
-                        {fighter.name}
-                      </span>
-
-                      <span
-                        className={`team-round-intro__status ${
-                          isKO ? "status-ko" : "status-alive"
-                        }`}
-                      >
-                        {isKO
-                          ? "K.O."
-                          : `HP ${Math.max(0, fighter.health)} / ${fighter.maximumHealth}`}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="team-round-intro__footer">GET READY</div>
-        </div>
+        <RoundIntroOverlay
+          roundNumber={roundNumber}
+          opponentTeam={teams.opponent}
+          playerTeam={teams.player}
+          isFadingOut={isIntroFadingOut}
+        />
       )}
       {combatPopups.length > 0 && (
         <div id="combatPopupContainer" aria-live="polite">
@@ -2948,66 +3047,87 @@ export default function TeamBattle() {
       )}
 
       <header className="battle-header">
-        <div className="header-team-label cpu-label">CPU TEAM</div>
+        <div className="header-team-label cpu-label">{levelConfig.localPvP ? "PLAYER 2" : "CPU TEAM"}</div>
         <h1>
           TEAM BATTLE <span>ROUND {roundNumber}</span>
         </h1>
-        <div className="header-team-label player-label">PLAYER TEAM</div>
+        <div className="header-team-label player-label">{levelConfig.localPvP ? "PLAYER 1" : "PLAYER TEAM"}</div>
       </header>
 
       {phase === "selecting" && (
         <div className="target-modal-backdrop">
-          <section className="target-modal">
-            <p className="eyebrow">ROUND {roundNumber}</p>
-            <h2>Choose your opponents</h2>
-            <p>
-              Assign each opponent to one teammate. Any remaining teammate skips
-              this round.
+          <section className="target-modal battle-pause-panel">
+            <header className="battle-pause-header target-modal-header">
+              <span>WILD CARDS · ROUND {roundNumber}</span>
+              <h2>SELECT YOUR TARGETS</h2>
+            </header>
+            <p className="target-modal-instructions">
+              Assign each available opponent to one teammate. Select an active target again to clear it.
             </p>
 
             {livingPlayers.map((player) => (
               <div className="target-choice-group" key={player.id}>
-                <h3>{player.name}</h3>
-                {livingOpponents
-                  .filter((opponent) => {
-                    const assignedToAnotherPlayer = Object.entries(
-                      roundTargets,
-                    ).some(
-                      ([assignedPlayer, assignedOpponent]) =>
-                        assignedPlayer !== player.id &&
-                        assignedOpponent === opponent.id,
-                    );
-
-                    return !assignedToAnotherPlayer;
-                  })
-                  .map((opponent) => {
-                    const selected = roundTargets[player.id] === opponent.id;
-
-                    return (
-                      <button
-                        key={opponent.id}
-                        type="button"
-                        className={`target-choice-button ${
-                          selected ? "is-selected" : ""
-                        }`}
-                        onClick={() =>
-                          selectRoundTarget(player.id, opponent.id)
-                        }
-                      >
-                        {opponent.name}
-                        {selected ? " ✓" : ""}
-                      </button>
-                    );
-                  })}
+                <div className="target-player-heading">
+                  {player.image && <img src={player.image} alt="" />}
+                  <div>
+                    <h3>{player.name}</h3>
+                    <span>{player.isCpuTeammate ? "CPU ALLY" : "YOUR FIGHTER"}</span>
+                  </div>
+                  {roundTargets[player.id] && (
+                    <button
+                      type="button"
+                      className="target-clear-button"
+                      onClick={() => {
+                        const target = teams.opponent.find((item) => item.id === roundTargets[player.id]);
+                        if (target) selectRoundTarget(player.id, target.id);
+                      }}
+                    >
+                      CLEAR ×
+                    </button>
+                  )}
+                </div>
+                <div className="target-opponent-grid">
+                  {livingOpponents
+                    .filter((opponent) => {
+                      const assignedToAnotherPlayer = Object.entries(roundTargets).some(
+                        ([assignedPlayer, assignedOpponent]) =>
+                          assignedPlayer !== player.id && assignedOpponent === opponent.id,
+                      );
+                      return !assignedToAnotherPlayer;
+                    })
+                    .map((opponent) => {
+                      const selected = roundTargets[player.id] === opponent.id;
+                      const hp = Math.max(0, Math.floor(opponent.health));
+                      const mp = Math.max(0, Math.floor(opponent.mana));
+                      return (
+                        <button
+                          key={opponent.id}
+                          type="button"
+                          className={`target-choice-button ${selected ? "is-selected" : ""}`}
+                          onClick={() => selectRoundTarget(player.id, opponent.id)}
+                          aria-pressed={selected}
+                        >
+                          <span className="target-choice-art">
+                            {opponent.image && <img src={opponent.image} alt="" />}
+                            {selected && <b>✓ TARGET LOCKED</b>}
+                          </span>
+                          <span className="target-choice-copy">
+                            <strong>{opponent.name}</strong>
+                            <small>HP {hp}/{opponent.maximumHealth} · MP {mp}/{opponent.maximumMana}</small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
               </div>
             ))}
 
             <button
               type="button"
-              className="confirm-target-button"
+              className="confirm-target-button battle-pause-close"
               onClick={confirmPlayerTargets}
             >
-              Confirm targets
+              CONFIRM TARGETS <span>▶</span>
             </button>
             <p className="modal-message">{combatMessage}</p>
           </section>
@@ -3082,11 +3202,11 @@ export default function TeamBattle() {
         })()}
 
       <section className="battlefield">
-        {isStoryMode && (
+        {(isStoryMode || levelConfig.stageBackground) && (
           <div
             className="team-battle-story-background"
             style={{
-              backgroundImage: `url("${storyBackgrounds[levelConfig.background] || storyBackgrounds.arena}")`,
+              backgroundImage: `url("${storyBackgrounds[isStoryMode ? levelConfig.background : levelConfig.stageBackground] || storyBackgrounds.arena}")`,
             }}
             aria-hidden="true"
           />
@@ -3094,7 +3214,7 @@ export default function TeamBattle() {
         <div className="battle-team cpu-team">
           <div className="team-heading">
             <span className="team-indicator" />
-            <h2>CPU TEAM</h2>
+            <h2>{levelConfig.localPvP ? "PLAYER 2 TEAM" : "CPU TEAM"}</h2>
           </div>
 
           <div className="fighter-grid">
@@ -3105,14 +3225,14 @@ export default function TeamBattle() {
                 team="opponent"
                 isSelected={false}
                 canSelect={phase === "fighting"}
+                combatEffect={combatEffects[fighter.id]}
                 onClick={() => {}}
               />
             ))}
           </div>
         </div>
 
-        <div className="battle-center">
-          <div className="versus-mark">VS</div>
+        <div className="battle-center" aria-live="polite">
           <p>{combatMessage}</p>
         </div>
 
@@ -3129,6 +3249,7 @@ export default function TeamBattle() {
                 fighter={fighter}
                 team="player"
                 isSelected={fighter.id === activePlayerId}
+                combatEffect={combatEffects[fighter.id]}
                 onClick={() => {
                   if (fighter.health > 0) setActivePlayerId(fighter.id);
                 }}
@@ -3419,7 +3540,7 @@ export default function TeamBattle() {
             if (!attacker || !target) return null;
 
             return (
-              <section className="player-attack-popup" aria-live="polite">
+              <section className="player-attack-popup is-opponent-side" aria-live="polite">
                 <div className="ally-popup-label">⚔ PLAYER ATTACK</div>
 
                 <div className="ally-popup-matchup">

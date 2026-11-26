@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getCharacterImage } from "../SkinManager.js";
+import StageSelect from "./StageSelect.jsx";
+import { storyExpressions } from "./Story/StoryExpressions.js";
+import { storyBackgrounds } from "./Story/StoryBackgrounds.js";
+import { preloadStoryImages } from "./Story/PreloadStoryImages.js";
 import { loadKeybinds, normalizeKey } from "./keybinds.js";
 import Toga from "../All_Character_Stats/TogaStats.js";
 import TogaImage from "../../assets/img/Toga.png";
@@ -276,6 +280,12 @@ function CharacterSelection() {
 
   const storyOpponentId = storyOpponentIds[0] ?? null;
 
+  useEffect(() => {
+    // Match the Story Level 1 preload pattern: warm all character, expression,
+    // and stage artwork while the player is still on character selection.
+    preloadStoryImages(storyBackgrounds, storyExpressions, roster);
+  }, []);
+
   const [unlockedIds, setUnlockedIds] = useState(() => getUnlockedCharacters());
 
   // const requiredFighters =
@@ -340,6 +350,7 @@ function CharacterSelection() {
   const [playerAnimationKey, setPlayerAnimationKey] = useState(0);
   const [cpuAnimationKey, setCpuAnimationKey] = useState(0);
   const [phase, setPhase] = useState("player");
+  const [characterChosenCountdown, setCharacterChosenCountdown] = useState(null);
 
   const selectedFighters = selectedIndices.map((index) => roster[index]);
   const player2Fighters = player2Indices.map((index) => roster[index]);
@@ -457,11 +468,9 @@ function CharacterSelection() {
     if (!localPvP || phase !== "player" || pvpConfirmed[playerId] ||
       selection.length !== requiredFighters) return;
     if (showAttackRequirement(selection, playerId === "player1" ? "PLAYER 1" : "PLAYER 2")) return;
-    setPvpConfirmed((current) => {
-      const next = { ...current, [playerId]: true };
-      if (next.player1 && next.player2) setPhase("ready");
-      return next;
-    });
+    setPvpConfirmed((current) => ({ ...current, [playerId]: true }));
+    const otherPlayer = playerId === "player1" ? "player2" : "player1";
+    if (pvpConfirmed[otherPlayer]) setPhase("pvp-confirmed");
   };
 
   // Handle keyboard arrows and Enter.
@@ -619,14 +628,37 @@ function CharacterSelection() {
       if (animationStep >= 6) {
         clearInterval(animation);
         setCpuIndices(finalTeam);
-        setPhase("ready");
+        setPhase("cpu-confirmed");
       }
     }, 350);
 
     return () => clearInterval(animation);
   }, [phase, selectedIndices, unlockedIds, requiredFighters, teamControl]);
 
-  const startBattle = () => {
+  // Give the chosen character a clear three-second reveal before stage select.
+  useEffect(() => {
+    if (phase !== "cpu-confirmed" && phase !== "pvp-confirmed") {
+      setCharacterChosenCountdown(null);
+      return undefined;
+    }
+
+    setCharacterChosenCountdown(3);
+    let remaining = 3;
+    const countdown = window.setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        window.clearInterval(countdown);
+        setCharacterChosenCountdown(0);
+        setPhase("ready");
+      } else {
+        setCharacterChosenCountdown(remaining);
+      }
+    }, 1000);
+
+    return () => window.clearInterval(countdown);
+  }, [phase]);
+
+  const startBattle = (stageBackground = "arena") => {
     if (
       phase !== "ready" ||
       selectedIndices.length !== requiredFighters ||
@@ -660,6 +692,7 @@ function CharacterSelection() {
           teamControl,
           localPvP,
           playerCount: localPvP ? 2 : 1,
+          stageBackground: isStoryMode ? undefined : stageBackground,
           gameMode: isStoryMode ? "story" : (levelConfig.gameMode ?? "quick"),
           // Keep the currently playing Story Mode soundtrack when battle opens.
           preserveMusicOnBattle: isStoryMode,
@@ -668,8 +701,57 @@ function CharacterSelection() {
     );
   };
 
+  if (phase === "ready" && !isStoryMode) {
+    return (
+      <main className="character-select-screen stage-select-screen">
+        <header className="select-header">
+          <button type="button" className="select-back-button" onClick={() => {
+            setPhase("player");
+            if (localPvP) setPvpConfirmed({ player1: false, player2: false });
+          }}>
+            ← BACK TO CHARACTER SELECT
+          </button>
+          <div className="select-match-info">
+            <span>{teamSize} MATCH</span>
+            <span>{localPvP ? "LOCAL PVP" : `AI: ${difficulty.toUpperCase()}`}</span>
+          </div>
+          <span className="stage-select-tab-label">STAGE SELECT</span>
+        </header>
+        <StageSelect localPvP={localPvP} onStart={startBattle} />
+      </main>
+    );
+  }
+
   return (
     <main className="character-select-screen">
+      {(phase === "cpu-confirmed" || phase === "pvp-confirmed") && characterChosenCountdown !== null && (
+        <div className="character-chosen-countdown" role="status" aria-live="assertive">
+          <div className="character-chosen-card">
+            <span className="character-chosen-kicker">FIGHTERS LOCKED IN</span>
+            <h2>{phase === "pvp-confirmed" ? "BOTH PLAYERS HAVE CHOSEN" : "OPPONENT SELECTED"}</h2>
+            <div className="character-chosen-names">
+              <span>P1 · {selectedFighters.map((fighter) => fighter.data.name).join(" + ")}</span>
+              <span>{phase === "pvp-confirmed" ? "P2" : "CPU"} · {(phase === "pvp-confirmed" ? player2Fighters : cpuFighters).map((fighter) => fighter.data.name).join(" + ")}</span>
+            </div>
+            <strong className="character-chosen-number">{characterChosenCountdown || "GO!"}</strong>
+            <p>PREPARING STAGE SELECTION</p>
+            <div className="character-chosen-actions">
+              {localPvP ? (
+                <>
+                  <button type="button" onClick={() => { setActiveSelectingPlayer("player1"); setPvpConfirmed({ player1: false, player2: true }); setPhase("player"); }}>P1 · CHANGE FIGHTER</button>
+                  <button type="button" onClick={() => { setActiveSelectingPlayer("player2"); setPvpConfirmed({ player1: true, player2: false }); setPhase("player"); }}>P2 · CHANGE FIGHTER</button>
+                </>
+              ) : (
+                <>
+                  <button type="button" onClick={() => { setCpuIndices([]); setPhase("player"); }}>CHANGE MY FIGHTER</button>
+                  <button type="button" onClick={() => { setCpuIndices([]); setPhase("cpu"); }}>REROLL CPU</button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="select-header">
         <button
           className="select-back-button"
@@ -731,6 +813,13 @@ function CharacterSelection() {
                 key={`player-${fighter.id}-${playerAnimationKey}`}
                 fighter={fighter}
               />
+            ))}
+            {Array.from({ length: Math.max(0, requiredFighters - selectedFighters.length) }, (_, slot) => (
+              <div className="fighter-unselected-placeholder" key={`player-empty-${slot}`}>
+                <span className="unselected-question">?</span>
+                <strong>FIGHTER NOT SELECTED</strong>
+                <small>{requiredFighters > 1 ? `TEAM SLOT ${selectedFighters.length + slot + 1} · AWAITING PICK` : "CHOOSE A FIGHTER FROM THE ROSTER"}</small>
+              </div>
             ))}
           </div>
           {phase === "player" && (
@@ -799,6 +888,13 @@ function CharacterSelection() {
                 {player2Fighters.map((fighter) => (
                   <FighterStats key={`p2-${fighter.id}-${playerAnimationKey}`} fighter={fighter} />
                 ))}
+                {Array.from({ length: Math.max(0, requiredFighters - player2Fighters.length) }, (_, slot) => (
+                  <div className="fighter-unselected-placeholder" key={`player2-empty-${slot}`}>
+                    <span className="unselected-question">?</span>
+                    <strong>FIGHTER NOT SELECTED</strong>
+                    <small>{requiredFighters > 1 ? `TEAM SLOT ${player2Fighters.length + slot + 1} · AWAITING PICK` : "PLAYER 2 HAS NOT PICKED"}</small>
+                  </div>
+                ))}
               </div>
             </>
           ) : cpuFighters.length > 0 ? (
@@ -811,9 +907,14 @@ function CharacterSelection() {
               ))}
             </div>
           ) : (
-            <div className="cpu-placeholder">
-              <span>?</span>
-              <strong>OPPONENT UNKNOWN</strong>
+            <div className={`cpu-placeholder ${teamSize === "2v2" ? "cpu-placeholder-team" : ""}`}>
+              {Array.from({ length: requiredFighters }, (_, slot) => (
+                <div className="cpu-unidentified-slot" key={`cpu-empty-${slot}`}>
+                  <span>?</span>
+                  <strong>OPPONENT UNKNOWN</strong>
+                  {teamSize === "2v2" && <small>CPU TEAM SLOT {slot + 1}</small>}
+                </div>
+              ))}
               <p>The CPU is waiting for your selection.</p>
             </div>
           )}
@@ -834,6 +935,8 @@ function CharacterSelection() {
           {requiredFighters === 2 ? "CONFIRM TEAM" : "CONFIRM FIGHTER"}{" "}
           <span>▶</span>
         </button>
+      ) : phase === "ready" && !isStoryMode ? (
+        <StageSelect localPvP={localPvP} onStart={startBattle} />
       ) : (
         <button
           className="confirm-fighter-button"

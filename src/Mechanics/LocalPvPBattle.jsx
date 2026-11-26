@@ -24,9 +24,6 @@ import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import { recordFestivalEvent } from "./Main Page/Festival/FestivalChallenges.js";
 import { recordDailyObjectiveEvent } from "./Main Page/Festival/FestivalDailyObjectives.js";
 import FestivalChallengePopup from "./Main Page/Festival/FestivalChallengePopup.jsx";
-import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
-import "./Teambattle.css";
-import "./BattleUI.css";
 import "./LocalPvPBattle.css";
 
 const TURN_SECONDS = 20;
@@ -120,19 +117,21 @@ export default function LocalPvPBattle() {
   const [turnTime, setTurnTime] = useState(TURN_SECONDS);
   const [defenseTime, setDefenseTime] = useState(DEFENSE_SECONDS);
   const [pendingAttack, setPendingAttack] = useState(null);
+  const [attackQueue, setAttackQueue] = useState([]);
+  const [attackPhaseComplete, setAttackPhaseComplete] = useState(false);
   const [combatLog, setCombatLog] = useState(["ROUND 1 — PLAYER 1'S TURN"]);
   const [targetIds, setTargetIds] = useState({});
   const [healTargetIds, setHealTargetIds] = useState({});
   const [showRoundIntro, setShowRoundIntro] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const resolvedRef = useRef(false);
+  const attackQueueRef = useRef([]);
   const turnTimeRef = useRef(TURN_SECONDS);
   const defenseTimeRef = useRef(DEFENSE_SECONDS);
 
   const activeTeam = teams[activeSide];
   const defendingSide = activeSide === "player" ? "opponent" : "player";
   const opposingTeam = teams[defendingSide];
-  const activeLiving = activeTeam.filter((fighter) => fighter && fighter.health > 0);
   const defendingLiving = opposingTeam.filter((fighter) => fighter && fighter.health > 0);
   const isFinal = phase === "victory" || phase === "defeat";
 
@@ -156,18 +155,18 @@ export default function LocalPvPBattle() {
   }, []);
 
   useEffect(() => {
-    if (phase !== "fighting" || pendingAttack || isFinal || isPaused) return;
+    if (phase !== "fighting" || attackPhaseComplete || isFinal || isPaused || showRoundIntro) return;
     const timer = window.setInterval(() => {
       const remaining = turnTimeRef.current - 1;
       turnTimeRef.current = remaining;
       setTurnTime(Math.max(0, remaining));
       if (remaining <= 0) {
         window.clearInterval(timer);
-        endTeamTurn(true);
+        endTeamTurn();
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [phase, activeSide, pendingAttack, round, isPaused]);
+  }, [phase, activeSide, attackPhaseComplete, round, isPaused, showRoundIntro]);
 
   useEffect(() => {
     if (phase !== "defending" || !pendingAttack || isPaused) return;
@@ -221,7 +220,7 @@ export default function LocalPvPBattle() {
         }
         return;
       }
-      if (phase !== "fighting") return;
+      if (phase !== "fighting" || attackPhaseComplete) return;
       if (!isTeamMatch) {
         const playerKey = activeSide === "player" ? "player1" : "player2";
         if (key === normalizeKey(binds[playerKey].finishTurn)) {
@@ -257,15 +256,15 @@ export default function LocalPvPBattle() {
     };
     window.addEventListener("keydown", handleKeys);
     return () => window.removeEventListener("keydown", handleKeys);
-  }, [phase, pendingAttack, teams, activeSide, activeTeam, defendingSide, isFinal, isPaused]);
+  }, [phase, pendingAttack, teams, activeSide, activeTeam, defendingSide, isFinal, isPaused, attackPhaseComplete]);
 
   useEffect(() => {
-    if (phase !== "fighting") return;
+    if (phase !== "fighting" || attackPhaseComplete) return;
     const living = teams[activeSide].filter((fighter) => fighter?.health > 0);
     if (living.length && living.every((fighter) => fighter.turnFinished)) {
-      endTeamTurn(false);
+      endTeamTurn();
     }
-  }, [teams, phase, activeSide]);
+  }, [teams, phase, activeSide, attackPhaseComplete]);
 
   useEffect(() => {
     if (isFinal) {
@@ -279,28 +278,17 @@ export default function LocalPvPBattle() {
   }, [phase]);
 
   const finishFighterTurn = (fighterId) => {
-    if (phase !== "fighting" || pendingAttack) return;
-    setTeams((current) => ({
-      ...current,
-      [activeSide]: current[activeSide].map((fighter) =>
-        fighter?.id === fighterId ? { ...fighter, turnFinished: true } : fighter,
-      ),
-    }));
-    const fighter = activeTeam.find((member) => member?.id === fighterId);
-    if (fighter) addLog(`${fighter.name} finished their turn.`);
+    if (phase !== "fighting" || attackPhaseComplete) return;
+    const updated = activeTeam.map((fighter) =>
+      fighter?.id === fighterId ? { ...fighter, turnFinished: true } : fighter,
+    );
+    setTeams((current) => ({ ...current, [activeSide]: updated }));
+    if (updated.filter((fighter) => fighter?.health > 0).every((fighter) => fighter.turnFinished)) {
+      endTeamTurn(false);
+    }
   };
 
-  const endTeamTurn = (timedOut) => {
-    if (phase !== "fighting" || pendingAttack || isFinal) return;
-    setTeams((current) => ({
-      ...current,
-      [activeSide]: current[activeSide].map((fighter) =>
-        fighter && fighter.health > 0 ? { ...fighter, turnFinished: true } : fighter,
-      ),
-    }));
-    addLog(timedOut
-      ? `${activeSide === "player" ? "PLAYER 1" : "PLAYER 2"} ran out of time.`
-      : `${activeSide === "player" ? "PLAYER 1" : "PLAYER 2"} ended their turn.`);
+  const advanceTeamTurn = () => {
     const nextSide = activeSide === "player" ? "opponent" : "player";
     if (nextSide === "player") {
       setTeams((current) => {
@@ -324,13 +312,35 @@ export default function LocalPvPBattle() {
       });
       setRound((value) => value + 1);
       setShowRoundIntro(true);
-      addLog(`ROUND ${round + 1} — PLAYER 1'S TURN`);
-    } else {
-      addLog("PLAYER 2'S TURN");
     }
     setActiveSide(nextSide);
+    resolvedRef.current = false;
+    attackQueueRef.current = [];
+    setAttackQueue([]);
+    setPendingAttack(null);
+    setAttackPhaseComplete(false);
+    setPhase("fighting");
     turnTimeRef.current = TURN_SECONDS;
     setTurnTime(TURN_SECONDS);
+  };
+
+  const endTeamTurn = () => {
+    if (phase !== "fighting" || attackPhaseComplete || isFinal) return;
+    setTeams((current) => ({
+      ...current,
+      [activeSide]: current[activeSide].map((fighter) =>
+        fighter && fighter.health > 0 ? { ...fighter, turnFinished: true } : fighter,
+      ),
+    }));
+    setAttackPhaseComplete(true);
+    if (attackQueueRef.current.length > 0) {
+      setPendingAttack(attackQueueRef.current[0]);
+      setPhase("defending");
+      defenseTimeRef.current = DEFENSE_SECONDS;
+      setDefenseTime(DEFENSE_SECONDS);
+    } else {
+      advanceTeamTurn();
+    }
   };
 
   const chooseTarget = (fighterId, targetId) => {
@@ -338,20 +348,22 @@ export default function LocalPvPBattle() {
   };
 
   const startAttack = (fighterId, attackIndex, selectedAttackIds = []) => {
-    if (phase !== "fighting" || pendingAttack) return;
+    if (phase !== "fighting" || attackPhaseComplete) return;
     const attacker = teams[activeSide].find((fighter) => fighter?.id === fighterId);
     const attack = attacker?.attacks?.[attackIndex];
     if (!attacker || attacker.health <= 0 || attacker.turnFinished ||
         !attack || !canUseAttack(attack)) return;
     const attacksUsedThisRound = attacker.attacks.filter(
       (move) => move.state === false,
-    ).length;
+    ).length + attackQueueRef.current.filter((entry) => entry.attackerId === fighterId).length;
     if (round === 1 && attacksUsedThisRound >= 4) {
       addLog(`${attacker.name} has reached the 4-attack opening limit.`);
       return;
     }
     const cost = getModifiedAttackStat(attack, attacker, "cost");
-    if (attacker.mana < cost) {
+    const queuedForFighter = attackQueueRef.current.filter((entry) => entry.attackerId === fighterId);
+    const reservedMana = queuedForFighter.reduce((total, entry) => total + entry.cost, 0);
+    if (attacker.mana - reservedMana < cost) {
       addLog(`${attacker.name} does not have enough mana.`);
       return;
     }
@@ -396,10 +408,11 @@ export default function LocalPvPBattle() {
       addLog("Choose a living opponent first.");
       return;
     }
-    resolvedRef.current = false;
-    defenseTimeRef.current = DEFENSE_SECONDS;
-    setDefenseTime(DEFENSE_SECONDS);
-    setPendingAttack({
+    if (queuedForFighter.some((entry) => entry.attackIndex === attackIndex)) {
+      addLog("That attack is already in your queue.");
+      return;
+    }
+    const queued = {
       attackerId: fighterId,
       targetId,
       attackIndex,
@@ -410,9 +423,11 @@ export default function LocalPvPBattle() {
       cost,
       hasHeal: Boolean(attack.heal),
       selectedAttackIds,
-    });
-    setPhase("defending");
-    addLog(`${attacker.name} used ${attack.name}. ${target.name}, defend!`);
+    };
+    const nextQueue = [...attackQueueRef.current, queued];
+    attackQueueRef.current = nextQueue;
+    setAttackQueue(nextQueue);
+    addLog(`${attacker.name} queued ${attack.name} against ${target.name}.`);
   };
 
   const resolveAttack = (choice) => {
@@ -429,8 +444,18 @@ export default function LocalPvPBattle() {
     const attack = attacker?.attacks?.[pendingAttack.attackIndex];
     if (!attacker || !defender || !attack || !canUseAttack(attack) ||
         (choice === "defend" && getModifiedCharacterStat(defender, "cooldown") <= 0)) {
-      setPendingAttack(null);
-      setPhase("fighting");
+      const remainingQueue = attackQueueRef.current.slice(1);
+      attackQueueRef.current = remainingQueue;
+      setAttackQueue(remainingQueue);
+      if (remainingQueue.length) {
+        setPendingAttack(remainingQueue[0]);
+        resolvedRef.current = false;
+        defenseTimeRef.current = DEFENSE_SECONDS;
+        setDefenseTime(DEFENSE_SECONDS);
+      } else {
+        setPendingAttack(null);
+        advanceTeamTurn();
+      }
       return;
     }
     const allFighters = [...next.player, ...next.opponent];
@@ -483,14 +508,28 @@ export default function LocalPvPBattle() {
           : `${attack.name} dealt ${damage} damage.`);
       if (defender.health <= 0) addLog(`${defender.name} is K.O.!`);
     }
-    setPendingAttack(null);
+    const remainingQueue = attackQueueRef.current.slice(1);
+    attackQueueRef.current = remainingQueue;
+    setAttackQueue(remainingQueue);
     const playerAlive = next.player.some((fighter) => fighter?.health > 0);
     const opponentAlive = next.opponent.some((fighter) => fighter?.health > 0);
     if (!playerAlive || !opponentAlive) {
+      setPendingAttack(null);
+      attackQueueRef.current = [];
+      setAttackQueue([]);
       setPhase(playerAlive ? "victory" : "defeat");
       return;
     }
-    setPhase("fighting");
+    if (remainingQueue.length > 0) {
+      setPendingAttack(remainingQueue[0]);
+      resolvedRef.current = false;
+      defenseTimeRef.current = DEFENSE_SECONDS;
+      setDefenseTime(DEFENSE_SECONDS);
+      setPhase("defending");
+    } else {
+      setPendingAttack(null);
+      advanceTeamTurn();
+    }
   };
 
   const resetMatch = () => {
@@ -504,6 +543,11 @@ export default function LocalPvPBattle() {
     turnTimeRef.current = TURN_SECONDS;
     setTurnTime(TURN_SECONDS);
     setPendingAttack(null);
+    resolvedRef.current = false;
+    attackQueueRef.current = [];
+    setAttackQueue([]);
+    setAttackPhaseComplete(false);
+    setPhase("fighting");
     setIsPaused(false);
     defenseTimeRef.current = DEFENSE_SECONDS;
     setDefenseTime(DEFENSE_SECONDS);
@@ -553,6 +597,19 @@ export default function LocalPvPBattle() {
             />
           )}
         </div>
+        {phase === "defending" && pendingAttack?.targetId === owner?.id && (
+          <div className="local-pvp-one-on-one-defense" role="dialog" aria-live="assertive">
+            <strong>⚠ INCOMING ATTACK · {defenseTime}s</strong>
+            <h4>{pendingAttack.attackName}</h4>
+            {pendingAttack.attackImage && <img className="local-pvp-defense-attack-image" src={pendingAttack.attackImage} alt={pendingAttack.attackName} />}
+            <p>{pendingAttack.damage} DAMAGE · {pendingAttack.speed} SPEED</p>
+            <div>
+              <button disabled={getModifiedCharacterStat(owner, "cooldown") <= 0 || defenseTime <= 0} onClick={() => resolveAttack("defend")}>BLOCK</button>
+              <button disabled={defenseTime <= 0} onClick={() => resolveAttack("evade")}>EVADE</button>
+              <button disabled={defenseTime <= 0} onClick={() => resolveAttack("take-damage")}>TAKE DAMAGE</button>
+            </div>
+          </div>
+        )}
       </section>
     );
 
@@ -562,7 +619,7 @@ export default function LocalPvPBattle() {
         <header className="local-pvp-header local-pvp-match-header">
           <button className="local-pvp-pause-trigger" onClick={() => setIsPaused(true)} aria-label="Pause match">Ⅱ</button>
           <div><strong>ROUND {round}</strong><span>1 VS 1 LOCAL PVP</span></div>
-          <div className="local-pvp-active-clock"><small>{activeSide === "player" ? "PLAYER 1 TURN" : "PLAYER 2 TURN"}</small><strong>{turnTime}s</strong></div>
+          <div className="local-pvp-active-clock"><small>{activeSide === "player" ? "PLAYER 1 TURN" : "PLAYER 2 TURN"}</small><strong>{turnTime}s</strong></div><div className="local-pvp-queue-counter"><strong>{attackQueue.length}</strong><span>QUEUED</span></div>
         </header>
         <div className="local-pvp-split-screen">
           {renderPlayerPane(playerTwo, playerOne, "player2", playerTwoActive, "local-pvp-player-two")}
@@ -570,31 +627,7 @@ export default function LocalPvPBattle() {
           {renderPlayerPane(playerOne, playerTwo, "player1", playerOneActive, "local-pvp-player-one")}
         </div>
         {showRoundIntro && <div className="local-pvp-round-intro">ROUND {round}<span>PLAYER 1 VS PLAYER 2</span></div>}
-        {phase === "defending" && pendingAttack && (
-          <section id="aiAttackSection" className={"incoming-attack-card local-pvp-incoming " + (defendingSide === "player" ? "local-pvp-incoming-player-one" : "local-pvp-incoming-player-two") } role="dialog" aria-live="assertive">
-            <div id="aiAttackCard">
-              <div id="aiAttackHeader"><span>⚠ INCOMING ATTACK</span><span className="attack-warning-dot" /></div>
-              <div id="defenseTimer" className={defenseTime <= 3 ? "timer-critical" : defenseTime <= 5 ? "timer-warning" : ""}>
-                <div id="defenseTimerText"><span>DEFENSE WINDOW</span><strong>{defenseTime}s</strong></div>
-                <div id="defenseTimerTrack"><div id="defenseTimerFill" style={{ width: defenseTime * 10 + "%" }} /></div>
-              </div>
-              <div id="aiAttackInfo">
-                <h5 id="aiAttackName">{pendingAttack.attackName}</h5>
-                {pendingAttack.attackImage && <div className="incoming-attack-image"><img src={pendingAttack.attackImage} alt={pendingAttack.attackName} /></div>}
-                <div id="aiAttackStats">
-                  <div className={"attack-threat-badge " + getDamageThreat(pendingAttack.damage).className}><span className="threat-label">DAMAGE</span><strong>{pendingAttack.damage}</strong><span className="threat-rating">{getDamageThreat(pendingAttack.damage).label}</span></div>
-                  <div className={"attack-threat-badge " + getSpeedThreat(pendingAttack.speed).className}><span className="threat-label">SPEED</span><strong>{pendingAttack.speed}</strong><span className="threat-rating">{getSpeedThreat(pendingAttack.speed).label}</span></div>
-                  <div className="attack-cost-badge"><span className="threat-label">MANA COST</span><strong>◆ {pendingAttack.cost}</strong></div>
-                </div>
-              </div>
-              <div id="defensiveActions">
-                <button id="defendButton" disabled={getModifiedCharacterStat(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId), "cooldown") <= 0 || defenseTime <= 0} onClick={() => resolveAttack("defend")}><span id="defendButtonIcon">🛡</span><span>DEFEND</span></button>
-                <button id="evadeButton" disabled={defenseTime <= 0} onClick={() => resolveAttack("evade")}><span id="evadeButtonIcon">💨</span><span>EVADE</span></button>
-                <button id="takeDamageButton" disabled={defenseTime <= 0} onClick={() => resolveAttack("take-damage")}><span>💥</span><span>TAKE FULL DAMAGE</span></button>
-              </div>
-            </div>
-          </section>
-        )}
+
         {isPaused && !isFinal && <section className="local-pvp-pause-overlay" role="dialog" aria-modal="true"><div className="local-pvp-pause-panel"><span>WILD CARDS</span><h2>PAUSED</h2><button onClick={() => setIsPaused(false)}>RESUME MATCH</button><button onClick={resetMatch}>RESTART MATCH</button><button onClick={() => navigate("/character-select")}>CHARACTER SELECT</button><button onClick={() => navigate("/")}>MAIN MENU</button></div></section>}
         {isFinal && <div className="local-pvp-result"><p>{phase === "victory" ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!"}</p><button onClick={resetMatch}>REMATCH</button><button onClick={() => navigate("/")}>MAIN MENU</button></div>}
       </main>
@@ -607,7 +640,7 @@ export default function LocalPvPBattle() {
       <header className="local-pvp-header">
         <button onClick={() => navigate("/character-select")}>← CHARACTER SELECT</button>
         <div><strong>ROUND {round}</strong><span>{isTeamMatch ? "2 VS 2 LOCAL PVP" : "1 VS 1 LOCAL PVP"}</span></div>
-        <div className={turnTime <= 5 ? "timer-danger" : ""}><small>{activeSide === "player" ? "PLAYER 1" : "PLAYER 2"} TURN</small><strong>{turnTime}s</strong></div>
+        <div className={turnTime <= 5 ? "timer-danger" : ""}><small>{activeSide === "player" ? "PLAYER 1" : "PLAYER 2"} TURN</small><strong>{turnTime}s</strong></div><div className="local-pvp-queue-counter"><strong>{attackQueue.length}</strong><span>QUEUED</span></div>
       </header>
 
       {showRoundIntro && <div className="local-pvp-round-intro">ROUND {round}<span>PLAYER 1 VS PLAYER 2</span></div>}
@@ -615,12 +648,12 @@ export default function LocalPvPBattle() {
       <div className="local-pvp-matchup">
         <section className="local-pvp-side local-pvp-player2">
           <h2>PLAYER 2 <span>TEAM</span></h2>
-          {teams.opponent.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} />)}
+          {teams.opponent.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} pendingAttack={pendingAttack} defenseTime={defenseTime} onResolve={resolveAttack} />)}
         </section>
         <div className="local-pvp-vs">VS</div>
         <section className="local-pvp-side local-pvp-player1">
           <h2>PLAYER 1 <span>TEAM</span></h2>
-          {teams.player.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} />)}
+          {teams.player.map((fighter) => fighter && <FighterStatus key={fighter.id} fighter={fighter} pendingAttack={pendingAttack} defenseTime={defenseTime} onResolve={resolveAttack} />)}
         </section>
       </div>
 
@@ -634,19 +667,6 @@ export default function LocalPvPBattle() {
         ))}
       </div>
 
-      {phase === "defending" && pendingAttack && (
-        <section className="local-pvp-defense" role="dialog" aria-live="assertive">
-          <p>INCOMING ATTACK</p>
-          <h2>{pendingAttack.attackName}</h2>
-          <span>{teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId)?.name} — CHOOSE YOUR DEFENSE</span>
-          <div className="local-pvp-defense-timer">{defenseTime}s</div>
-          <div>
-            <button onClick={() => resolveAttack("defend")} disabled={getModifiedCharacterStat(teams[defendingSide].find((fighter) => fighter?.id === pendingAttack.targetId), "cooldown") <= 0}>DEFEND</button>
-            <button onClick={() => resolveAttack("evade")}>EVADE</button>
-            <button onClick={() => resolveAttack("take-damage")}>TAKE DAMAGE</button>
-          </div>
-        </section>
-      )}
 
       <section className="local-pvp-attacks">
         <div className="local-pvp-player2-panels">
@@ -664,7 +684,7 @@ export default function LocalPvPBattle() {
   );
 }
 
-function FighterStatus({ fighter }) {
+function FighterStatus({ fighter, pendingAttack, defenseTime, onResolve }) {
   const hp = Math.max(0, fighter.health);
   const mp = Math.max(0, fighter.mana);
   return (
@@ -677,6 +697,19 @@ function FighterStatus({ fighter }) {
         <span>MP {mp}/{fighter.maximumMana}</span>
         <div className="local-pvp-meter mana"><i style={{ width: `${Math.max(0, mp / fighter.maximumMana * 100)}%` }} /></div>
       </div>
+      {pendingAttack?.targetId === fighter.id && (
+        <div className="local-pvp-fighter-defense" role="dialog" aria-live="assertive">
+          <strong>⚠ INCOMING ATTACK · {defenseTime}s</strong>
+          <h4>{pendingAttack.attackName}</h4>
+          {pendingAttack.attackImage && <img className="local-pvp-defense-attack-image" src={pendingAttack.attackImage} alt={pendingAttack.attackName} />}
+          <p>{pendingAttack.damage} DAMAGE · {pendingAttack.speed} SPEED</p>
+          <div>
+            <button disabled={getModifiedCharacterStat(fighter, "cooldown") <= 0 || defenseTime <= 0} onClick={() => onResolve("defend")}>BLOCK</button>
+            <button disabled={defenseTime <= 0} onClick={() => onResolve("evade")}>EVADE</button>
+            <button disabled={defenseTime <= 0} onClick={() => onResolve("take-damage")}>TAKE DAMAGE</button>
+          </div>
+        </div>
+      )}
     </article>
   );
 }

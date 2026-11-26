@@ -1,0 +1,326 @@
+/* Isolated horizontal layout refinements for local co-op.
+   Kept separate from the main team battle stylesheet to avoid broad overrides. */
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
+}
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom > .combat-log {
+  display: none !important;
+}
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom .player-attack-panel {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  align-self: stretch;
+}
+.team-battle:is(.is-local-coop, .is-local-pvp) .battlefield {
+  position: relative;
+  isolation: isolate;
+}
+.team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming {
+  position: absolute;
+  z-index: 35;
+  top: 50%;
+  width: min(310px, 28%);
+  max-height: min(78%, 540px);
+  overflow-y: auto;
+  transform: translateY(-50%);
+  margin: 0;
+  box-shadow: 0 16px 42px #000b, 0 0 20px #ff315955;
+}
+.team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming.is-first {
+  left: 12px;
+  right: auto;
+}
+.team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming.is-second {
+  right: 12px;
+  left: auto;
+}
+.team-battle:is(.is-local-coop, .is-local-pvp) .player-attack-popup.is-opponent-side {
+  position: absolute;
+  z-index: 34;
+  top: 50%;
+  right: 12px;
+  left: auto;
+  width: min(310px, 28%);
+  transform: translateY(-50%);
+  margin: 0;
+}
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-center {
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming,
+  .team-battle:is(.is-local-coop, .is-local-pvp) .player-attack-popup.is-opponent-side {
+    width: min(260px, 42%);
+  }
+}
+@media (max-width: 650px) {
+  .team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming,
+  .team-battle:is(.is-local-coop, .is-local-pvp) .player-attack-popup.is-opponent-side {
+    position: relative;
+    inset: auto;
+    width: min(100%, 360px);
+    max-height: none;
+    transform: none;
+    margin: 10px auto;
+  }
+}
+
+/* ==========================================================
+   LOCAL MATCH — HORIZONTAL ARCADE LAYOUT
+   This stylesheet is intentionally scoped to local co-op so
+   the existing solo TeamBattle presentation stays untouched.
+========================================================== */
+
+.team-battle:is(.is-local-coop, .is-local-pvp) {
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+  padding: 10px 18px 14px;
+  display: grid;
+  grid-template-rows: 42px minmax(280px, 1fr) minmax(210px, 30vh);
+  gap: 9px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(165, 245, 27, .09), transparent 58%),
+    linear-gradient(180deg, #0b1710 0%, #0a1711 58%, #080d16 100%);
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 0;
+  padding: 0 4px;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-header h1 {
+  white-space: nowrap;
+  font-size: clamp(17px, 1.7vw, 25px);
+  letter-spacing: 2px;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battlefield {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(42px, .12fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: clamp(8px, 1.3vw, 20px);
+  padding: clamp(12px, 1.5vw, 22px);
+  border: 1px solid rgba(19, 213, 255, .55);
+  border-radius: 13px;
+  background:
+    radial-gradient(ellipse at center, rgba(28, 62, 39, .42), transparent 68%),
+    linear-gradient(145deg, #102017, #0b1710);
+  box-shadow: inset 0 0 26px rgba(19, 213, 255, .035), 0 8px 24px #0005;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-team {
+  min-width: 0;
+  min-height: 0;
+  gap: 8px;
+  justify-content: center;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .team-heading {
+  min-height: 22px;
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .fighter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+  gap: clamp(8px, 1.2vw, 18px);
+  min-height: 0;
+  flex: 1;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .fighter-unit {
+  width: min(100%, 310px);
+  max-width: 310px;
+  min-height: 0;
+  gap: 8px;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .fighter-hud {
+  padding: 8px 10px;
+  gap: 5px;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .fighter-portrait-stage {
+  min-height: 0;
+  height: clamp(150px, 27vh, 300px);
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 4px;
+  text-align: center;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-center p {
+  max-width: 120px;
+  color: #f7e9b5;
+  font: 800 clamp(9px, .8vw, 12px)/1.35 Oxanium, sans-serif;
+  text-shadow: 0 2px 8px #000;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom > .combat-log {
+  display: none !important;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom .player-attack-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid rgba(165, 245, 27, .3);
+  border-radius: 11px;
+  background: linear-gradient(160deg, rgba(28, 48, 29, .98), rgba(10, 20, 13, .98));
+  box-shadow: 0 8px 22px #0005;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom .attack-panel-header {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 4px 8px;
+  border-bottom: 2px solid #a5f51b;
+  text-align: center;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .team-attack-grid {
+  min-height: 0;
+  grid-auto-columns: clamp(92px, 8vw, 126px);
+  grid-auto-rows: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-content: stretch;
+  padding: 8px 2px 4px;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .team-attack-wrapper,
+.team-battle:is(.is-local-coop, .is-local-pvp) .team-attack-card {
+  min-height: 0;
+  height: 100%;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .team-attack-card {
+  padding: 6px;
+  gap: 4px;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .team-attack-card .team-attack-image,
+.team-battle:is(.is-local-coop, .is-local-pvp) .team-attack-card .team-attack-image-placeholder {
+  flex: 0 0 clamp(52px, 8vh, 76px);
+  height: clamp(52px, 8vh, 76px);
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming {
+  z-index: 35;
+  top: 50%;
+  width: min(300px, 29%);
+  max-height: 84%;
+  overflow-y: auto;
+  transform: translateY(-50%);
+  border-color: rgba(255, 63, 97, .8);
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming.is-first {
+  left: 10px;
+  right: auto;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming.is-second {
+  right: 10px;
+  left: auto;
+}
+
+.team-battle:is(.is-local-coop, .is-local-pvp) .player-attack-popup.is-opponent-side {
+  z-index: 34;
+  top: 50%;
+  right: 10px;
+  left: auto;
+  width: min(300px, 29%);
+  transform: translateY(-50%);
+}
+
+@media (max-width: 900px) {
+  .team-battle:is(.is-local-coop, .is-local-pvp) {
+    padding: 8px;
+    grid-template-rows: 38px minmax(260px, 1fr) minmax(190px, 30vh);
+  }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .battlefield { gap: 6px; padding: 9px; }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .fighter-portrait-stage { height: clamp(115px, 22vh, 210px); }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming,
+  .team-battle:is(.is-local-coop, .is-local-pvp) .player-attack-popup.is-opponent-side { width: min(250px, 34%); }
+}
+
+@media (max-width: 650px) {
+  .team-battle:is(.is-local-coop, .is-local-pvp) {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+  }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .battlefield {
+    min-height: 650px;
+    grid-template-columns: minmax(0, 1fr) 26px minmax(0, 1fr);
+  }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .fighter-grid { grid-template-columns: minmax(0, 1fr); }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .fighter-portrait-stage { height: clamp(135px, 22vh, 190px); }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom {
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .battle-bottom .player-attack-panel { min-height: 190px; }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .team-attack-grid {
+    grid-auto-columns: 105px;
+    grid-auto-rows: 190px;
+    grid-template-rows: 190px;
+    overflow-y: hidden;
+  }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .team-attack-wrapper,
+  .team-battle:is(.is-local-coop, .is-local-pvp) .team-attack-card { height: 190px; min-height: 190px; }
+  .team-battle:is(.is-local-coop, .is-local-pvp) .local-coop-incoming,
+  .team-battle:is(.is-local-coop, .is-local-pvp) .player-attack-popup.is-opponent-side {
+    position: relative;
+    inset: auto;
+    width: min(100%, 340px);
+    max-height: none;
+    transform: none;
+    margin: 8px auto;
+  }
+}
+

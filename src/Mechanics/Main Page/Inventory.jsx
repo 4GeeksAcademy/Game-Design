@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { roster } from "./CharacterSelection.jsx";
 import { getUnlockedCharacters } from "../Currency.js";
 import { skins } from "../Skins.js";
-import { getAttackKey, getAttackDisplayName, getAttackSlotLimit, getEquippedAttackKeys, saveEquippedAttackKeys, isAttackUnlocked, unlockAttack } from "../AttackLoadouts.js";
+import { getAttackKey, getAttackDisplayName, getAttackSlotLimit, getEquippedAttackKeys, saveEquippedAttackKeys, resetEquippedAttackKeys, isAttackUnlocked, unlockAttack } from "../AttackLoadouts.js";
 
 import {
   getOwnedSkins,
@@ -307,6 +307,7 @@ function AttackDetails({ attack, characterName, characterId, onClose, onUnlock }
 
 
 function AttackLoadoutEditor({ character }) {
+  const navigate = useNavigate();
   const [equipped, setEquipped] = useState([]);
   const [notice, setNotice] = useState("");
   const attacks = character?.data?.attacks ?? [];
@@ -328,6 +329,12 @@ function AttackLoadoutEditor({ character }) {
   const save = () => {
     saveEquippedAttackKeys(character.id, equipped, attacks, character.data.slot);
     setNotice("LOADOUT SAVED — READY FOR BATTLE");
+  };
+
+  const resetToOwned = () => {
+    const resetKeys = resetEquippedAttackKeys(character.id, attacks, character.data.slot);
+    setEquipped(resetKeys);
+    setNotice(`LOADOUT RESET — ${resetKeys.length} OWNED ATTACKS EQUIPPED`);
   };
 
   const unlock = (attack) => {
@@ -356,7 +363,7 @@ function AttackLoadoutEditor({ character }) {
         <span>{attack.damage ?? 0} DMG · {attack.cost ?? 0} MANA</span>
         {mode === "locked" ? (
           attack.festivalExclusive ? (
-            <span className="loadout-festival-exclusive">FESTIVAL EXCLUSIVE · CLAIM IN FESTIVAL</span>
+            <button type="button" className="loadout-festival-exclusive" onClick={() => navigate("/festival")}>FESTIVAL EXCLUSIVE · CLAIM IN FESTIVAL ↗</button>
           ) : (
           <button onClick={() => unlock(attack)}>UNLOCK · ◈ {attack.unlockCost ?? attack.coinCost ?? attack.price ?? 0}</button>
           )
@@ -385,9 +392,14 @@ function AttackLoadoutEditor({ character }) {
             <strong>{equipped.length} / {slots}</strong>
             <span>ATTACK SLOTS EQUIPPED</span>
           </div>
-          <button className="loadout-save-button" onClick={save}>
-            SAVE {character.data.name.toUpperCase()} LOADOUT
-          </button>
+          <div className="loadout-action-buttons">
+            <button className="loadout-save-button" onClick={save}>
+              SAVE {character.data.name.toUpperCase()} LOADOUT
+            </button>
+            <button className="loadout-reset-button" onClick={resetToOwned}>
+              RESET TO OWNED ATTACKS
+            </button>
+          </div>
           {notice && <p className="loadout-save-message">{notice}</p>}
         </div>
       </header>
