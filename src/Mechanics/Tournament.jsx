@@ -79,6 +79,8 @@ function makeTournament(size, player) {
     participants,
     rounds,
     currentRound: 0,
+    displayRoundIndex: 0,
+    lastTransitionRoundIndex: -1,
     started: false,
     playerEliminated: false,
     complete: false,
@@ -356,7 +358,7 @@ function RoundTransition({ transition, onContinue }) {
             <p className="wc-round-transition-caption">THESE CONTENDERS' RUN ENDS HERE</p>
             <div className="wc-round-eliminators">
               {transition.eliminators.map((fighter, index) => (
-                <article className="wc-round-eliminator" key={fighter.id} style={{ "--reveal-order": index }}>
+                <article className="wc-round-eliminator" key={fighter.id} style={{ animationDelay: (index * 0.22) + "s" }}>
                   <span className="wc-round-eliminator-rank">{String(index + 1).padStart(2, "0")}</span>
                   <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
                   <strong>{fighterName(fighter)}</strong>
@@ -375,7 +377,7 @@ function RoundTransition({ transition, onContinue }) {
             <p className="wc-round-transition-caption">CURRENT STANDINGS · WINNERS MOVE FORWARD</p>
             <div className="wc-round-standings">
               {transition.standings.map((pair, index) => (
-                <article className="wc-round-standing-match" key={index} style={{ "--reveal-order": index }}>
+                <article className="wc-round-standing-match" key={index} style={{ animationDelay: (index * 0.22) + "s" }}>
                   <div className="wc-round-standing-fighter">
                     <img src={fighterImage(pair[0])} alt={fighterName(pair[0])} />
                     <strong>{fighterName(pair[0])}</strong>
@@ -599,14 +601,19 @@ export default function Tournament() {
         });
 
         draft.currentRound = roundIndex;
+        draft.displayRoundIndex = roundIndex;
         publishTournament(draft);
-        await presentRoundTransition(completedRound, round, roundIndex - 1, draft.size);
-        if (skipCpuQueueRef.current) {
-          setSpectating(false);
-          return;
+        if (!forcedPlacement && draft.lastTransitionRoundIndex !== roundIndex - 1) {
+          draft.lastTransitionRoundIndex = roundIndex - 1;
+          await presentRoundTransition(completedRound, round, roundIndex - 1, draft.size);
+          if (skipCpuQueueRef.current) {
+            setSpectating(false);
+            return;
+          }
         }
       } else {
         draft.currentRound = roundIndex;
+        draft.displayRoundIndex = roundIndex;
         publishTournament(draft);
       }
 
@@ -647,11 +654,16 @@ export default function Tournament() {
         });
 
         draft.currentRound = roundIndex;
+        draft.displayRoundIndex = roundIndex;
         publishTournament(draft);
-        await presentRoundTransition(completedRound, round, roundIndex - 1, draft.size);
-        if (skipCpuQueueRef.current) return;
+        if (draft.lastTransitionRoundIndex !== roundIndex - 1) {
+          draft.lastTransitionRoundIndex = roundIndex - 1;
+          await presentRoundTransition(completedRound, round, roundIndex - 1, draft.size);
+          if (skipCpuQueueRef.current) return;
+        }
       } else {
         draft.currentRound = roundIndex;
+        draft.displayRoundIndex = roundIndex;
         publishTournament(draft);
       }
 
@@ -735,6 +747,31 @@ export default function Tournament() {
           : null;
       } else if (updated.size === 8 && updated.currentRound === 0) {
         updated.placementOpportunity = { type: "consolation" };
+      }
+
+      const nextRoundIndex = updated.currentRound + 1;
+      if (nextRoundIndex < updated.rounds.length) {
+        const nextRound = updated.rounds[nextRoundIndex];
+        const previousWinners = currentRound.map((item) => item.winner);
+        nextRound.forEach((item, index) => {
+          if (!item.fighters[0] || !item.fighters[1]) {
+            item.fighters = [
+              previousWinners[index * 2] || null,
+              previousWinners[index * 2 + 1] || null,
+            ];
+          }
+          item.isPlayerMatch = false;
+        });
+
+        updated.displayRoundIndex = nextRoundIndex;
+        updated.lastTransitionRoundIndex = updated.currentRound;
+        publishTournament(updated);
+        await presentRoundTransition(currentRound, nextRound, updated.currentRound, updated.size);
+        if (skipCpuQueueRef.current) return;
+      } else {
+        playUISound("back");
+        completeTournament(updated);
+        return;
       }
 
       publishTournament(updated);
@@ -1134,9 +1171,7 @@ export default function Tournament() {
   }
 
   if (tournament) {
-    const roundLabels = tournament.size === 4
-      ? ["SEMIFINALS", "FINAL"]
-      : ["QUARTERFINALS", "SEMIFINALS", "FINAL"];
+    const displayRoundIndex = tournament.displayRoundIndex ?? tournament.currentRound;
 
     return (
       <main className={"wc-tournament wc-tournament-bracket" + (restarting ? " is-restarting" : "")}>
@@ -1191,12 +1226,12 @@ export default function Tournament() {
 
         <section className="wc-tourney-rounds wc-tourney-current-round" aria-label="Current tournament round">
           <div className="wc-tourney-round-title wc-tourney-current-round-title">
-            <span>ROUND {tournament.currentRound + 1} OF {tournament.rounds.length}</span>
-            <h2>{getRoundLabel(tournament.size, tournament.currentRound)}</h2>
-            <small>{(tournament.rounds[tournament.currentRound] || []).length} MATCH{(tournament.rounds[tournament.currentRound] || []).length === 1 ? "" : "ES"}</small>
+            <span>ROUND {displayRoundIndex + 1} OF {tournament.rounds.length}</span>
+            <h2>{getRoundLabel(tournament.size, displayRoundIndex)}</h2>
+            <small>{(tournament.rounds[displayRoundIndex] || []).length} MATCH{(tournament.rounds[displayRoundIndex] || []).length === 1 ? "" : "ES"}</small>
           </div>
           <div className="wc-tourney-round-matches wc-tourney-current-round-matches">
-            {(tournament.rounds[tournament.currentRound] || []).map((match, matchIndex) => (
+            {(tournament.rounds[displayRoundIndex] || []).map((match, matchIndex) => (
               <TournamentMatch
                 key={match.id}
                 match={match}
@@ -1205,7 +1240,7 @@ export default function Tournament() {
                 revealing={revealing}
                 previewFighters={revealPreview?.[match.id]}
                 onEnterMatch={enterMatch}
-                roundLabel={getRoundLabel(tournament.size, tournament.currentRound)}
+                roundLabel={getRoundLabel(tournament.size, displayRoundIndex)}
               />
             ))}
           </div>
