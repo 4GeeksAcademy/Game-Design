@@ -4872,3 +4872,27 @@
     transition-duration: .01ms !important;
   }
 }
+
+
+/* The fork draws inward and downward when a match winner is confirmed. */
+.wc-tourney-advance-fork.is-complete .fork-branch {
+  animation: wcTourneyForkVertical .38s ease-out both;
+}
+
+.wc-tourney-advance-fork.is-complete .fork-bridge {
+  animation: wcTourneyForkHorizontal .38s .16s ease-out both;
+}
+
+.wc-tourney-advance-fork.is-complete .fork-stem {
+  animation: wcTourneyForkVertical .34s .3s ease-out both;
+}
+
+@keyframes wcTourneyForkVertical {
+  from { transform: scaleY(.05); opacity: .25; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes wcTourneyForkHorizontal {
+  from { transform: scaleX(.05); opacity: .25; }
+  to { transform: scaleX(1); opacity: 1; }
+}
