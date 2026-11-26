@@ -41,18 +41,10 @@ function simulateCpuMatch(one, two) {
   return battle.fighters[0].health >= battle.fighters[1].health ? one : two;
 }
 
-function makeTournament(size, player, cpuPool) {
-  const selectedCpu = [...cpuPool]
-    .filter((fighter) => fighter.id !== player.id)
-    .sort(() => Math.random() - 0.5)
-    .slice(0, size - 1);
-  // Place the human in the left slot of Match 01. The remaining CPU
-  // contenders are shuffled so the rest of the bracket stays unpredictable.
-  const participants = [
-    player,
-    selectedCpu[0],
-    ...selectedCpu.slice(1).sort(() => Math.random() - 0.5),
-  ];
+function makeTournament(size, player) {
+  // CPU slots stay empty until START TOURNAMENT is pressed.
+  // The player is fixed in the left slot of the opening match.
+  const participants = [player, ...Array(size - 1).fill(null)];
   const rounds = [];
   let matchCount = size / 2;
   let roundNumber = 1;
@@ -526,7 +518,7 @@ export default function Tournament() {
     setShowEliminationScreen(false);
     setRevealing(true);
     playUISound("confirm");
-    const next = makeTournament(size, selectedFighter, cpuPool);
+    const next = makeTournament(size, selectedFighter);
     window.setTimeout(() => {
       setTournament(next);
       setShowResults(false);
@@ -557,6 +549,17 @@ export default function Tournament() {
     let step = 0;
     window.clearInterval(revealIntervalRef.current);
 
+    // The actual CPU draw happens now, not when the empty bracket was generated.
+    const selectedCpu = [...cpuPool]
+      .filter((fighter) => fighter.id !== tournament.player.id)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, tournament.size - 1);
+    const finalParticipants = [
+      tournament.player,
+      selectedCpu[0],
+      ...selectedCpu.slice(1).sort(() => Math.random() - 0.5),
+    ];
+
     revealIntervalRef.current = window.setInterval(() => {
       setRevealPreview(createRevealPreview());
       playUISound("click");
@@ -566,7 +569,21 @@ export default function Tournament() {
         window.clearInterval(revealIntervalRef.current);
         revealIntervalRef.current = null;
         setRevealPreview(null);
-        setTournament((current) => current ? { ...current, started: true } : current);
+        setTournament((current) => {
+          if (!current) return current;
+          const firstRound = current.rounds[0].map((match, index) => ({
+            ...match,
+            fighters: [finalParticipants[index * 2], finalParticipants[index * 2 + 1]],
+            isPlayerMatch: [finalParticipants[index * 2], finalParticipants[index * 2 + 1]]
+              .some((fighter) => fighter?.id === current.player.id),
+          }));
+          return {
+            ...current,
+            participants: finalParticipants,
+            rounds: [firstRound, ...current.rounds.slice(1)],
+            started: true,
+          };
+        });
         setRevealing(false);
         playUISound("victory");
       }
