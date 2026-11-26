@@ -288,8 +288,8 @@ function TournamentMatch({
         <span>{match.winner ? "RESULT CONFIRMED" : revealing ? "DRAWING CONTENDERS" : "WINNER ADVANCES"}</span>
       </div>
 
-      <div className="wc-tourney-matchup">
-        <div className="wc-tourney-fighter-stack">
+      <div className="wc-tourney-matchup wc-tourney-vertical-bracket">
+        <div className="wc-tourney-head-to-head">
           <TournamentFighter
             fighter={shownFirst}
             mystery={firstMystery}
@@ -309,29 +309,32 @@ function TournamentMatch({
           />
         </div>
 
-        <div className="wc-tourney-bracket-fork" aria-hidden="true">
-          <i className="fork-upper" />
-          <i className="fork-lower" />
+        <div className="wc-tourney-vertical-fork" aria-hidden="true">
+          <i className="fork-left" />
+          <i className="fork-right" />
+          <i className="fork-join" />
           <i className="fork-stem" />
-          <i className="fork-out" />
         </div>
 
         <div className={"wc-tourney-advance-slot" + (match.winner ? " has-winner" : "")}>
-          <span>{match.winner ? "ADVANCING CONTENDER" : "WINNER ADVANCES"}</span>
           {match.winner ? (
             <>
+              <span>ADVANCING TO THE NEXT ROUND</span>
               <div className="wc-tourney-advance-portrait">
                 <img src={fighterImage(match.winner)} alt={fighterName(match.winner)} />
               </div>
               <strong>{fighterName(match.winner)}</strong>
-              <small>TO THE NEXT ROUND</small>
+              <small>WINNER · MATCH {String(matchIndex + 1).padStart(2, "0")}</small>
             </>
           ) : (
-            <div className="wc-tourney-advance-pending">
-              <span>?</span>
-              <strong>WINNER</strong>
-              <small>TO BE DECIDED</small>
-            </div>
+            <>
+              <span>WINNER ADVANCES</span>
+              <div className="wc-tourney-advance-pending">
+                <span>?</span>
+                <strong>AWAITING RESULT</strong>
+              </div>
+              <small>THE BRACKET WILL UPDATE AFTER THIS MATCH</small>
+            </>
           )}
         </div>
       </div>
@@ -358,7 +361,7 @@ function RoundTransition({ transition, onContinue }) {
             <p className="wc-round-transition-caption">THEIR CHAMPIONSHIP RUN ENDS HERE</p>
             <div className="wc-round-eliminators">
               {transition.eliminators.map((fighter, index) => (
-                <article className="wc-round-eliminator" key={fighter.id} style={{ animationDelay: (index * 0.22) + "s" }}>
+                <article className="wc-round-eliminator" key={fighter.id} style={{ animationDelay: (index * 0.88) + "s" }}>
                   <span className="wc-round-eliminator-rank">{String(index + 1).padStart(2, "0")}</span>
                   <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
                   <strong>{fighterName(fighter)}</strong>
@@ -377,7 +380,7 @@ function RoundTransition({ transition, onContinue }) {
             <p className="wc-round-transition-caption">CURRENT STANDINGS · WINNERS MOVE FORWARD</p>
             <div className="wc-round-standings">
               {transition.standings.map((pair, index) => (
-                <article className="wc-round-standing-match" key={index} style={{ animationDelay: (index * 0.22) + "s" }}>
+                <article className="wc-round-standing-match" key={index} style={{ animationDelay: (index * 0.88) + "s" }}>
                   <div className="wc-round-standing-fighter">
                     <img src={fighterImage(pair[0])} alt={fighterName(pair[0])} />
                     <strong>{fighterName(pair[0])}</strong>
@@ -406,6 +409,105 @@ function RoundTransition({ transition, onContinue }) {
         )}
       </section>
     </div>
+  );
+}
+
+function TournamentStartPrompt({ tournament, previewFighters, revealing, onStart }) {
+  const firstRound = tournament.rounds[0] || [];
+
+  return (
+    <div className="wc-tourney-start-backdrop">
+      <section className="wc-tourney-start-dialog" role="dialog" aria-modal="true" aria-labelledby="wcTourneyStartTitle">
+        <p className="wc-tourney-start-kicker">WILD CARDS · GRAND CHAMPIONSHIP</p>
+        <h2 id="wcTourneyStartTitle">{revealing ? "THE DRAW IS UNDERWAY" : "THE BRACKET IS READY"}</h2>
+        <p className="wc-tourney-start-copy">
+          {revealing
+            ? "The contenders are being revealed and their opening matches are being locked in."
+            : "Review the opening matchups. Your tournament begins when you are ready."}
+        </p>
+
+        <div className="wc-tourney-start-preview-heading">
+          <span>OPENING ROUND</span>
+          <strong>{tournament.size} FIGHTERS · {firstRound.length} MATCHES</strong>
+        </div>
+
+        <div className="wc-tourney-start-preview">
+          {firstRound.map((match, index) => {
+            const preview = previewFighters?.[match.id];
+            const first = preview?.[0] || match.fighters[0];
+            const second = preview?.[1] || match.fighters[1];
+            const firstIsPlayer = first?.id === tournament.player.id;
+            const secondIsPlayer = second?.id === tournament.player.id;
+
+            return (
+              <article className="wc-tourney-start-match" key={match.id}>
+                <span className="wc-tourney-start-match-number">MATCH {String(index + 1).padStart(2, "0")}</span>
+                <div className="wc-tourney-start-entrant">
+                  <div className="wc-tourney-start-portrait">
+                    {first
+                      ? <img src={fighterImage(first)} alt={fighterName(first)} />
+                      : <span>?</span>}
+                  </div>
+                  <strong>{first ? fighterName(first) : "UNKNOWN"}</strong>
+                  {firstIsPlayer && <small>YOU</small>}
+                </div>
+                <b className="wc-tourney-start-vs">VS</b>
+                <div className="wc-tourney-start-entrant">
+                  <div className="wc-tourney-start-portrait">
+                    {second
+                      ? <img src={fighterImage(second)} alt={fighterName(second)} />
+                      : <span>?</span>}
+                  </div>
+                  <strong>{second ? fighterName(second) : "UNKNOWN"}</strong>
+                  {secondIsPlayer && <small>YOU</small>}
+                </div>
+                <div className="wc-tourney-start-advance" aria-hidden="true">↓</div>
+              </article>
+            );
+          })}
+        </div>
+
+        <div className="wc-tourney-start-footer">
+          <span>{revealing ? "DRAWING CONTENDERS…" : "ONE CHAMPION WILL CLAIM THE CROWN"}</span>
+          <button type="button" onClick={onStart} disabled={revealing}>
+            {revealing ? <><i className="wc-tourney-start-spinner" /> DRAWING THE BRACKET…</> : <>START TOURNAMENT <span>▶</span></>}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function TournamentPlacementList({ placements }) {
+  const rankedFighters = (placements || []).slice(3);
+
+  return (
+    <aside className="wc-tourney-placement-list">
+      <header>
+        <span>FINAL RANKINGS</span>
+        <strong>THE REST OF THE FIELD</strong>
+      </header>
+      <div className="wc-tourney-placement-entries">
+        {rankedFighters.map((fighter, index) => {
+          const rank = index + 4;
+          const suffix = rank === 4 ? "TH" : "TH";
+          return (
+            <article className="wc-tourney-placement-entry" key={fighter?.id || rank}>
+              <span className="wc-tourney-placement-rank">{rank}{suffix}</span>
+              <div className="wc-tourney-placement-image">
+                {fighter
+                  ? <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
+                  : <span>?</span>}
+              </div>
+              <div className="wc-tourney-placement-name">
+                <strong>{fighter ? fighterName(fighter) : "UNKNOWN FIGHTER"}</strong>
+                <small>{rank === 4 ? "FOURTH PLACE" : "TOURNAMENT FINISH"}</small>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </aside>
   );
 }
 
@@ -482,20 +584,20 @@ export default function Tournament() {
     });
   }
 
-  function presentRoundTransition(completedRound, nextRound, completedRoundIndex, bracketSize) {
-    const eliminators = completedRound
-      .map((match) => match.fighters.find(
+  function presentRoundTransition(completedRounds, nextRound, nextRoundIndex, bracketSize) {
+    const eliminators = completedRounds.flatMap((round) =>
+      round.map((match) => match.fighters.find(
         (fighter) => fighter && fighter.id !== match.winner?.id,
-      ))
-      .filter(Boolean);
+      )).filter(Boolean)
+    );
     const standings = nextRound.map((match) => [...match.fighters]);
 
     if (!eliminators.length || !standings.length) return Promise.resolve();
 
     setRoundTransition({
       phase: "eliminators",
-      completedRoundLabel: getRoundLabel(bracketSize, completedRoundIndex),
-      nextRoundLabel: getRoundLabel(bracketSize, completedRoundIndex + 1),
+      completedRoundLabel: bracketSize === 4 ? "SEMIFINALS COMPLETE" : "QUARTERFINALS & SEMIFINALS COMPLETE",
+      nextRoundLabel: getRoundLabel(bracketSize, nextRoundIndex),
       eliminators,
       standings,
     });
@@ -518,7 +620,9 @@ export default function Tournament() {
     if (!roundTransition || roundTransition.phase === "ready") return undefined;
 
     const nextPhase = roundTransition.phase === "eliminators" ? "standings" : "ready";
-    const duration = roundTransition.phase === "eliminators" ? 2600 : 2400;
+    const duration = roundTransition.phase === "eliminators"
+      ? Math.max(4200, roundTransition.eliminators.length * 880 + 1900)
+      : 3800;
     const timer = window.setTimeout(() => {
       setRoundTransition((current) => current ? { ...current, phase: nextPhase } : current);
       playUISound("click");
@@ -603,9 +707,10 @@ export default function Tournament() {
         draft.currentRound = roundIndex;
         draft.displayRoundIndex = roundIndex;
         publishTournament(draft);
-        if (!forcedPlacement && draft.lastTransitionRoundIndex !== roundIndex - 1) {
+        const isFinalRound = roundIndex === draft.rounds.length - 1;
+        if (isFinalRound && draft.lastTransitionRoundIndex !== roundIndex - 1) {
           draft.lastTransitionRoundIndex = roundIndex - 1;
-          await presentRoundTransition(completedRound, round, roundIndex - 1, draft.size);
+          await presentRoundTransition(draft.rounds.slice(0, roundIndex), round, roundIndex, draft.size);
           if (skipCpuQueueRef.current) {
             setSpectating(false);
             return;
@@ -656,9 +761,10 @@ export default function Tournament() {
         draft.currentRound = roundIndex;
         draft.displayRoundIndex = roundIndex;
         publishTournament(draft);
-        if (draft.lastTransitionRoundIndex !== roundIndex - 1) {
+        const isFinalRound = roundIndex === draft.rounds.length - 1;
+        if (isFinalRound && draft.lastTransitionRoundIndex !== roundIndex - 1) {
           draft.lastTransitionRoundIndex = roundIndex - 1;
-          await presentRoundTransition(completedRound, round, roundIndex - 1, draft.size);
+          await presentRoundTransition(draft.rounds.slice(0, roundIndex), round, roundIndex, draft.size);
           if (skipCpuQueueRef.current) return;
         }
       } else {
@@ -764,10 +870,7 @@ export default function Tournament() {
         });
 
         updated.displayRoundIndex = nextRoundIndex;
-        updated.lastTransitionRoundIndex = updated.currentRound;
         publishTournament(updated);
-        await presentRoundTransition(currentRound, nextRound, updated.currentRound, updated.size);
-        if (skipCpuQueueRef.current) return;
       } else {
         playUISound("back");
         completeTournament(updated);
@@ -1127,7 +1230,7 @@ export default function Tournament() {
         <section className="wc-tourney-results-title">
           <p className="wc-tourney-kicker">THE FINAL BELL HAS RUNG</p>
           <h1>THE PODIUM</h1>
-          <p>The fighters who earned the top three places.</p>
+          <p>The champion, the podium, and every contender's final position.</p>
         </section>
         <section className="wc-tourney-player-strip wc-tourney-result-player">
           <img src={fighterImage(tournament.player)} alt={fighterName(tournament.player)} />
@@ -1137,7 +1240,10 @@ export default function Tournament() {
           </div>
           <span>{placement}{suffix} PLACE</span>
         </section>
-        <Podium placements={tournament.placements} showRewards size={tournament.size} />
+        <section className="wc-tourney-final-standings-layout">
+          <Podium placements={tournament.placements} showRewards size={tournament.size} />
+          <TournamentPlacementList placements={tournament.placements} />
+        </section>
         <section className="wc-tourney-reward-receipt">
           <div>
             <span>YOUR FINISH</span>
@@ -1193,9 +1299,7 @@ export default function Tournament() {
           <div className="wc-tourney-header-right">
             <span>{tournament.size} CONTENDERS</span>
             {!tournament.started ? (
-              <button className="wc-tourney-reveal-button" onClick={startTournament} disabled={revealing}>
-                {revealing ? "REVEALING..." : "START TOURNAMENT"}
-              </button>
+              <span className="wc-tourney-live-state">{revealing ? "● DRAW IN PROGRESS" : "● BRACKET PREVIEW"}</span>
             ) : (
               <span className="wc-tourney-live-state">● TOURNAMENT LIVE</span>
             )}
@@ -1274,6 +1378,15 @@ export default function Tournament() {
               RESTART
             </button>
           </section>
+        )}
+
+        {!tournament.started && (
+          <TournamentStartPrompt
+            tournament={tournament}
+            previewFighters={revealPreview}
+            revealing={revealing}
+            onStart={startTournament}
+          />
         )}
 
         <RoundTransition
@@ -1367,4 +1480,712 @@ export default function Tournament() {
       </footer>
     </main>
   );
+}
+
+
+/* =========================================================
+   VERTICAL BRACKET TREE — side-by-side contender cards,
+   straight downward fork, then advancing winner.
+   ========================================================= */
+.wc-tourney-current-round .wc-tourney-matchup.wc-tourney-vertical-bracket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 13px 0 3px;
+}
+
+.wc-tourney-head-to-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 46px minmax(0, 1fr);
+  align-items: stretch;
+  gap: clamp(6px, 1.4vw, 16px);
+  width: 100%;
+}
+
+.wc-tourney-current-round .wc-tourney-head-to-head .wc-tourney-fighter {
+  height: clamp(140px, 17vh, 184px);
+  min-height: 140px;
+  grid-template-columns: clamp(104px, 14vw, 172px) minmax(0, 1fr);
+  gap: 12px;
+  padding: 7px;
+}
+
+.wc-tourney-current-round .wc-tourney-head-to-head .wc-tourney-portrait {
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  place-items: end center;
+}
+
+.wc-tourney-current-round .wc-tourney-head-to-head .wc-tourney-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.wc-tourney-head-to-head .wc-tourney-versus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 0;
+  color: #d9ba73;
+  font-size: .7rem;
+  writing-mode: vertical-rl;
+}
+
+.wc-tourney-head-to-head .wc-tourney-versus::before,
+.wc-tourney-head-to-head .wc-tourney-versus::after {
+  content: "";
+  width: 1px;
+  height: 100%;
+  min-height: 24px;
+  background: linear-gradient(180deg, transparent, #c09b5a, transparent);
+}
+
+.wc-tourney-vertical-fork {
+  position: relative;
+  width: min(220px, 42%);
+  height: 38px;
+  flex: 0 0 38px;
+  margin: 0 auto;
+}
+
+.wc-tourney-vertical-fork i {
+  position: absolute;
+  display: block;
+  background: linear-gradient(180deg, #e0c078, #8e713d);
+  box-shadow: 0 0 9px #d5ae5d45;
+}
+
+.wc-tourney-vertical-fork .fork-left,
+.wc-tourney-vertical-fork .fork-right {
+  top: 0;
+  width: 2px;
+  height: 48%;
+}
+
+.wc-tourney-vertical-fork .fork-left { left: 8%; }
+.wc-tourney-vertical-fork .fork-right { right: 8%; }
+
+.wc-tourney-vertical-fork .fork-join {
+  top: 46%;
+  left: 8%;
+  width: 84%;
+  height: 2px;
+  background: linear-gradient(90deg, #8e713d, #e0c078, #8e713d);
+}
+
+.wc-tourney-vertical-fork .fork-stem {
+  top: 46%;
+  bottom: 0;
+  left: calc(50% - 1px);
+  width: 2px;
+  background: linear-gradient(180deg, #e0c078, #8e713d);
+}
+
+.wc-tourney-current-round .wc-tourney-advance-slot {
+  display: grid;
+  grid-template-columns: auto 78px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  justify-content: stretch;
+  gap: 3px 12px;
+  width: min(540px, 76%);
+  min-height: 92px;
+  padding: 8px 14px;
+  border: 1px solid rgba(201, 168, 100, .5);
+  border-radius: 7px;
+  background: linear-gradient(100deg, rgba(38, 31, 19, .95), rgba(11, 14, 11, .98));
+  box-shadow: 0 6px 16px #0006, inset 0 1px #fff1;
+}
+
+.wc-tourney-current-round .wc-tourney-advance-slot > span {
+  grid-column: 1 / -1;
+  color: #c1a56c;
+  font-size: .56rem;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-align: center;
+}
+
+.wc-tourney-current-round .wc-tourney-advance-portrait,
+.wc-tourney-current-round .wc-tourney-advance-pending {
+  grid-column: 2;
+  grid-row: 2;
+  width: 72px;
+  height: 67px;
+  border: 1px solid #d5b56f88;
+}
+
+.wc-tourney-current-round .wc-tourney-advance-slot > strong {
+  grid-column: 3;
+  grid-row: 2;
+  color: #f5d991;
+  font-size: clamp(.8rem, 1.2vw, 1.03rem);
+  text-align: left;
+}
+
+.wc-tourney-current-round .wc-tourney-advance-slot > small {
+  grid-column: 1;
+  grid-row: 2;
+  color: #b09255;
+  font-size: .48rem;
+  font-weight: 900;
+  letter-spacing: .07em;
+  text-align: right;
+}
+
+.wc-tourney-current-round .wc-tourney-advance-pending {
+  gap: 0;
+}
+
+.wc-tourney-current-round .wc-tourney-advance-pending span {
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.wc-tourney-current-round .wc-tourney-advance-pending strong {
+  font-size: .48rem;
+}
+
+.wc-tourney-current-round .wc-tourney-advance-pending small {
+  display: none;
+}
+
+.wc-tourney-current-round .wc-tourney-match.is-complete .wc-tourney-vertical-fork .fork-left,
+.wc-tourney-current-round .wc-tourney-match.is-complete .wc-tourney-vertical-fork .fork-right {
+  animation: wcVerticalForkDown .45s ease-out both;
+}
+
+.wc-tourney-current-round .wc-tourney-match.is-complete .wc-tourney-vertical-fork .fork-join {
+  animation: wcVerticalForkAcross .4s .16s ease-out both;
+}
+
+.wc-tourney-current-round .wc-tourney-match.is-complete .wc-tourney-vertical-fork .fork-stem {
+  animation: wcVerticalForkDown .4s .3s ease-out both;
+  transform-origin: top;
+}
+
+@keyframes wcVerticalForkDown {
+  from { transform: scaleY(.05); opacity: .25; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes wcVerticalForkAcross {
+  from { transform: scaleX(.05); opacity: .25; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+/* Dramatic, sequential eliminator reveal. The next fighter waits for the
+   previous fighter's K.O. stamp and portrait animation to complete. */
+.wc-round-eliminator {
+  position: relative;
+  grid-template-columns: 38px 76px minmax(0, 1fr) auto 56px;
+  min-height: 88px;
+  border-color: rgba(255, 72, 92, .58);
+  background:
+    radial-gradient(ellipse at 15% 50%, rgba(255, 38, 67, .2), transparent 45%),
+    linear-gradient(100deg, #45151e, #17110f 78%);
+  box-shadow: inset 4px 0 #f04459, 0 8px 22px #0008;
+  animation: wcEliminatorReveal 1.12s cubic-bezier(.12, .82, .22, 1) both;
+}
+
+.wc-round-eliminator::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, .18) 48%, transparent 72%);
+  transform: translateX(-120%);
+  animation: wcEliminatorImpact 1.15s calc(var(--reveal-order, 0) * .88s + .2s) ease-out both;
+}
+
+.wc-round-eliminator img {
+  width: 72px;
+  height: 76px;
+  filter: grayscale(.85) contrast(1.25) drop-shadow(0 0 9px #ff314966);
+  animation: wcEliminatorPortrait 1s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-round-eliminator strong {
+  color: #fff0eb;
+  font-size: 1rem;
+  text-shadow: 0 0 13px #ff315944;
+}
+
+.wc-round-eliminator small {
+  color: #ff8796;
+  font-size: .62rem;
+  letter-spacing: .18em;
+}
+
+.wc-round-eliminator-ko {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border: 2px solid #ff7184;
+  border-radius: 50%;
+  color: #fff;
+  background: radial-gradient(circle, #a62237, #3d0d18 72%);
+  box-shadow: 0 0 18px #ff315977, inset 0 0 12px #fff2;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .92rem;
+  font-weight: 1000;
+  transform: rotate(-12deg) scale(.55);
+  opacity: 0;
+  animation: wcKoStamp  .52s calc(var(--reveal-order, 0) * .88s + .5s) cubic-bezier(.16, 1, .3, 1) forwards;
+}
+
+@keyframes wcEliminatorReveal {
+  0% { opacity: 0; transform: translateX(-42px) scale(.92); filter: brightness(2.2); }
+  38% { opacity: 1; transform: translateX(7px) scale(1.015); filter: brightness(1.3); }
+  58% { transform: translateX(-3px) scale(1); filter: brightness(1); }
+  100% { opacity: 1; transform: translateX(0) scale(1); filter: brightness(.9); }
+}
+
+@keyframes wcEliminatorPortrait {
+  0% { opacity: 0; transform: translateY(-10px) scale(1.22); filter: grayscale(0) brightness(1.7); }
+  45% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: .78; filter: grayscale(.85) contrast(1.25); }
+}
+
+@keyframes wcEliminatorImpact {
+  0% { transform: translateX(-120%); opacity: 0; }
+  30% { opacity: .8; }
+  100% { transform: translateX(120%); opacity: 0; }
+}
+
+@keyframes wcKoStamp {
+  0% { opacity: 0; transform: rotate(-18deg) scale(1.8); }
+  65% { opacity: 1; transform: rotate(-10deg) scale(.9); }
+  100% { opacity: 1; transform: rotate(-10deg) scale(1); }
+}
+
+/* Central start-tournament prompt overlays a live bracket preview. */
+.wc-tourney-start-backdrop {
+  position: fixed;
+  z-index: 9000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 18px;
+  background: rgba(3, 5, 7, .76);
+  backdrop-filter: blur(5px);
+  animation: wcRoundTransitionFade .3s ease both;
+}
+
+.wc-tourney-start-dialog {
+  width: min(900px, 100%);
+  max-height: min(92vh, 900px);
+  overflow-y: auto;
+  padding: clamp(20px, 3vw, 34px);
+  border: 1px solid #f0d68b;
+  border-radius: 13px 4px;
+  color: #f6efdd;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(220, 173, 81, .26), transparent 53%),
+    linear-gradient(145deg, #242016, #0b0e0c 70%);
+  box-shadow: 0 26px 90px #000e, 0 0 0 5px #d1a84b22, 0 0 45px #dfba6844;
+  text-align: center;
+  animation: wcRoundPanelEnter .5s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-tourney-start-kicker {
+  margin: 0 0 8px;
+  color: #f0d48c;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .62rem;
+  font-weight: 1000;
+  letter-spacing: .2em;
+}
+
+.wc-tourney-start-dialog > h2 {
+  margin: 0;
+  color: #ffedbd;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(1.8rem, 5vw, 3.4rem);
+  font-weight: 1000;
+  letter-spacing: .08em;
+  text-shadow: 0 0 22px #dfb85d55;
+}
+
+.wc-tourney-start-copy {
+  margin: 8px 0 18px;
+  color: #d0c4a8;
+  font-size: .78rem;
+}
+
+.wc-tourney-start-preview-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 11px;
+  border: 1px solid #b18a4c66;
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  color: #e8d299;
+  background: #1d1b13;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .6rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+  text-align: left;
+}
+
+.wc-tourney-start-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #b18a4c66;
+  border-radius: 0 0 6px 6px;
+  background: rgba(5, 7, 7, .5);
+}
+
+.wc-tourney-start-match {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 108px;
+  padding: 18px 5px 5px;
+  border: 1px solid #ffffff18;
+  border-radius: 5px;
+  background: linear-gradient(110deg, #22251c, #10120e);
+}
+
+.wc-tourney-start-match-number {
+  position: absolute;
+  top: 5px;
+  left: 8px;
+  color: #bba16b;
+  font-size: .48rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.wc-tourney-start-entrant {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 49px minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  gap: 2px 6px;
+  text-align: left;
+}
+
+.wc-tourney-start-portrait {
+  grid-row: 1 / span 2;
+  width: 49px;
+  height: 70px;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border: 1px solid #c8a96255;
+  border-radius: 3px;
+  color: #d1b46f;
+  background: radial-gradient(ellipse at 50% 100%, #bd9b5225, transparent 65%), #12140f;
+  font-size: 2rem;
+  font-weight: 1000;
+}
+
+.wc-tourney-start-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.wc-tourney-start-entrant strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #f0e4c6;
+  font-size: .58rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-tourney-start-entrant small {
+  color: #63dfff;
+  font-size: .44rem;
+  font-weight: 1000;
+  letter-spacing: .1em;
+}
+
+.wc-tourney-start-vs {
+  color: #e5c77d;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .62rem;
+}
+
+.wc-tourney-start-advance {
+  display: grid;
+  place-items: center;
+  height: 68px;
+  border-left: 2px solid #b48e4c;
+  color: #f0d488;
+  font-size: 1.1rem;
+}
+
+.wc-tourney-start-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  margin-top: 18px;
+}
+
+.wc-tourney-start-footer > span {
+  color: #c5ad78;
+  font-size: .59rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+.wc-tourney-start-footer button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: min(420px, 100%);
+  min-height: 58px;
+  border: 1px solid #fff0ad;
+  border-radius: 7px 3px;
+  color: #1a1408;
+  background: linear-gradient(110deg, #fff3bd, #e5bd64 60%, #b98537);
+  box-shadow: 0 0 0 3px #e3bc6b23, 0 0 28px #efcb774f, 0 7px 20px #0009;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .92rem;
+  font-weight: 1000;
+  letter-spacing: .15em;
+  cursor: pointer;
+  transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+}
+
+.wc-tourney-start-footer button:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-2px) scale(1.015);
+  box-shadow: 0 0 0 4px #e3bc6b33, 0 0 38px #efcb7777, 0 10px 25px #000b;
+}
+
+.wc-tourney-start-footer button:disabled {
+  opacity: .75;
+  cursor: wait;
+}
+
+.wc-tourney-start-footer button > span {
+  font-size: 1.1rem;
+}
+
+.wc-tourney-start-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #2a2519;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: wcStartSpin .7s linear infinite;
+}
+
+@keyframes wcStartSpin { to { transform: rotate(360deg); } }
+
+/* Full standings: champion podium at left, every other rank in a right rail. */
+.wc-tourney-final-standings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(235px, 310px);
+  align-items: stretch;
+  gap: 18px;
+  width: min(100%, 1150px);
+  margin: 0 auto;
+}
+
+.wc-tourney-final-standings-layout .wc-podium {
+  min-width: 0;
+  align-self: center;
+}
+
+.wc-tourney-placement-list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(205, 168, 94, .42);
+  border-radius: 7px;
+  background: linear-gradient(155deg, #211d14, #0b0d0b 75%);
+  box-shadow: 0 10px 26px #0007, inset 0 1px #fff1;
+}
+
+.wc-tourney-placement-list > header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 3px 10px;
+  border-bottom: 1px solid #d1ac6544;
+  text-align: left;
+}
+
+.wc-tourney-placement-list > header span {
+  color: #c7a76a;
+  font-size: .54rem;
+  font-weight: 950;
+  letter-spacing: .18em;
+}
+
+.wc-tourney-placement-list > header strong {
+  color: #f4e1b2;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .82rem;
+  letter-spacing: .08em;
+}
+
+.wc-tourney-placement-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 9px;
+}
+
+.wc-tourney-placement-entry {
+  display: grid;
+  grid-template-columns: 39px 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 66px;
+  padding: 5px;
+  border: 1px solid #ffffff18;
+  border-radius: 4px;
+  background: linear-gradient(100deg, #2a2418, #10120e);
+}
+
+.wc-tourney-placement-rank {
+  color: #e3c77f;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .78rem;
+  font-weight: 1000;
+  text-align: center;
+}
+
+.wc-tourney-placement-image {
+  width: 50px;
+  height: 56px;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border: 1px solid #b89a5e55;
+  border-radius: 3px;
+  background: #11140f;
+}
+
+.wc-tourney-placement-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.wc-tourney-placement-name {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  text-align: left;
+}
+
+.wc-tourney-placement-name strong {
+  overflow: hidden;
+  color: #eee2c5;
+  font-size: .72rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-tourney-placement-name small {
+  color: #9e8a60;
+  font-size: .47rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+@media (max-width: 760px) {
+  .wc-tourney-head-to-head {
+    grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .wc-tourney-current-round .wc-tourney-head-to-head .wc-tourney-fighter {
+    height: 122px;
+    min-height: 122px;
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 6px;
+    padding: 5px;
+  }
+
+  .wc-tourney-current-round .wc-tourney-head-to-head .wc-tourney-fighter-name {
+    font-size: .77rem;
+  }
+
+  .wc-tourney-current-round .wc-tourney-head-to-head .wc-tourney-fighter-seed {
+    font-size: .38rem;
+    letter-spacing: .05em;
+  }
+
+  .wc-tourney-current-round .wc-tourney-advance-slot {
+    width: min(540px, 95%);
+  }
+
+  .wc-tourney-final-standings-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wc-tourney-final-standings-layout .wc-podium {
+    width: min(100%, 560px);
+    margin-inline: auto;
+  }
+
+  .wc-tourney-placement-entries {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wc-tourney-start-backdrop {
+    padding: 9px;
+  }
+
+  .wc-tourney-start-dialog {
+    padding: 16px 10px;
+  }
+
+  .wc-tourney-start-preview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wc-tourney-start-match {
+    min-height: 96px;
+  }
+
+  .wc-round-eliminator {
+    grid-template-columns: 28px 58px minmax(0, 1fr) auto 42px;
+    gap: 6px;
+    min-height: 70px;
+  }
+
+  .wc-round-eliminator img {
+    width: 55px;
+    height: 60px;
+  }
+
+  .wc-round-eliminator-ko {
+    width: 39px;
+    height: 39px;
+    font-size: .72rem;
+  }
 }
