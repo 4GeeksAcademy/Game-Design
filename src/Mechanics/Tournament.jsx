@@ -361,7 +361,7 @@ function RoundTransition({ transition, onContinue }) {
             <p className="wc-round-transition-caption">THEIR CHAMPIONSHIP RUN ENDS HERE</p>
             <div className="wc-round-eliminators">
               {transition.eliminators.map((fighter, index) => (
-                <article className="wc-round-eliminator" key={fighter.id} style={{ animationDelay: (index * 0.88) + "s" }}>
+                <article className="wc-round-eliminator" key={fighter.id} style={{ "--reveal-order": index, animationDelay: (index * 1.12) + "s" }}>
                   <span className="wc-round-eliminator-rank">{String(index + 1).padStart(2, "0")}</span>
                   <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
                   <strong>{fighterName(fighter)}</strong>
@@ -380,7 +380,7 @@ function RoundTransition({ transition, onContinue }) {
             <p className="wc-round-transition-caption">CURRENT STANDINGS · WINNERS MOVE FORWARD</p>
             <div className="wc-round-standings">
               {transition.standings.map((pair, index) => (
-                <article className="wc-round-standing-match" key={index} style={{ animationDelay: (index * 0.88) + "s" }}>
+                <article className="wc-round-standing-match" key={index} style={{ "--reveal-order": index, animationDelay: (index * 1.12) + "s" }}>
                   <div className="wc-round-standing-fighter">
                     <img src={fighterImage(pair[0])} alt={fighterName(pair[0])} />
                     <strong>{fighterName(pair[0])}</strong>
@@ -871,6 +871,19 @@ export default function Tournament() {
 
         updated.displayRoundIndex = nextRoundIndex;
         publishTournament(updated);
+
+        const isFinalRound = nextRoundIndex === updated.rounds.length - 1;
+        if (isFinalRound && updated.lastTransitionRoundIndex !== updated.currentRound) {
+          updated.lastTransitionRoundIndex = updated.currentRound;
+          publishTournament(updated);
+          await presentRoundTransition(
+            updated.rounds.slice(0, nextRoundIndex),
+            nextRound,
+            nextRoundIndex,
+            updated.size,
+          );
+          if (skipCpuQueueRef.current) return;
+        }
       } else {
         playUISound("back");
         completeTournament(updated);
