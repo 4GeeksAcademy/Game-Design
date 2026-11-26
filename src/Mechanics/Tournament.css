@@ -1654,3 +1654,35 @@
   border-color: rgba(255,236,190,.2);
   border-top-color: #ffe6a0;
 }
+
+@media (max-height: 700px) and (min-width: 701px) {
+  .wc-tournament-results {
+    min-height: 0;
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding-top: 10px;
+    padding-bottom: 12px;
+    gap: 7px;
+  }
+  .wc-tournament-results .wc-podium {
+    margin-top: 4px;
+  }
+  .wc-tournament-results .wc-podium-place {
+    height: 158px;
+    gap: 4px;
+    padding-top: 7px;
+  }
+  .wc-tournament-results .wc-podium-place.place-1 {
+    height: 190px;
+  }
+  .wc-tournament-results .wc-podium-place.place-3 {
+    height: 144px;
+  }
+  .wc-tournament-results .wc-podium-place img {
+    height: 76px;
+  }
+  .wc-tourney-reward-receipt {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
