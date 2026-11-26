@@ -2947,7 +2947,7 @@
 
 .wc-tourney-vertical-fork {
   position: relative;
-  width: min(220px, 42%);
+  width: 100%;
   height: 38px;
   flex: 0 0 38px;
   margin: 0 auto;
@@ -2967,13 +2967,13 @@
   height: 48%;
 }
 
-.wc-tourney-vertical-fork .fork-left { left: 8%; }
-.wc-tourney-vertical-fork .fork-right { right: 8%; }
+.wc-tourney-vertical-fork .fork-left { left: 25%; }
+.wc-tourney-vertical-fork .fork-right { right: 25%; }
 
 .wc-tourney-vertical-fork .fork-join {
   top: 46%;
-  left: 8%;
-  width: 84%;
+  left: 25%;
+  width: 50%;
   height: 2px;
   background: linear-gradient(90deg, #8e713d, #e0c078, #8e713d);
 }
