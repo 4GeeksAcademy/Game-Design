@@ -1686,3 +1686,267 @@
     padding-bottom: 8px;
   }
 }
+
+
+/* Fighter entries are display cards, not pseudo-buttons. */
+.wc-tourney-matchup {
+  align-items: stretch;
+  gap: 8px;
+}
+.wc-tourney-fighter {
+  position: relative;
+  min-width: 0;
+  height: 58px;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 7px 4px 4px;
+  border: 1px solid rgba(173, 148, 100, .34);
+  border-radius: 5px;
+  background:
+    linear-gradient(135deg, rgba(61, 52, 37, .78), rgba(18, 18, 16, .97) 56%),
+    #12110f;
+  box-shadow:
+    inset 0 1px rgba(255, 246, 219, .06),
+    0 4px 10px rgba(0, 0, 0, .22);
+  cursor: default;
+  transition: border-color .2s ease, background .2s ease, opacity .2s ease;
+}
+.wc-tourney-fighter::after {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  content: "";
+  background: rgba(222, 190, 121, .42);
+}
+.wc-tourney-fighter.player-entry {
+  border-color: rgba(19, 213, 255, .55);
+  background:
+    linear-gradient(115deg, rgba(11, 64, 72, .54), rgba(14, 17, 17, .98) 65%);
+  box-shadow: inset 2px 0 #13d5ff, 0 4px 12px rgba(0, 0, 0, .24);
+}
+.wc-tourney-fighter.match-winner {
+  border-color: rgba(247, 211, 127, .85);
+  background:
+    linear-gradient(115deg, rgba(91, 68, 29, .62), rgba(21, 18, 13, .98) 68%);
+  box-shadow: inset 2px 0 #e9c66f, 0 0 15px rgba(229, 189, 103, .1);
+}
+.wc-tourney-fighter.eliminated {
+  opacity: .46;
+  filter: grayscale(1);
+}
+.wc-tourney-portrait {
+  flex: 0 0 47px;
+  width: 47px;
+  height: 49px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(224, 198, 143, .2);
+  border-radius: 3px;
+  color: #e8cd8e;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(228, 192, 119, .18), transparent 72%),
+    linear-gradient(145deg, #302a20, #11100e);
+  font-size: 1rem;
+  font-weight: 950;
+}
+.wc-tourney-fighter.player-entry .wc-tourney-portrait {
+  border-color: rgba(19, 213, 255, .43);
+}
+.wc-tourney-fighter.match-winner .wc-tourney-portrait {
+  border-color: rgba(241, 210, 136, .75);
+}
+.wc-tourney-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 16%;
+}
+.wc-tourney-fighter-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: #f2e8d5;
+  font-size: .67rem;
+  font-weight: 950;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 5px #000;
+}
+.wc-tourney-fighter small {
+  flex: 0 0 auto;
+  max-width: 44px;
+  border: 1px solid rgba(222, 190, 121, .3);
+  border-radius: 2px;
+  padding: 3px 4px;
+  color: #e8cc8c;
+  background: rgba(0, 0, 0, .28);
+  font-size: .42rem;
+  font-weight: 1000;
+  letter-spacing: .08em;
+}
+.wc-tourney-fighter.player-entry small {
+  border-color: rgba(19, 213, 255, .42);
+  color: #74dff0;
+}
+.wc-tourney-fighter.match-winner small {
+  border-color: rgba(241, 210, 136, .58);
+  color: #ffe6a0;
+}
+.wc-tourney-versus {
+  align-self: center;
+  width: 26px;
+  min-width: 26px;
+  font-size: .55rem;
+  text-shadow: 0 0 12px rgba(214, 182, 110, .45);
+}
+.wc-tourney-match {
+  gap: 5px;
+  padding: 5px 9px;
+}
+.wc-tourney-match-heading {
+  font-size: .45rem;
+}
+.wc-tourney-fight-button {
+  min-height: 18px;
+  padding: 1px 11px;
+  font-size: .49rem !important;
+  letter-spacing: .12em;
+}
+
+/* Setup podium: reserve enough height for every prize line, including 3rd. */
+.wc-tournament-setup .wc-tourney-prize-section {
+  justify-content: center;
+  padding-top: 2px;
+}
+.wc-tournament-setup .wc-podium {
+  width: min(100%, 760px);
+  margin-top: 5px;
+  gap: 11px;
+}
+.wc-tournament-setup .wc-podium-place {
+  height: 178px;
+  min-height: 178px;
+  overflow: visible;
+  gap: 7px;
+  padding: 9px 7px 8px;
+}
+.wc-tournament-setup .wc-podium-place.place-1 {
+  height: 202px;
+  min-height: 202px;
+}
+.wc-tournament-setup .wc-podium-place.place-3 {
+  height: 166px;
+  min-height: 166px;
+}
+.wc-tournament-setup .wc-podium-place img {
+  height: 51px;
+  width: min(100%, 92px);
+}
+.wc-tournament-setup .wc-podium-place > strong {
+  font-size: .67rem;
+}
+.wc-tournament-setup .wc-podium-place > span {
+  font-size: .5rem;
+}
+.wc-tournament-setup .wc-podium-prize {
+  margin-top: 1px;
+  font-size: .82rem;
+  white-space: nowrap;
+}
+.wc-tournament-setup .wc-podium-prize small {
+  font-size: .46rem;
+}
+.wc-tournament-setup .wc-podium-bonus {
+  font-size: .46rem;
+  white-space: nowrap;
+}
+.wc-tourney-elimination-panel {
+  flex-wrap: wrap;
+}
+.wc-tourney-elimination-panel > div:nth-child(2) {
+  min-width: 180px;
+  flex: 1 1 250px;
+}
+.wc-tourney-elimination-panel button {
+  flex: 0 1 auto;
+}
+
+/* Compact displays keep the character portrait cards readable. */
+@media (max-width: 760px) {
+  .wc-tourney-fighter {
+    min-height: 55px;
+    height: 55px;
+    gap: 5px;
+    padding: 3px 5px 3px 3px;
+  }
+  .wc-tourney-portrait {
+    flex-basis: 43px;
+    width: 43px;
+    height: 47px;
+  }
+  .wc-tourney-fighter-name {
+    font-size: .59rem;
+  }
+  .wc-tourney-fighter small {
+    max-width: 37px;
+    padding: 2px 3px;
+    font-size: .38rem;
+  }
+  .wc-tourney-matchup {
+    gap: 4px;
+  }
+  .wc-tourney-versus {
+    width: 19px;
+    min-width: 19px;
+  }
+  .wc-tournament-setup .wc-podium-place {
+    height: 158px;
+    min-height: 158px;
+    padding: 7px 4px;
+    gap: 5px;
+  }
+  .wc-tournament-setup .wc-podium-place.place-1 {
+    height: 180px;
+    min-height: 180px;
+  }
+  .wc-tournament-setup .wc-podium-place.place-3 {
+    height: 150px;
+    min-height: 150px;
+  }
+  .wc-tournament-setup .wc-podium-place img {
+    height: 42px;
+  }
+  .wc-tournament-setup .wc-podium-prize {
+    gap: 2px;
+    font-size: .66rem;
+  }
+  .wc-tourney-elimination-panel button {
+    flex: 1 1 44%;
+  }
+}
+@media (max-height: 760px) and (min-width: 761px) {
+  .wc-tournament-setup .wc-podium-place {
+    height: 158px;
+    min-height: 158px;
+    gap: 5px;
+  }
+  .wc-tournament-setup .wc-podium-place.place-1 {
+    height: 180px;
+    min-height: 180px;
+  }
+  .wc-tournament-setup .wc-podium-place.place-3 {
+    height: 148px;
+    min-height: 148px;
+  }
+  .wc-tournament-setup .wc-podium-place img {
+    height: 40px;
+  }
+}
