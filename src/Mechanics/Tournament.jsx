@@ -537,6 +537,14 @@ export default function Tournament() {
           <h1>THE PODIUM</h1>
           <p>The fighters who earned the top three places.</p>
         </section>
+        <section className="wc-tourney-player-strip wc-tourney-result-player">
+          <img src={fighterImage(tournament.player)} alt={fighterName(tournament.player)} />
+          <div>
+            <small>YOUR TOURNAMENT RESULT</small>
+            <strong>{fighterName(tournament.player)}</strong>
+          </div>
+          <span>{placement}{suffix} PLACE</span>
+        </section>
         <Podium placements={tournament.placements} />
         <section className="wc-tourney-reward-receipt">
           <div>
@@ -589,7 +597,7 @@ export default function Tournament() {
             <span>{tournament.size} CONTENDERS</span>
             {!tournament.started ? (
               <button className="wc-tourney-reveal-button" onClick={startTournament} disabled={revealing}>
-                {revealing ? "REVEALING..." : "REVEAL THE BRACKET"}
+                {revealing ? "REVEALING..." : "START TOURNAMENT"}
               </button>
             ) : (
               <span className="wc-tourney-live-state">● TOURNAMENT LIVE</span>
