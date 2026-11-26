@@ -989,7 +989,7 @@ export default function Tournament() {
           <strong>{fighterName(selectedFighter)}</strong>
           <span>YOUR CHAMPIONSHIP PICK</span>
         </div>
-        <button className="wc-tourney-primary-action" disabled={!selectedFighter || revealing} onClick={generateBracket}>
+        <button className={"wc-tourney-primary-action" + (revealing ? " is-loading" : "")} disabled={!selectedFighter || revealing} onClick={generateBracket}>
           {revealing ? "DRAWING THE CONTENDERS..." : "GENERATE BRACKET"} <span>▶</span>
         </button>
       </footer>
