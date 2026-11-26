@@ -1255,6 +1255,7 @@ export default function Tournament() {
         publishTournament(updated);
 
         if (
+          currentRound.every((item) => Boolean(item.winner)) &&
           shouldPresentEliminationList(updated.size, updated.currentRound) &&
           updated.lastTransitionRoundIndex !== updated.currentRound
         ) {
