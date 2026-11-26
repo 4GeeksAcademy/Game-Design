@@ -15,6 +15,9 @@ const REWARDS = {
 const getRewardAmount = (size, place) => REWARDS[size]?.[place] || 0;
 const fighterName = (fighter) => fighter?.data?.name || fighter?.name || "Unknown Fighter";
 const fighterImage = (fighter) => fighter ? getCharacterImage(fighter.id, fighter.image) : "";
+const getRoundLabel = (size, index) => (
+  (size === 4 ? ["SEMIFINALS", "FINAL"] : ["QUARTERFINALS", "SEMIFINALS", "FINAL"])[index] || "CHAMPIONSHIP"
+);
 const copyRounds = (rounds) => rounds.map((round) => round.map((match) => ({
   ...match,
   fighters: [...match.fighters],
@@ -227,6 +230,7 @@ function TournamentFighter({
       eliminated ? "eliminated" : "",
       winner ? "match-winner" : "",
       revealing ? "is-revealing" : "",
+      mystery ? "is-mystery-entry" : "",
     ].filter(Boolean).join(" ")}>
       <div className={"wc-tourney-portrait" + (mystery ? " is-mystery" : "")}>
         {mystery
@@ -235,11 +239,20 @@ function TournamentFighter({
             ? <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
             : <span>—</span>}
       </div>
-      <span className="wc-tourney-fighter-name">
-        {mystery ? "UNKNOWN CONTENDER" : fighter ? fighterName(fighter) : "TO BE DECIDED"}
-      </span>
-      {player && <small>YOU</small>}
-      {winner && <small>WINNER</small>}
+      <div className="wc-tourney-fighter-meta">
+        <span className="wc-tourney-fighter-seed">
+          {player ? "PLAYER CONTENDER" : mystery ? "AWAITING DRAW" : "TOURNAMENT CONTENDER"}
+        </span>
+        <strong className="wc-tourney-fighter-name">
+          {mystery ? "UNKNOWN CONTENDER" : fighter ? fighterName(fighter) : "TO BE DECIDED"}
+        </strong>
+        <div className="wc-tourney-fighter-tags">
+          {player && <small>YOU</small>}
+          {winner && <small>ADVANCES</small>}
+          {eliminated && <small>ELIMINATED</small>}
+          {revealing && <small>DRAWING</small>}
+        </div>
+      </div>
     </div>
   );
 }
@@ -251,6 +264,7 @@ function TournamentMatch({
   revealing,
   previewFighters,
   onEnterMatch,
+  roundLabel,
 }) {
   const playerId = tournament.player.id;
   const first = match.fighters[0];
@@ -262,44 +276,134 @@ function TournamentMatch({
   const firstMystery = !shownFirst || (!tournament.started && !revealing && !firstIsPlayer);
   const secondMystery = !shownSecond || (!tournament.started && !revealing && !secondIsPlayer);
   const activePlayerMatch = tournament.started && match.isPlayerMatch && !match.winner;
+  const winnerIsFirst = match.winner?.id === first?.id;
+  const winnerIsSecond = match.winner?.id === second?.id;
 
   return (
-    <article className={"wc-tourney-match" + (activePlayerMatch ? " is-player-match" : "")}>
+    <article className={"wc-tourney-match" + (activePlayerMatch ? " is-player-match" : "") + (match.winner ? " is-complete" : "")}>
       <div className="wc-tourney-match-heading">
-        <span>MATCH {String(matchIndex + 1).padStart(2, "0")}</span>
-        <span>{match.winner ? "COMPLETE" : revealing ? "DRAWING CONTENDERS" : "WINNER ADVANCES"}</span>
+        <span>{roundLabel} · MATCH {String(matchIndex + 1).padStart(2, "0")}</span>
+        <span>{match.winner ? "RESULT CONFIRMED" : revealing ? "DRAWING CONTENDERS" : "WINNER ADVANCES"}</span>
       </div>
+
       <div className="wc-tourney-matchup">
-        <TournamentFighter
-          fighter={shownFirst}
-          mystery={firstMystery}
-          player={firstIsPlayer}
-          eliminated={Boolean(match.winner && match.winner.id !== first?.id)}
-          winner={Boolean(match.winner && match.winner.id === first?.id)}
-          revealing={revealing && !firstIsPlayer}
-        />
-        <span className="wc-tourney-versus">VS</span>
-        <TournamentFighter
-          fighter={shownSecond}
-          mystery={secondMystery}
-          player={secondIsPlayer}
-          eliminated={Boolean(match.winner && match.winner.id !== second?.id)}
-          winner={Boolean(match.winner && match.winner.id === second?.id)}
-          revealing={revealing && !secondIsPlayer}
-        />
+        <div className="wc-tourney-fighter-stack">
+          <TournamentFighter
+            fighter={shownFirst}
+            mystery={firstMystery}
+            player={firstIsPlayer}
+            eliminated={Boolean(match.winner && !winnerIsFirst)}
+            winner={winnerIsFirst}
+            revealing={revealing && !firstIsPlayer}
+          />
+          <div className="wc-tourney-versus"><span>VS</span></div>
+          <TournamentFighter
+            fighter={shownSecond}
+            mystery={secondMystery}
+            player={secondIsPlayer}
+            eliminated={Boolean(match.winner && !winnerIsSecond)}
+            winner={winnerIsSecond}
+            revealing={revealing && !secondIsPlayer}
+          />
+        </div>
+
+        <div className="wc-tourney-bracket-fork" aria-hidden="true">
+          <i className="fork-upper" />
+          <i className="fork-lower" />
+          <i className="fork-stem" />
+          <i className="fork-out" />
+        </div>
+
+        <div className={"wc-tourney-advance-slot" + (match.winner ? " has-winner" : "")}>
+          <span>{match.winner ? "ADVANCING CONTENDER" : "WINNER ADVANCES"}</span>
+          {match.winner ? (
+            <>
+              <div className="wc-tourney-advance-portrait">
+                <img src={fighterImage(match.winner)} alt={fighterName(match.winner)} />
+              </div>
+              <strong>{fighterName(match.winner)}</strong>
+              <small>TO THE NEXT ROUND</small>
+            </>
+          ) : (
+            <div className="wc-tourney-advance-pending">
+              <span>?</span>
+              <strong>WINNER</strong>
+              <small>TO BE DECIDED</small>
+            </div>
+          )}
+        </div>
       </div>
+
       {activePlayerMatch && (
         <button className="wc-tourney-fight-button" onClick={() => onEnterMatch(match)}>
           ENTER MATCH <span>▶</span>
         </button>
       )}
-      {match.winner && (
-        <div className="wc-tourney-winner-line">
-          <span>ADVANCES</span>
-          <strong>{fighterName(match.winner)}</strong>
-        </div>
-      )}
     </article>
+  );
+}
+
+function RoundTransition({ transition, onContinue }) {
+  if (!transition) return null;
+
+  return (
+    <div className={"wc-round-transition phase-" + transition.phase} role="presentation">
+      <section className="wc-round-transition-panel" role="dialog" aria-modal="true" aria-labelledby="wcRoundTransitionTitle">
+        {transition.phase === "eliminators" && (
+          <>
+            <p className="wc-round-transition-kicker">{transition.completedRoundLabel} · ROUND COMPLETE</p>
+            <h2 id="wcRoundTransitionTitle">THE ELIMINATED</h2>
+            <p className="wc-round-transition-caption">THESE CONTENDERS' RUN ENDS HERE</p>
+            <div className="wc-round-eliminators">
+              {transition.eliminators.map((fighter, index) => (
+                <article className="wc-round-eliminator" key={fighter.id} style={{ "--reveal-order": index }}>
+                  <span className="wc-round-eliminator-rank">{String(index + 1).padStart(2, "0")}</span>
+                  <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
+                  <strong>{fighterName(fighter)}</strong>
+                  <small>ELIMINATED</small>
+                </article>
+              ))}
+            </div>
+            <span className="wc-round-transition-progress">ADVANCING THE BRACKET…</span>
+          </>
+        )}
+
+        {transition.phase === "standings" && (
+          <>
+            <p className="wc-round-transition-kicker">THE ROAD TO THE CROWN CONTINUES</p>
+            <h2 id="wcRoundTransitionTitle">{transition.nextRoundLabel}</h2>
+            <p className="wc-round-transition-caption">CURRENT STANDINGS · WINNERS MOVE FORWARD</p>
+            <div className="wc-round-standings">
+              {transition.standings.map((pair, index) => (
+                <article className="wc-round-standing-match" key={index} style={{ "--reveal-order": index }}>
+                  <div className="wc-round-standing-fighter">
+                    <img src={fighterImage(pair[0])} alt={fighterName(pair[0])} />
+                    <strong>{fighterName(pair[0])}</strong>
+                  </div>
+                  <span>VS</span>
+                  <div className="wc-round-standing-fighter">
+                    <img src={fighterImage(pair[1])} alt={fighterName(pair[1])} />
+                    <strong>{fighterName(pair[1])}</strong>
+                  </div>
+                  <div className="wc-round-standing-fork" aria-hidden="true"><i /><i /><i /></div>
+                </article>
+              ))}
+            </div>
+            <span className="wc-round-transition-progress">THE NEXT MATCHUPS ARE SET</span>
+          </>
+        )}
+
+        {transition.phase === "ready" && (
+          <div className="wc-round-ready">
+            <span className="wc-round-ready-emblem">♛</span>
+            <p className="wc-round-transition-kicker">THE BRACKET IS SET</p>
+            <h2 id="wcRoundTransitionTitle">LET'S START!</h2>
+            <p className="wc-round-transition-caption">{transition.nextRoundLabel} AWAIT</p>
+            <button type="button" onClick={onContinue}>ENTER THE NEXT ROUND <span>▶</span></button>
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
 
@@ -348,11 +452,13 @@ export default function Tournament() {
   const [activeCpuMatch, setActiveCpuMatch] = useState(null);
   const [spectating, setSpectating] = useState(false);
   const [restarting, setRestarting] = useState(false);
+  const [roundTransition, setRoundTransition] = useState(null);
   const processedMatch = useRef(null);
   const activeCpuResolveRef = useRef(null);
   const skipCpuQueueRef = useRef(false);
   const revealIntervalRef = useRef(null);
   const celebrationPlayedRef = useRef("");
+  const roundTransitionResolveRef = useRef(null);
   const unlockedIds = getUnlockedCharacters();
   const unlockedKey = unlockedIds.join("|");
   const available = useMemo(
@@ -373,6 +479,51 @@ export default function Tournament() {
       rounds: copyRounds(next.rounds),
     });
   }
+
+  function presentRoundTransition(completedRound, nextRound, completedRoundIndex, bracketSize) {
+    const eliminators = completedRound
+      .map((match) => match.fighters.find(
+        (fighter) => fighter && fighter.id !== match.winner?.id,
+      ))
+      .filter(Boolean);
+    const standings = nextRound.map((match) => [...match.fighters]);
+
+    if (!eliminators.length || !standings.length) return Promise.resolve();
+
+    setRoundTransition({
+      phase: "eliminators",
+      completedRoundLabel: getRoundLabel(bracketSize, completedRoundIndex),
+      nextRoundLabel: getRoundLabel(bracketSize, completedRoundIndex + 1),
+      eliminators,
+      standings,
+    });
+
+    playUISound("unlock");
+    return new Promise((resolve) => {
+      roundTransitionResolveRef.current = resolve;
+    });
+  }
+
+  function continueRoundTransition() {
+    setRoundTransition(null);
+    playUISound("confirm");
+    const resolve = roundTransitionResolveRef.current;
+    roundTransitionResolveRef.current = null;
+    resolve?.();
+  }
+
+  useEffect(() => {
+    if (!roundTransition || roundTransition.phase === "ready") return undefined;
+
+    const nextPhase = roundTransition.phase === "eliminators" ? "standings" : "ready";
+    const duration = roundTransition.phase === "eliminators" ? 2600 : 2400;
+    const timer = window.setTimeout(() => {
+      setRoundTransition((current) => current ? { ...current, phase: nextPhase } : current);
+      playUISound("click");
+    }, duration);
+
+    return () => window.clearTimeout(timer);
+  }, [roundTransition?.phase]);
 
   function completeTournament(next) {
     const finished = finishTournamentDraft(next);
@@ -435,7 +586,8 @@ export default function Tournament() {
       const round = draft.rounds[roundIndex];
 
       if (roundIndex > 0) {
-        const previousWinners = draft.rounds[roundIndex - 1].map((match) => match.winner);
+        const completedRound = draft.rounds[roundIndex - 1];
+        const previousWinners = completedRound.map((match) => match.winner);
         round.forEach((match, index) => {
           if (!match.fighters[0] || !match.fighters[1]) {
             match.fighters = [
@@ -445,10 +597,19 @@ export default function Tournament() {
           }
           match.isPlayerMatch = false;
         });
+
+        draft.currentRound = roundIndex;
+        publishTournament(draft);
+        await presentRoundTransition(completedRound, round, roundIndex - 1, draft.size);
+        if (skipCpuQueueRef.current) {
+          setSpectating(false);
+          return;
+        }
+      } else {
+        draft.currentRound = roundIndex;
+        publishTournament(draft);
       }
 
-      draft.currentRound = roundIndex;
-      publishTournament(draft);
       const completed = await playCpuRound(round, roundIndex, draft.player.id);
       if (!completed || skipCpuQueueRef.current) {
         setSpectating(false);
@@ -471,7 +632,8 @@ export default function Tournament() {
       const round = draft.rounds[roundIndex];
 
       if (roundIndex > 0) {
-        const previousWinners = draft.rounds[roundIndex - 1].map((match) => match.winner);
+        const completedRound = draft.rounds[roundIndex - 1];
+        const previousWinners = completedRound.map((match) => match.winner);
         round.forEach((match, index) => {
           if (!match.fighters[0] || !match.fighters[1]) {
             match.fighters = [
@@ -483,10 +645,16 @@ export default function Tournament() {
             (fighter) => fighter?.id === draft.player.id,
           );
         });
+
+        draft.currentRound = roundIndex;
+        publishTournament(draft);
+        await presentRoundTransition(completedRound, round, roundIndex - 1, draft.size);
+        if (skipCpuQueueRef.current) return;
+      } else {
+        draft.currentRound = roundIndex;
+        publishTournament(draft);
       }
 
-      draft.currentRound = roundIndex;
-      publishTournament(draft);
       const completedCpuMatches = await playCpuRound(round, roundIndex, draft.player.id);
       if (!completedCpuMatches || skipCpuQueueRef.current) return;
 
@@ -616,6 +784,7 @@ export default function Tournament() {
     processedMatch.current = null;
     celebrationPlayedRef.current = "";
     setShowEliminationScreen(false);
+    setRoundTransition(null);
     setRevealing(true);
     playUISound("confirm");
     const next = makeTournament(size, selectedFighter);
@@ -798,6 +967,9 @@ export default function Tournament() {
 
   function leaveTournament() {
     if (!tournament) return;
+    roundTransitionResolveRef.current?.();
+    roundTransitionResolveRef.current = null;
+    setRoundTransition(null);
     skipCpuQueueRef.current = true;
     window.clearInterval(revealIntervalRef.current);
     revealIntervalRef.current = null;
@@ -833,6 +1005,9 @@ export default function Tournament() {
   }
 
   function restartTournament() {
+    roundTransitionResolveRef.current?.();
+    roundTransitionResolveRef.current = null;
+    setRoundTransition(null);
     skipCpuQueueRef.current = true;
     window.clearInterval(revealIntervalRef.current);
     revealIntervalRef.current = null;
@@ -1014,29 +1189,26 @@ export default function Tournament() {
           </div>
         )}
 
-        <section className="wc-tourney-rounds" aria-label="Tournament bracket">
-          {tournament.rounds.map((round, roundIndex) => (
-            <section className="wc-tourney-round" key={roundIndex} style={{ flex: round.length }}>
-              <div className="wc-tourney-round-title">
-                <span>ROUND {roundIndex + 1}</span>
-                <h2>{roundLabels[roundIndex] || "CHAMPIONSHIP"}</h2>
-                <small>{round.length} MATCH{round.length === 1 ? "" : "ES"}</small>
-              </div>
-              <div className="wc-tourney-round-matches">
-                {round.map((match, matchIndex) => (
-                  <TournamentMatch
-                    key={match.id}
-                    match={match}
-                    matchIndex={matchIndex}
-                    tournament={tournament}
-                    revealing={revealing}
-                    previewFighters={revealPreview?.[match.id]}
-                    onEnterMatch={enterMatch}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
+        <section className="wc-tourney-rounds wc-tourney-current-round" aria-label="Current tournament round">
+          <div className="wc-tourney-round-title wc-tourney-current-round-title">
+            <span>ROUND {tournament.currentRound + 1} OF {tournament.rounds.length}</span>
+            <h2>{getRoundLabel(tournament.size, tournament.currentRound)}</h2>
+            <small>{(tournament.rounds[tournament.currentRound] || []).length} MATCH{(tournament.rounds[tournament.currentRound] || []).length === 1 ? "" : "ES"}</small>
+          </div>
+          <div className="wc-tourney-round-matches wc-tourney-current-round-matches">
+            {(tournament.rounds[tournament.currentRound] || []).map((match, matchIndex) => (
+              <TournamentMatch
+                key={match.id}
+                match={match}
+                matchIndex={matchIndex}
+                tournament={tournament}
+                revealing={revealing}
+                previewFighters={revealPreview?.[match.id]}
+                onEnterMatch={enterMatch}
+                roundLabel={getRoundLabel(tournament.size, tournament.currentRound)}
+              />
+            ))}
+          </div>
         </section>
 
         {tournament.playerEliminated && showEliminationScreen && !tournament.complete && (
@@ -1068,6 +1240,11 @@ export default function Tournament() {
             </button>
           </section>
         )}
+
+        <RoundTransition
+          transition={roundTransition}
+          onContinue={continueRoundTransition}
+        />
       </main>
     );
   }
