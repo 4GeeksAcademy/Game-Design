@@ -877,6 +877,7 @@ export default function Tournament() {
       const bronzeOpponent = updated.placementOpportunity?.opponent;
       if (!bronzeOpponent) return;
       updated.placementResults = {
+        ...(updated.placementResults || {}),
         bronzeWinner: result.won ? updated.player : bronzeOpponent,
       };
       updated.placementOpportunity = null;
