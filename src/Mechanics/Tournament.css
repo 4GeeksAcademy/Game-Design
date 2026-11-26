@@ -985,7 +985,7 @@
 
 .wc-tournament-results .wc-podium-place img {
   width: min(100%, 150px);
-  height: clamp(90px, 16vh, 140px);
+  height: clamp(90px, 14vh, 125px);
 }
 
 .wc-tournament-results .wc-podium-place > strong {
