@@ -355,52 +355,44 @@ export default function Tournament() {
     });
   }
 
-  function playCpuRound(round, roundIndex, playerId) {
-    return new Promise(async (resolve) => {
-      const pending = round.filter((match) =>
-        !match.winner &&
-        match.fighters[0] &&
-        match.fighters[1] &&
-        !match.fighters.some((fighter) => fighter.id === playerId)
-      );
+  async function playCpuRound(round, roundIndex, playerId) {
+    const pending = round.filter((match) =>
+      !match.winner &&
+      match.fighters[0] &&
+      match.fighters[1] &&
+      !match.fighters.some((fighter) => fighter.id === playerId)
+    );
 
-      for (let index = 0; index < pending.length; index += 1) {
-        if (skipCpuQueueRef.current) {
-          resolve(false);
-          return;
-        }
-        const match = pending[index];
-        const winner = await new Promise((finishMatch) => {
-          activeCpuResolveRef.current = finishMatch;
-          setActiveCpuMatch({
-            match,
-            roundIndex,
-            matchNumber: index + 1,
-            totalMatches: pending.length,
-          });
+    for (let index = 0; index < pending.length; index += 1) {
+      if (skipCpuQueueRef.current) return false;
+      const match = pending[index];
+      const winner = await new Promise((finishMatch) => {
+        activeCpuResolveRef.current = finishMatch;
+        setActiveCpuMatch({
+          match,
+          roundIndex,
+          matchNumber: index + 1,
+          totalMatches: pending.length,
         });
+      });
 
-        if (skipCpuQueueRef.current) {
-          resolve(false);
-          return;
-        }
+      if (skipCpuQueueRef.current) return false;
 
-        match.winner = winner || simulateCpuMatch(match.fighters[0], match.fighters[1]);
-        setTournament((current) => current ? {
-          ...current,
-          rounds: copyRounds(current.rounds).map((items, index) =>
-            index === roundIndex
-              ? items.map((item) => item.id === match.id ? { ...item, winner: match.winner } : item)
-              : items
-          ),
-        } : current);
-        setActiveCpuMatch(null);
-        await new Promise((done) => window.setTimeout(done, 260));
-      }
-      resolve(true);
-    });
+      match.winner = winner || simulateCpuMatch(match.fighters[0], match.fighters[1]);
+      setTournament((current) => current ? {
+        ...current,
+        rounds: copyRounds(current.rounds).map((items, itemRoundIndex) =>
+          itemRoundIndex === roundIndex
+            ? items.map((item) => item.id === match.id ? { ...item, winner: match.winner } : item)
+            : items
+        ),
+      } : current);
+      setActiveCpuMatch(null);
+      await new Promise((done) => window.setTimeout(done, 260));
+    }
+
+    return true;
   }
-
   async function advanceAfterPlayerResult(draft, playerStillIn) {
     skipCpuQueueRef.current = false;
     setSpectating(!playerStillIn);
