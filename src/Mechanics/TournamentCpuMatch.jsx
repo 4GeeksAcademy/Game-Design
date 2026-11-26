@@ -287,10 +287,6 @@ export default function TournamentCpuMatch({
   const first = fighters[0];
   const second = fighters[1];
   const action = battleView?.currentAction;
-  const attackOwner = action
-    ? fighters.find((fighter) => fighter.id === action.attackerId)
-    : null;
-  const activeAttack = findAttackForAction(attackOwner, action);
   const recentActions = (battleView?.log || []).slice(-5).reverse();
   const winnerParticipant = battleView?.finished
     ? resolveWinner(battleView, match)
