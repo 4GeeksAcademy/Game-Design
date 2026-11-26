@@ -3665,3 +3665,354 @@
   background: rgba(49, 40, 23, .9);
   box-shadow: none;
 }
+
+
+/* Current-round board: keep the view focused on the active stage and give
+   fighter artwork enough room to read clearly at a glance. */
+.wc-tourney-single-round {
+  width: min(100%, 1180px);
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 2px 8px 12px;
+  scrollbar-color: #98763f #171511;
+  scrollbar-width: thin;
+}
+
+.wc-tourney-single-round > .wc-tourney-round {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wc-tourney-single-round .wc-tourney-round-title {
+  flex: 0 0 48px;
+  min-height: 48px;
+  gap: clamp(8px, 2vw, 18px);
+  border: 1px solid rgba(214, 174, 93, .3);
+  border-radius: 6px;
+  background: linear-gradient(100deg, rgba(22, 19, 13, .98), rgba(35, 28, 17, .98), rgba(22, 19, 13, .98));
+  box-shadow: 0 7px 17px #0007;
+}
+
+.wc-tourney-single-round .wc-tourney-round-title h2 {
+  color: #f7d98b;
+  font-size: clamp(.88rem, 1.5vw, 1.2rem);
+  letter-spacing: .17em;
+}
+
+.wc-tourney-single-round .wc-tourney-round-matches {
+  display: grid;
+  flex: 1 0 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(150px, 1fr);
+  gap: 12px;
+  min-height: 0;
+  padding: 2px 0 8px;
+}
+
+.wc-tourney-single-round .wc-tourney-match {
+  min-width: 0;
+  min-height: 150px;
+  flex: initial;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  box-shadow: 0 9px 22px #0007, inset 0 1px #fff1;
+}
+
+.wc-tourney-single-round .wc-tourney-match-heading {
+  min-height: 17px;
+  font-size: .55rem;
+  letter-spacing: .1em;
+}
+
+.wc-tourney-single-round .wc-tourney-matchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 7px;
+  min-height: 0;
+  padding: 3px 0;
+}
+
+.wc-tourney-single-round .wc-tourney-fighter {
+  height: 104px;
+  min-height: 104px;
+  display: grid;
+  grid-template-columns: minmax(70px, 34%) minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  gap: 3px 7px;
+  padding: 5px;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.wc-tourney-single-round .wc-tourney-portrait {
+  grid-row: 1 / span 2;
+  width: 100%;
+  height: 92px;
+  min-width: 0;
+  flex: initial;
+  border-radius: 4px;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(228, 192, 119, .2), transparent 72%),
+    linear-gradient(145deg, #302a20, #11100e);
+}
+
+.wc-tourney-single-round .wc-tourney-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  padding: 1px;
+}
+
+.wc-tourney-single-round .wc-tourney-fighter-name {
+  align-self: end;
+  font-size: clamp(.62rem, .8vw, .78rem);
+  line-height: 1.12;
+}
+
+.wc-tourney-single-round .wc-tourney-fighter small {
+  justify-self: start;
+  max-width: 100%;
+  padding: 3px 5px;
+  font-size: .43rem;
+}
+
+.wc-tourney-single-round .wc-tourney-versus {
+  align-self: center;
+  width: 34px;
+  min-width: 34px;
+  font-size: .67rem;
+}
+
+.wc-tourney-single-round .wc-tourney-fight-button {
+  min-height: 27px;
+  padding: 4px 12px;
+  font-size: .56rem !important;
+}
+
+.wc-tourney-single-round .wc-tourney-winner-line {
+  padding-top: 4px;
+  font-size: .5rem;
+}
+
+@media (max-width: 900px) {
+  .wc-tourney-single-round .wc-tourney-round-matches {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .wc-tourney-single-round {
+    padding: 0 2px 8px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-round-title {
+    flex-wrap: wrap;
+    flex: 0 0 auto;
+    min-height: 42px;
+    padding: 6px;
+    gap: 5px 9px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-round-title span,
+  .wc-tourney-single-round .wc-tourney-round-title small {
+    font-size: .43rem;
+  }
+
+  .wc-tourney-single-round .wc-tourney-round-title h2 {
+    font-size: .75rem;
+  }
+
+  .wc-tourney-single-round .wc-tourney-match {
+    min-height: 130px;
+    padding: 8px 7px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-matchup {
+    grid-template-columns: minmax(0, 1fr) 27px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-fighter {
+    height: 90px;
+    min-height: 90px;
+    grid-template-columns: minmax(55px, 35%) minmax(0, 1fr);
+    gap: 3px 5px;
+    padding: 4px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-portrait {
+    height: 80px;
+  }
+
+  .wc-tourney-single-round .wc-tourney-fighter-name {
+    font-size: .58rem;
+  }
+
+  .wc-tourney-single-round .wc-tourney-versus {
+    width: 27px;
+    min-width: 27px;
+    font-size: .54rem;
+  }
+}
+
+/* One-at-a-time placement reveals with a centered K.O. impact popup. */
+.wc-round-elimination-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(760px, 100%);
+  min-height: 330px;
+  margin: 0 auto 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 91, 109, .42);
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse at 50% 44%, rgba(204, 39, 57, .22), transparent 56%),
+    linear-gradient(145deg, #281117, #0d100e 72%);
+  box-shadow: inset 0 0 42px #0009, 0 12px 30px #0008;
+  animation: wcEliminatorReveal .55s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-round-eliminator-spotlight {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 17px 20px 15px;
+  text-align: center;
+}
+
+.wc-round-eliminator-place {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 5px 14px;
+  border: 1px solid #e6c778;
+  border-radius: 4px;
+  color: #ffe5a1;
+  background: linear-gradient(100deg, #4c3519, #211910);
+  box-shadow: 0 0 16px #e6c77827;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .85rem;
+  font-weight: 1000;
+  letter-spacing: .16em;
+}
+
+.wc-round-eliminator-place.is-pending {
+  border-color: #ff7180;
+  color: #ffd0d5;
+  background: linear-gradient(100deg, #4b1c25, #211114);
+}
+
+.wc-round-eliminator-spotlight img {
+  width: 164px;
+  height: 178px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 8px 14px #000c) drop-shadow(0 0 12px #f34a5b55);
+}
+
+.wc-round-eliminator-spotlight strong {
+  max-width: min(90vw, 560px);
+  overflow: hidden;
+  color: #fff2e8;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  font-weight: 1000;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 2px 10px #000;
+}
+
+.wc-round-eliminator-spotlight small {
+  color: #c7a8a0;
+  font-size: .57rem;
+  font-weight: 950;
+  letter-spacing: .15em;
+}
+
+.wc-round-ko-popup {
+  position: absolute;
+  z-index: 3;
+  top: 49%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: min(360px, 78%);
+  padding: 7px 14px 9px;
+  transform: translate(-50%, -50%) rotate(-8deg) scale(.35);
+  border: 3px solid #ffd0d5;
+  border-radius: 5px;
+  color: #fff;
+  background: linear-gradient(115deg, rgba(130, 15, 32, .97), rgba(34, 7, 13, .98));
+  box-shadow: 0 0 0 5px #e62c472c, 0 12px 35px #000d, 0 0 28px #ff2f4a88;
+  text-align: center;
+  animation: wcRoundKoPopup .92s cubic-bezier(.12, .82, .22, 1) both;
+  pointer-events: none;
+}
+
+.wc-round-ko-popup span {
+  color: #ffb8c0;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .53rem;
+  font-weight: 1000;
+  letter-spacing: .2em;
+}
+
+.wc-round-ko-popup strong {
+  color: #fff;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(3.5rem, 10vw, 6.5rem);
+  font-weight: 1000;
+  font-style: italic;
+  line-height: .95;
+  letter-spacing: -.04em;
+  text-shadow: 4px 4px 0 #5a0e1a, 0 0 22px #ff526b;
+}
+
+.wc-round-ko-popup small {
+  color: #ffe0e3;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .56rem;
+  font-weight: 1000;
+  letter-spacing: .14em;
+}
+
+@keyframes wcRoundKoPopup {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-14deg) scale(1.5); }
+  18% { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(.92); }
+  30%, 78% { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(-5deg) scale(.92); }
+}
+
+@media (max-width: 700px) {
+  .wc-round-elimination-stage {
+    min-height: 290px;
+  }
+
+  .wc-round-eliminator-spotlight img {
+    width: 132px;
+    height: 145px;
+  }
+
+  .wc-round-ko-popup {
+    width: 82%;
+  }
+}
