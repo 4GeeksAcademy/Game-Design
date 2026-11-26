@@ -288,15 +288,6 @@ export default function TournamentCpuMatch({
   const second = fighters[1];
   const action = battleView?.currentAction;
   const recentActions = (battleView?.log || []).slice(-5).reverse();
-  const winnerParticipant = battleView?.finished
-    ? resolveWinner(battleView, match)
-    : null;
-  const winnerIndex = winnerParticipant?.id === match?.fighters?.[1]?.id ? 1 : 0;
-  const loserIndex = 1 - winnerIndex;
-  const winnerSnapshot = fighters[winnerIndex];
-  const loserSnapshot = fighters[loserIndex];
-  const isKnockout = Boolean(battleView?.finished && loserSnapshot?.health <= 0);
-
   const actionText = !action
     ? "THE MATCH IS STARTING"
     : action.action === "skipped"
