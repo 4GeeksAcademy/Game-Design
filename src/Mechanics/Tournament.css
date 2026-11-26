@@ -5049,3 +5049,491 @@
   }
 }
 
+/* ================================================
+   GRAND FINALS: centered championship bracket + live standings rail
+   ================================================ */
+.wc-tournament-bracket .wc-tourney-finals-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 318px);
+  align-items: stretch;
+  gap: clamp(14px, 2vw, 24px);
+  width: min(100%, 1460px);
+  max-width: 1460px;
+  margin-inline: auto;
+  padding: 4px clamp(8px, 1.5vw, 18px) 18px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 4px 0 12px;
+  overflow: visible;
+}
+
+.wc-tourney-finals-round::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 10% 4% 8%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 34%, rgba(244, 196, 91, .2), transparent 52%),
+    radial-gradient(ellipse at 50% 78%, rgba(255, 160, 51, .08), transparent 54%);
+  filter: blur(15px);
+  animation: wcFinalsAura 3.2s ease-in-out infinite alternate;
+}
+
+.wc-tourney-finals-intro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: clamp(92px, 14vh, 138px);
+  margin: 0 auto 12px;
+  padding: 14px 22px;
+  text-align: center;
+  animation: wcFinalsTitleArrival .9s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-tourney-finals-intro::before,
+.wc-tourney-finals-intro::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: clamp(36px, 9vw, 112px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #f5d48a, transparent);
+  box-shadow: 0 0 12px rgba(245, 212, 138, .8);
+}
+
+.wc-tourney-finals-intro::before {
+  right: 100%;
+}
+
+.wc-tourney-finals-intro::after {
+  left: 100%;
+}
+
+.wc-tourney-finals-intro span {
+  color: #e5c47e;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .65rem;
+  font-weight: 950;
+  letter-spacing: .32em;
+  text-shadow: 0 0 14px rgba(237, 190, 99, .5);
+}
+
+.wc-tourney-finals-intro strong {
+  color: #fff0c2;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(2.1rem, 4.2vw, 3.8rem);
+  font-weight: 1000;
+  line-height: .98;
+  letter-spacing: .16em;
+  text-shadow:
+    0 2px 0 #6c481c,
+    0 0 18px rgba(255, 206, 111, .54),
+    0 0 42px rgba(238, 156, 52, .27);
+  animation: wcFinalsTitleGlow 2.4s ease-in-out infinite alternate;
+}
+
+.wc-tourney-finals-intro small {
+  color: #bba77f;
+  font-size: .56rem;
+  font-weight: 900;
+  letter-spacing: .22em;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-round-title {
+  width: min(100%, 900px);
+  align-self: center;
+  flex: 0 0 48px;
+  min-height: 48px;
+  margin-bottom: 8px;
+  border-color: rgba(240, 197, 108, .58);
+  background:
+    linear-gradient(90deg, rgba(56, 37, 15, .97), rgba(24, 20, 14, .98) 50%, rgba(56, 37, 15, .97));
+  box-shadow: 0 0 22px rgba(235, 181, 83, .12), inset 0 1px #fff2;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-round-title h2 {
+  color: #ffe7ac;
+  text-shadow: 0 0 16px rgba(255, 205, 105, .46);
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-round-matches {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: minmax(0, auto);
+  align-content: center;
+  justify-items: center;
+  flex: 1 0 auto;
+  min-height: 0;
+  padding: 10px 0 18px;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-match {
+  width: min(100%, 900px);
+  min-height: 350px;
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid rgba(244, 202, 116, .78);
+  background:
+    radial-gradient(ellipse at 50% -12%, rgba(249, 194, 89, .23), transparent 58%),
+    linear-gradient(145deg, rgba(50, 38, 21, .99), rgba(14, 15, 14, .99) 55%, rgba(43, 29, 17, .99));
+  box-shadow:
+    0 18px 48px #000b,
+    0 0 0 1px rgba(255, 224, 157, .11),
+    0 0 34px rgba(235, 178, 75, .2),
+    inset 0 1px rgba(255, 244, 208, .2);
+  animation: wcFinalsMatchArrival .95s .18s cubic-bezier(.16, 1, .3, 1) both,
+    wcFinalsMatchPulse 3.4s 1.2s ease-in-out infinite;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-match:hover {
+  transform: none;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-match-heading {
+  min-height: 25px;
+  color: #efcf91;
+  font-size: .67rem;
+  letter-spacing: .18em;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-match-heading span:last-child {
+  border-color: rgba(244, 207, 139, .48);
+  color: #ffe6ae;
+  background: rgba(89, 56, 18, .28);
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-matchup {
+  grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+  gap: clamp(10px, 1.8vw, 22px);
+  padding-top: 18px;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-fighter {
+  height: clamp(132px, 19vh, 190px);
+  min-height: 132px;
+  grid-template-columns: minmax(104px, 39%) minmax(0, 1fr);
+  gap: 8px 12px;
+  padding: 8px;
+  border-color: rgba(233, 208, 154, .43);
+  background: linear-gradient(145deg, rgba(13, 17, 15, .98), rgba(39, 32, 21, .96));
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-fighter.match-winner {
+  border-color: #ffe6a4;
+  box-shadow: inset 0 0 20px rgba(248, 202, 107, .15), 0 0 24px rgba(246, 197, 95, .22);
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-portrait {
+  height: 100%;
+  min-height: 112px;
+  border-color: rgba(240, 207, 139, .38);
+  background:
+    radial-gradient(ellipse at 50% 14%, rgba(255, 223, 155, .2), transparent 72%),
+    linear-gradient(180deg, #352b1c, #0e100e);
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-fighter-name {
+  color: #fff0c8;
+  font-size: clamp(.75rem, 1vw, .95rem);
+  font-weight: 1000;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-versus {
+  color: #ffe3a1;
+  font-size: .95rem;
+  text-shadow: 0 0 14px rgba(250, 205, 113, .65);
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-advance-fork {
+  margin-top: 8px;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-advance-card {
+  border-color: rgba(246, 208, 129, .72);
+  background: linear-gradient(105deg, rgba(78, 56, 22, .96), rgba(22, 20, 14, .98));
+  box-shadow: 0 0 22px rgba(238, 186, 83, .16), inset 0 1px #fff2;
+}
+
+.wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-fight-button {
+  min-height: 44px;
+  margin-top: 8px;
+  font-size: .72rem !important;
+  letter-spacing: .18em;
+  animation: wcFinalsButtonPulse 2.2s ease-in-out infinite alternate;
+}
+
+/* Current placements stay visible beside the final matchup. */
+.wc-tourney-finals-standings {
+  position: relative;
+  align-self: stretch;
+  min-width: 0;
+  padding: 13px 11px 12px;
+  border: 1px solid rgba(218, 181, 103, .48);
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(217, 171, 83, .17), transparent 54%),
+    linear-gradient(160deg, rgba(28, 26, 20, .98), rgba(11, 13, 12, .99));
+  box-shadow: 0 12px 32px #0008, inset 0 1px #fff1;
+  animation: wcFinalsStandingsArrival .72s .32s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.wc-tourney-finals-standings-header {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+  padding: 2px 4px 10px;
+  border-bottom: 1px solid rgba(222, 187, 112, .26);
+  text-align: center;
+}
+
+.wc-tourney-finals-standings-header > span {
+  color: #d8b875;
+  font-size: .5rem;
+  font-weight: 1000;
+  letter-spacing: .2em;
+}
+
+.wc-tourney-finals-standings-header h3 {
+  margin: 0;
+  color: #ffedc0;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: clamp(.9rem, 1.25vw, 1.15rem);
+  font-weight: 1000;
+  letter-spacing: .12em;
+  text-shadow: 0 0 13px rgba(238, 193, 106, .24);
+}
+
+.wc-tourney-finals-standings-header small {
+  color: #9d9279;
+  font-size: .48rem;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+
+.wc-tourney-finals-standings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wc-tourney-finals-standing {
+  display: grid;
+  grid-template-columns: 36px 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 4px 6px;
+  border: 1px solid rgba(183, 157, 106, .2);
+  border-radius: 5px;
+  background: linear-gradient(100deg, rgba(43, 38, 28, .8), rgba(13, 15, 14, .92));
+}
+
+.wc-tourney-finals-standing.is-finalist {
+  border-color: rgba(242, 202, 116, .68);
+  background: linear-gradient(100deg, rgba(84, 60, 24, .52), rgba(25, 22, 15, .95));
+  box-shadow: inset 3px 0 #e8c36f, 0 0 12px rgba(234, 188, 92, .1);
+}
+
+.wc-tourney-finals-standing-place {
+  color: #ebcf92;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .72rem;
+  font-weight: 1000;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.wc-tourney-finals-standing img {
+  width: 40px;
+  height: 43px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 3px 5px #000b);
+}
+
+.wc-tourney-finals-standing-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.wc-tourney-finals-standing-copy strong {
+  overflow: hidden;
+  color: #f5ebd5;
+  font-family: Oxanium, Arial, sans-serif;
+  font-size: .69rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wc-tourney-finals-standing-copy small {
+  color: #bca679;
+  font-size: .44rem;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.wc-tourney-finals-standing.is-finalist .wc-tourney-finals-standing-copy small {
+  color: #f1d18c;
+}
+
+/* Finals reveal: a crown-lit arrival, glowing arena, and a readable table. */
+@keyframes wcFinalsAura {
+  from { opacity: .55; transform: scale(.94); }
+  to { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes wcFinalsTitleArrival {
+  0% { opacity: 0; transform: translateY(20px) scale(.9); filter: blur(6px); }
+  65% { opacity: 1; transform: translateY(-2px) scale(1.025); filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes wcFinalsTitleGlow {
+  from { text-shadow: 0 2px 0 #6c481c, 0 0 12px rgba(255, 206, 111, .32); }
+  to { text-shadow: 0 2px 0 #6c481c, 0 0 22px rgba(255, 206, 111, .8), 0 0 46px rgba(238, 156, 52, .4); }
+}
+
+@keyframes wcFinalsMatchArrival {
+  from { opacity: 0; transform: translateY(30px) scale(.94); filter: brightness(.65); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
+}
+
+@keyframes wcFinalsMatchPulse {
+  0%, 100% { box-shadow: 0 18px 48px #000b, 0 0 0 1px rgba(255, 224, 157, .11), 0 0 28px rgba(235, 178, 75, .16), inset 0 1px rgba(255, 244, 208, .2); }
+  50% { box-shadow: 0 18px 48px #000b, 0 0 0 1px rgba(255, 224, 157, .22), 0 0 44px rgba(235, 178, 75, .34), inset 0 1px rgba(255, 244, 208, .24); }
+}
+
+@keyframes wcFinalsStandingsArrival {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes wcFinalsButtonPulse {
+  from { box-shadow: 0 0 16px rgba(238, 188, 91, .18); }
+  to { box-shadow: 0 0 28px rgba(238, 188, 91, .46); }
+}
+
+@media (max-width: 1050px) {
+  .wc-tournament-bracket .wc-tourney-finals-layout {
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 12px;
+  }
+
+  .wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-match {
+    min-height: 320px;
+  }
+
+  .wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-fighter {
+    grid-template-columns: minmax(82px, 36%) minmax(0, 1fr);
+  }
+
+  .wc-tourney-finals-standing {
+    grid-template-columns: 30px 36px minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .wc-tourney-finals-standing img {
+    width: 35px;
+    height: 39px;
+  }
+}
+
+@media (max-width: 760px) {
+  .wc-tournament-bracket .wc-tourney-finals-layout {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+    padding-inline: 6px;
+  }
+
+  .wc-tourney-finals-standings {
+    width: 100%;
+  }
+
+  .wc-tourney-finals-standings-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-match {
+    min-height: 0;
+    padding: 12px 8px;
+  }
+
+  .wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-matchup {
+    grid-template-columns: minmax(0, 1fr) 26px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-fighter {
+    height: 112px;
+    min-height: 112px;
+    grid-template-columns: minmax(56px, 38%) minmax(0, 1fr);
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-portrait {
+    min-height: 100px;
+  }
+
+  .wc-tourney-finals-intro strong {
+    font-size: clamp(1.55rem, 7vw, 2.35rem);
+  }
+
+  .wc-tourney-finals-intro::before,
+  .wc-tourney-finals-intro::after {
+    width: 24px;
+  }
+
+  .wc-tourney-finals-standing {
+    grid-template-columns: 28px 34px minmax(0, 1fr);
+    min-height: 45px;
+    gap: 4px;
+    padding: 3px;
+  }
+
+  .wc-tourney-finals-standing img {
+    width: 32px;
+    height: 36px;
+  }
+
+  .wc-tourney-finals-standing-copy strong {
+    font-size: .61rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-tourney-finals-round::before,
+  .wc-tourney-finals-intro,
+  .wc-tourney-finals-intro strong,
+  .wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-match,
+  .wc-tournament-bracket .wc-tourney-finals-round .wc-tourney-fight-button,
+  .wc-tourney-finals-standings {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
