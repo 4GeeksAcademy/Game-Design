@@ -354,8 +354,8 @@ function RoundTransition({ transition, onContinue }) {
         {transition.phase === "eliminators" && (
           <>
             <p className="wc-round-transition-kicker">{transition.completedRoundLabel} · ROUND COMPLETE</p>
-            <h2 id="wcRoundTransitionTitle">THE ELIMINATED</h2>
-            <p className="wc-round-transition-caption">THESE CONTENDERS' RUN ENDS HERE</p>
+            <h2 id="wcRoundTransitionTitle">ELIMINATED CONTENDERS</h2>
+            <p className="wc-round-transition-caption">THEIR CHAMPIONSHIP RUN ENDS HERE</p>
             <div className="wc-round-eliminators">
               {transition.eliminators.map((fighter, index) => (
                 <article className="wc-round-eliminator" key={fighter.id} style={{ animationDelay: (index * 0.22) + "s" }}>
