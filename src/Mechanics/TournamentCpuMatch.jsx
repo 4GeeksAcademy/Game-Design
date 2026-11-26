@@ -59,6 +59,7 @@ export default function TournamentCpuMatch({
   matchNumber,
   onComplete,
   onLeaveTournament,
+  onRestartTournament,
 }) {
   const battleRef = useRef(null);
   const completedRef = useRef(false);
@@ -163,9 +164,14 @@ export default function TournamentCpuMatch({
           <small>{roundLabel}</small>
           <strong>MATCH {String(matchNumber).padStart(2, "0")}</strong>
         </div>
-        <button type="button" className="wc-cpu-leave" onClick={onLeaveTournament}>
-          LEAVE TOURNAMENT
-        </button>
+        <div className="wc-cpu-watch-header-actions">
+          <button type="button" className="wc-cpu-restart" onClick={onRestartTournament}>
+            ↻ RESTART
+          </button>
+          <button type="button" className="wc-cpu-leave" onClick={onLeaveTournament}>
+            LEAVE TOURNAMENT
+          </button>
+        </div>
       </header>
 
       <section className="wc-cpu-player-persistent">
