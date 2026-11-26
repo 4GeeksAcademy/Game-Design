@@ -4,6 +4,8 @@ import { roster } from "./Main Page/CharacterSelection.jsx";
 import { getUnlockedCharacters, addCoins } from "./Currency.js";
 import { createWatchBattle, nextWatchAction } from "./WatchBattle.js";
 import { getCharacterImage } from "./SkinManager.js";
+import { playGameSound, playUISound } from "../audio/audioManager.js";
+import TournamentCpuMatch from "./TournamentCpuMatch.jsx";
 import "./Tournament.css";
 
 const REWARDS = { 1: 100000, 2: 50000, 3: 25000 };
@@ -16,7 +18,7 @@ const copyRounds = (rounds) => rounds.map((round) => round.map((match) => ({
 
 function simulateCpuMatch(one, two) {
   const toBot = (fighter) => ({
-    ...fighter.data,
+    ...(fighter.data || fighter),
     image: fighter.image,
     rosterId: fighter.id,
   });
@@ -33,14 +35,17 @@ function simulateCpuMatch(one, two) {
     battle.winner = first.health >= second.health ? first.name : second.name;
   }
 
-  return battle.winner === battle.fighters[0].name ? one : two;
+  if (battle.winner) {
+    return battle.winner === battle.fighters[0].name ? one : two;
+  }
+  return battle.fighters[0].health >= battle.fighters[1].health ? one : two;
 }
 
-function makeTournament(size, player) {
-  const pool = roster
+function makeTournament(size, player, cpuPool) {
+  const participants = [player, ...[...cpuPool]
     .filter((fighter) => fighter.id !== player.id)
-    .sort(() => Math.random() - 0.5);
-  const participants = [player, ...pool.slice(0, size - 1)]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, size - 1)]
     .sort(() => Math.random() - 0.5);
   const rounds = [];
   let matchCount = size / 2;
@@ -76,15 +81,9 @@ function makeTournament(size, player) {
   };
 }
 
-function simulateRound(round, playerId = null) {
+function simulateRound(round) {
   round.forEach((match) => {
-    const includesPlayer = match.fighters.some((fighter) => fighter?.id === playerId);
-    if (
-      !match.winner &&
-      match.fighters[0] &&
-      match.fighters[1] &&
-      !includesPlayer
-    ) {
+    if (!match.winner && match.fighters[0] && match.fighters[1]) {
       match.winner = simulateCpuMatch(match.fighters[0], match.fighters[1]);
     }
   });
@@ -102,10 +101,7 @@ function buildPlacements(tournament) {
 
   const thirdPlaceWinner = simulateCpuMatch(semifinalLosers[0], semifinalLosers[1]);
   const thirdPlaceLoser = semifinalLosers.find((fighter) => fighter.id !== thirdPlaceWinner.id);
-  tournament.thirdPlaceMatch = {
-    fighters: semifinalLosers,
-    winner: thirdPlaceWinner,
-  };
+  tournament.thirdPlaceMatch = { fighters: semifinalLosers, winner: thirdPlaceWinner };
 
   if (tournament.size === 4) {
     return [champion, runnerUp, thirdPlaceWinner, thirdPlaceLoser];
@@ -114,23 +110,18 @@ function buildPlacements(tournament) {
   const quarterfinalLosers = rounds[0]
     .map((match) => match.fighters.find((fighter) => fighter.id !== match.winner.id))
     .filter(Boolean);
-
-  const consolationWinnerA = simulateCpuMatch(quarterfinalLosers[0], quarterfinalLosers[1]);
-  const consolationWinnerB = simulateCpuMatch(quarterfinalLosers[2], quarterfinalLosers[3]);
-  const consolationLoserA = quarterfinalLosers.find((fighter) =>
-    fighter.id !== consolationWinnerA.id &&
-    (fighter.id === quarterfinalLosers[0].id || fighter.id === quarterfinalLosers[1].id)
+  const quarterPairs = [
+    quarterfinalLosers.slice(0, 2),
+    quarterfinalLosers.slice(2, 4),
+  ];
+  const consolationWinners = quarterPairs.map((pair) => simulateCpuMatch(pair[0], pair[1]));
+  const consolationLosers = quarterPairs.map((pair, index) =>
+    pair.find((fighter) => fighter.id !== consolationWinners[index].id),
   );
-  const consolationLoserB = quarterfinalLosers.find((fighter) =>
-    fighter.id !== consolationWinnerB.id &&
-    (fighter.id === quarterfinalLosers[2].id || fighter.id === quarterfinalLosers[3].id)
-  );
-  const fifthPlaceWinner = simulateCpuMatch(consolationWinnerA, consolationWinnerB);
-  const seventhPlaceWinner = simulateCpuMatch(consolationLoserA, consolationLoserB);
-  const sixthPlace = [consolationWinnerA, consolationWinnerB]
-    .find((fighter) => fighter.id !== fifthPlaceWinner.id);
-  const eighthPlace = [consolationLoserA, consolationLoserB]
-    .find((fighter) => fighter.id !== seventhPlaceWinner.id);
+  const fifthPlaceWinner = simulateCpuMatch(consolationWinners[0], consolationWinners[1]);
+  const seventhPlaceWinner = simulateCpuMatch(consolationLosers[0], consolationLosers[1]);
+  const sixthPlace = consolationWinners.find((fighter) => fighter.id !== fifthPlaceWinner.id);
+  const eighthPlace = consolationLosers.find((fighter) => fighter.id !== seventhPlaceWinner.id);
 
   return [
     champion,
@@ -144,42 +135,42 @@ function buildPlacements(tournament) {
   ];
 }
 
-function completeRemainingMatches(tournament) {
-  for (
-    let roundIndex = tournament.currentRound;
-    roundIndex < tournament.rounds.length;
-    roundIndex += 1
-  ) {
-    const round = tournament.rounds[roundIndex];
-
-    if (roundIndex > 0) {
-      const previousWinners = tournament.rounds[roundIndex - 1]
-        .map((match) => match.winner);
-      round.forEach((match, index) => {
-        if (!match.fighters[0]) {
-          match.fighters = [
-            previousWinners[index * 2] || null,
-            previousWinners[index * 2 + 1] || null,
-          ];
-        }
-      });
-    }
-
-    simulateRound(round, tournament.player.id);
-  }
-
+function finishTournamentDraft(tournament) {
   const finalMatch = tournament.rounds[tournament.rounds.length - 1][0];
   if (!finalMatch.winner && finalMatch.fighters[0] && finalMatch.fighters[1]) {
     finalMatch.winner = simulateCpuMatch(finalMatch.fighters[0], finalMatch.fighters[1]);
   }
-
   tournament.complete = true;
   tournament.placements = buildPlacements(tournament);
   tournament.humanPlacement =
     tournament.placements.findIndex((fighter) => fighter.id === tournament.player.id) + 1 ||
     tournament.size;
-
   return tournament;
+}
+
+function completeRemainingMatches(tournament) {
+  for (let roundIndex = 0; roundIndex < tournament.rounds.length; roundIndex += 1) {
+    const round = tournament.rounds[roundIndex];
+
+    if (roundIndex > 0) {
+      const previousWinners = tournament.rounds[roundIndex - 1].map((match) => match.winner);
+      round.forEach((match, index) => {
+        if (!match.fighters[0] || !match.fighters[1]) {
+          match.fighters = [
+            previousWinners[index * 2] || null,
+            previousWinners[index * 2 + 1] || null,
+          ];
+          match.isPlayerMatch = match.fighters.some(
+            (fighter) => fighter?.id === tournament.player.id,
+          );
+        }
+      });
+    }
+
+    simulateRound(round);
+  }
+
+  return finishTournamentDraft(tournament);
 }
 
 function TournamentFighter({
@@ -188,6 +179,7 @@ function TournamentFighter({
   player = false,
   eliminated = false,
   winner = false,
+  revealing = false,
 }) {
   return (
     <div className={[
@@ -195,6 +187,7 @@ function TournamentFighter({
       player ? "player-entry" : "",
       eliminated ? "eliminated" : "",
       winner ? "match-winner" : "",
+      revealing ? "is-revealing" : "",
     ].filter(Boolean).join(" ")}>
       <div className="wc-tourney-portrait">
         {mystery
@@ -212,37 +205,48 @@ function TournamentFighter({
   );
 }
 
-function TournamentMatch({ match, matchIndex, tournament, onEnterMatch }) {
+function TournamentMatch({
+  match,
+  matchIndex,
+  tournament,
+  revealing,
+  previewFighters,
+  onEnterMatch,
+}) {
   const playerId = tournament.player.id;
   const first = match.fighters[0];
   const second = match.fighters[1];
   const firstIsPlayer = first?.id === playerId;
   const secondIsPlayer = second?.id === playerId;
-  const firstMystery = !first || (!tournament.started && !firstIsPlayer);
-  const secondMystery = !second || (!tournament.started && !secondIsPlayer);
+  const shownFirst = revealing && !firstIsPlayer ? previewFighters?.[0] || first : first;
+  const shownSecond = revealing && !secondIsPlayer ? previewFighters?.[1] || second : second;
+  const firstMystery = !shownFirst || (!tournament.started && !revealing && !firstIsPlayer);
+  const secondMystery = !shownSecond || (!tournament.started && !revealing && !secondIsPlayer);
   const activePlayerMatch = tournament.started && match.isPlayerMatch && !match.winner;
 
   return (
     <article className={"wc-tourney-match" + (activePlayerMatch ? " is-player-match" : "")}>
       <div className="wc-tourney-match-heading">
         <span>MATCH {String(matchIndex + 1).padStart(2, "0")}</span>
-        <span>{match.winner ? "COMPLETE" : "WINNER ADVANCES"}</span>
+        <span>{match.winner ? "COMPLETE" : revealing ? "DRAWING CONTENDERS" : "WINNER ADVANCES"}</span>
       </div>
       <div className="wc-tourney-matchup">
         <TournamentFighter
-          fighter={first}
+          fighter={shownFirst}
           mystery={firstMystery}
           player={firstIsPlayer}
           eliminated={Boolean(match.winner && match.winner.id !== first?.id)}
           winner={Boolean(match.winner && match.winner.id === first?.id)}
+          revealing={revealing && !firstIsPlayer}
         />
         <span className="wc-tourney-versus">VS</span>
         <TournamentFighter
-          fighter={second}
+          fighter={shownSecond}
           mystery={secondMystery}
           player={secondIsPlayer}
           eliminated={Boolean(match.winner && match.winner.id !== second?.id)}
           winner={Boolean(match.winner && match.winner.id === second?.id)}
+          revealing={revealing && !secondIsPlayer}
         />
       </div>
       {activePlayerMatch && (
@@ -299,26 +303,148 @@ export default function Tournament() {
   const [selectedId, setSelectedId] = useState("");
   const [tournament, setTournament] = useState(location.state?.tournament || null);
   const [revealing, setRevealing] = useState(false);
+  const [revealPreview, setRevealPreview] = useState(null);
   const [showResults, setShowResults] = useState(Boolean(location.state?.showResults));
+  const [showEliminationScreen, setShowEliminationScreen] = useState(false);
+  const [activeCpuMatch, setActiveCpuMatch] = useState(null);
   const [spectating, setSpectating] = useState(false);
+  const [restarting, setRestarting] = useState(false);
   const processedMatch = useRef(null);
+  const activeCpuResolveRef = useRef(null);
+  const skipCpuQueueRef = useRef(false);
+  const revealIntervalRef = useRef(null);
+  const celebrationPlayedRef = useRef("");
   const unlockedIds = getUnlockedCharacters();
+  const unlockedKey = unlockedIds.join("|");
   const available = useMemo(
     () => roster.filter((fighter) => unlockedIds.includes(fighter.id)),
-    [unlockedIds],
+    [unlockedKey],
+  );
+  const cpuPool = useMemo(
+    () => roster.filter((fighter) =>
+      !fighter.isFestivalSecret || unlockedIds.includes(fighter.id)
+    ),
+    [unlockedKey],
   );
   const selectedFighter = available.find((fighter) => fighter.id === selectedId) || available[0];
 
-  useEffect(() => {
-    const result = location.state?.tournamentResult;
-    const incomingTournament = location.state?.tournament;
-    const resultKey = result && incomingTournament
-      ? incomingTournament.id + ":" + result.matchId
-      : null;
+  function publishTournament(next) {
+    setTournament({
+      ...next,
+      rounds: copyRounds(next.rounds),
+    });
+  }
 
-    if (!result || !incomingTournament || processedMatch.current === resultKey) return;
-    processedMatch.current = resultKey;
+  function completeTournament(next) {
+    const finished = finishTournamentDraft(next);
+    setTournament(finished);
+    setShowEliminationScreen(false);
+    setShowResults(true);
+    setSpectating(false);
+    navigate("/tournament", {
+      replace: true,
+      state: { tournament: finished, showResults: true },
+    });
+  }
 
+  function playCpuRound(round, roundIndex) {
+    return new Promise(async (resolve) => {
+      const pending = round.filter((match) =>
+        !match.winner &&
+        match.fighters[0] &&
+        match.fighters[1] &&
+        !match.fighters.some((fighter) => fighter.id === tournament?.player?.id)
+      );
+
+      for (let index = 0; index < pending.length; index += 1) {
+        if (skipCpuQueueRef.current) {
+          resolve(false);
+          return;
+        }
+        const match = pending[index];
+        const winner = await new Promise((finishMatch) => {
+          activeCpuResolveRef.current = finishMatch;
+          setActiveCpuMatch({
+            match,
+            roundIndex,
+            matchNumber: index + 1,
+            totalMatches: pending.length,
+          });
+        });
+
+        if (skipCpuQueueRef.current) {
+          resolve(false);
+          return;
+        }
+
+        match.winner = winner || simulateCpuMatch(match.fighters[0], match.fighters[1]);
+        setTournament((current) => current ? {
+          ...current,
+          rounds: copyRounds(current.rounds).map((items, index) =>
+            index === roundIndex
+              ? items.map((item) => item.id === match.id ? { ...item, winner: match.winner } : item)
+              : items
+          ),
+        } : current);
+        setActiveCpuMatch(null);
+        await new Promise((done) => window.setTimeout(done, 260));
+      }
+      resolve(true);
+    });
+  }
+
+  async function advanceAfterPlayerResult(draft, playerStillIn) {
+    skipCpuQueueRef.current = false;
+    setSpectating(!playerStillIn);
+
+    for (let roundIndex = draft.currentRound; roundIndex < draft.rounds.length; roundIndex += 1) {
+      const round = draft.rounds[roundIndex];
+
+      if (roundIndex > 0) {
+        const previousWinners = draft.rounds[roundIndex - 1].map((match) => match.winner);
+        round.forEach((match, index) => {
+          if (!match.fighters[0] || !match.fighters[1]) {
+            match.fighters = [
+              previousWinners[index * 2] || null,
+              previousWinners[index * 2 + 1] || null,
+            ];
+          }
+          match.isPlayerMatch = !draft.playerEliminated && match.fighters.some(
+            (fighter) => fighter?.id === draft.player.id,
+          );
+        });
+      }
+
+      draft.currentRound = roundIndex;
+      publishTournament(draft);
+      const completedCpuMatches = await playCpuRound(round, roundIndex);
+      if (!completedCpuMatches || skipCpuQueueRef.current) return;
+
+      const nextHumanMatch = round.find((match) =>
+        match.isPlayerMatch &&
+        !match.winner &&
+        match.fighters.some((fighter) => fighter?.id === draft.player.id)
+      );
+
+      publishTournament(draft);
+      if (playerStillIn && nextHumanMatch) {
+        setSpectating(false);
+        setShowEliminationScreen(false);
+        navigate("/tournament", {
+          replace: true,
+          state: { tournament: draft, showResults: false },
+        });
+        return;
+      }
+
+      if (roundIndex === draft.rounds.length - 1) {
+        completeTournament(draft);
+        return;
+      }
+    }
+  }
+
+  async function processPlayerResult(incomingTournament, result) {
     const updated = {
       ...incomingTournament,
       rounds: copyRounds(incomingTournament.rounds),
@@ -332,61 +458,106 @@ export default function Tournament() {
 
     match.winner = result.won ? updated.player : opponent;
     updated.playerEliminated = !result.won;
-    simulateRound(currentRound, updated.player.id);
+    publishTournament(updated);
 
-    if (result.won && updated.currentRound < updated.rounds.length - 1) {
-      const nextIndex = updated.currentRound + 1;
-      const winners = currentRound.map((item) => item.winner);
-      const nextRound = updated.rounds[nextIndex];
-
-      nextRound.forEach((item, index) => {
-        item.fighters = [
-          winners[index * 2] || null,
-          winners[index * 2 + 1] || null,
-        ];
-        item.isPlayerMatch = item.fighters.some(
-          (fighter) => fighter?.id === updated.player.id,
-        );
+    if (!result.won) {
+      setShowEliminationScreen(true);
+      setSpectating(false);
+      navigate("/tournament", {
+        replace: true,
+        state: { tournament: updated, showResults: false },
       });
-
-      simulateRound(nextRound, updated.player.id);
-      updated.currentRound = nextIndex;
-    } else if (result.won) {
-      completeRemainingMatches(updated);
+      return;
     }
 
-    setTournament(updated);
-    setShowResults(updated.complete);
-    navigate("/tournament", {
-      replace: true,
-      state: { tournament: updated, showResults: updated.complete },
+    playUISound("victory");
+    await advanceAfterPlayerResult(updated, true);
+  }
+
+  useEffect(() => {
+    const result = location.state?.tournamentResult;
+    const incomingTournament = location.state?.tournament;
+    const resultKey = result && incomingTournament
+      ? incomingTournament.id + ":" + result.matchId
+      : null;
+
+    if (!result || !incomingTournament || processedMatch.current === resultKey) return;
+    processedMatch.current = resultKey;
+    processPlayerResult(incomingTournament, result).catch((error) => {
+      console.error("[Wild Cards Tournament] Could not process match result:", error);
+      setShowEliminationScreen(true);
+      setSpectating(false);
     });
-  }, [location.state, navigate]);
+  }, [location.state]);
+
+  useEffect(() => {
+    if (!showResults || !tournament?.complete || celebrationPlayedRef.current === tournament.id) return;
+    celebrationPlayedRef.current = tournament.id;
+    playUISound("victory");
+    const timer = window.setTimeout(() => playUISound("unlock"), 550);
+    return () => window.clearTimeout(timer);
+  }, [showResults, tournament?.complete, tournament?.id]);
 
   function generateBracket() {
-    if (!selectedFighter || available.length === 0) return;
+    if (!selectedFighter || cpuPool.filter((fighter) => fighter.id !== selectedFighter.id).length < size - 1) return;
+    skipCpuQueueRef.current = false;
+    processedMatch.current = null;
+    celebrationPlayedRef.current = "";
+    setShowEliminationScreen(false);
     setRevealing(true);
-    const next = makeTournament(size, selectedFighter);
+    playUISound("confirm");
+    const next = makeTournament(size, selectedFighter, cpuPool);
     window.setTimeout(() => {
       setTournament(next);
       setShowResults(false);
+      setRevealPreview(null);
       setRevealing(false);
-    }, 1100);
+      playUISound("confirm");
+    }, 1000);
+  }
+
+  function createRevealPreview() {
+    if (!tournament) return null;
+    const pool = cpuPool.filter((fighter) => fighter.id !== tournament.player.id);
+    const previews = {};
+
+    tournament.rounds[0].forEach((match) => {
+      previews[match.id] = match.fighters.map((fighter) => {
+        if (fighter?.id === tournament.player.id) return fighter;
+        return pool[Math.floor(Math.random() * pool.length)] || fighter;
+      });
+    });
+    return previews;
   }
 
   function startTournament() {
-    if (!tournament || revealing) return;
+    if (!tournament || revealing || tournament.started) return;
     setRevealing(true);
-    window.setTimeout(() => {
-      setTournament((current) => current ? { ...current, started: true } : current);
-      setRevealing(false);
-    }, 900);
+    playUISound("confirm");
+    let step = 0;
+    window.clearInterval(revealIntervalRef.current);
+
+    revealIntervalRef.current = window.setInterval(() => {
+      setRevealPreview(createRevealPreview());
+      playUISound("click");
+      step += 1;
+
+      if (step >= 6) {
+        window.clearInterval(revealIntervalRef.current);
+        revealIntervalRef.current = null;
+        setRevealPreview(null);
+        setTournament((current) => current ? { ...current, started: true } : current);
+        setRevealing(false);
+        playUISound("victory");
+      }
+    }, 350);
   }
 
   function enterMatch(match) {
     const opponent = match.fighters.find((fighter) => fighter.id !== tournament.player.id);
     if (!opponent) return;
 
+    playUISound("confirm");
     navigate("/battle", {
       state: {
         gameMode: "tournament",
@@ -402,6 +573,23 @@ export default function Tournament() {
         stageBackground: "arena",
       },
     });
+  }
+
+  function finishWatchedCpuMatch(winner) {
+    const finishMatch = activeCpuResolveRef.current;
+    activeCpuResolveRef.current = null;
+    setActiveCpuMatch(null);
+    finishMatch?.(winner);
+  }
+
+  async function watchRemaining() {
+    if (!tournament || spectating) return;
+    setShowEliminationScreen(false);
+    await advanceAfterPlayerResult({
+      ...tournament,
+      started: true,
+      rounds: copyRounds(tournament.rounds),
+    }, false);
   }
 
   function prepareCpuFinish() {
@@ -422,95 +610,62 @@ export default function Tournament() {
         (fighter) => fighter.id !== updated.player.id,
       );
     }
-
     return completeRemainingMatches(updated);
   }
 
-  async function watchRemaining() {
-    if (spectating || !tournament) return;
-    setSpectating(true);
-
-    const updated = {
-      ...tournament,
-      started: true,
-      playerEliminated: true,
-      rounds: copyRounds(tournament.rounds),
-    };
-    const activeRound = updated.rounds[updated.currentRound];
-    const pendingPlayerMatch = activeRound?.find(
-      (match) => match.isPlayerMatch && !match.winner,
-    );
-
-    if (pendingPlayerMatch) {
-      pendingPlayerMatch.winner = pendingPlayerMatch.fighters.find(
-        (fighter) => fighter.id !== updated.player.id,
-      );
-    }
-
-    const pause = () => new Promise((resolve) => window.setTimeout(resolve, 650));
-
-    for (
-      let roundIndex = updated.currentRound;
-      roundIndex < updated.rounds.length;
-      roundIndex += 1
-    ) {
-      const round = updated.rounds[roundIndex];
-
-      if (roundIndex > 0) {
-        const previousWinners = updated.rounds[roundIndex - 1]
-          .map((match) => match.winner);
-        round.forEach((match, index) => {
-          if (!match.fighters[0]) {
-            match.fighters = [
-              previousWinners[index * 2] || null,
-              previousWinners[index * 2 + 1] || null,
-            ];
-          }
-        });
-      }
-
-      setTournament({
-        ...updated,
-        rounds: copyRounds(updated.rounds),
-      });
-      await pause();
-
-      for (const match of round) {
-        if (match.winner || !match.fighters[0] || !match.fighters[1]) continue;
-        match.winner = simulateCpuMatch(match.fighters[0], match.fighters[1]);
-        setTournament({
-          ...updated,
-          rounds: copyRounds(updated.rounds),
-        });
-        await pause();
-      }
-    }
-
-    const finished = completeRemainingMatches(updated);
-    setTournament(finished);
-    setShowResults(true);
-    setSpectating(false);
-  }
-
   function leaveTournament() {
+    if (!tournament) return;
+    skipCpuQueueRef.current = true;
+    if (activeCpuMatch && activeCpuResolveRef.current) {
+      const winner = simulateCpuMatch(
+        activeCpuMatch.match.fighters[0],
+        activeCpuMatch.match.fighters[1],
+      );
+      activeCpuResolveRef.current(winner);
+      activeCpuResolveRef.current = null;
+      setActiveCpuMatch(null);
+    }
     const finished = prepareCpuFinish();
     if (!finished) return;
     setTournament(finished);
+    setShowEliminationScreen(false);
     setShowResults(true);
+    setSpectating(false);
+    navigate("/tournament", {
+      replace: true,
+      state: { tournament: finished, showResults: true },
+    });
   }
 
   function restartTournament() {
-    setTournament(null);
-    setShowResults(false);
-    setSpectating(false);
-    setSelectedId("");
-    navigate("/tournament", { replace: true, state: null });
+    skipCpuQueueRef.current = true;
+    window.clearInterval(revealIntervalRef.current);
+    revealIntervalRef.current = null;
+    activeCpuResolveRef.current?.(null);
+    activeCpuResolveRef.current = null;
+    setActiveCpuMatch(null);
+    setRestarting(true);
+    setTimeout(() => {
+      setTournament(null);
+      setShowResults(false);
+      setShowEliminationScreen(false);
+      setSpectating(false);
+      setRevealPreview(null);
+      setRevealing(false);
+      setRestarting(false);
+      setSelectedId("");
+      setSize(4);
+      setTournament(null);
+      processedMatch.current = null;
+      navigate("/tournament", { replace: true, state: null });
+    }, 480);
   }
 
   function claimReward() {
     const amount = REWARDS[tournament.humanPlacement] || 0;
     if (!tournament.rewardClaimed && amount > 0) {
       addCoins(amount);
+      playGameSound("purchase");
       const updated = { ...tournament, rewardClaimed: true };
       setTournament(updated);
       navigate("/tournament", {
@@ -520,13 +675,41 @@ export default function Tournament() {
     }
   }
 
+  if (activeCpuMatch && tournament) {
+    const roundLabels = tournament.size === 4
+      ? ["SEMIFINALS", "FINAL"]
+      : ["QUARTERFINALS", "SEMIFINALS", "FINAL"];
+    return (
+      <TournamentCpuMatch
+        match={activeCpuMatch.match}
+        roundLabel={roundLabels[activeCpuMatch.roundIndex] || "CHAMPIONSHIP"}
+        matchNumber={activeCpuMatch.matchNumber}
+        onComplete={finishWatchedCpuMatch}
+        onLeaveTournament={leaveTournament}
+      />
+    );
+  }
+
   if (showResults && tournament?.complete) {
     const placement = tournament.humanPlacement;
     const suffix = placement === 1 ? "ST" : placement === 2 ? "ND" : placement === 3 ? "RD" : "TH";
     const reward = REWARDS[placement] || 0;
 
     return (
-      <main className="wc-tournament wc-tournament-results">
+      <main className={"wc-tournament wc-tournament-results" + (restarting ? " is-restarting" : "")}>
+        <div className="wc-tourney-confetti" aria-hidden="true">
+          {Array.from({ length: 24 }, (_, index) => (
+            <i
+              key={index}
+              style={{
+                left: ((index * 37) % 100) + "%",
+                animationDelay: ((index % 8) * -0.37) + "s",
+                animationDuration: (3.2 + (index % 5) * 0.42) + "s",
+              }}
+            />
+          ))}
+        </div>
+        <div className="wc-tourney-crown-light" aria-hidden="true" />
         <header className="wc-tourney-header wc-tourney-results-header">
           <span>WILD CARDS</span>
           <span>GRAND CHAMPIONSHIP · FINAL STANDINGS</span>
@@ -584,7 +767,7 @@ export default function Tournament() {
       : ["QUARTERFINALS", "SEMIFINALS", "FINAL"];
 
     return (
-      <main className="wc-tournament wc-tournament-bracket">
+      <main className={"wc-tournament wc-tournament-bracket" + (restarting ? " is-restarting" : "")}>
         <header className="wc-tourney-header">
           <button className="wc-tourney-exit" onClick={leaveTournament}>
             {tournament.playerEliminated ? "SKIP TO STANDINGS" : "LEAVE & SEE STANDINGS"}
@@ -620,13 +803,16 @@ export default function Tournament() {
           </section>
         </div>
 
+        {revealing && (
+          <div className="wc-tourney-reveal-status" role="status">
+            <span className="wc-tourney-reveal-spinner" />
+            <strong>THE CONTENDERS ARE BEING DRAWN</strong>
+          </div>
+        )}
+
         <section className="wc-tourney-rounds" aria-label="Tournament bracket">
           {tournament.rounds.map((round, roundIndex) => (
-            <section
-              className="wc-tourney-round"
-              key={roundIndex}
-              style={{ flex: round.length }}
-            >
+            <section className="wc-tourney-round" key={roundIndex} style={{ flex: round.length }}>
               <div className="wc-tourney-round-title">
                 <span>ROUND {roundIndex + 1}</span>
                 <h2>{roundLabels[roundIndex] || "CHAMPIONSHIP"}</h2>
@@ -639,6 +825,8 @@ export default function Tournament() {
                     match={match}
                     matchIndex={matchIndex}
                     tournament={tournament}
+                    revealing={revealing}
+                    previewFighters={revealPreview?.[match.id]}
                     onEnterMatch={enterMatch}
                   />
                 ))}
@@ -647,17 +835,18 @@ export default function Tournament() {
           ))}
         </section>
 
-        {tournament.playerEliminated && !tournament.complete && (
-          <section className="wc-tourney-spectator-bar">
+        {tournament.playerEliminated && showEliminationScreen && !tournament.complete && (
+          <section className="wc-tourney-elimination-panel">
+            <div className="wc-tourney-elimination-mark">K.O.</div>
             <div>
               <strong>YOUR RUN HAS ENDED</strong>
-              <span>See who claims the championship.</span>
+              <span>The championship is still alive. Choose how you want to finish the tournament.</span>
             </div>
-            <button onClick={watchRemaining} disabled={spectating}>
-              {spectating ? "SIMULATING MATCHES..." : "WATCH THE REMAINING MATCHES"}
+            <button className="wc-tourney-watch-button" onClick={watchRemaining} disabled={spectating}>
+              {spectating ? "STARTING WATCH MODE..." : "WATCH REMAINING MATCHES"}
             </button>
             <button className="wc-tourney-skip-button" onClick={leaveTournament}>
-              SKIP TO RESULTS
+              LEAVE & SEE RESULTS
             </button>
             <button className="wc-tourney-restart-button" onClick={restartTournament}>
               RESTART
@@ -669,7 +858,7 @@ export default function Tournament() {
   }
 
   return (
-    <main className="wc-tournament wc-tournament-setup">
+    <main className={"wc-tournament wc-tournament-setup" + (restarting ? " is-restarting" : "")}>
       <header className="wc-tourney-header">
         <button className="wc-tourney-exit" onClick={() => navigate("/")}>← MAIN MENU</button>
         <div className="wc-tourney-header-title">
