@@ -424,6 +424,45 @@ export default function Tournament() {
 
     return true;
   }
+
+  async function finishRemainingCpuRounds(draft, startRoundIndex, forcedPlacement = null) {
+    if (forcedPlacement) draft.forcedPlacement = forcedPlacement;
+    setShowEliminationScreen(false);
+    setSpectating(true);
+    skipCpuQueueRef.current = false;
+
+    for (let roundIndex = startRoundIndex; roundIndex < draft.rounds.length; roundIndex += 1) {
+      const round = draft.rounds[roundIndex];
+
+      if (roundIndex > 0) {
+        const previousWinners = draft.rounds[roundIndex - 1].map((match) => match.winner);
+        round.forEach((match, index) => {
+          if (!match.fighters[0] || !match.fighters[1]) {
+            match.fighters = [
+              previousWinners[index * 2] || null,
+              previousWinners[index * 2 + 1] || null,
+            ];
+          }
+          match.isPlayerMatch = false;
+        });
+      }
+
+      draft.currentRound = roundIndex;
+      publishTournament(draft);
+      const completed = await playCpuRound(round, roundIndex, draft.player.id);
+      if (!completed || skipCpuQueueRef.current) {
+        setSpectating(false);
+        return;
+      }
+
+      publishTournament(draft);
+      if (roundIndex === draft.rounds.length - 1) {
+        completeTournament(draft);
+        return;
+      }
+    }
+  }
+
   async function advanceAfterPlayerResult(draft, playerStillIn) {
     skipCpuQueueRef.current = false;
     setSpectating(!playerStillIn);
@@ -480,6 +519,20 @@ export default function Tournament() {
       ...incomingTournament,
       rounds: copyRounds(incomingTournament.rounds),
     };
+
+    // A bronze-medal battle is a real player match, separate from the main bracket.
+    if (result.placementType === "bronze") {
+      const bronzeOpponent = updated.placementOpportunity?.opponent;
+      if (!bronzeOpponent) return;
+      updated.placementResults = {
+        bronzeWinner: result.won ? updated.player : bronzeOpponent,
+      };
+      updated.placementOpportunity = null;
+      playUISound(result.won ? "victory" : "back");
+      await finishRemainingCpuRounds(updated, updated.currentRound + 1);
+      return;
+    }
+
     const currentRound = updated.rounds[updated.currentRound];
     const match = currentRound?.find((item) => item.id === result.matchId);
     if (!match || match.winner) return;
@@ -492,8 +545,33 @@ export default function Tournament() {
     publishTournament(updated);
 
     if (!result.won) {
-      setShowEliminationScreen(true);
+      setShowEliminationScreen(false);
+      setSpectating(true);
+
+      // Finish the other matches in the round before offering placement choices.
+      const completedRound = await playCpuRound(
+        currentRound,
+        updated.currentRound,
+        updated.player.id,
+      );
+      if (!completedRound || skipCpuQueueRef.current) return;
+
+      const isSemifinal = updated.currentRound === updated.rounds.length - 2;
+      if (isSemifinal) {
+        const otherSemifinal = currentRound.find((item) => item.id !== match.id);
+        const bronzeOpponent = otherSemifinal?.fighters.find(
+          (fighter) => fighter.id !== otherSemifinal.winner?.id,
+        );
+        updated.placementOpportunity = bronzeOpponent
+          ? { type: "bronze", opponent: bronzeOpponent }
+          : null;
+      } else if (updated.size === 8 && updated.currentRound === 0) {
+        updated.placementOpportunity = { type: "consolation" };
+      }
+
+      publishTournament(updated);
       setSpectating(false);
+      setShowEliminationScreen(true);
       navigate("/tournament", {
         replace: true,
         state: { tournament: updated, showResults: false },
@@ -504,7 +582,6 @@ export default function Tournament() {
     playUISound("victory");
     await advanceAfterPlayerResult(updated, true);
   }
-
   useEffect(() => {
     const result = location.state?.tournamentResult;
     const incomingTournament = location.state?.tournament;
@@ -641,6 +718,29 @@ export default function Tournament() {
     });
   }
 
+
+  function enterPlacementMatch() {
+    const opponent = tournament?.placementOpportunity?.opponent;
+    if (!opponent) return;
+    playUISound("confirm");
+    navigate("/battle", {
+      state: {
+        gameMode: "tournament",
+        tournament,
+        tournamentMatchId: "placement-bronze",
+        tournamentPlacement: { type: "bronze" },
+        playerId: tournament.player.id,
+        opponentId: opponent.id,
+        teamSize: "1v1",
+        difficulty: "Normal",
+        teamControl: "single-player",
+        localPvP: false,
+        playerCount: 1,
+        stageBackground: "arena",
+      },
+    });
+  }
+
   function finishWatchedCpuMatch(winner) {
     const finishMatch = activeCpuResolveRef.current;
     activeCpuResolveRef.current = null;
@@ -650,12 +750,29 @@ export default function Tournament() {
 
   async function watchRemaining() {
     if (!tournament || spectating) return;
-    setShowEliminationScreen(false);
-    await advanceAfterPlayerResult({
-      ...tournament,
-      started: true,
-      rounds: copyRounds(tournament.rounds),
-    }, false);
+    await finishRemainingCpuRounds(
+      {
+        ...tournament,
+        started: true,
+        rounds: copyRounds(tournament.rounds),
+      },
+      tournament.currentRound + 1,
+    );
+  }
+
+  async function forfeitPlacement() {
+    if (!tournament || spectating) return;
+    const guaranteedPlace =
+      tournament.placementOpportunity?.type === "bronze" ? 3 : 8;
+    await finishRemainingCpuRounds(
+      {
+        ...tournament,
+        started: true,
+        rounds: copyRounds(tournament.rounds),
+      },
+      tournament.currentRound + 1,
+      guaranteedPlace,
+    );
   }
 
   function prepareCpuFinish(source = tournament) {
