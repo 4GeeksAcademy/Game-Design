@@ -862,7 +862,9 @@ export default function Tournament() {
   const [selectedId, setSelectedId] = useState("");
   const [tournament, setTournament] = useState(location.state?.tournament || null);
   const [revealing, setRevealing] = useState(false);
-  const [revealPreview, setRevealPreview] = useState(null);\n  const [drawParticipants, setDrawParticipants] = useState(null);\n  const [drawComplete, setDrawComplete] = useState(false);
+  const [revealPreview, setRevealPreview] = useState(null);
+  const [drawParticipants, setDrawParticipants] = useState(null);
+  const [drawComplete, setDrawComplete] = useState(false);
   const [showResults, setShowResults] = useState(Boolean(location.state?.showResults));
   const [showEliminationScreen, setShowEliminationScreen] = useState(false);
   const [showEliminationPopup, setShowEliminationPopup] = useState(false);
