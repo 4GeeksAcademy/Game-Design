@@ -1330,3 +1330,32 @@
     width: 9px;
   }
 }
+
+.wc-tourney-result-player {
+  flex: 0 0 auto;
+  align-self: center;
+  width: min(100%, 320px);
+  min-width: 0;
+  border-color: rgba(19, 213, 255, .46);
+}
+.wc-tourney-result-player > span {
+  color: #d4c29b;
+  font-size: .56rem;
+  font-weight: 950;
+  letter-spacing: .1em;
+}
+@media (max-height: 680px) and (min-width: 701px) {
+  .wc-tourney-bracket .wc-tourney-rounds {
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .wc-tourney-bracket .wc-tourney-round {
+    flex: 0 0 auto !important;
+  }
+  .wc-tourney-bracket .wc-tourney-round-matches {
+    flex: 0 0 auto;
+  }
+  .wc-tourney-bracket .wc-tourney-match {
+    min-height: 62px;
+  }
+}
