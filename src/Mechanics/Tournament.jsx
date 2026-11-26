@@ -545,7 +545,7 @@ export default function Tournament() {
           </div>
           <span>{placement}{suffix} PLACE</span>
         </section>
-        <Podium placements={tournament.placements} />
+        <Podium placements={tournament.placements} showRewards />
         <section className="wc-tourney-reward-receipt">
           <div>
             <span>YOUR FINISH</span>
