@@ -524,6 +524,7 @@ function RoundTransition({ transition, onContinue }) {
                   <span className={"wc-round-eliminator-status" + (entry.pending ? " is-pending" : "")}>
                     {entry.pending ? "PENDING" : "ELIMINATED"}
                   </span>
+                  <span className="wc-round-eliminator-ko">K.O.</span>
                 </article>
               ))}
             </div>
