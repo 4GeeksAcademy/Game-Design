@@ -167,6 +167,16 @@ function completeRemainingMatches(tournament) {
       });
     }
 
+    if (tournament.playerEliminated) {
+      const pendingPlayerMatch = round.find((match) =>
+        !match.winner && match.fighters.some((fighter) => fighter?.id === tournament.player.id)
+      );
+      if (pendingPlayerMatch) {
+        pendingPlayerMatch.winner = pendingPlayerMatch.fighters.find(
+          (fighter) => fighter.id !== tournament.player.id
+        );
+      }
+    }
     simulateRound(round);
   }
 
@@ -347,13 +357,13 @@ export default function Tournament() {
     });
   }
 
-  function playCpuRound(round, roundIndex) {
+  function playCpuRound(round, roundIndex, playerId) {
     return new Promise(async (resolve) => {
       const pending = round.filter((match) =>
         !match.winner &&
         match.fighters[0] &&
         match.fighters[1] &&
-        !match.fighters.some((fighter) => fighter.id === tournament?.player?.id)
+        !match.fighters.some((fighter) => fighter.id === playerId)
       );
 
       for (let index = 0; index < pending.length; index += 1) {
@@ -417,7 +427,7 @@ export default function Tournament() {
 
       draft.currentRound = roundIndex;
       publishTournament(draft);
-      const completedCpuMatches = await playCpuRound(round, roundIndex);
+      const completedCpuMatches = await playCpuRound(round, roundIndex, draft.player.id);
       if (!completedCpuMatches || skipCpuQueueRef.current) return;
 
       const nextHumanMatch = round.find((match) =>
@@ -489,6 +499,10 @@ export default function Tournament() {
       setSpectating(false);
     });
   }, [location.state]);
+
+  useEffect(() => () => {
+    window.clearInterval(revealIntervalRef.current);
+  }, []);
 
   useEffect(() => {
     if (!showResults || !tournament?.complete || celebrationPlayedRef.current === tournament.id) return;
