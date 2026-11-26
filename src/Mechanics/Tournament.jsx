@@ -411,9 +411,9 @@ function TournamentMatch({
         <div className={"wc-tourney-advance-card" + (match.winner ? " has-winner" : "")}>
           {match.winner ? (
             <>
-              <span className="wc-tourney-advance-card-label">ADVANCES TO NEXT ROUND</span>
               <img src={fighterImage(match.winner)} alt={fighterName(match.winner)} />
               <div>
+                <small className="wc-tourney-advance-card-label">ADVANCES TO NEXT ROUND</small>
                 <strong>{fighterName(match.winner)}</strong>
                 <small>WINNER · ADVANCING</small>
               </div>
