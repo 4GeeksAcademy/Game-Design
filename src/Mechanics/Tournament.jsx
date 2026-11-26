@@ -282,6 +282,9 @@ function Podium({ placements, showRewards = false }) {
                 <small>COINS</small>
               </b>
             )}
+            {showRewards && rank === 1 && (
+              <i className="wc-podium-bonus">+ FUTURE FIGHTER</i>
+            )}
           </article>
         );
       })}
@@ -576,7 +579,7 @@ export default function Tournament() {
       <main className="wc-tournament wc-tournament-bracket">
         <header className="wc-tourney-header">
           <button className="wc-tourney-exit" onClick={leaveTournament}>
-            {tournament.playerEliminated ? "SKIP TO STANDINGS" : "END RUN"}
+            {tournament.playerEliminated ? "SKIP TO STANDINGS" : "LEAVE & SEE STANDINGS"}
           </button>
           <div className="wc-tourney-header-title">
             <span>WILD CARDS</span>
