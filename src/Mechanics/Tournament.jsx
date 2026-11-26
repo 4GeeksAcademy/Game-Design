@@ -8,7 +8,11 @@ import { playGameSound, playUISound } from "../audio/audioManager.js";
 import TournamentCpuMatch from "./TournamentCpuMatch.jsx";
 import "./Tournament.css";
 
-const REWARDS = { 1: 100000, 2: 50000, 3: 25000 };
+const REWARDS = {
+  8: { 1: 100000, 2: 50000, 3: 25000 },
+  4: { 1: 50000, 2: 25000, 3: 12500 },
+};
+const getRewardAmount = (size, place) => REWARDS[size]?.[place] || 0;
 const fighterName = (fighter) => fighter?.data?.name || fighter?.name || "Unknown Fighter";
 const fighterImage = (fighter) => fighter ? getCharacterImage(fighter.id, fighter.image) : "";
 const copyRounds = (rounds) => rounds.map((round) => round.map((match) => ({
@@ -76,6 +80,9 @@ function makeTournament(size, player) {
     playerEliminated: false,
     complete: false,
     rewardClaimed: false,
+    placementOpportunity: null,
+    placementResults: null,
+    forcedPlacement: null,
   };
 }
 
@@ -97,12 +104,22 @@ function buildPlacements(tournament) {
     .map((match) => match.fighters.find((fighter) => fighter.id !== match.winner.id))
     .filter(Boolean);
 
-  const thirdPlaceWinner = simulateCpuMatch(semifinalLosers[0], semifinalLosers[1]);
-  const thirdPlaceLoser = semifinalLosers.find((fighter) => fighter.id !== thirdPlaceWinner.id);
-  tournament.thirdPlaceMatch = { fighters: semifinalLosers, winner: thirdPlaceWinner };
+  const bronzeWinner =
+    tournament.placementResults?.bronzeWinner ||
+    simulateCpuMatch(semifinalLosers[0], semifinalLosers[1]);
+  const bronzeLoser = semifinalLosers.find((fighter) => fighter.id !== bronzeWinner.id);
+  tournament.thirdPlaceMatch = {
+    fighters: semifinalLosers,
+    winner: bronzeWinner,
+  };
 
   if (tournament.size === 4) {
-    return [champion, runnerUp, thirdPlaceWinner, thirdPlaceLoser];
+    const placements = [champion, runnerUp, bronzeWinner, bronzeLoser];
+    if (tournament.forcedPlacement === 3) {
+      placements[2] = tournament.player;
+      placements[3] = semifinalLosers.find((fighter) => fighter.id !== tournament.player.id);
+    }
+    return placements;
   }
 
   const quarterfinalLosers = rounds[0]
@@ -121,18 +138,32 @@ function buildPlacements(tournament) {
   const sixthPlace = consolationWinners.find((fighter) => fighter.id !== fifthPlaceWinner.id);
   const eighthPlace = consolationLosers.find((fighter) => fighter.id !== seventhPlaceWinner.id);
 
-  return [
+  const placements = [
     champion,
     runnerUp,
-    thirdPlaceWinner,
-    thirdPlaceLoser,
+    bronzeWinner,
+    bronzeLoser,
     fifthPlaceWinner,
     sixthPlace,
     seventhPlaceWinner,
     eighthPlace,
   ];
-}
 
+  if (tournament.forcedPlacement === 3) {
+    placements[2] = tournament.player;
+    placements[3] = semifinalLosers.find((fighter) => fighter.id !== tournament.player.id);
+  } else if (tournament.forcedPlacement === 8) {
+    const previousPlayerPlace = placements.findIndex(
+      (fighter) => fighter?.id === tournament.player.id,
+    );
+    if (previousPlayerPlace >= 0) {
+      placements[previousPlayerPlace] = placements[7];
+      placements[7] = tournament.player;
+    }
+  }
+
+  return placements;
+}
 function finishTournamentDraft(tournament) {
   const finalMatch = tournament.rounds[tournament.rounds.length - 1][0];
   if (!finalMatch.winner && finalMatch.fighters[0] && finalMatch.fighters[1]) {
@@ -272,7 +303,7 @@ function TournamentMatch({
   );
 }
 
-function Podium({ placements, showRewards = false }) {
+function Podium({ placements, showRewards = false, size = 8 }) {
   const podiumOrder = [2, 1, 3];
   return (
     <div className="wc-podium">
@@ -290,7 +321,7 @@ function Podium({ placements, showRewards = false }) {
             <span>{rank === 1 ? "CHAMPION" : rank + (rank === 2 ? "ND" : "RD") + " PLACE"}</span>
             {showRewards && (
               <b className="wc-podium-prize">
-                {rank === 1 ? "100,000" : rank === 2 ? "50,000" : "25,000"}
+                {getRewardAmount(size, rank).toLocaleString()}
                 <small>COINS</small>
               </b>
             )}
