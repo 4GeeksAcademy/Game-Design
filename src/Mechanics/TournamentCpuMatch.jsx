@@ -64,7 +64,7 @@ export default function TournamentCpuMatch({
   const completedRef = useRef(false);
   const [battleView, setBattleView] = useState(null);
   const [playing, setPlaying] = useState(true);
-  const [speed, setSpeed] = useState(0);
+  const [speed, setSpeed] = useState(1);
 
   useEffect(() => {
     if (!match?.fighters?.[0] || !match?.fighters?.[1]) return;
@@ -83,7 +83,7 @@ export default function TournamentCpuMatch({
     completedRef.current = false;
     setBattleView(createSnapshot(battle));
     setPlaying(true);
-    setSpeed(0);
+    setSpeed(1);
     playUISound("confirm");
 
     return () => {
