@@ -840,6 +840,7 @@ export default function Tournament() {
   const [revealPreview, setRevealPreview] = useState(null);
   const [showResults, setShowResults] = useState(Boolean(location.state?.showResults));
   const [showEliminationScreen, setShowEliminationScreen] = useState(false);
+  const [showEliminationPopup, setShowEliminationPopup] = useState(false);
   const [activeCpuMatch, setActiveCpuMatch] = useState(null);
   const [spectating, setSpectating] = useState(false);
   const [restarting, setRestarting] = useState(false);
@@ -1293,6 +1294,22 @@ export default function Tournament() {
     playUISound("victory");
     await advanceAfterPlayerResult(updated, true);
   }
+  useEffect(() => {
+    if (!showEliminationScreen || !tournament?.playerEliminated || tournament?.complete) {
+      setShowEliminationPopup(false);
+      return undefined;
+    }
+
+    setShowEliminationPopup(false);
+    const timer = window.setTimeout(() => setShowEliminationPopup(true), 1000);
+    return () => window.clearTimeout(timer);
+  }, [
+    showEliminationScreen,
+    tournament?.playerEliminated,
+    tournament?.complete,
+    tournament?.id,
+  ]);
+
   useEffect(() => {
     const result = location.state?.tournamentResult;
     const incomingTournament = location.state?.tournament;
@@ -1805,37 +1822,50 @@ export default function Tournament() {
           )}
         </section>
 
-        {tournament.playerEliminated && showEliminationScreen && !tournament.complete && (
-          <section className="wc-tourney-elimination-panel">
-            <div className="wc-tourney-elimination-mark">K.O.</div>
-            <div>
-              <strong>{tournament.placementOpportunity?.type === "bronze" ? "A SHOT AT THIRD PLACE REMAINS" : "YOUR RUN HAS ENDED"}</strong>
-              <span>
+        {tournament.playerEliminated && showEliminationPopup && !tournament.complete && (
+          <div className="wc-tourney-ko-popup-backdrop" role="presentation">
+            <section
+              className="wc-tourney-ko-popup"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="wcTourneyKoTitle"
+              aria-describedby="wcTourneyKoDescription"
+            >
+              <div className="wc-tourney-ko-impact" aria-hidden="true">K.O.</div>
+              <p className="wc-tourney-ko-kicker">TOURNAMENT ELIMINATION</p>
+              <h2 id="wcTourneyKoTitle">
+                {tournament.placementOpportunity?.type === "bronze"
+                  ? "A SHOT AT THIRD PLACE REMAINS"
+                  : "YOUR RUN HAS ENDED"}
+              </h2>
+              <p id="wcTourneyKoDescription" className="wc-tourney-ko-description">
                 {tournament.placementOpportunity?.type === "bronze"
                   ? "Play the bronze-medal match to earn third place, or forfeit and accept fourth."
                   : "Continue to see your final 5th–8th place ranking, or forfeit and accept eighth place."}
-              </span>
-            </div>
-            {tournament.placementOpportunity?.type === "bronze" && (
-              <button className="wc-tourney-watch-button" onClick={enterPlacementMatch}>
-                PLAY FOR 3RD PLACE
-              </button>
-            )}
-            <button className="wc-tourney-watch-button" onClick={watchRemaining} disabled={spectating}>
-              {spectating ? "STARTING WATCH MODE..." : "WATCH REMAINING MATCHES"}
-            </button>
-            <button className="wc-tourney-skip-button" onClick={forfeitPlacement} disabled={spectating}>
-              {tournament.placementOpportunity?.type === "bronze"
-                ? "FORFEIT · ACCEPT 4TH"
-                : "FORFEIT · ACCEPT 8TH"}
-            </button>
-            <button className="wc-tourney-restart-button" onClick={restartTournament}>
-              RESTART
-            </button>
-          </section>
+              </p>
+              <div className="wc-tourney-ko-actions">
+                {tournament.placementOpportunity?.type === "bronze" && (
+                  <button className="wc-tourney-ko-primary" onClick={enterPlacementMatch}>
+                    PLAY FOR 3RD PLACE
+                  </button>
+                )}
+                <button className="wc-tourney-ko-primary" onClick={watchRemaining} disabled={spectating}>
+                  {spectating ? "STARTING WATCH MODE..." : "WATCH REMAINING MATCHES"}
+                </button>
+                <button className="wc-tourney-ko-forfeit" onClick={forfeitPlacement} disabled={spectating}>
+                  {tournament.placementOpportunity?.type === "bronze"
+                    ? "FORFEIT · ACCEPT 4TH"
+                    : "FORFEIT · ACCEPT 8TH"}
+                </button>
+                <button className="wc-tourney-ko-restart" onClick={restartTournament}>
+                  RESTART TOURNAMENT
+                </button>
+              </div>
+            </section>
+          </div>
         )}
 
-        {!tournament.started && (
+
           <TournamentStartPrompt
             tournament={tournament}
             previewFighters={revealPreview}
