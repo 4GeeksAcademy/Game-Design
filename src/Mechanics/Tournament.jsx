@@ -232,7 +232,6 @@ function TournamentFighter({
       eliminated ? "eliminated" : "",
       winner ? "match-winner" : "",
       revealing ? "is-revealing" : "",
-      mystery ? "is-mystery-entry" : "",
     ].filter(Boolean).join(" ")}>
       <div className={"wc-tourney-portrait" + (mystery ? " is-mystery" : "")}>
         {mystery
@@ -241,20 +240,11 @@ function TournamentFighter({
             ? <img src={fighterImage(fighter)} alt={fighterName(fighter)} />
             : <span>—</span>}
       </div>
-      <div className="wc-tourney-fighter-meta">
-        <span className="wc-tourney-fighter-seed">
-          {player ? "PLAYER CONTENDER" : mystery ? "AWAITING DRAW" : "TOURNAMENT CONTENDER"}
-        </span>
-        <strong className="wc-tourney-fighter-name">
-          {mystery ? "UNKNOWN CONTENDER" : fighter ? fighterName(fighter) : "TO BE DECIDED"}
-        </strong>
-        <div className="wc-tourney-fighter-tags">
-          {player && <small>YOU</small>}
-          {winner && <small>ADVANCES</small>}
-          {eliminated && <small>ELIMINATED</small>}
-          {revealing && <small>DRAWING</small>}
-        </div>
-      </div>
+      <span className="wc-tourney-fighter-name">
+        {mystery ? "UNKNOWN CONTENDER" : fighter ? fighterName(fighter) : "TO BE DECIDED"}
+      </span>
+      {player && <small>YOU</small>}
+      {winner && <small>WINNER</small>}
     </div>
   );
 }
@@ -282,67 +272,40 @@ function TournamentMatch({
   const winnerIsSecond = match.winner?.id === second?.id;
 
   return (
-    <article className={"wc-tourney-match" + (activePlayerMatch ? " is-player-match" : "") + (match.winner ? " is-complete" : "")}>
+    <article className={"wc-tourney-match" + (activePlayerMatch ? " is-player-match" : "")}>
       <div className="wc-tourney-match-heading">
         <span>{roundLabel} · MATCH {String(matchIndex + 1).padStart(2, "0")}</span>
-        <span>{match.winner ? "RESULT CONFIRMED" : revealing ? "DRAWING CONTENDERS" : "WINNER ADVANCES"}</span>
+        <span>{match.winner ? "COMPLETE" : revealing ? "DRAWING CONTENDERS" : "WINNER ADVANCES"}</span>
       </div>
-
-      <div className="wc-tourney-matchup wc-tourney-vertical-bracket">
-        <div className="wc-tourney-head-to-head">
-          <TournamentFighter
-            fighter={shownFirst}
-            mystery={firstMystery}
-            player={firstIsPlayer}
-            eliminated={Boolean(match.winner && !winnerIsFirst)}
-            winner={winnerIsFirst}
-            revealing={revealing && !firstIsPlayer}
-          />
-          <div className="wc-tourney-versus"><span>VS</span></div>
-          <TournamentFighter
-            fighter={shownSecond}
-            mystery={secondMystery}
-            player={secondIsPlayer}
-            eliminated={Boolean(match.winner && !winnerIsSecond)}
-            winner={winnerIsSecond}
-            revealing={revealing && !secondIsPlayer}
-          />
-        </div>
-
-        <div className="wc-tourney-vertical-fork" aria-hidden="true">
-          <i className="fork-left" />
-          <i className="fork-right" />
-          <i className="fork-join" />
-          <i className="fork-stem" />
-        </div>
-
-        <div className={"wc-tourney-advance-slot" + (match.winner ? " has-winner" : "")}>
-          {match.winner ? (
-            <>
-              <span>ADVANCING TO THE NEXT ROUND</span>
-              <div className="wc-tourney-advance-portrait">
-                <img src={fighterImage(match.winner)} alt={fighterName(match.winner)} />
-              </div>
-              <strong>{fighterName(match.winner)}</strong>
-              <small>WINNER · MATCH {String(matchIndex + 1).padStart(2, "0")}</small>
-            </>
-          ) : (
-            <>
-              <span>WINNER ADVANCES</span>
-              <div className="wc-tourney-advance-pending">
-                <span>?</span>
-                <strong>AWAITING RESULT</strong>
-              </div>
-              <small>THE BRACKET WILL UPDATE AFTER THIS MATCH</small>
-            </>
-          )}
-        </div>
+      <div className="wc-tourney-matchup">
+        <TournamentFighter
+          fighter={shownFirst}
+          mystery={firstMystery}
+          player={firstIsPlayer}
+          eliminated={Boolean(match.winner && !winnerIsFirst)}
+          winner={winnerIsFirst}
+          revealing={revealing && !firstIsPlayer}
+        />
+        <span className="wc-tourney-versus">VS</span>
+        <TournamentFighter
+          fighter={shownSecond}
+          mystery={secondMystery}
+          player={secondIsPlayer}
+          eliminated={Boolean(match.winner && !winnerIsSecond)}
+          winner={winnerIsSecond}
+          revealing={revealing && !secondIsPlayer}
+        />
       </div>
-
       {activePlayerMatch && (
         <button className="wc-tourney-fight-button" onClick={() => onEnterMatch(match)}>
           ENTER MATCH <span>▶</span>
         </button>
+      )}
+      {match.winner && (
+        <div className="wc-tourney-winner-line">
+          <span>ADVANCES</span>
+          <strong>{fighterName(match.winner)}</strong>
+        </div>
       )}
     </article>
   );
@@ -356,7 +319,7 @@ function RoundTransition({ transition, onContinue }) {
       <section className="wc-round-transition-panel" role="dialog" aria-modal="true" aria-labelledby="wcRoundTransitionTitle">
         {transition.phase === "eliminators" && (
           <>
-            <p className="wc-round-transition-kicker">{transition.completedRoundLabel} · ROUND COMPLETE</p>
+            <p className="wc-round-transition-kicker">{transition.completedRoundLabel} · ELIMINATION STAGE COMPLETE</p>
             <h2 id="wcRoundTransitionTitle">ELIMINATED CONTENDERS</h2>
             <p className="wc-round-transition-caption">THEIR CHAMPIONSHIP RUN ENDS HERE</p>
             <div className="wc-round-eliminators">
@@ -1296,7 +1259,9 @@ export default function Tournament() {
   }
 
   if (tournament) {
-    const displayRoundIndex = tournament.displayRoundIndex ?? tournament.currentRound;
+    const roundLabels = tournament.size === 4
+      ? ["SEMIFINALS", "FINAL"]
+      : ["QUARTERFINALS", "SEMIFINALS", "FINAL"];
 
     return (
       <main className={"wc-tournament wc-tournament-bracket" + (restarting ? " is-restarting" : "")}>
@@ -1347,26 +1312,30 @@ export default function Tournament() {
           </div>
         )}
 
-        <section className="wc-tourney-rounds wc-tourney-current-round" aria-label="Current tournament round">
-          <div className="wc-tourney-round-title wc-tourney-current-round-title">
-            <span>ROUND {displayRoundIndex + 1} OF {tournament.rounds.length}</span>
-            <h2>{getRoundLabel(tournament.size, displayRoundIndex)}</h2>
-            <small>{(tournament.rounds[displayRoundIndex] || []).length} MATCH{(tournament.rounds[displayRoundIndex] || []).length === 1 ? "" : "ES"}</small>
-          </div>
-          <div className="wc-tourney-round-matches wc-tourney-current-round-matches">
-            {(tournament.rounds[displayRoundIndex] || []).map((match, matchIndex) => (
-              <TournamentMatch
-                key={match.id}
-                match={match}
-                matchIndex={matchIndex}
-                tournament={tournament}
-                revealing={revealing}
-                previewFighters={revealPreview?.[match.id]}
-                onEnterMatch={enterMatch}
-                roundLabel={getRoundLabel(tournament.size, displayRoundIndex)}
-              />
-            ))}
-          </div>
+        <section className="wc-tourney-rounds" aria-label="Tournament bracket">
+          {tournament.rounds.map((round, roundIndex) => (
+            <section className="wc-tourney-round" key={roundIndex} style={{ flex: round.length }}>
+              <div className="wc-tourney-round-title">
+                <span>ROUND {roundIndex + 1} OF {tournament.rounds.length}</span>
+                <h2>{roundLabels[roundIndex] || "CHAMPIONSHIP"}</h2>
+                <small>{round.length} MATCH{round.length === 1 ? "" : "ES"}</small>
+              </div>
+              <div className="wc-tourney-round-matches">
+                {round.map((match, matchIndex) => (
+                  <TournamentMatch
+                    key={match.id}
+                    match={match}
+                    matchIndex={matchIndex}
+                    tournament={tournament}
+                    revealing={revealing}
+                    previewFighters={revealPreview?.[match.id]}
+                    onEnterMatch={enterMatch}
+                    roundLabel={roundLabels[roundIndex] || "CHAMPIONSHIP"}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
         </section>
 
         {tournament.playerEliminated && showEliminationScreen && !tournament.complete && (
