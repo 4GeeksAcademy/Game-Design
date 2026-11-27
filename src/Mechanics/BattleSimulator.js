@@ -548,7 +548,7 @@ function simulateTeamBattle(
         defender.health > 0 &&
         attacksThisTurn < attackLimit
       ) {
-        const attack = chooseAttack(attacker, difficulty);
+        const attack = chooseAttack(attacker, difficulty, defender, attacksThisTurn);
 
         if (!attack) break;
 
