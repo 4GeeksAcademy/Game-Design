@@ -1195,7 +1195,7 @@ export default function TeamBattle() {
       }
 
       // Pay the mana cost once, regardless of recipient count.
-      attacker.mana -= attack.cost ?? 0;
+      attacker.mana -= getModifiedAttackStat(attack, attacker, "cost");
 
       // Apply healing and buffs to each recipient.
       recipients.forEach((recipient) => {
@@ -1474,7 +1474,7 @@ export default function TeamBattle() {
 
         const hasUsableAttack = attacker.attacks.some(
           (candidate) =>
-            canUseAttack(candidate) && attacker.mana >= (candidate.cost ?? 0),
+            canFighterUseAttack(attacker, candidate),
         );
 
         return {
@@ -1843,7 +1843,7 @@ export default function TeamBattle() {
           .map((attack, attackIndex) => ({ attack, attackIndex }))
           .filter(
             ({ attack }) =>
-              canUseAttack(attack) && cpu.mana >= (attack.cost ?? 0),
+              canFighterUseAttack(cpu, attack),
           )
           .map(({ attackIndex }) => ({
             id: `${cpu.id}-${attackIndex}-${target.id}`,
@@ -2664,7 +2664,15 @@ export default function TeamBattle() {
           defenderHealthBefore - Math.max(0, Number(currentDefender.health) || 0),
         );
         const cpuAttackerEffectId = Date.now() + Math.random();
-        const playerDefenderEffectId = Date.now() + Math.random();
+        const defenderReactionId = Date.now() + Math.random();
+        const defenderResultId = Date.now() + Math.random();
+        const reactionType = choice === "defend"
+          ? "blocked"
+          : choice === "evade" && result.evaded
+            ? "evaded"
+            : "reaction";
+
+        // The attack lunge starts first; the defender reacts halfway through.
         setCombatEffects((current) => ({
           ...current,
           [currentAttacker.id]: {
@@ -2675,24 +2683,52 @@ export default function TeamBattle() {
             message: "",
             effects: [],
           },
-          [currentDefender.id]: {
-            id: playerDefenderEffectId,
-            type: choice === "defend" ? "blocked" : choice === "evade" && result.evaded ? "evaded" : actualDamage > 0 ? "damage" : "status",
-            damage: actualDamage,
-            tier: actualDamage >= 70 ? "fatal" : actualDamage >= 45 ? "heavy" : actualDamage >= 20 ? "effective" : "light",
-            message: choice === "defend" ? "BLOCKED!" : choice === "evade" && result.evaded ? "EVADED!" : "",
-            effects: Object.entries(result.debuffsApplied ?? {}).filter(([, amount]) => Number(amount) !== 0).map(([stat, amount]) => ({ stat, label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` })),
-          },
         }));
-        [[currentAttacker.id, cpuAttackerEffectId], [currentDefender.id, playerDefenderEffectId]].forEach(([fighterId, effectId]) => {
-          setTimeout(() => {
-            setCombatEffects((current) =>
-              current[fighterId]?.id === effectId
-                ? { ...current, [fighterId]: null }
-                : current,
-            );
-          }, 3000);
-        });
+
+        window.setTimeout(() => {
+          setCombatEffects((current) => ({
+            ...current,
+            [currentDefender.id]: {
+              id: defenderReactionId,
+              type: reactionType,
+              damage: 0,
+              tier: "light",
+              message: choice === "defend"
+                ? "BLOCKED!"
+                : choice === "evade"
+                  ? result.evaded ? "EVADED!" : "FAILED EVADE!"
+                  : "",
+              effects: [],
+            },
+          }));
+        }, 120);
+
+        window.setTimeout(() => {
+          if (actualDamage > 0 || Object.values(result.debuffsApplied ?? {}).some((amount) => Number(amount) !== 0)) {
+            setCombatEffects((current) => ({
+              ...current,
+              [currentDefender.id]: {
+                id: defenderResultId,
+                type: actualDamage > 0 ? "damage" : "status",
+                damage: actualDamage,
+                tier: actualDamage >= 70 ? "fatal" : actualDamage >= 45 ? "heavy" : actualDamage >= 20 ? "effective" : "light",
+                message: "",
+                effects: Object.entries(result.debuffsApplied ?? {})
+                  .filter(([, amount]) => Number(amount) !== 0)
+                  .map(([stat, amount]) => ({ stat, label: `↓ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` })),
+              },
+            }));
+          }
+        }, 640);
+
+        window.setTimeout(() => {
+          setCombatEffects((current) => ({
+            ...current,
+            [currentAttacker.id]: current[currentAttacker.id]?.id === cpuAttackerEffectId
+              ? { ...current, [currentAttacker.id]: null }[currentAttacker.id]
+              : current[currentAttacker.id],
+          }));
+        }, 950);
       }
 
       if (!result) {
@@ -2722,17 +2758,19 @@ export default function TeamBattle() {
           addLog(`${currentDefender.name} chose to take the full damage.`);
         }
 
-        describeEffects(
-          result.buffsApplied,
-          currentAttacker.name,
-          "buff",
-        ).forEach((message) => addLog(message, "buff"));
+        window.setTimeout(() => {
+          describeEffects(
+            result.buffsApplied,
+            currentAttacker.name,
+            "buff",
+          ).forEach((message) => addLog(message, "buff"));
 
-        describeEffects(
-          result.debuffsApplied,
-          currentDefender.name,
-          "debuff",
-        ).forEach((message) => addLog(message, "debuff"));
+          describeEffects(
+            result.debuffsApplied,
+            currentDefender.name,
+            "debuff",
+          ).forEach((message) => addLog(message, "debuff"));
+        }, 700);
       }
 
       const outcomeText =
@@ -2744,15 +2782,14 @@ export default function TeamBattle() {
               : `${currentDefender.name} failed to evade and took damage.`
             : `${currentDefender.name} took the full damage.`;
 
-      setDefenseOutcome(outcomeText);
-
       setTeams({ player: updatedPlayers, opponent: updatedCPU });
 
+      window.setTimeout(() => setDefenseOutcome(outcomeText), 700);
       setTimeout(() => {
         setDefenseOutcome(null);
         setPendingDefense(null);
         setCpuActionIndex((index) => index + 1);
-      }, 1000);
+      }, 1250);
     },
     [pendingDefense, phase, teams.player, teams.opponent, addLog],
   );
@@ -2845,21 +2882,57 @@ export default function TeamBattle() {
           opponent: updatedOpponents,
         });
 
+        const attackerEffectId = Date.now() + Math.random();
+        const reactionEffectId = Date.now() + Math.random();
+        const resultEffectId = Date.now() + Math.random();
+        const beforeHealth = Math.max(0, Number(teams.player.find((fighter) => fighter.id === currentDefender.id)?.health) || 0);
+        const afterHealth = Math.max(0, Number(currentDefender.health) || 0);
+        const actualDamage = Math.max(0, beforeHealth - afterHealth);
+
+        setCombatEffects((current) => ({
+          ...current,
+          [currentAttacker.id]: {
+            id: attackerEffectId, type: "attack", damage: 0,
+            tier: "light", message: "", effects: [],
+          },
+        }));
+        window.setTimeout(() => setCombatEffects((current) => ({
+          ...current,
+          [currentDefender.id]: {
+            id: reactionEffectId,
+            type: result.evaded ? "evaded" : result.action === "defend" ? "blocked" : "reaction",
+            damage: 0, tier: "light",
+            message: result.evaded ? "EVADED!" : result.action === "defend" ? "BLOCKED!" : "",
+            effects: [],
+          },
+        })), 120);
+        window.setTimeout(() => {
+          if (actualDamage > 0) {
+            setCombatEffects((current) => ({
+              ...current,
+              [currentDefender.id]: {
+                id: resultEffectId, type: "damage", damage: actualDamage,
+                tier: actualDamage >= 70 ? "fatal" : actualDamage >= 45 ? "heavy" : actualDamage >= 20 ? "effective" : "light",
+                message: "", effects: [],
+              },
+            }));
+          }
+        }, 640);
+
         const outcomeText = result.evaded
           ? `${currentDefender.name} evaded the attack.`
           : `${currentDefender.name} defended the attack.`;
 
-        setDefenseOutcome(outcomeText);
+        window.setTimeout(() => {
+          setDefenseOutcome(outcomeText);
+          addLog(`${currentDefender.name} automatically responded to ${incomingAttack.name}.`);
+        }, 700);
 
         setTimeout(() => {
           setDefenseOutcome(null);
           setPendingDefense(null);
           setCpuActionIndex((index) => index + 1);
-        }, 2000);
-
-        addLog(
-          `${currentDefender.name} automatically responded to ${incomingAttack.name}.`,
-        );
+        }, 1250);
       } else {
         resolveCPUDefense("timeout");
       }
