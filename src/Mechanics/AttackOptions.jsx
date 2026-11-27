@@ -177,69 +177,108 @@ function AttackOptions({
         .filter((effect) => effect.kind === "buff")
         .map(({ stat, amount, kind }) => ({ stat, kind, label: `${kind === "buff" ? "↑" : "↓"} ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}` }));
 
+      // Stage the full exchange: attacker lunge, defender reaction, then result.
       onCombatEffect?.({
-        target: "opponent",
-        type: result.action === "defend" ? "blocked" : result.action === "evade" ? "evaded" : physicalDamage > 0 ? "damage" : damageAndDebuffs.length ? "status" : "attack",
-        damage: physicalDamage,
-        tier,
-        message: result.action === "defend" ? "BLOCKED!" : result.action === "evade" ? (result.evaded ? "EVADED!" : "FAILED TO EVADE!") : "",
-        effects: damageAndDebuffs.filter((effect) => effect.stat !== "health"),
+        target: "player",
+        type: "attack",
+        damage: 0,
+        tier: "light",
+        message: "",
+        effects: [],
       });
-      const healingReceived = Math.max(0, Number(result.buffsApplied?.health) || 0);
-      if (healingReceived > 0 || selfBuffs.length || damage > 0) {
+
+      const defenderReactionType = result.action === "defend"
+        ? "blocked"
+        : result.action === "evade" && result.evaded
+          ? "evaded"
+          : "reaction";
+      window.setTimeout(() => {
         onCombatEffect?.({
-          target: "player",
-          type: healingReceived > 0 ? "heal" : damage > 0 ? "attack" : "status",
-          damage: healingReceived,
+          target: "opponent",
+          type: defenderReactionType,
+          damage: 0,
           tier: "light",
-          message: healingReceived > 0 ? "HEALED!" : "",
-          effects: selfBuffs.filter((effect) => effect.stat !== "health"),
+          message: result.action === "defend"
+            ? "BLOCKED!"
+            : result.action === "evade"
+              ? result.evaded ? "EVADED!" : "FAILED TO EVADE!"
+              : "",
+          effects: [],
         });
+      }, 120);
+
+      window.setTimeout(() => {
+        if (physicalDamage > 0 || damageAndDebuffs.length > 0) {
+          onCombatEffect?.({
+            target: "opponent",
+            type: physicalDamage > 0 ? "damage" : "status",
+            damage: physicalDamage,
+            tier,
+            message: "",
+            effects: damageAndDebuffs.filter((effect) => effect.stat !== "health"),
+          });
+        }
+      }, 640);
+
+      const healingReceived = Math.max(0, Number(result.buffsApplied?.health) || 0);
+      if (healingReceived > 0 || selfBuffs.length) {
+        window.setTimeout(() => {
+          onCombatEffect?.({
+            target: "player",
+            type: healingReceived > 0 ? "heal" : "status",
+            damage: healingReceived,
+            tier: "light",
+            message: healingReceived > 0 ? "HEALED!" : "",
+            effects: selfBuffs.filter((effect) => effect.stat !== "health"),
+          });
+        }, 800);
       }
 
       setAttacksUsed((previous) => previous + 1);
-      showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
+      window.setTimeout(() => {
+        showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
 
-      if (result.action === "defend") {
-        showCombatMessage(
-          `${opponent.name} blocked ${attack.name}!`,
-          "blocked",
-        );
-      } else if (result.action === "evade") {
-        showCombatMessage(`${opponent.name} evaded ${attack.name}!`, "evaded");
-      } else if (result.action === "attack" && result.evaded === false) {
-        showCombatMessage("💥 FAILED TO EVADE!", "hit");
-      } else if (damage > 0) {
-        showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
-      }
-
-      if (result.buffNotAppliedReason) {
-        const reason =
-          result.buffNotAppliedReason === "evaded" ? "evaded" : "blocked";
-
-        showCombatMessage(
-          `BUFF NOT APPLIED — ATTACK WAS ${reason.toUpperCase()}!`,
-          "blocked",
-        );
-      }
-
-      Object.entries(result.buffsApplied ?? {}).forEach(([stat, amount]) => {
-        if (typeof amount === "number" && amount !== 0) {
+        if (result.action === "defend") {
           showCombatMessage(
-            `✨ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
-            "buff",
+            `${opponent.name} blocked ${attack.name}!`,
+            "blocked",
+          );
+        } else if (result.action === "evade") {
+          showCombatMessage(`${opponent.name} evaded ${attack.name}!`, "evaded");
+        } else if (result.action === "attack" && result.evaded === false) {
+          showCombatMessage("💥 FAILED TO EVADE!", "hit");
+        } else if (damage > 0) {
+          showCombatMessage(`${damage} DAMAGE DEALT!`, "hit");
+        }
+
+        if (result.buffNotAppliedReason) {
+          const reason =
+            result.buffNotAppliedReason === "evaded" ? "evaded" : "blocked";
+
+          showCombatMessage(
+            `BUFF NOT APPLIED — ATTACK WAS ${reason.toUpperCase()}!`,
+            "blocked",
           );
         }
-      });
 
-      Object.entries(result.debuffsApplied ?? {}).forEach(([stat, amount]) => {
-        if (typeof amount === "number" && amount !== 0) {
-          showCombatMessage(
-            `💀 ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
-            "debuff",
-          );
-        }
-      });
+        Object.entries(result.buffsApplied ?? {}).forEach(([stat, amount]) => {
+          if (typeof amount === "number" && amount !== 0) {
+            showCombatMessage(
+              `✨ ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
+              "buff",
+            );
+          }
+        });
+
+        Object.entries(result.debuffsApplied ?? {}).forEach(([stat, amount]) => {
+          if (typeof amount === "number" && amount !== 0) {
+            showCombatMessage(
+              `💀 ${stat.toUpperCase()} ${amount > 0 ? "+" : ""}${amount}`,
+              "debuff",
+            );
+          }
+        });
+      }, 700);
     },
     [
       character,
