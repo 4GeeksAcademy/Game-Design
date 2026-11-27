@@ -8,7 +8,12 @@ const ATTACK_TIMEOUT = 10000;
 function hasMeaningfulDebuff(attack, defender) {
   if (!attack?.debuff || !defender) return false;
 
+  // Normal only considers the three lighter strategic debuffs. Recovery and
+  // cooldown manipulation are deliberately reserved for Hard difficulty.
+  const normalAwareStats = new Set(["defense", "agility", "manaRegen"]);
+
   return Object.entries(attack.debuff).some(([stat, rawAmount]) => {
+    if (!normalAwareStats.has(stat)) return false;
     const amount = Math.abs(Number(rawAmount) || 0);
     if (amount <= 0) return false;
 
