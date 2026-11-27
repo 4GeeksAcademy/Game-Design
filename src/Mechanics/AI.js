@@ -1,4 +1,4 @@
-import { attackCharacter, evadeAttack, canUseAttack, canFighterUseAttack } from "./Health.js";
+import { attackCharacter, evadeAttack, canFighterUseAttack } from "./Health.js";
 
 function aiChooseAttack(ai) {
   let availableAttacks = ai.attacks.filter((attack) => {
