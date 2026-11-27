@@ -230,8 +230,8 @@ function getOpponentResponse(attack, attacker, defender) {
   const agility = Math.max(0, getModifiedCharacterStat(defender, "agility"));
   if (speed > 0) {
     const speedMargin = speed - (cooldown > 0 ? agility : 0);
-    if (speedMargin <= 0) evadeChance *= 0.65;
-    else if (speedMargin >= 25) evadeChance *= 0.75;
+    if (speedMargin <= 0) evadeChance = Math.min(0.55, evadeChance * 1.35);
+    else if (speedMargin >= 25) evadeChance *= 0.65;
   }
 
   const totalDefenseChance = Math.min(0.7, evadeChance + blockChance);
