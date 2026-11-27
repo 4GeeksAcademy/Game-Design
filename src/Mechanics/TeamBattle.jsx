@@ -38,6 +38,11 @@ import {
   chooseNormalTeamAction,
   normalDefendOrEvade,
 } from "./AI_NormalDifficulty.js";
+import {
+  chooseHardTeamAction,
+  hardDefendOrEvade,
+  getHardAttackPriority,
+} from "./AI_HardDifficulty.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
@@ -1309,7 +1314,7 @@ export default function TeamBattle() {
         ? attackCharacter(attack, attacker, defender, 0, stunOptions)
         : difficulty === "Normal"
           ? normalDefendOrEvade(attack, attacker, defender, stunOptions)
-          : aiDefendOrEvade(attack, attacker, defender, stunOptions);
+          : hardDefendOrEvade(attack, attacker, defender, stunOptions);
 
     if (!result) {
       addLog(`${attack.name} could not be used.`);
@@ -1730,7 +1735,13 @@ export default function TeamBattle() {
             attacks: ally.attacks.filter((attack) => attack.heal),
           };
 
-      const action = chooseNormalTeamAction(fighterToEvaluate, teams.player);
+      const action = difficulty === "Hard"
+        ? chooseHardTeamAction(
+            fighterToEvaluate,
+            teams.player,
+            target ? [target] : [],
+          )
+        : chooseNormalTeamAction(fighterToEvaluate, teams.player);
 
       selectedAttack = action?.attack ?? null;
       healTargetId = action?.healTargetId ?? null;
@@ -1903,13 +1914,15 @@ export default function TeamBattle() {
 
       if (!target) return;
 
-      const usableAttacks = cpu.attacks
-        .map((attack, attackIndex) => ({ attack, attackIndex }))
-        .filter(
-          ({ attack }) =>
-            canFighterUseAttack(cpu, attack),
-        )
-        .slice(0, limit);
+      const usableAttacks = difficulty === "Hard"
+        ? getHardAttackPriority(cpu, target).map((attack) => ({
+            attack,
+            attackIndex: cpu.attacks.indexOf(attack),
+          }))
+        : cpu.attacks
+            .map((attack, attackIndex) => ({ attack, attackIndex }))
+            .filter(({ attack }) => canFighterUseAttack(cpu, attack))
+            .slice(0, limit);
 
       usableAttacks.forEach(({ attackIndex }) => {
         queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
