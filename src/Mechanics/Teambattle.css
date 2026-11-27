@@ -3945,8 +3945,9 @@ battlefield > .local-coop-incoming {
 .fighter-art-button:has(.damage-tier-fatal) .fighter-portrait { animation: team-fatal-recoil 1.95s cubic-bezier(.15,.75,.2,1); }
 .fighter-art-button:has(.damage-tier-effective) .fighter-portrait { animation:team-heavy-recoil .9s ease-out; }
 .fighter-art-button:has(.damage-tier-heavy) .fighter-portrait { animation: team-fatal-recoil 1.4s cubic-bezier(.15,.75,.2,1); }
+.fighter-art-button:has(.damage-tier-effective) { animation:team-hit-shake .72s ease-out; }
+.fighter-art-button:has(.damage-tier-heavy) { animation:team-hit-shake 1.2s ease-out; }
 .fighter-art-button:has(.damage-tier-fatal) { animation:team-hit-shake 1.35s ease-out; }
-.fighter-art-button:has(.damage-tier-heavy) .fighter-portrait { animation: team-heavy-recoil 1.4s ease-out; }
 @keyframes team-fatal-recoil {
   0%{transform:translateY(0) rotate(0) scale(1)}
   18%{transform:translateY(-9px) rotate(-3deg) scale(1.04)}
