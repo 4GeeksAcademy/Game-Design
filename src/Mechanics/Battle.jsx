@@ -791,9 +791,8 @@ function BattleMatch() {
   const resolveIncomingAttack = useCallback(
     (choice) => {
       if (isPaused || !aiAttack || defenseTimeLeft <= 0 || incomingDefenseResolvedRef.current) return;
-      incomingDefenseResolvedRef.current = true;
-
       if (choice === "defend" && getModifiedCharacterStat(character, "cooldown") <= 0) return;
+      incomingDefenseResolvedRef.current = true;
 
       const selectedAttackIds = aiChooseStunTargets(
   character,
@@ -824,7 +823,10 @@ const stunOptions = {
                 blocked: false,
               });
 
-      if (!result) return;
+      if (!result) {
+        incomingDefenseResolvedRef.current = false;
+        return;
+      }
       // Record successful defensive actions for Festival challenges.
       if (choice === "defend") {
         setCombatDefense((value) => value + 1);
