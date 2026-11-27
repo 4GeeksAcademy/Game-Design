@@ -43,16 +43,16 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
   // debuff is significant, spend a defensive charge when a block can stop
   // it; otherwise evade if the available mana can guarantee success.
   if (damage === 0) {
-    if (!meaningfulDebuff || cooldown <= 0) {
+    if (!meaningfulDebuff) {
       return attackCharacter(attack, attacker, defender, 0, options);
     }
 
     const attackSpeed = getModifiedAttackStat(attack, attacker, "speed");
     const agility = getModifiedCharacterStat(defender, "agility");
-    const evadeManaNeeded = Math.max(0, attackSpeed - agility);
+    const evadeManaNeeded = Math.max(0, attackSpeed - (cooldown > 0 ? agility : 0));
     const canEvade = mana >= evadeManaNeeded;
 
-    if (attack.debuffRequiresHit === true) {
+    if (attack.debuffRequiresHit === true && cooldown > 0) {
       const result = attackCharacter(attack, attacker, defender, 0, {
         ...options,
         blocked: true,
@@ -73,16 +73,17 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
     return attackCharacter(attack, attacker, defender, 0, options);
   }
 
-  if (cooldown <= 0) {
-    return attackCharacter(attack, attacker, defender, 0, options);
-  }
-
-  const damageAfterBlock = Math.max(0, damage - defense);
-  const blockPreventsKnockout = damage >= health && damageAfterBlock < health;
+  const damageAfterBlock = cooldown > 0
+    ? Math.max(0, damage - defense)
+    : damage;
+  const blockPreventsKnockout =
+    cooldown > 0 && damage >= health && damageAfterBlock < health;
 
   const attackSpeed = getModifiedAttackStat(attack, attacker, "speed");
   const agility = getModifiedCharacterStat(defender, "agility");
-  const evadeManaNeeded = Math.max(0, attackSpeed - agility);
+  // With no cooldown charge, Health.evadeAttack cannot use agility and
+  // requires mana equal to the full incoming attack speed.
+  const evadeManaNeeded = Math.max(0, attackSpeed - (cooldown > 0 ? agility : 0));
 
   // Never attempt an evade that would fail due to insufficient mana.
   const canEvade = mana >= evadeManaNeeded;
@@ -122,7 +123,7 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
     // Don't spend a defensive charge on trivial damage.
     const trivialDamage = Math.max(5, health * 0.1);
 
-    if (meaningfulDebuff && attack.debuffRequiresHit === true) {
+    if (meaningfulDebuff && attack.debuffRequiresHit === true && cooldown > 0) {
       // Blocking is sufficient to prevent a hit-gated debuff and costs no mana.
       choice = "defend";
     } else if (meaningfulDebuff && canEvade) {
