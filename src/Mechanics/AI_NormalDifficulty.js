@@ -159,7 +159,7 @@ function chooseNormalTeamAction(fighter, teammates) {
   if (!Array.isArray(teammates)) return null;
 
   const usableAttacks = fighter.attacks.filter(
-    (attack) => canUseAttack(attack) && fighter.mana >= (attack.cost ?? 0),
+    (attack) => canFighterUseAttack(fighter, attack),
   );
 
   if (usableAttacks.length === 0) return null;
