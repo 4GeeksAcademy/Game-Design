@@ -571,18 +571,22 @@ export function updateAudioSettings(next) {
   const qualityChanged =
     Object.prototype.hasOwnProperty.call(next, "quality") &&
     next.quality !== settings.quality;
+  const audioSettingsChanged = ["master", "music", "effects", "voices", "muted"]
+    .some((key) => Object.prototype.hasOwnProperty.call(next, key));
   settings = {
     ...settings,
     ...next,
     ...(hasMotionBlurUpdate ? { motionBlurPreferenceSet: true } : {}),
   };
   saveSettings();
-  applyVolumes();
+  if (audioSettingsChanged) {
+    applyVolumes();
+    if (settings.muted || settings.music <= 0) stopMusic();
+    else if (activeMusicTrack) playMusicTrack(activeMusicTrack, currentTrack);
+    else if (!musicSuppressed) startMusic(currentTrack);
+  }
   if (motionBlurChanged) applyMotionBlurPreference(true);
   if (qualityChanged) applyVisualQualityPreference();
-  if (settings.muted || settings.music <= 0) stopMusic();
-  else if (activeMusicTrack) playMusicTrack(activeMusicTrack, currentTrack);
-  else if (!musicSuppressed) startMusic(currentTrack);
   return getAudioSettings();
 }
 
