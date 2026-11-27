@@ -175,19 +175,19 @@ function resolveBotAttack(
   const attackSpeed = getModifiedAttackStat(attack, attacker, "speed");
 
   const defenderCooldown = getModifiedCharacterStat(defender, "cooldown");
+  const meaningfulDebuff = attack.debuff && Object.entries(attack.debuff).some(
+    ([stat, rawAmount]) => {
+      const amount = Math.abs(Number(rawAmount) || 0);
+      const currentValue = getModifiedCharacterStat(defender, stat);
+      const effectiveReduction = Math.min(amount, currentValue);
+      return currentValue > 0 && (effectiveReduction / currentValue) * 100 > 5;
+    },
+  );
 
   // Zero-damage debuffs still require defensive evaluation. A block only
   // prevents a debuff explicitly marked debuffRequiresHit; otherwise a
   // successful evade is the only defense that prevents the effect.
   if (damage <= 0) {
-    const meaningfulDebuff = attack.debuff && Object.entries(attack.debuff).some(
-      ([stat, rawAmount]) => {
-        const amount = Math.abs(Number(rawAmount) || 0);
-        const currentValue = getModifiedCharacterStat(defender, stat);
-        return amount > 0 && currentValue > 0 && (amount / currentValue) * 100 > 5;
-      },
-    );
-
     if (!meaningfulDebuff || defenderCooldown <= 0) {
       return attackCharacter(attack, attacker, defender, 0, options);
     }
@@ -248,7 +248,8 @@ function resolveBotAttack(
 
   const shouldEvade =
     canEvade &&
-    (agilityNeeded === 0 ||
+    ((meaningfulDebuff && attack.debuffRequiresHit !== true) ||
+      agilityNeeded === 0 ||
       isLethalThreat ||
       (damage > defense &&
         (blockedDamage >= 10 || manaAfterEvade >= manaReserve)));
