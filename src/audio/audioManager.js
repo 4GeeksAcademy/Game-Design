@@ -5,7 +5,7 @@ import "./motionEffects.css";
 // synthesized prototypes later without changing game components.
 
 const STORAGE_KEY = "wild-cards-audio-settings";
-const DEFAULTS = { master: 0.75, music: 0.3, effects: 0.65, voices: 0.8, muted: false, motionBlur: true };
+const DEFAULTS = { master: 0.75, music: 0.3, effects: 0.65, voices: 0.8, muted: false, motionBlur: false, motionBlurPreferenceSet: false, quality: "normal" };
 
 let audioContext = null;
 let masterGain = null;
@@ -130,6 +130,14 @@ function applyMotionBlurPreference(reconcileActiveAnimations = false) {
   });
 }
 
+function applyVisualQualityPreference() {
+  if (typeof document === "undefined") return;
+  const quality = ["low", "normal", "high"].includes(settings.quality)
+    ? settings.quality
+    : "normal";
+  document.documentElement.dataset.wcQuality = quality;
+}
+
 function installMotionBlurListeners() {
   if (typeof document === "undefined" || document.documentElement.dataset.wcMotionBlurListeners === "installed") return;
   document.documentElement.dataset.wcMotionBlurListeners = "installed";
@@ -170,10 +178,19 @@ function installMotionBlurListeners() {
 }
 
 applyMotionBlurPreference();
+applyVisualQualityPreference();
 installMotionBlurListeners();
 function loadSettings() {
   try {
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") };
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    const loaded = { ...DEFAULTS, ...saved };
+    // Earlier versions enabled blur by default and saved that inherited value
+    // whenever audio changed. Treat it as opt-in unless the player explicitly
+    // changes the new preference in this version.
+    if (saved.motionBlurPreferenceSet !== true) {
+      loaded.motionBlur = false;
+    }
+    return loaded;
   } catch {
     return { ...DEFAULTS };
   }
@@ -546,13 +563,22 @@ export function getAudioSettings() {
 }
 
 export function updateAudioSettings(next) {
+  const hasMotionBlurUpdate = Object.prototype.hasOwnProperty.call(next, "motionBlur");
   const motionBlurChanged =
-    Object.prototype.hasOwnProperty.call(next, "motionBlur") &&
+    hasMotionBlurUpdate &&
     (next.motionBlur !== false) !== (settings.motionBlur !== false);
-  settings = { ...settings, ...next };
+  const qualityChanged =
+    Object.prototype.hasOwnProperty.call(next, "quality") &&
+    next.quality !== settings.quality;
+  settings = {
+    ...settings,
+    ...next,
+    ...(hasMotionBlurUpdate ? { motionBlurPreferenceSet: true } : {}),
+  };
   saveSettings();
   applyVolumes();
   if (motionBlurChanged) applyMotionBlurPreference(true);
+  if (qualityChanged) applyVisualQualityPreference();
   if (settings.muted || settings.music <= 0) stopMusic();
   else if (activeMusicTrack) playMusicTrack(activeMusicTrack, currentTrack);
   else if (!musicSuppressed) startMusic(currentTrack);
