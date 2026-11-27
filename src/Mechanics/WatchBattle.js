@@ -316,7 +316,7 @@ function nextWatchDuelAction(battle) {
 
     const attack =
       battle.attacksThisTurn < attackLimit
-        ? chooseAttack(attacker, difficulty)
+        ? chooseAttack(attacker, difficulty, defender, battle.attacksThisTurn)
         : null;
 
     if (!attack) {
@@ -334,6 +334,8 @@ function nextWatchDuelAction(battle) {
       attacker,
       defender,
       battle.fighters,
+      difficulty,
+      battle.attacksThisTurn,
     );
 
     if (!result) {
@@ -498,7 +500,7 @@ function nextWatchTeamAction(battle) {
 
     const attack =
       battle.attacksThisTurn < attackLimit
-        ? chooseAttack(attacker, difficulty)
+        ? chooseAttack(attacker, difficulty, defender, battle.attacksThisTurn)
         : null;
 
     // This fighter has no more usable attacks.
@@ -516,6 +518,8 @@ function nextWatchTeamAction(battle) {
       attacker,
       defender,
       battle.fighters,
+      difficulty,
+      battle.attacksThisTurn,
     );
 
     if (!result) {
