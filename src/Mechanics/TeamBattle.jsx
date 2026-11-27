@@ -1855,18 +1855,21 @@ export default function TeamBattle() {
 
         if (!target) return;
 
-        const attacks = cpu.attacks
-          .map((attack, attackIndex) => ({ attack, attackIndex }))
-          .filter(
-            ({ attack }) =>
-              canFighterUseAttack(cpu, attack),
-          )
-          .map(({ attackIndex }) => ({
-            id: `${cpu.id}-${attackIndex}-${target.id}`,
-            cpuId: cpu.id,
-            targetId: target.id,
-            attackIndex,
-          }));
+        const plannedAttacks = difficulty === "Hard"
+          ? getHardAttackPriority(cpu, target).map((attack) => ({
+              attack,
+              attackIndex: cpu.attacks.indexOf(attack),
+            }))
+          : cpu.attacks
+              .map((attack, attackIndex) => ({ attack, attackIndex }))
+              .filter(({ attack }) => canFighterUseAttack(cpu, attack));
+
+        const attacks = plannedAttacks.map(({ attackIndex }) => ({
+          id: `${cpu.id}-${attackIndex}-${target.id}`,
+          cpuId: cpu.id,
+          targetId: target.id,
+          attackIndex,
+        }));
 
         attacksByTarget[target.id] = [
           ...(attacksByTarget[target.id] ?? []),
