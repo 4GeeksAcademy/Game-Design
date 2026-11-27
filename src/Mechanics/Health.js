@@ -373,6 +373,16 @@ function canUseAttack(attack) {
   return true;
 }
 
+// Shared eligibility check for CPU and player-controlled fighters.
+// Includes temporary stat modifiers, limited uses, turn cooldowns, stun,
+// mana cost and sacrifice-health requirements.
+function canFighterUseAttack(fighter, attack) {
+  if (!fighter || !canUseAttack(attack)) return false;
+  const cost = getModifiedAttackStat(attack, fighter, "cost");
+  const sacrificeHealth = Math.max(0, Number(attack.sacrifice?.health) || 0);
+  return Number(fighter.mana) >= cost && Number(fighter.health) > sacrificeHealth;
+}
+
 function consumeAttack(attack) {
   // Reduce remaining uses when the attack has a uses limit.
   if (Number.isInteger(attack.uses)) {
