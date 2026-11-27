@@ -2870,7 +2870,8 @@ export default function TeamBattle() {
       const incomingAttack =
         currentAttacker?.attacks[pendingDefense.attackIndex];
 
-      if (!currentAttacker || !currentDefender || !incomingAttack) {
+      if (!currentAttacker || !currentDefender || !incomingAttack ||
+          !canFighterUseAttack(currentAttacker, incomingAttack)) {
         resolveCPUDefense("timeout");
         return;
       }
