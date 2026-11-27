@@ -129,7 +129,7 @@ function Character({
           <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
             <img key={combatEffect?.id ?? "idle"} src={character.image} id="characterImage" alt={character.name} />
             {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
-            {combatEffect?.target === "player" && combatEffect.type === "debuff-drain" && <span key={combatEffect.id} className="durability-drain-visual" aria-hidden="true"><i /><i /><i /></span>}
+            {combatEffect?.target === "player" && ["debuff-drain", "damage"].includes(combatEffect.type) && <span key={combatEffect.id} className="durability-drain-visual" aria-hidden="true"><i /><i /><i /></span>}
           </div>
           {combatEffect?.target === "player" && (
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
