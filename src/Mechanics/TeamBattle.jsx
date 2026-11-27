@@ -2737,8 +2737,11 @@ export default function TeamBattle() {
           setCombatEffects((current) => ({
             ...current,
             [currentAttacker.id]: current[currentAttacker.id]?.id === cpuAttackerEffectId
-              ? { ...current, [currentAttacker.id]: null }[currentAttacker.id]
+              ? null
               : current[currentAttacker.id],
+            [currentDefender.id]: current[currentDefender.id]?.id === defenderReactionId
+              ? null
+              : current[currentDefender.id],
           }));
         }, 950);
       }
