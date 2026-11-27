@@ -306,9 +306,7 @@ function createNormalAIController({
     // This prevents an outdated queue snapshot from bypassing cooldowns.
     const index = queue.findIndex((key) => {
       const liveAttack = findLiveAttack(currentAI, key);
-      return liveAttack &&
-        canUseAttack(liveAttack) &&
-        getModifiedAttackStat(liveAttack, currentAI, "cost") <= currentAI.mana;
+      return canFighterUseAttack(currentAI, liveAttack);
     });
 
     if (index === -1) {
@@ -351,8 +349,7 @@ function createNormalAIController({
       // Re-check the current move immediately before execution.
       if (
         !attack ||
-        !canUseAttack(attack) ||
-        getModifiedAttackStat(attack, attacker, "cost") > attacker.mana
+        !canFighterUseAttack(attacker, attack)
       ) {
         currentAttack = null;
         currentAttackKey = null;
