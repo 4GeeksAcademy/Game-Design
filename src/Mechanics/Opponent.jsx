@@ -63,7 +63,7 @@ function Opponent({ opponent, setOpponent, combatEffect = null, isAttacking = fa
           <div className={`solo-portrait-wrapper ${hasStun ? "fighter-stunned" : ""}`}>
             <img key={combatEffect?.id ?? "idle"} id="opponentImage" src={opponent.image} alt={opponent.name} />
             {hasStun && <span className="solo-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
-            {combatEffect?.target === "opponent" && combatEffect.type === "debuff-drain" && <span key={combatEffect.id} className="durability-drain-visual" aria-hidden="true"><i /><i /><i /></span>}
+            {combatEffect?.target === "opponent" && ["debuff-drain", "damage"].includes(combatEffect.type) && <span key={combatEffect.id} className="durability-drain-visual" aria-hidden="true"><i /><i /><i /></span>}
           </div>
           {combatEffect?.target === "opponent" && (
             <div key={combatEffect.id} className={`solo-impact-overlay impact-${combatEffect.type}`}>
