@@ -359,7 +359,11 @@ function getHardAttackPriority(attacker, defender, options = {}) {
     const key = item.attack.id ?? item.attack.name;
     if (seen.has(key) || item.cost > mana) continue;
     const canFinish = item.damage >= (Number(defender?.health) || 0);
-    const reserve = getHardManaReserve(attacker, defender, actionsSelected);
+    const reserve = getHardManaReserve(
+      { ...attacker, mana },
+      defender,
+      actionsSelected,
+    );
     if (mana - item.cost < reserve && !canFinish) continue;
     seen.add(key);
     remaining.push(item.attack);
