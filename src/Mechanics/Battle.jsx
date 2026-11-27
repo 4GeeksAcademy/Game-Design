@@ -17,8 +17,9 @@ import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
+import { createHardAIController } from "./AI_HardDifficulty.js";
 import { addCoins } from "./Currency.js";
-import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getBotEquippedAttacks, getHardDifficultyAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
@@ -26,7 +27,7 @@ import { playComboSound, playComboBreakSound } from "../audio/audioManager.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
-function createBattleFighter(characterId, battleId) {
+function createBattleFighter(characterId, battleId, difficulty = "Easy") {
   const selected = roster.find((fighter) => fighter.id === characterId);
   if (!selected?.data) return null;
 
@@ -34,7 +35,9 @@ function createBattleFighter(characterId, battleId) {
   // Human equipment and CPU builds are independent. Bot kits are configured
   // in Bot Simulator, so an empty player loadout cannot disable the opponent.
   const sourceAttacks = battleId === "opponent"
-    ? getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+    ? difficulty === "Hard"
+      ? getHardDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
+      : getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
     : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
   const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)
@@ -562,7 +565,10 @@ function BattleMatch() {
     const difficulty = location.state?.difficulty ?? "Easy";
 
     if (difficulty === "Normal" || difficulty === "Hard") {
-      const controller = createNormalAIController({
+      const createController = difficulty === "Hard"
+        ? createHardAIController
+        : createNormalAIController;
+      const controller = createController({
         getAI: () => opponentRef.current,
         getPlayer: () => characterRef.current,
 
