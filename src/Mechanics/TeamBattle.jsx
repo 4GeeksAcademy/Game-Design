@@ -1193,7 +1193,13 @@ export default function TeamBattle() {
         return;
       }
 
-      // Pay the mana cost once, regardless of recipient count.
+      // Pay the same activation costs as an ordinary attack, once per cast.
+      const sacrificeHealth = Math.max(0, Number(attack.sacrifice?.health) || 0);
+      if (attacker.health <= sacrificeHealth) {
+        addLog(`${attacker.name} does not have enough health to use ${attack.name}.`);
+        return;
+      }
+      attacker.health -= sacrificeHealth;
       attacker.mana -= getModifiedAttackStat(attack, attacker, "cost");
 
       // Apply healing and buffs to each recipient.
