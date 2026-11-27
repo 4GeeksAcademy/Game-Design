@@ -2665,6 +2665,8 @@ export default function TeamBattle() {
           ? 3000
           : 1300;
 
+      const resultMessageDelay = hasResultFeedback ? 2500 : 700;
+
       if (result) {
         const cpuAttackerEffectId = Date.now() + Math.random();
         const defenderReactionId = Date.now() + Math.random();
@@ -2774,7 +2776,7 @@ export default function TeamBattle() {
         } else if (choice === "evade") {
           if (result.evaded) { setCombatDefense((value) => value + 1); recordDailyObjectiveEvent("defense", 1); }
         } else if (choice === "timeout") {
-          window.setTimeout(() => addLog(`Time ran out. ${attack.name} hit ${currentDefender.name}.`), 700);
+          window.setTimeout(() => addLog(`Time ran out. ${attack.name} hit ${currentDefender.name}.`), resultMessageDelay);
         } else {
           window.setTimeout(() => addLog(`${currentDefender.name} chose to take the full damage.`), 700);
         }
@@ -2791,7 +2793,7 @@ export default function TeamBattle() {
             currentDefender.name,
             "debuff",
           ).forEach((message) => addLog(message, "debuff"));
-        }, 700);
+        }, resultMessageDelay);
       }
 
       const outcomeText =
@@ -2805,7 +2807,7 @@ export default function TeamBattle() {
 
       setTeams({ player: updatedPlayers, opponent: updatedCPU });
 
-      window.setTimeout(() => setDefenseOutcome(outcomeText), 700);
+      window.setTimeout(() => setDefenseOutcome(outcomeText), resultMessageDelay);
       setTimeout(() => {
         setDefenseOutcome(null);
         setPendingDefense(null);
@@ -2917,6 +2919,8 @@ export default function TeamBattle() {
             ? 3000
             : 1300;
 
+        const resultMessageDelay = hasResultFeedback ? 2500 : 700;
+
         setCombatEffects((current) => ({
           ...current,
           [currentAttacker.id]: {
@@ -2967,7 +2971,7 @@ export default function TeamBattle() {
         window.setTimeout(() => {
           setDefenseOutcome(outcomeText);
           addLog(`${currentDefender.name} automatically responded to ${incomingAttack.name}.`);
-        }, 700);
+        }, resultMessageDelay);
 
         setTimeout(() => {
           setDefenseOutcome(null);
