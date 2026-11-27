@@ -1826,6 +1826,14 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+
+  /* Fighter movement is essential combat feedback, so preserve this one short lunge. */
+  #battleLayout .solo-fighter-art:has(.impact-attack) img {
+    animation: team-attack-lunge .24s cubic-bezier(.18,.9,.25,1) both !important;
+  }
+  #battleLayout .player-fighter-section .solo-fighter-art:has(.impact-attack) img {
+    animation-name: team-attack-lunge-left !important;
+  }
 }
 
 /* ---------- Remastered 1v1 result presentation ---------- */
