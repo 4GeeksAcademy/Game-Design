@@ -2243,8 +2243,11 @@ export default function TeamBattle() {
     const healthBefore = Number(currentDefender.health) || 0;
 
     let result;
+    const attackUnavailable = !canFighterUseAttack(currentAttacker, currentAttack);
 
-    if (choice === "defend") {
+    if (attackUnavailable) {
+      result = null;
+    } else if (choice === "defend") {
       const defense = getModifiedCharacterStat(currentDefender, "defense");
 
       result = attackCharacter(
@@ -2321,8 +2324,9 @@ export default function TeamBattle() {
       result,
     });
 
-    const outcome =
-      choice === "defend"
+    const outcome = attackUnavailable
+      ? `${currentAttacker.name}'s ${currentAttack.name} was no longer available and was skipped.`
+      : choice === "defend"
         ? `${currentDefender.name} defended ${currentAttacker.name}'s ${currentAttack.name}.`
         : choice === "evade"
           ? result?.evaded
