@@ -410,6 +410,18 @@ function Homescreen() {
               onChange={(event) => changeAudioSetting("muted", event.target.checked)}
             />
           </label>
+          <label className="audio-mute-row motion-blur-setting-row">
+            <span>
+              <strong>Motion blur</strong>
+              <small>Add a subtle directional blur while characters and interface elements move. Disable it for a sharper, cleaner image.</small>
+            </span>
+            <input
+              type="checkbox"
+              checked={audioSettings.motionBlur !== false}
+              onChange={(event) => changeAudioSetting("motionBlur", event.target.checked)}
+              aria-label="Enable motion blur"
+            />
+          </label>
         </section>
 
         <div className="settings-actions">
