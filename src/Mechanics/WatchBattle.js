@@ -334,8 +334,7 @@ function nextWatchDuelAction(battle) {
       attacker,
       defender,
       battle.fighters,
-      difficulty,
-      battle.attacksThisTurn,
+      battle.difficulties[defenderIndex],
     );
 
     if (!result) {
@@ -518,8 +517,7 @@ function nextWatchTeamAction(battle) {
       attacker,
       defender,
       battle.fighters,
-      difficulty,
-      battle.attacksThisTurn,
+      battle.difficulties[battle.fighters.indexOf(defender)],
     );
 
     if (!result) {
