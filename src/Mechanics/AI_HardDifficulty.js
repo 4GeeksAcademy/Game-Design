@@ -377,6 +377,7 @@ function chooseHardTeamAction(fighter, teammates, opponents = []) {
   )) {
     let healValue = 0;
     let healTargetId = null;
+    let bestSingleHeal = 0;
     const possibleTargets = healAttack.heal.target === "all"
       ? teammates.filter((ally) => ally.health > 0)
       : teammates.filter((ally) => ally.id !== fighter.id && ally.health > 0);
@@ -385,10 +386,8 @@ function chooseHardTeamAction(fighter, teammates, opponents = []) {
       const effective = getHardEffectiveHeal(healAttack, ally);
       if (effective > 0) {
         healValue += effective;
-        if (healAttack.heal.target === "selected" && effective > getHardEffectiveHeal(
-          healAttack,
-          teammates.find((item) => item.id === healTargetId) ?? { health: 0, maximumHealth: 0 },
-        )) {
+        if (healAttack.heal.target === "selected" && effective > bestSingleHeal) {
+          bestSingleHeal = effective;
           healTargetId = ally.id;
         }
       }
