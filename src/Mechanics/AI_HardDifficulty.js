@@ -252,6 +252,12 @@ function getHardAttackUtility(attack, attacker, defender) {
   let utility = response.expectedDamage * 1.8;
   utility += response.killChance * 100;
   utility += debuff.score;
+  const selfHealAmount = Math.max(0, Number(attack.buff?.health) || 0);
+  const selfMissingHealth = Math.max(
+    0,
+    Number(attacker.maximumHealth ?? attacker.health) - Number(attacker.health || 0),
+  );
+  utility += Math.min(selfMissingHealth, selfHealAmount) * 1.8;
   if (attack.stun) utility += 12;
   if (attack.buff) utility += 8;
   if (attack.heal) utility += 10;
@@ -384,6 +390,13 @@ function getHardEffectiveHeal(attack, fighter) {
   return Math.min(missing, amount);
 }
 
+function getHardEffectiveSelfHeal(attack, fighter) {
+  if (!attack?.buff || !fighter || fighter.health <= 0) return 0;
+  const maxHealth = Math.max(1, Number(fighter.maximumHealth ?? fighter.health) || 1);
+  const missing = Math.max(0, maxHealth - (Number(fighter.health) || 0));
+  return Math.min(missing, Math.max(0, Number(attack.buff.health) || 0));
+}
+
 function chooseHardTeamAction(fighter, teammates, opponents = []) {
   if (!fighter || !Array.isArray(fighter.attacks)) return null;
   const livingOpponents = opponents.filter((opponent) => opponent.health > 0);
@@ -397,22 +410,27 @@ function chooseHardTeamAction(fighter, teammates, opponents = []) {
     : { attack: null, healTargetId: null, score: -Infinity };
 
   for (const healAttack of fighter.attacks.filter((move) =>
-    move.heal && canFighterUseAttack(fighter, move)
+    (move.heal || Number(move.buff?.health) > 0) &&
+    canFighterUseAttack(fighter, move)
   )) {
     let healValue = 0;
     let healTargetId = null;
     let bestSingleHeal = 0;
-    const possibleTargets = healAttack.heal.target === "all"
-      ? teammates.filter((ally) => ally.health > 0)
-      : teammates.filter((ally) => ally.id !== fighter.id && ally.health > 0);
+    if (!healAttack.heal && Number(healAttack.buff?.health) > 0) {
+      healValue = getHardEffectiveSelfHeal(healAttack, fighter);
+    } else {
+      const possibleTargets = healAttack.heal.target === "all"
+        ? teammates.filter((ally) => ally.health > 0)
+        : teammates.filter((ally) => ally.id !== fighter.id && ally.health > 0);
 
-    for (const ally of possibleTargets) {
-      const effective = getHardEffectiveHeal(healAttack, ally);
-      if (effective > 0) {
-        healValue += effective;
-        if (healAttack.heal.target === "selected" && effective > bestSingleHeal) {
-          bestSingleHeal = effective;
-          healTargetId = ally.id;
+      for (const ally of possibleTargets) {
+        const effective = getHardEffectiveHeal(healAttack, ally);
+        if (effective > 0) {
+          healValue += effective;
+          if (healAttack.heal.target === "selected" && effective > bestSingleHeal) {
+            bestSingleHeal = effective;
+            healTargetId = ally.id;
+          }
         }
       }
     }
