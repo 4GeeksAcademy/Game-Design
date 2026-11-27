@@ -4572,3 +4572,34 @@ battlefield > .local-coop-incoming {
 .stage-select-screen .wild-stage-select { flex:1; width:min(1480px,calc(100% - 32px)); margin:18px auto 30px; }
 .stage-select-tab-label { justify-self:end; color:#f5d56a; font:900 10px Oxanium,sans-serif; letter-spacing:2px; }
 .stage-select-back { display:block; margin:0 auto 14px; padding:8px 13px; color:#cce8ff; background:#10263a; border:1px solid #527b9a; border-radius:6px; font:900 10px Oxanium,sans-serif; letter-spacing:1px; cursor:pointer; }
+
+
+/* Final combat motion pass: the fighter card is the animated unit.
+   The portrait remains anchored inside the card instead of sliding within it. */
+.team-battle .fighter-art-button:has(.impact-attack) {
+  animation:team-card-attack-lunge .24s cubic-bezier(.18,.9,.25,1) both !important;
+}
+.team-battle .player-team .fighter-art-button:has(.impact-attack) {
+  animation-name:team-card-attack-lunge-left !important;
+}
+.team-battle .fighter-art-button:has(.impact-attack) .fighter-portrait,
+.team-battle .fighter-art-button:has(.impact-attack) .fighter-portrait-wrapper {
+  animation:none !important;
+  transform:none !important;
+}
+.team-battle .fighter-art-button:has(.impact-evaded) {
+  animation:team-card-evade-dodge .52s cubic-bezier(.2,.75,.25,1) both !important;
+}
+.team-battle .fighter-art-button:has(.impact-evaded) .fighter-portrait,
+.team-battle .fighter-art-button:has(.impact-evaded) .fighter-portrait-wrapper {
+  animation:none !important;
+  transform:none !important;
+}
+@keyframes team-card-attack-lunge {
+  0%,100% { transform:translateX(0) scale(1); }
+  45% { transform:translateX(36px) scale(1.035); }
+}
+@keyframes team-card-attack-lunge-left {
+  0%,100% { transform:translateX(0) scale(1); }
+  45% { transform:translateX(-36px) scale(1.035); }
+}
