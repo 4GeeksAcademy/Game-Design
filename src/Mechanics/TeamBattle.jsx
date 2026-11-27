@@ -1356,7 +1356,7 @@ export default function TeamBattle() {
           message: "DEBUFF HIT!", effects: appliedDebuffs.filter((effect) => effect.stat === "health"),
         }}));
         window.setTimeout(() => setCombatEffects((current) => current[defender.id]?.id === followUpId ? { ...current, [defender.id]: null } : current), 1500);
-      }, 850);
+      }, 1450);
     } else if (physicalDamage === 0 && nonHealthDebuffs.length > 0) {
       recordComboOutcome(true);
     } else if (physicalDamage === 0 && appliedDebuffs.length === 0) {
@@ -1365,35 +1365,92 @@ export default function TeamBattle() {
     const impactTier = physicalDamage >= 70 ? "fatal" : physicalDamage >= 45 ? "heavy" : physicalDamage >= 20 ? "effective" : "light";
     const impactType = result.evaded ? "evaded" : result.action === "defend" ? "blocked" : physicalDamage > 0 ? "damage" : nonHealthDebuffs.length ? "status" : "attack";
     const attackerEffectId = Date.now() + Math.random();
-    const defenderEffectId = Date.now() + Math.random();
+    const defenderReactionId = Date.now() + Math.random();
+    const defenderResultId = Date.now() + Math.random();
+    const reactionType = result.evaded
+      ? "evaded"
+      : result.action === "defend"
+        ? "blocked"
+        : "reaction";
+
+    // Stage the visuals instead of showing the attacker, defender and damage
+    // feedback at once. The attack lunge is 240ms; the response begins halfway.
     setCombatEffects((current) => ({
       ...current,
       [attacker.id]: {
         id: attackerEffectId,
-        type: damageActuallyDealt > 0 ? "attack" : "status",
+        type: damageActuallyDealt > 0 || !attacker.isCpuTeammate ? "attack" : "status",
         damage: 0,
         tier: "light",
         message: "",
         effects: appliedBuffs,
       },
-      [defender.id]: {
-        id: defenderEffectId,
-        type: impactType,
-        damage: physicalDamage,
-        tier: impactTier,
-        message: result.evaded ? "EVADED!" : result.action === "defend" ? "BLOCKED!" : "",
-        effects: nonHealthDebuffs,
-      },
     }));
-    [[attacker.id, attackerEffectId], [defender.id, defenderEffectId]].forEach(([fighterId, effectId]) => {
-      setTimeout(() => {
+
+    window.setTimeout(() => {
+      setCombatEffects((current) => ({
+        ...current,
+        [defender.id]: {
+          id: defenderReactionId,
+          type: reactionType,
+          damage: 0,
+          tier: "light",
+          message: result.evaded ? "EVADED!" : result.action === "defend" ? "BLOCKED!" : "",
+          effects: [],
+        },
+      }));
+    }, 120);
+
+    // Let the dodge/guard/recoil finish before showing the damage number.
+    window.setTimeout(() => {
+      if (result.evaded) {
+        window.setTimeout(() => {
+          setCombatEffects((current) =>
+            current[defender.id]?.id === defenderReactionId
+              ? { ...current, [defender.id]: null }
+              : current,
+          );
+        }, 650);
+        return;
+      }
+
+      const hasResultFeedback = physicalDamage > 0 || nonHealthDebuffs.length > 0;
+      if (!hasResultFeedback) {
         setCombatEffects((current) =>
-          current[fighterId]?.id === effectId
-            ? { ...current, [fighterId]: null }
+          current[defender.id]?.id === defenderReactionId
+            ? { ...current, [defender.id]: null }
+            : current,
+        );
+        return;
+      }
+
+      setCombatEffects((current) => ({
+        ...current,
+        [defender.id]: {
+          id: defenderResultId,
+          type: physicalDamage > 0 ? "damage" : "status",
+          damage: physicalDamage,
+          tier: impactTier,
+          message: "",
+          effects: nonHealthDebuffs,
+        },
+      }));
+      window.setTimeout(() => {
+        setCombatEffects((current) =>
+          current[defender.id]?.id === defenderResultId
+            ? { ...current, [defender.id]: null }
             : current,
         );
       }, 2100);
-    });
+    }, 640);
+
+    window.setTimeout(() => {
+      setCombatEffects((current) =>
+        current[attacker.id]?.id === attackerEffectId
+          ? { ...current, [attacker.id]: null }
+          : current,
+      );
+    }, 900);
     if (!attacker.isCpuTeammate && damageActuallyDealt > 0) playGameSound("attack");
     setAttacksUsed((value) => value + 1);
 
