@@ -29,7 +29,8 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
 
   // Never attempt an evade that would fail due to insufficient mana.
   const canEvade = mana >= evadeManaNeeded;
-  const evadePreventsKnockout = canEvade && damage < health;
+  // A successful evade prevents the entire attack, including lethal damage.
+  const evadePreventsKnockout = canEvade;
 
   const isFatal = damage >= health;
 
