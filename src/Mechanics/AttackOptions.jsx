@@ -167,7 +167,7 @@ function AttackOptions({
             message: "DEBUFF HIT!",
             effects: damageAndDebuffs.filter((effect) => effect.stat === "health"),
           });
-        }, 500);
+        }, 1450);
       } else if (physicalDamage === 0 && debuffDamage === 0 && hasOtherDebuff) {
         onComboEvent?.(true);
       } else if (physicalDamage === 0 && debuffDamage === 0 && damageAndDebuffs.length === 0) {
