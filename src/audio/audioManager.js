@@ -1,9 +1,11 @@
+import "./motionEffects.css";
+
 // Central audio engine for Wild Cards.
 // All sound profiles are kept here so recorded files can replace the
 // synthesized prototypes later without changing game components.
 
 const STORAGE_KEY = "wild-cards-audio-settings";
-const DEFAULTS = { master: 0.75, music: 0.3, effects: 0.65, voices: 0.8, muted: false };
+const DEFAULTS = { master: 0.75, music: 0.3, effects: 0.65, voices: 0.8, muted: false, motionBlur: true };
 
 let audioContext = null;
 let masterGain = null;
@@ -81,6 +83,60 @@ let activeMusicTrack = null;
 let audioElement = null;
 let musicSuppressed = false;
 let settings = loadSettings();
+
+function applyMotionBlurPreference() {
+  if (typeof document === "undefined") return;
+  document.documentElement.classList.toggle("wc-motion-blur-enabled", settings.motionBlur !== false);
+}
+
+function installMotionBlurListeners() {
+  if (typeof document === "undefined" || document.documentElement.dataset.wcMotionBlurListeners === "installed") return;
+  document.documentElement.dataset.wcMotionBlurListeners = "installed";
+
+  const begin = (event) => {
+    if (settings.motionBlur === false) return;
+    const element = event.target;
+    if (!(element instanceof Element)) return;
+
+    const computed = window.getComputedStyle(element);
+    const animationNames = computed.animationName.split(",").map((name) => name.trim()).filter(Boolean);
+    const hasMotionAnimation = animationNames.some((name) => name !== "none");
+    const hasTransformTransition = computed.transitionProperty.split(",").some((property) =>
+      property.trim() === "transform" || property.trim() === "all"
+    );
+    if (!hasMotionAnimation && !hasTransformTransition) return;
+
+    if (!element.classList.contains("wc-motion-blur-active")) {
+      const baseFilter = computed.filter;
+      element.style.setProperty("--wc-motion-base-filter", baseFilter && baseFilter !== "none" ? baseFilter : "none");
+      element.classList.add("wc-motion-blur-active");
+    }
+    element.dataset.wcMotionBlurCount = String((Number(element.dataset.wcMotionBlurCount) || 0) + 1);
+  };
+
+  const finish = (event) => {
+    const element = event.target;
+    if (!(element instanceof Element) || !element.classList.contains("wc-motion-blur-active")) return;
+    const count = Math.max(0, (Number(element.dataset.wcMotionBlurCount) || 1) - 1);
+    if (count > 0) {
+      element.dataset.wcMotionBlurCount = String(count);
+      return;
+    }
+    delete element.dataset.wcMotionBlurCount;
+    element.classList.remove("wc-motion-blur-active");
+    element.style.removeProperty("--wc-motion-base-filter");
+  };
+
+  document.addEventListener("animationstart", begin, true);
+  document.addEventListener("animationend", finish, true);
+  document.addEventListener("animationcancel", finish, true);
+  document.addEventListener("transitionrun", begin, true);
+  document.addEventListener("transitionend", finish, true);
+  document.addEventListener("transitioncancel", finish, true);
+}
+
+applyMotionBlurPreference();
+installMotionBlurListeners();
 function loadSettings() {
   try {
     return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") };
@@ -459,6 +515,7 @@ export function updateAudioSettings(next) {
   settings = { ...settings, ...next };
   saveSettings();
   applyVolumes();
+  applyMotionBlurPreference();
   if (settings.muted || settings.music <= 0) stopMusic();
   else if (activeMusicTrack) playMusicTrack(activeMusicTrack, currentTrack);
   else if (!musicSuppressed) startMusic(currentTrack);
