@@ -3048,6 +3048,10 @@
   flex: 0 0 auto;
 }
 
+.home-screen--settings .home-content--settings > * {
+  flex-shrink: 0;
+}
+
 .home-screen--settings .home-content--settings {
   flex: 1 1 0;
   min-height: 0;
