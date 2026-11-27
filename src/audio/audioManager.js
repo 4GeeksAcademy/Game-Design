@@ -106,11 +106,13 @@ function activateMotionBlur(element, count = 1) {
   );
 }
 
-function applyMotionBlurPreference() {
+function applyMotionBlurPreference(reconcileActiveAnimations = false) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   const enabled = settings.motionBlur !== false;
   root.classList.toggle("wc-motion-blur-enabled", enabled);
+
+  if (!reconcileActiveAnimations) return;
 
   // A preference can change while a fighter is already moving. Reconcile
   // active animations so enabling blur does not require a fresh animation.
@@ -550,10 +552,13 @@ export function getAudioSettings() {
 }
 
 export function updateAudioSettings(next) {
+  const motionBlurChanged =
+    Object.prototype.hasOwnProperty.call(next, "motionBlur") &&
+    (next.motionBlur !== false) !== (settings.motionBlur !== false);
   settings = { ...settings, ...next };
   saveSettings();
   applyVolumes();
-  applyMotionBlurPreference();
+  if (motionBlurChanged) applyMotionBlurPreference(true);
   if (settings.muted || settings.music <= 0) stopMusic();
   else if (activeMusicTrack) playMusicTrack(activeMusicTrack, currentTrack);
   else if (!musicSuppressed) startMusic(currentTrack);
