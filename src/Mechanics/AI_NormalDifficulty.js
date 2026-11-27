@@ -1,4 +1,4 @@
-import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
+import { attackCharacter, evadeAttack, canUseAttack, canFighterUseAttack } from "./Health.js";
 import { aiChooseStunTargets } from "./AI.js";
 import { getModifiedAttackStat, getModifiedCharacterStat } from "./Modifiers.js";
 
@@ -127,7 +127,7 @@ function getNormalAttackPriority(attacks) {
 function aiChooseNormalAttacks(ai) {
   if (!ai || !Array.isArray(ai.attacks)) return [];
 
-  const usableAttacks = ai.attacks.filter((attack) => canUseAttack(attack));
+  const usableAttacks = ai.attacks.filter((attack) => canFighterUseAttack(ai, attack));
 
   return getNormalAttackPriority(usableAttacks).slice(0, MAX_QUEUE_SIZE);
 }
@@ -136,7 +136,7 @@ function chooseNormalAttack(fighter) {
   if (!fighter || !Array.isArray(fighter.attacks)) return null;
 
   const usableAttacks = fighter.attacks.filter(
-    (attack) => canUseAttack(attack) && fighter.mana >= (attack.cost ?? 0),
+    (attack) => canFighterUseAttack(fighter, attack),
   );
 
   return getNormalAttackPriority(usableAttacks)[0] ?? null;
@@ -319,7 +319,7 @@ function createNormalAIController({
     currentAttackKey = queue.splice(index, 1)[0];
     currentAttack = findLiveAttack(currentAI, currentAttackKey);
 
-    if (!currentAttack || !canUseAttack(currentAttack)) {
+    if (!currentAttack || !canFighterUseAttack(readAI(), currentAttack)) {
       currentAttack = null;
       currentAttackKey = null;
       advance();
