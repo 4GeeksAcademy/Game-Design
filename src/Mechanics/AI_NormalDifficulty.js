@@ -244,7 +244,9 @@ function chooseNormalTeamAction(fighter, teammates) {
   let bestAction = {
     attack:
       getNormalAttackPriority(
-        usableAttacks.filter((attack) => !attack.heal),
+        usableAttacks.filter(
+          (attack) => !attack.heal && !(Number(attack.buff?.health) > 0),
+        ),
       )[0] ?? null,
     healTargetId: null,
     score: -Infinity,
@@ -255,13 +257,23 @@ function chooseNormalTeamAction(fighter, teammates) {
   }
 
   // Now evaluate healing attacks.
-  const healingAttacks = usableAttacks.filter((attack) => attack.heal);
+  const healingAttacks = usableAttacks.filter(
+    (attack) => attack.heal || Number(attack.buff?.health) > 0,
+  );
 
   for (const attack of healingAttacks) {
     let healValue = 0;
     let healTargetId = null;
 
-    if (attack.heal.target === "selected") {
+    // Some characters heal themselves through buff.health rather than a
+    // dedicated attack.heal object (e.g. Namekian Regeneration).
+    if (!attack.heal && Number(attack.buff?.health) > 0) {
+      const maximumHealth = fighter.maximumHealth ?? fighter.health;
+      healValue = Math.min(
+        Math.max(0, maximumHealth - fighter.health),
+        Number(attack.buff.health),
+      );
+    } else if (attack.heal.target === "selected") {
       const possibleTargets = teammates.filter(
         (ally) => ally.id !== fighter.id && ally.health > 0,
       );
