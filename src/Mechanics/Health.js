@@ -653,6 +653,7 @@ export {
   applyHeal,
   consumeAttack,
   canUseAttack,
+  canFighterUseAttack,
   getEligibleStunTargets,
   canApplyStun,
   applyStun,
