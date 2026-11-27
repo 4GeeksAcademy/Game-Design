@@ -2675,7 +2675,7 @@ export default function TeamBattle() {
           ? 3000
           : 1300;
 
-      const resultMessageDelay = hasResultFeedback ? 2500 : 700;
+      const resultMessageDelay = hasResultFeedback ? 3000 : 700;
 
       if (result) {
         const cpuAttackerEffectId = Date.now() + Math.random();
