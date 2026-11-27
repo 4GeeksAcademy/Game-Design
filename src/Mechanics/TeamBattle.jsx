@@ -2768,9 +2768,9 @@ export default function TeamBattle() {
         } else if (choice === "evade") {
           if (result.evaded) { setCombatDefense((value) => value + 1); recordDailyObjectiveEvent("defense", 1); }
         } else if (choice === "timeout") {
-          addLog(`Time ran out. ${attack.name} hit ${currentDefender.name}.`);
+          window.setTimeout(() => addLog(`Time ran out. ${attack.name} hit ${currentDefender.name}.`), 700);
         } else {
-          addLog(`${currentDefender.name} chose to take the full damage.`);
+          window.setTimeout(() => addLog(`${currentDefender.name} chose to take the full damage.`), 700);
         }
 
         window.setTimeout(() => {
