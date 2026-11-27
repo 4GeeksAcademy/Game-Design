@@ -856,6 +856,13 @@ const stunOptions = {
         Math.max(0, Number(character.health) || 0) -
           Math.max(0, Number(result.defender?.health) || 0),
       );
+      const incomingEffects = Object.entries(result.debuffsApplied ?? {})
+        .filter(([, amount]) => Number(amount) !== 0)
+        .map(([stat, amount]) => ({
+          stat,
+          label: "↓ " + stat.toUpperCase() + " " + (amount > 0 ? "+" : "") + amount,
+        }));
+      if (result.stunnedAttacks?.length) incomingEffects.push({ stat: "stun", label: "STUN APPLIED" });
       const attackerEffectId = Date.now() + Math.random();
       const reactionEffectId = Date.now() + Math.random();
       const resultEffectId = Date.now() + Math.random();
@@ -904,11 +911,11 @@ const stunOptions = {
             player: {
               target: "player",
               id: resultEffectId,
-              type: "damage",
+              type: incomingDamage > 0 ? "damage" : "status",
               damage: incomingDamage,
               tier: incomingDamage >= 70 ? "fatal" : incomingDamage >= 45 ? "heavy" : incomingDamage >= 20 ? "effective" : "light",
-              message: "",
-              effects: [],
+              message: result.stunnedAttacks?.length ? "STUNNED!" : "",
+              effects: incomingEffects,
             },
           }));
         } else if (choice !== "evade" || !result.evaded) {
@@ -940,7 +947,7 @@ const stunOptions = {
         }));
       }, 2740);
 
-      const hasResultFeedback = incomingDamage > 0 || Object.values(result.debuffsApplied ?? {}).some((amount) => Number(amount) !== 0) || Boolean(result.stunnedAttacks?.length);
+      const hasResultFeedback = incomingDamage > 0 || incomingEffects.length > 0;
       const resultMessageDelay = hasResultFeedback ? 3000 : 700;
       window.setTimeout(() => {
         if (choice === "defend") {
