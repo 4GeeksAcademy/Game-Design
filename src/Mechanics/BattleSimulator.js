@@ -1,4 +1,4 @@
-import { attackCharacter, canUseAttack } from "./Health.js";
+import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
 
 import {
   getModifiedAttackStat,
@@ -167,19 +167,27 @@ function resolveBotAttack(
     return normalDefendOrEvade(attack, attacker, defender, options);
   }
 
-  // Easy intentionally ignores debuff strategy and stays unpredictable.
-  if (getModifiedCharacterStat(defender, "cooldown") > 0 && Math.random() < 0.5) {
-    const defense = getModifiedCharacterStat(defender, "defense");
-    const healthBefore = defender.health;
-    const result = attackCharacter(attack, attacker, defender, defense, {
-      ...options,
-      blocked: true,
-    });
-    if (result) {
-      result.defender.cooldown = Math.max(0, getModifiedCharacterStat(defender, "cooldown") - 1);
-      result.action = "defend";
-      result.damageReceived = healthBefore - defender.health;
+  // Easy intentionally ignores debuff strategy and keeps its simple
+  // 50/50 block-or-evade choice whenever a defensive charge is available.
+  const cooldown = getModifiedCharacterStat(defender, "cooldown");
+  if (cooldown > 0) {
+    if (Math.random() < 0.5) {
+      const defense = getModifiedCharacterStat(defender, "defense");
+      const healthBefore = defender.health;
+      const result = attackCharacter(attack, attacker, defender, defense, {
+        ...options,
+        blocked: true,
+      });
+      if (result) {
+        result.defender.cooldown = Math.max(0, cooldown - 1);
+        result.action = "defend";
+        result.damageReceived = healthBefore - defender.health;
+      }
+      return result;
     }
+
+    const result = evadeAttack(attack, attacker, defender, options);
+    if (result) result.action = result.evaded ? "evade" : "take damage";
     return result;
   }
 
