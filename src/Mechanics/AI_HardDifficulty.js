@@ -104,7 +104,12 @@ function hardDefendOrEvade(attack, attacker, defender, options = {}, context = {
   const evadeCost = getHardEvadeManaCost(attack, attacker, defender);
   const canEvade = mana >= evadeCost;
   const averageSpeed = getAverageAttackSpeed(attacker);
-  const reserve = getHardManaReserve(defender, attacker, context.attacksUsedThisTurn ?? 0);
+  // Low-health defenders keep the extra survival reserve during the incoming
+  // enemy turn as well, after having spent their own offensive actions.
+  const reserveActionCount = healthPercent <= LOW_HEALTH_THRESHOLD
+    ? Math.max(2, context.attacksUsedThisTurn ?? 0)
+    : (context.attacksUsedThisTurn ?? 0);
+  const reserve = getHardManaReserve(defender, attacker, reserveActionCount);
   const manaAfterEvade = Math.max(0, mana - evadeCost);
   const evadeKeepsReserve = manaAfterEvade >= reserve;
   const fatal = damage >= health && health > 0;
@@ -331,7 +336,7 @@ function getHardAttackPriority(attacker, defender, options = {}) {
   const remaining = [];
   const seen = new Set();
   let mana = Math.max(0, Number(attacker?.mana) || 0);
-  const reserve = getHardManaReserve(attacker, defender, options.attacksUsedThisTurn ?? 0);
+  let actionsSelected = Math.max(0, Number(options.attacksUsedThisTurn) || 0);
   const sorted = (attacker?.attacks ?? [])
     .filter((attack) => canFighterUseAttack(attacker, attack))
     .map((attack) => ({
@@ -346,10 +351,12 @@ function getHardAttackPriority(attacker, defender, options = {}) {
     const key = item.attack.id ?? item.attack.name;
     if (seen.has(key) || item.cost > mana) continue;
     const canFinish = item.damage >= (Number(defender?.health) || 0);
+    const reserve = getHardManaReserve(attacker, defender, actionsSelected);
     if (mana - item.cost < reserve && !canFinish) continue;
     seen.add(key);
     remaining.push(item.attack);
     mana -= item.cost;
+    actionsSelected += 1;
   }
   return remaining;
 }
