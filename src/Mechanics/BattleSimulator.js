@@ -14,17 +14,16 @@ import { chooseHardAttack, hardDefendOrEvade } from "./AI_HardDifficulty.js";
 
 const MAX_ROUNDS = 100;
 const OPENING_TURN_ATTACK_LIMIT = 4;
-// Match the live 1v1 controllers: Easy resolves up to two moves,
-// while Normal currently queues up to MAX_QUEUE_SIZE (10) usable moves.
-// Hard remains on Normal's live limit until its dedicated controller exists.
+// Match the live 1v1 controllers: Easy resolves up to two moves;
+// Normal and Hard may use up to ten currently available actions.
 const MAX_ATTACKS_PER_TURN = {
   Easy: 2,
   Normal: 10,
   Hard: 10,
 };
 
-// Team battles have their own live turn rules: Easy is capped at two,
-// while Normal/Hard can continue through every currently usable move.
+// Team battles have their own live turn rules: Easy is capped at two;
+// while Normal/Hard can continue through currently usable moves.
 // The opening team turn still has its existing four-action cap.
 const MAX_TEAM_ATTACKS_PER_TURN = {
   Easy: 2,
