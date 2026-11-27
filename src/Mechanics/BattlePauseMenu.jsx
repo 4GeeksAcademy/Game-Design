@@ -122,7 +122,23 @@ export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect
             <span><input type="range" min="0" max="1" step="0.05" value={audio[key]} onChange={(event) => changeAudio(key, Number(event.target.value))}/><output>{Math.round(audio[key] * 100)}%</output></span>
           </label>)}
           <label className="battle-pause-mute"><span><strong>Mute all audio</strong><small>Silence music, effects, and voices.</small></span><input type="checkbox" checked={audio.muted} onChange={(event) => changeAudio("muted", event.target.checked)}/></label>
-          <label className="battle-pause-mute motion-blur-setting-row"><span><strong>Motion blur</strong><small>Subtle blur during movement and animated transitions.</small></span><input type="checkbox" checked={audio.motionBlur !== false} onChange={(event) => changeAudio("motionBlur", event.target.checked)}/></label>
+          
+        </section>
+        <section className="battle-pause-visual-section">
+          <h3>VISUAL EFFECTS</h3>
+          <p>Customize the movement effects used throughout the game. These settings save automatically.</p>
+          <label className="battle-pause-visual-toggle motion-blur-setting-row">
+            <span>
+              <strong>Motion Blur</strong>
+              <small>Adds subtle movement blur to animated fighters, attacks, impacts, and transitions. Turning it off keeps every animation intact.</small>
+            </span>
+            <input
+              type="checkbox"
+              checked={audio.motionBlur !== false}
+              onChange={(event) => changeAudio("motionBlur", event.target.checked)}
+              aria-label="Enable motion blur"
+            />
+          </label>
         </section>
       </div>}
       {tab === "settings" && <button className="battle-pause-close" onClick={onResume}>SAVE SETTINGS & RESUME</button>}
