@@ -89,18 +89,29 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
   let choice = "take-damage";
 
   if (isFatal) {
-    // Survival comes first. Avoid spending resources if the
-    // defensive move cannot prevent the knockout.
-    if (blockPreventsKnockout && !evadePreventsKnockout) {
+    // A meaningful hit-gated debuff can be stopped by blocking. An
+    // ungated debuff survives a block, so evade it whenever possible.
+    if (meaningfulDebuff && attack.debuffRequiresHit !== true && canEvade) {
+      choice = "evade";
+    } else if (
+      meaningfulDebuff &&
+      attack.debuffRequiresHit === true &&
+      blockPreventsKnockout
+    ) {
+      choice = "defend";
+    } else if (blockPreventsKnockout && !evadePreventsKnockout) {
       choice = "defend";
     } else if (evadePreventsKnockout && !blockPreventsKnockout) {
       choice = "evade";
     } else if (blockPreventsKnockout && evadePreventsKnockout) {
-      // Both work: prefer the option that preserves more mana.
+      // Both work: preserve the debuff immunity when blocking is enough;
+      // otherwise favor the cheaper defensive option.
       choice =
-        evadeManaNeeded === 0 || evadeManaNeeded <= mana * 0.25
-          ? "evade"
-          : "defend";
+        meaningfulDebuff && attack.debuffRequiresHit === true
+          ? "defend"
+          : evadeManaNeeded === 0 || evadeManaNeeded <= mana * 0.25
+            ? "evade"
+            : "defend";
     }
   } else {
     // Don't spend a defensive charge on trivial damage.
