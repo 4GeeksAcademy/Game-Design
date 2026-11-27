@@ -942,13 +942,18 @@ const stunOptions = {
 
       // Let the complete attack/reaction/result beat play before the AI
       // controller hides this popup or advances to the next queued attack.
+      const nextAttackDelay = result.evaded
+        ? 1100
+        : incomingDamage > 0
+          ? 3000
+          : 1300;
       window.setTimeout(() => {
         if (aiControllerRef.current) {
           aiControllerRef.current.respondToDefense();
         } else {
           setAiAttack(null);
         }
-      }, 1050);
+      }, nextAttackDelay);
     },
     [aiAttack, defenseTimeLeft, character, opponent, showCombatMessage],
   );
