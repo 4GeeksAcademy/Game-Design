@@ -1,4 +1,5 @@
 import "./motionEffects.css";
+import "./visualQuality.css";
 
 // Central audio engine for Wild Cards.
 // All sound profiles are kept here so recorded files can replace the
