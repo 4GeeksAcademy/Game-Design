@@ -938,6 +938,7 @@ const stunOptions = {
         }));
       }, 2740);
 
+      const resultMessageDelay = incomingDamage > 0 ? 2500 : 700;
       window.setTimeout(() => {
         if (choice === "defend") {
           showCombatMessage("🛡️ BLOCKED!", "blocked");
@@ -952,7 +953,7 @@ const stunOptions = {
             "hit",
           );
         }
-      }, 700);
+      }, resultMessageDelay);
 
       // Let the complete attack/reaction/result beat play before the AI
       // controller hides this popup or advances to the next queued attack.
