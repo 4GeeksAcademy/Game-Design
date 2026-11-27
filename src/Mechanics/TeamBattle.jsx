@@ -1228,7 +1228,7 @@ export default function TeamBattle() {
       ).length;
 
       const hasUsableAttack = attacker.attacks.some(
-        (move) => canUseAttack(move) && attacker.mana >= (move.cost ?? 0),
+        (move) => canFighterUseAttack(attacker, move),
       );
 
       const cpuMustFinish =
@@ -1378,7 +1378,7 @@ export default function TeamBattle() {
       ...current,
       [attacker.id]: {
         id: attackerEffectId,
-        type: damageActuallyDealt > 0 || !attacker.isCpuTeammate ? "attack" : "status",
+        type: "attack",
         damage: 0,
         tier: "light",
         message: "",
@@ -2053,7 +2053,7 @@ export default function TeamBattle() {
     }
 
     const attack = cpu.attacks[action.attackIndex];
-    if (!attack || !canUseAttack(attack) || cpu.mana < (attack.cost ?? 0)) {
+    if (!canFighterUseAttack(cpu, attack)) {
       setCpuActionIndex((index) => index + 1);
       return;
     }
@@ -2611,7 +2611,7 @@ export default function TeamBattle() {
 
       const attack = currentAttacker.attacks[pendingDefense.attackIndex];
 
-      if (!attack || attack.state !== true) {
+      if (!canFighterUseAttack(currentAttacker, attack)) {
         defenseResolvedRef.current = true;
         setTimeout(() => {
           setDefenseOutcome(null);
