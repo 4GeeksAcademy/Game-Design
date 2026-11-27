@@ -2719,6 +2719,21 @@ export default function TeamBattle() {
         }, 640);
 
         window.setTimeout(() => {
+          setCombatEffects((current) =>
+            current[currentDefender.id]?.id === defenderReactionId
+              ? { ...current, [currentDefender.id]: null }
+              : current,
+          );
+        }, 950);
+        window.setTimeout(() => {
+          setCombatEffects((current) =>
+            current[currentDefender.id]?.id === defenderResultId
+              ? { ...current, [currentDefender.id]: null }
+              : current,
+          );
+        }, 2740);
+
+        window.setTimeout(() => {
           setCombatEffects((current) => ({
             ...current,
             [currentAttacker.id]: current[currentAttacker.id]?.id === cpuAttackerEffectId
@@ -2915,6 +2930,19 @@ export default function TeamBattle() {
             }));
           }
         }, 640);
+        window.setTimeout(() => {
+          setCombatEffects((current) => ({
+            ...current,
+            [currentAttacker.id]: current[currentAttacker.id]?.id === attackerEffectId ? null : current[currentAttacker.id],
+            [currentDefender.id]: current[currentDefender.id]?.id === reactionEffectId ? null : current[currentDefender.id],
+          }));
+        }, 950);
+        window.setTimeout(() => {
+          setCombatEffects((current) => ({
+            ...current,
+            [currentDefender.id]: current[currentDefender.id]?.id === resultEffectId ? null : current[currentDefender.id],
+          }));
+        }, 2740);
 
         const outcomeText = result.evaded
           ? `${currentDefender.name} evaded the attack.`
