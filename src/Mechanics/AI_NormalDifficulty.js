@@ -181,7 +181,14 @@ function scoreAttack(attack) {
   score += Math.max(0, attack.speed || 0) * 0.5;
 
   if (attack.buff) score += 12;
-  if (attack.debuff) score += 14;
+  const normalAwareDebuffs = ["defense", "agility", "manaRegen"];
+  if (
+    normalAwareDebuffs.some(
+      (stat) => Math.abs(Number(attack.debuff?.[stat]) || 0) > 0,
+    )
+  ) {
+    score += 14;
+  }
 
   score -= Math.max(0, attack.cost || 0) * 0.6;
 
