@@ -2750,3 +2750,33 @@ body {
 }
 #battleLayout .solo-impact-overlay > span { animation-duration:1.9s; }
 #battleLayout .solo-effect-label { animation-duration:2.1s; }
+
+
+/* Keep the solo portrait attached to its full fighter card during attack/evade. */
+#battleLayout .solo-fighter-art:has(.impact-attack) {
+  animation:solo-card-attack-lunge .24s cubic-bezier(.18,.9,.25,1) both !important;
+}
+#battleLayout .player-fighter-section .solo-fighter-art:has(.impact-attack) {
+  animation-name:solo-card-attack-lunge-left !important;
+}
+#battleLayout .solo-fighter-art:has(.impact-attack) img,
+#battleLayout .solo-fighter-art:has(.impact-attack) .solo-portrait-wrapper {
+  animation:none !important;
+  transform:none !important;
+}
+#battleLayout .solo-fighter-art:has(.impact-evaded) {
+  animation:team-card-evade-dodge .52s cubic-bezier(.2,.75,.25,1) both !important;
+}
+#battleLayout .solo-fighter-art:has(.impact-evaded) img,
+#battleLayout .solo-fighter-art:has(.impact-evaded) .solo-portrait-wrapper {
+  animation:none !important;
+  transform:none !important;
+}
+@keyframes solo-card-attack-lunge {
+  0%,100% { transform:translateX(0) scale(1); }
+  45% { transform:translateX(36px) scale(1.035); }
+}
+@keyframes solo-card-attack-lunge-left {
+  0%,100% { transform:translateX(0) scale(1); }
+  45% { transform:translateX(-36px) scale(1.035); }
+}
