@@ -19,7 +19,7 @@ import {
   tickSelfModifiers,
 } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
-import { getEquippedAttacks, getBotEquippedAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getBotEquippedAttacks, getHardDifficultyAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
 import { addCoins } from "./Currency.js";
 import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
@@ -53,7 +53,7 @@ import KnockoutOverlay from "./KnockoutOverlay.jsx";
 import "./Teambattle.css";
 import "./LocalBattle.css";
 
-function createBattleFighter(id, isCpuControlled = false) {
+function createBattleFighter(id, isCpuControlled = false, difficulty = "Easy") {
   const selected = roster.find((fighter) => fighter.id === id);
   if (!selected?.data) return null;
 
@@ -76,7 +76,9 @@ function createBattleFighter(id, isCpuControlled = false) {
         : data.defense,
     // CPU fighters use their independent Bot Simulator build.
     attacks: (isCpuControlled
-      ? getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+      ? difficulty === "Hard"
+        ? getHardDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
+        : getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
       : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
     ).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
@@ -332,7 +334,7 @@ function SegmentedMeter({ label, value, maximum, type, title }) {
 function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficulty = "Normal") {
   const player = playerTeamIds.map((id, index) => {
     const isCpuTeammate = isCpuAssist && index === 1;
-    const fighter = createBattleFighter(id, isCpuTeammate);
+    const fighter = createBattleFighter(id, isCpuTeammate, difficulty);
 
     if (!fighter) return null;
 
@@ -341,7 +343,7 @@ function createBattleTeams(playerTeamIds, opponentTeamIds, isCpuAssist, difficul
 
   return {
     player,
-    opponent: opponentTeamIds.map((id) => createBattleFighter(id, true)),
+    opponent: opponentTeamIds.map((id) => createBattleFighter(id, true, difficulty)),
   };
 }
 
