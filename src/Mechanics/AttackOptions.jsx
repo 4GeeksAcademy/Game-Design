@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { aiDefendOrEvade } from "./AI.js";
 import { normalDefendOrEvade } from "./AI_NormalDifficulty.js";
+import { hardDefendOrEvade } from "./AI_HardDifficulty.js";
 import { getModifiedAttackStat } from "./Modifiers.js";
 import { loadKeybinds, normalizeKey } from "./Main Page/keybinds.js";
 import { canUseAttack } from "./Health.js";
@@ -121,9 +122,11 @@ function AttackOptions({
 
       const opponentHealthBefore = Math.max(0, Number(opponent.health) || 0);
       const result =
-        difficulty === "Normal"
-          ? normalDefendOrEvade(attack, character, opponent, stunOptions)
-          : aiDefendOrEvade(attack, character, opponent, stunOptions);
+        difficulty === "Hard"
+          ? hardDefendOrEvade(attack, character, opponent, stunOptions)
+          : difficulty === "Normal"
+            ? normalDefendOrEvade(attack, character, opponent, stunOptions)
+            : aiDefendOrEvade(attack, character, opponent, stunOptions);
 
       if (!result) {
         showCombatMessage("Not enough mana!", "hit");
