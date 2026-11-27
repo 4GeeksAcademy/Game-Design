@@ -343,7 +343,10 @@ function getHardAttackPriority(attacker, defender, options = {}) {
   let mana = Math.max(0, Number(attacker?.mana) || 0);
   let actionsSelected = Math.max(0, Number(options.attacksUsedThisTurn) || 0);
   const sorted = (attacker?.attacks ?? [])
-    .filter((attack) => canFighterUseAttack(attacker, attack))
+    .filter((attack) =>
+      canFighterUseAttack(attacker, attack) &&
+      !(attack.heal && !(getModifiedAttackStat(attack, attacker, "damage") > 0))
+    )
     .map((attack) => ({
       attack,
       cost: Math.max(0, getModifiedAttackStat(attack, attacker, "cost")),
