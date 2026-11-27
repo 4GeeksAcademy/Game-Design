@@ -2765,7 +2765,7 @@ body {
   transform:none !important;
 }
 #battleLayout .solo-fighter-art:has(.impact-evaded) {
-  animation:team-card-evade-dodge .52s cubic-bezier(.2,.75,.25,1) both !important;
+  animation:solo-card-evade-dodge .52s cubic-bezier(.2,.75,.25,1) both !important;
 }
 #battleLayout .solo-fighter-art:has(.impact-evaded) img,
 #battleLayout .solo-fighter-art:has(.impact-evaded) .solo-portrait-wrapper {
@@ -2779,4 +2779,10 @@ body {
 @keyframes solo-card-attack-lunge-left {
   0%,100% { transform:translateX(0) scale(1); }
   45% { transform:translateX(-36px) scale(1.035); }
+}
+
+@keyframes solo-card-evade-dodge {
+  0%,100% { transform:translateX(0) scale(1); }
+  42% { transform:translateX(24px) scale(.985); }
+  68% { transform:translateX(17px) scale(.99); }
 }
