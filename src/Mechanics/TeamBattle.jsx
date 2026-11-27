@@ -498,6 +498,17 @@ export default function TeamBattle() {
   const [pendingDefense, setPendingDefense] = useState(null);
   const [cpuActionQueue, setCpuActionQueue] = useState(null);
   const [cpuActionIndex, setCpuActionIndex] = useState(0);
+  const advanceCpuAction = useCallback(() => {
+    if (difficulty === "Hard" && !isLocalCoop) {
+      // Hard re-plans from live health, mana and cooldowns after every
+      // resolved action instead of executing a stale prebuilt queue.
+      setCpuActionQueue(null);
+      setCpuActionIndex(0);
+      setCpuQueueReady(false);
+      return;
+    }
+    setCpuActionIndex((index) => index + 1);
+  }, [difficulty, isLocalCoop]);
   const [defenseTimeLeft, setDefenseTimeLeft] = useState(10);
   const [combatMessage, setCombatMessage] = useState(
     "Choose your fighters' targets.",
@@ -2069,13 +2080,13 @@ export default function TeamBattle() {
     );
 
     if (!cpu || cpu.health <= 0 || !target || target.health <= 0) {
-      setCpuActionIndex((index) => index + 1);
+      advanceCpuAction();
       return;
     }
 
     const attack = cpu.attacks[action.attackIndex];
     if (!canFighterUseAttack(cpu, attack)) {
-      setCpuActionIndex((index) => index + 1);
+      advanceCpuAction();
       return;
     }
 
@@ -2097,6 +2108,7 @@ export default function TeamBattle() {
     teams.player,
     livingPlayers.length,
     livingOpponents.length,
+    advanceCpuAction,
   ]);
 
   useEffect(() => {
@@ -2630,7 +2642,7 @@ export default function TeamBattle() {
       if (!currentAttacker || !currentDefender) {
         defenseResolvedRef.current = true;
         setPendingDefense(null);
-        setCpuActionIndex((index) => index + 1);
+        advanceCpuAction();
         return;
       }
 
@@ -2641,7 +2653,7 @@ export default function TeamBattle() {
         setTimeout(() => {
           setDefenseOutcome(null);
           setPendingDefense(null);
-          setCpuActionIndex((index) => index + 1);
+          advanceCpuAction();
         }, 1000);
         return;
       }
@@ -2839,10 +2851,10 @@ export default function TeamBattle() {
       setTimeout(() => {
         setDefenseOutcome(null);
         setPendingDefense(null);
-        setCpuActionIndex((index) => index + 1);
+        advanceCpuAction();
       }, nextAttackDelay);
     },
-    [pendingDefense, phase, teams.player, teams.opponent, addLog],
+    [pendingDefense, phase, teams.player, teams.opponent, addLog, advanceCpuAction],
   );
 
   const resolveCPUDefenseRef = useRef(resolveCPUDefense);
@@ -3005,7 +3017,7 @@ export default function TeamBattle() {
         setTimeout(() => {
           setDefenseOutcome(null);
           setPendingDefense(null);
-          setCpuActionIndex((index) => index + 1);
+          advanceCpuAction();
         }, nextAttackDelay);
       } else {
         resolveCPUDefense("timeout");
