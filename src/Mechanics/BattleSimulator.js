@@ -152,8 +152,7 @@ function resolveBotAttack(
   attacker,
   defender,
   fighters = [attacker, defender],
-  difficulty = "Easy",
-  attacksUsedThisTurn = 0,
+  defenderDifficulty = "Easy",
 ) {
   if (
     !canUseAttack(attack) ||
@@ -167,12 +166,10 @@ function resolveBotAttack(
     fighters,
   };
 
-  if (difficulty === "Hard") {
-    return hardDefendOrEvade(attack, attacker, defender, options, {
-      attacksUsedThisTurn,
-    });
+  if (defenderDifficulty === "Hard") {
+    return hardDefendOrEvade(attack, attacker, defender, options);
   }
-  if (difficulty === "Normal") {
+  if (defenderDifficulty === "Normal") {
     return normalDefendOrEvade(attack, attacker, defender, options);
   }
 
@@ -205,6 +202,7 @@ function runBotTurn(
   round,
   isOpeningTurn = false,
   fighters = [attacker, defender],
+  defenderDifficulty = "Easy",
 ) {
   let attacksThisTurn = 0;
 
@@ -224,7 +222,7 @@ function runBotTurn(
     const attackerManaBefore = attacker.mana;
     const defenderManaBefore = defender.mana;
 
-    const result = resolveBotAttack(attack, attacker, defender, fighters, difficulty, attacksThisTurn);
+    const result = resolveBotAttack(attack, attacker, defender, fighters, defenderDifficulty);
 
     if (!result) {
       // Prevent a failed move from trapping the simulator.
@@ -351,6 +349,7 @@ function simulateBattle(
       const defender = fighters[1 - attackerIndex];
 
       const difficulty = attackerIndex === 0 ? difficultyOne : difficultyTwo;
+      const defenderDifficulty = attackerIndex === 0 ? difficultyTwo : difficultyOne;
 
       if (attacker.health <= 0 || defender.health <= 0) break;
 
@@ -363,6 +362,7 @@ function simulateBattle(
         round,
         round === 1 && position === 0,
         fighters,
+        defenderDifficulty,
       );
     }
 
@@ -499,7 +499,7 @@ function simulateTeamBattle(
     return living(team).length === 0;
   }
 
-  function runTeamTurn(attackers, defenders, difficulty, round) {
+  function runTeamTurn(attackers, defenders, difficulty, defenderDifficulty, round) {
     const targets = assignUniqueTargets(attackers, defenders);
 
     for (const attacker of attackers) {
@@ -561,8 +561,7 @@ function simulateTeamBattle(
           attacker,
           defender,
           allFighters,
-          difficulty,
-          attacksThisTurn,
+          defenderDifficulty,
         );
 
         if (!result) {
@@ -609,11 +608,11 @@ function simulateTeamBattle(
     roundsCompleted = round;
 
     // The player's team acts first, followed by the opposing team.
-    runTeamTurn(players, opponents, difficultyOne, round);
+    runTeamTurn(players, opponents, difficultyOne, difficultyTwo, round);
 
     if (teamIsDefeated(opponents)) break;
 
-    runTeamTurn(opponents, players, difficultyTwo, round);
+    runTeamTurn(opponents, players, difficultyTwo, difficultyOne, round);
 
     if (teamIsDefeated(players) || teamIsDefeated(opponents)) break;
 
