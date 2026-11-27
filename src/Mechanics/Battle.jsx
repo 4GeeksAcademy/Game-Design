@@ -280,6 +280,7 @@ function BattleMatch() {
   const [combatMessages, setCombatMessages] = useState([]);
   const [combatLog, setCombatLog] = useState([]);
   const [aiAttack, setAiAttack] = useState(null);
+  const incomingDefenseResolvedRef = useRef(false);
   const [combatEffects, setCombatEffects] = useState({});
   const [comboState, setComboState] = useState(null);
   const [comboBreakState, setComboBreakState] = useState(null);
@@ -566,7 +567,10 @@ function BattleMatch() {
         getPlayer: () => characterRef.current,
 
         onShowAttack: (attack) => {
-          if (attack) aiAttackHealthBeforeRef.current = characterRef.current?.health ?? 0;
+          if (attack) {
+            incomingDefenseResolvedRef.current = false;
+            aiAttackHealthBeforeRef.current = characterRef.current?.health ?? 0;
+          }
           setAiAttack(attack);
         },
 
@@ -634,7 +638,13 @@ function BattleMatch() {
 
     // Easy AI uses the same visible defense window, but can advance
     // immediately when the player blocks or evades.
-    const controller = aiTurn(opponent, character, (attack) => { aiAttackHealthBeforeRef.current = characterRef.current?.health ?? 0; setAiAttack(attack); }, () => {
+    const controller = aiTurn(opponent, character, (attack) => {
+      if (attack) {
+        incomingDefenseResolvedRef.current = false;
+        aiAttackHealthBeforeRef.current = characterRef.current?.health ?? 0;
+      }
+      setAiAttack(attack);
+    }, () => {
       setOpponent({ ...opponent });
       setCharacter({ ...character });
       setAiAttack(null);
@@ -780,7 +790,8 @@ function BattleMatch() {
 
   const resolveIncomingAttack = useCallback(
     (choice) => {
-      if (isPaused || !aiAttack || defenseTimeLeft <= 0) return;
+      if (isPaused || !aiAttack || defenseTimeLeft <= 0 || incomingDefenseResolvedRef.current) return;
+      incomingDefenseResolvedRef.current = true;
 
       if (choice === "defend" && getModifiedCharacterStat(character, "cooldown") <= 0) return;
 
