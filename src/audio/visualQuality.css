@@ -1,0 +1,62 @@
+/*
+ * Wild Cards global graphics presets.
+ * Low keeps the complete interface and combat feedback while trimming expensive
+ * decorative layers. Normal is the original presentation. High enhances the
+ * effects the browser and source artwork can actually provide.
+ */
+:root[data-wc-quality="low"] *,
+:root[data-wc-quality="low"] *::before,
+:root[data-wc-quality="low"] *::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:root[data-wc-quality="low"] #battleLayout > #battleArena {
+  background: #0b1711 !important;
+}
+
+:root[data-wc-quality="low"] #battleLayout .solo-fighter-art::before {
+  display: none !important;
+}
+
+:root[data-wc-quality="low"] .team-battle .fighter-portrait-wrapper {
+  box-shadow: none !important;
+}
+
+:root[data-wc-quality="low"] .team-battle .fighter-portrait-wrapper:not(.fighter-stunned) {
+  background: #091321 !important;
+}
+
+:root[data-wc-quality="low"] #battleLayout .solo-fighter-art:not(:has(.impact-attack)):not(:has(.impact-damage)) .solo-portrait-wrapper > img,
+:root[data-wc-quality="low"] .team-battle .fighter-art-button:not(:has(.impact-attack)):not(:has(.impact-damage)) .fighter-portrait {
+  animation: none !important;
+}
+
+:root[data-wc-quality="normal"] {
+  color-scheme: dark;
+}
+
+/* High means maximum detail/effects available from the browser and assets,
+   not artificial upscaling of low-resolution character artwork to true 8K. */
+:root[data-wc-quality="high"] #battleLayout > #battleArena {
+  box-shadow: inset 0 0 34px #0007, 0 0 22px #13d5ff35, 0 0 54px #13d5ff18;
+}
+
+:root[data-wc-quality="high"] #battleLayout .solo-fighter-hud,
+:root[data-wc-quality="high"] .team-battle .fighter-card,
+:root[data-wc-quality="high"] .team-battle .fighter-hud,
+:root[data-wc-quality="high"] #battleLayout .attack-card {
+  box-shadow: 0 9px 24px #0008, 0 0 16px #13d5ff22, inset 0 1px 0 #ffffff20;
+}
+
+:root[data-wc-quality="high"] #battleLayout .solo-fighter-art img,
+:root[data-wc-quality="high"] .team-battle .fighter-portrait {
+  image-rendering: auto;
+  filter: saturate(1.12) contrast(1.06) drop-shadow(0 0 10px #13d5ff35);
+}
+
+:root[data-wc-quality="high"] .team-battle .opponent-team .fighter-portrait {
+  filter: saturate(1.12) contrast(1.06) drop-shadow(0 0 10px #ff315945);
+}
