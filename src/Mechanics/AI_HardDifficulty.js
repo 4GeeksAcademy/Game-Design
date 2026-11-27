@@ -128,9 +128,13 @@ function hardDefendOrEvade(attack, attacker, defender, options = {}, context = {
     } else if (blockSurvives && !evadeSurvives) {
       choice = "defend";
     } else if (evadeSurvives && blockSurvives) {
-      choice = evadeKeepsReserve && evadeCost < Math.max(1, cooldown * 12)
-        ? "evade"
-        : "defend";
+      // Blocking is mana-free. Only prefer evasion when it is needed to stop
+      // an ungated significant debuff that a block would still allow through.
+      if (debuff.significant && attack.debuffRequiresHit !== true) {
+        choice = "evade";
+      } else {
+        choice = "defend";
+      }
     } else if (canEvade) {
       choice = "evade";
     } else if (cooldown > 0 && blockedDamage < damage) {
@@ -264,7 +268,8 @@ function chooseHardAttack(attacker, defender, options = {}) {
   const attacksUsedThisTurn = Math.max(0, Number(options.attacksUsedThisTurn) || 0);
   const reserve = getHardManaReserve(attacker, defender, attacksUsedThisTurn);
   const usable = attacker.attacks.filter((attack) =>
-    canFighterUseAttack(attacker, attack)
+    canFighterUseAttack(attacker, attack) &&
+    !(attack.heal && !(getModifiedAttackStat(attack, attacker, "damage") > 0))
   );
   if (!usable.length) return null;
 
