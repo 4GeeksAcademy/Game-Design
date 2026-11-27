@@ -174,13 +174,46 @@ function resolveBotAttack(
   const defense = getModifiedCharacterStat(defender, "defense");
   const attackSpeed = getModifiedAttackStat(attack, attacker, "speed");
 
-  // Zero-damage abilities resolve directly.
-  // This includes stun, buffs, debuffs, and attack modifiers.
+  const defenderCooldown = getModifiedCharacterStat(defender, "cooldown");
+
+  // Zero-damage debuffs still require defensive evaluation. A block only
+  // prevents a debuff explicitly marked debuffRequiresHit; otherwise a
+  // successful evade is the only defense that prevents the effect.
   if (damage <= 0) {
+    const meaningfulDebuff = attack.debuff && Object.entries(attack.debuff).some(
+      ([stat, rawAmount]) => {
+        const amount = Math.abs(Number(rawAmount) || 0);
+        const currentValue = getModifiedCharacterStat(defender, stat);
+        return amount > 0 && currentValue > 0 && (amount / currentValue) * 100 > 5;
+      },
+    );
+
+    if (!meaningfulDebuff || defenderCooldown <= 0) {
+      return attackCharacter(attack, attacker, defender, 0, options);
+    }
+
+    if (attack.debuffRequiresHit === true) {
+      const result = attackCharacter(attack, attacker, defender, 0, {
+        ...options,
+        blocked: true,
+      });
+      if (result) {
+        defender.cooldown = Math.max(0, defenderCooldown - 1);
+        result.action = "defend";
+      }
+      return result;
+    }
+
+    const agility = getModifiedCharacterStat(defender, "agility");
+    const agilityNeeded = Math.max(0, attackSpeed - agility);
+    if (defender.mana >= agilityNeeded) {
+      const result = evadeAttack(attack, attacker, defender, options);
+      if (result) result.action = result.evaded ? "evade" : "take damage";
+      return result;
+    }
+
     return attackCharacter(attack, attacker, defender, 0, options);
   }
-
-  const defenderCooldown = getModifiedCharacterStat(defender, "cooldown");
 
   // Preserve the existing low-health behavior.
   if (defender.health <= 5 && defender.health > damage) {
