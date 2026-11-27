@@ -2672,7 +2672,7 @@ export default function TeamBattle() {
       const nextAttackDelay = result?.evaded && !hasResultFeedback
         ? 1100
         : hasResultFeedback
-          ? 3000
+          ? 3300
           : 1300;
 
       const resultMessageDelay = hasResultFeedback ? 3000 : 700;
@@ -2927,10 +2927,10 @@ export default function TeamBattle() {
         const nextAttackDelay = result.evaded && !hasResultFeedback
           ? 1100
           : hasResultFeedback
-            ? 3000
+            ? 3300
             : 1300;
 
-        const resultMessageDelay = hasResultFeedback ? 2500 : 700;
+        const resultMessageDelay = hasResultFeedback ? 3000 : 700;
 
         setCombatEffects((current) => ({
           ...current,
