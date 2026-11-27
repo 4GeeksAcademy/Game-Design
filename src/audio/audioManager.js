@@ -110,18 +110,22 @@ function activateMotionBlur(element, count = 1) {
 function applyMotionBlurPreference(reconcileActiveAnimations = false) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  const enabled = settings.motionBlur !== false;
+  const enabled = settings.motionBlur === true;
   root.classList.toggle("wc-motion-blur-enabled", enabled);
 
-  if (!reconcileActiveAnimations) return;
+  if (!enabled) {
+    if (reconcileActiveAnimations) {
+      root.querySelectorAll(".wc-motion-blur-active").forEach(clearMotionBlur);
+    }
+    // Do not keep document-wide animation listeners running while blur is off.
+    removeMotionBlurListeners();
+    return;
+  }
 
-  // A preference can change while a fighter is already moving. Reconcile
-  // active animations so enabling blur does not require a fresh animation.
-  root.querySelectorAll(".wc-motion-blur-active").forEach((element) => {
-    if (!enabled) clearMotionBlur(element);
-  });
-  if (!enabled || typeof root.getAnimations !== "function") return;
+  installMotionBlurListeners();
+  if (!reconcileActiveAnimations || typeof root.getAnimations !== "function") return;
 
+  // If enabled mid-animation, pick up movement already in progress.
   root.querySelectorAll("*").forEach((element) => {
     if (typeof element.getAnimations !== "function") return;
     const activeCount = element.getAnimations().filter(
@@ -139,9 +143,10 @@ function applyVisualQualityPreference() {
   document.documentElement.dataset.wcQuality = quality;
 }
 
+let motionBlurListenerHandlers = null;
+
 function installMotionBlurListeners() {
-  if (typeof document === "undefined" || document.documentElement.dataset.wcMotionBlurListeners === "installed") return;
-  document.documentElement.dataset.wcMotionBlurListeners = "installed";
+  if (typeof document === "undefined" || settings.motionBlur !== true || motionBlurListenerHandlers) return;
 
   const begin = (event) => {
     if (settings.motionBlur === false) return;
@@ -170,6 +175,7 @@ function installMotionBlurListeners() {
     clearMotionBlur(element);
   };
 
+  motionBlurListenerHandlers = { begin, finish };
   document.addEventListener("animationstart", begin, true);
   document.addEventListener("animationend", finish, true);
   document.addEventListener("animationcancel", finish, true);
@@ -178,9 +184,20 @@ function installMotionBlurListeners() {
   document.addEventListener("transitioncancel", finish, true);
 }
 
+function removeMotionBlurListeners() {
+  if (typeof document === "undefined" || !motionBlurListenerHandlers) return;
+  const { begin, finish } = motionBlurListenerHandlers;
+  document.removeEventListener("animationstart", begin, true);
+  document.removeEventListener("animationend", finish, true);
+  document.removeEventListener("animationcancel", finish, true);
+  document.removeEventListener("transitionrun", begin, true);
+  document.removeEventListener("transitionend", finish, true);
+  document.removeEventListener("transitioncancel", finish, true);
+  motionBlurListenerHandlers = null;
+}
+
 applyMotionBlurPreference();
 applyVisualQualityPreference();
-installMotionBlurListeners();
 function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
