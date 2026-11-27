@@ -130,8 +130,6 @@ const Kenpachi = {
       name: "Nozarashi",
       locked: true,
       unlockCost: 50000,
-      locked: true,
-      unlockCost: 300,
       image: Attack5,
       damage: 0,
       speed: 0,
