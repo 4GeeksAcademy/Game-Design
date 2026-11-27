@@ -17,6 +17,11 @@
   background: #0b1711 !important;
 }
 
+/* Low mode suppresses optional blur even if its preference remains enabled. */
+:root[data-wc-quality="low"].wc-motion-blur-enabled .wc-motion-blur-active {
+  filter: var(--wc-motion-base-filter, none) !important;
+}
+
 :root[data-wc-quality="low"] #battleLayout .solo-fighter-art::before {
   display: none !important;
 }
@@ -32,10 +37,6 @@
 :root[data-wc-quality="low"] #battleLayout .solo-fighter-art:not(:has(.impact-attack)):not(:has(.impact-damage)) .solo-portrait-wrapper > img,
 :root[data-wc-quality="low"] .team-battle .fighter-art-button:not(:has(.impact-attack)):not(:has(.impact-damage)) .fighter-portrait {
   animation: none !important;
-}
-
-:root[data-wc-quality="normal"] {
-  color-scheme: dark;
 }
 
 /* High means maximum detail/effects available from the browser and assets,
@@ -59,4 +60,8 @@
 
 :root[data-wc-quality="high"] .team-battle .opponent-team .fighter-portrait {
   filter: saturate(1.12) contrast(1.06) drop-shadow(0 0 10px #ff315945);
+}
+
+:root[data-wc-quality="high"] .team-battle .fighter-portrait-wrapper.fighter-stunned > .fighter-portrait {
+  filter: drop-shadow(0 0 5px #13d5ff) drop-shadow(0 0 14px rgba(19, 213, 255, .9));
 }
