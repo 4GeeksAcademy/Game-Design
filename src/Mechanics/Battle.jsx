@@ -963,7 +963,7 @@ const stunOptions = {
       const nextAttackDelay = result.evaded
         ? 1100
         : incomingDamage > 0
-          ? 3000
+          ? 3300
           : 1300;
       window.setTimeout(() => {
         if (aiControllerRef.current) {
