@@ -1,4 +1,4 @@
-import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
+import { attackCharacter, canUseAttack } from "./Health.js";
 
 import {
   getModifiedAttackStat,
@@ -9,7 +9,7 @@ import {
 import { resetAttacks } from "./Turns.js";
 import { aiChooseStunTargets } from "./AI.js";
 
-import { getNormalAttackPriority, scoreAttack, normalDefendOrEvade } from "./AI_NormalDifficulty.js";
+import { getNormalAttackPriority, normalDefendOrEvade } from "./AI_NormalDifficulty.js";
 import { chooseHardAttack, hardDefendOrEvade } from "./AI_HardDifficulty.js";
 
 const MAX_ROUNDS = 100;
@@ -114,12 +114,6 @@ function cloneFighter(fighter) {
         attack.cooldownStartedThisRound !== true,
     })),
   };
-}
-
-function getDefense(fighter) {
-  return typeof fighter.defense === "number"
-    ? fighter.defense
-    : (fighter.defense?.amount ?? 0);
 }
 
 function chooseAttack(fighter, difficulty, defender, attacksUsedThisTurn = 0) {
