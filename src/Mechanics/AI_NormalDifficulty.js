@@ -15,10 +15,10 @@ function hasMeaningfulDebuff(attack, defender) {
     const currentValue = getModifiedCharacterStat(defender, stat);
     if (currentValue <= 0) return false;
 
-    // Debuffs are stored as flat reductions. Compare their actual impact
-    // against the target's current stat so a small absolute change can still
-    // be recognized as severe for a low-stat fighter.
-    return (amount / currentValue) * 100 > 5;
+    // Debuffs are flat reductions and applyEffects clamps stats at zero.
+    // Measure the actual reduction, not an amount that exceeds the stat.
+    const effectiveReduction = Math.min(amount, currentValue);
+    return (effectiveReduction / currentValue) * 100 > 5;
   });
 }
 
