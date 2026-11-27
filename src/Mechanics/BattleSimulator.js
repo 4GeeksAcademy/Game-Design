@@ -13,10 +13,22 @@ import { getNormalAttackPriority, scoreAttack } from "./AI_NormalDifficulty.js";
 
 const MAX_ROUNDS = 100;
 const OPENING_TURN_ATTACK_LIMIT = 4;
+// Match the live 1v1 controllers: Easy resolves up to two moves,
+// while Normal currently queues up to MAX_QUEUE_SIZE (10) usable moves.
+// Hard remains on Normal's live limit until its dedicated controller exists.
 const MAX_ATTACKS_PER_TURN = {
-  Easy: 1,
-  Normal: 6,
+  Easy: 2,
+  Normal: 10,
   Hard: 10,
+};
+
+// Team battles have their own live turn rules: Easy is capped at two,
+// while Normal/Hard can continue through every currently usable move.
+// The opening team turn still has its existing four-action cap.
+const MAX_TEAM_ATTACKS_PER_TURN = {
+  Easy: 2,
+  Normal: Number.POSITIVE_INFINITY,
+  Hard: Number.POSITIVE_INFINITY,
 };
 
 // Both 1v1 systems use the same alternating turn order.
@@ -24,14 +36,8 @@ function getTurnOrder(round) {
   return round % 2 === 1 ? [0, 1] : [1, 0];
 }
 
-// The first fighter of the opening round gets the special attack limit.
-function getAttackLimit(difficulty, isOpeningTurn = false) {
-  const difficultyLimit =
-    MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
-
-  return isOpeningTurn
-    ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyLimit)
-    : difficultyLimit;
+function getAttackLimit(difficulty) {
+  return MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
 }
 
 // Make independent copies so the original roster never changes.
@@ -293,12 +299,7 @@ function runBotTurn(
 ) {
   let attacksThisTurn = 0;
 
-  const difficultyAttackLimit =
-    MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
-
-  const attackLimit = isOpeningTurn
-    ? Math.min(OPENING_TURN_ATTACK_LIMIT, difficultyAttackLimit)
-    : difficultyAttackLimit;
+  const attackLimit = getAttackLimit(difficulty);
 
   while (
     attacker.health > 0 &&
@@ -620,7 +621,8 @@ function simulateTeamBattle(
       if (defender.health <= 0) continue;
 
       const difficultyAttackLimit =
-        MAX_ATTACKS_PER_TURN[difficulty] ?? MAX_ATTACKS_PER_TURN.Easy;
+        MAX_TEAM_ATTACKS_PER_TURN[difficulty] ??
+        MAX_TEAM_ATTACKS_PER_TURN.Easy;
 
       const isOpeningTeamTurn = round === 1 && attackers === players;
 
