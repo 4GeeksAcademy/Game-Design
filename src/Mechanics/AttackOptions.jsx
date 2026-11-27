@@ -235,7 +235,7 @@ function AttackOptions({
       }
 
       setAttacksUsed((previous) => previous + 1);
-      const resultMessageDelay = physicalDamage > 0 || damageAndDebuffs.length > 0 || debuffDamage > 0 ? 2500 : 700;
+      const resultMessageDelay = physicalDamage > 0 || damageAndDebuffs.length > 0 || debuffDamage > 0 ? 3000 : 700;
       window.setTimeout(() => {
         showCombatMessage(`${character.name} uses ${attack.name}!`, "attack");
 
