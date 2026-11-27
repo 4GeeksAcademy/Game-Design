@@ -940,7 +940,8 @@ const stunOptions = {
         }));
       }, 2740);
 
-      const hasResultFeedback = incomingDamage > 0 || Object.values(result.debuffsApplied ?? {}).some((amount) => Number(amount) !== 0) || Boolean(result.stunnedAttacks?.length);\n      const resultMessageDelay = hasResultFeedback ? 3000 : 700;
+      const hasResultFeedback = incomingDamage > 0 || Object.values(result.debuffsApplied ?? {}).some((amount) => Number(amount) !== 0) || Boolean(result.stunnedAttacks?.length);
+      const resultMessageDelay = hasResultFeedback ? 3000 : 700;
       window.setTimeout(() => {
         if (choice === "defend") {
           showCombatMessage("🛡️ BLOCKED!", "blocked");
