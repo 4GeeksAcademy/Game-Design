@@ -843,42 +843,98 @@ const stunOptions = {
         Math.max(0, Number(character.health) || 0) -
           Math.max(0, Number(result.defender?.health) || 0),
       );
-      triggerCombatEffect({
-        target: "opponent",
-        type: "attack",
-        damage: 0,
-        tier: "light",
-        message: "",
-        effects: [],
-      });
-      triggerCombatEffect({
-        target: "player",
-        type: choice === "defend" ? "blocked" : choice === "evade" && result.evaded ? "evaded" : incomingDamage > 0 ? "damage" : "status",
-        damage: incomingDamage,
-        tier: incomingDamage >= 70 ? "fatal" : incomingDamage >= 45 ? "heavy" : incomingDamage >= 20 ? "effective" : "light",
-        message: choice === "defend" ? "BLOCKED!" : choice === "evade" && result.evaded ? "EVADED!" : "",
-        effects: [],
-      });
+      const attackerEffectId = Date.now() + Math.random();
+      const reactionEffectId = Date.now() + Math.random();
+      const resultEffectId = Date.now() + Math.random();
+      const reactionType = choice === "defend"
+        ? "blocked"
+        : choice === "evade" && result.evaded
+          ? "evaded"
+          : "reaction";
 
-      if (choice === "defend") {
-        showCombatMessage("🛡️ BLOCKED!", "blocked");
-      } else if (choice === "evade") {
-        showCombatMessage(
-          result.evaded ? "💨 EVADED!" : "💥 FAILED TO EVADE!",
-          result.evaded ? "evaded" : "hit",
-        );
-      } else {
-        showCombatMessage(
-          `${character.name} took ${result.damageReceived ?? aiAttack.damage} full damage!`,
-          "hit",
-        );
-      }
+      setCombatEffects((current) => ({
+        ...current,
+        opponent: {
+          id: attackerEffectId,
+          type: "attack",
+          damage: 0,
+          tier: "light",
+          message: "",
+          effects: [],
+        },
+      }));
 
-      if (aiControllerRef.current) {
-        aiControllerRef.current.respondToDefense();
-      } else {
-        setAiAttack(null);
-      }
+      window.setTimeout(() => {
+        setCombatEffects((current) => ({
+          ...current,
+          player: {
+            id: reactionEffectId,
+            type: reactionType,
+            damage: 0,
+            tier: "light",
+            message: choice === "defend"
+              ? "BLOCKED!"
+              : choice === "evade"
+                ? result.evaded ? "EVADED!" : "FAILED EVADE!"
+                : "",
+            effects: [],
+          },
+        }));
+      }, 120);
+
+      window.setTimeout(() => {
+        if (incomingDamage > 0) {
+          setCombatEffects((current) => ({
+            ...current,
+            player: {
+              id: resultEffectId,
+              type: "damage",
+              damage: incomingDamage,
+              tier: incomingDamage >= 70 ? "fatal" : incomingDamage >= 45 ? "heavy" : incomingDamage >= 20 ? "effective" : "light",
+              message: "",
+              effects: [],
+            },
+          }));
+        } else if (choice !== "evade" || !result.evaded) {
+          setCombatEffects((current) => ({
+            ...current,
+            player: {
+              id: resultEffectId,
+              type: "status",
+              damage: 0,
+              tier: "light",
+              message: "",
+              effects: [],
+            },
+          }));
+        }
+      }, 640);
+
+      window.setTimeout(() => {
+        if (choice === "defend") {
+          showCombatMessage("🛡️ BLOCKED!", "blocked");
+        } else if (choice === "evade") {
+          showCombatMessage(
+            result.evaded ? "💨 EVADED!" : "💥 FAILED TO EVADE!",
+            result.evaded ? "evaded" : "hit",
+          );
+        } else {
+          showCombatMessage(
+            `${character.name} took ${result.damageReceived ?? aiAttack.damage} full damage!`,
+            "hit",
+          );
+        }
+      }, 700);
+
+      // Let the complete attack/reaction/result beat play before the AI
+      // controller hides this popup or advances to the next queued attack.
+      window.setTimeout(() => {
+        if (aiControllerRef.current) {
+          aiControllerRef.current.respondToDefense();
+        } else {
+          setAiAttack(null);
+        }
+      }, 1050);
     },
     [aiAttack, defenseTimeLeft, character, opponent, showCombatMessage],
   );
