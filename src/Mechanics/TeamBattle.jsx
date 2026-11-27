@@ -225,7 +225,7 @@ function FighterPreview({
             <div className={`fighter-portrait-wrapper ${hasStunnedAttacks ? "fighter-stunned" : ""}`}>
               <img key={combatEffect?.id ?? "idle"} className="fighter-portrait" src={fighter.image} alt="" />
               {hasStunnedAttacks && <span className="team-stun-status"><strong>STUNNED!</strong><small key={stunnedAttackCount}>{stunnedAttackCount} ATTACK{stunnedAttackCount === 1 ? "" : "S"} DISABLED</small></span>}
-              {combatEffect?.type === "debuff-drain" && <span key={combatEffect.id} className="durability-drain-visual" aria-hidden="true"><i /><i /><i /></span>}
+              {["debuff-drain", "damage"].includes(combatEffect?.type) && <span key={combatEffect.id} className="durability-drain-visual" aria-hidden="true"><i /><i /><i /></span>}
             </div>
           )}
           {combatEffect && (
