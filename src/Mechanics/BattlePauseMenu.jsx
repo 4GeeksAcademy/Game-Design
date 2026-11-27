@@ -126,15 +126,44 @@ export default function BattlePauseMenu({ onResume, onRestart, onCharacterSelect
         </section>
         <section className="battle-pause-visual-section">
           <h3>VISUAL EFFECTS</h3>
-          <p>Customize the movement effects used throughout the game. These settings save automatically.</p>
+          <p>Choose the visual quality used throughout Wild Cards. Your selection saves automatically.</p>
+
+          <div className="battle-pause-quality-control">
+            <div className="battle-pause-quality-heading">
+              <strong>GRAPHICS QUALITY</strong>
+              <small>Current: {(audio.quality || "normal").toUpperCase()}</small>
+            </div>
+            <div className="battle-pause-quality-options" role="group" aria-label="Graphics quality">
+              {[
+                ["low", "LOW", "Performance first"],
+                ["normal", "NORMAL", "Balanced experience"],
+                ["high", "HIGH", "Maximum available detail"],
+              ].map(([value, label, description]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`battle-pause-quality-button ${(audio.quality || "normal") === value ? "is-selected" : ""}`}
+                  aria-pressed={(audio.quality || "normal") === value}
+                  onClick={() => changeAudio("quality", value)}
+                >
+                  <strong>{label}</strong>
+                  <small>{description}</small>
+                </button>
+              ))}
+            </div>
+            <p className="battle-pause-quality-note">
+              Low reduces decorative rendering costs while keeping gameplay, buttons, and important interface elements visible. High enhances the effects supported by your device and the game's current artwork.
+            </p>
+          </div>
+
           <label className="battle-pause-visual-toggle motion-blur-setting-row">
             <span>
               <strong>Motion Blur</strong>
-              <small>Adds subtle movement blur to animated fighters, attacks, impacts, and transitions. Turning it off keeps every animation intact.</small>
+              <small>Optional movement blur for fighters, attacks, impacts, and transitions. Off by default to help lower-memory devices.</small>
             </span>
             <input
               type="checkbox"
-              checked={audio.motionBlur !== false}
+              checked={audio.motionBlur === true}
               onChange={(event) => changeAudio("motionBlur", event.target.checked)}
               aria-label="Enable motion blur"
             />
