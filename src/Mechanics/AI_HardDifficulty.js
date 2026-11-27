@@ -341,7 +341,9 @@ function getHardAttackPriority(attacker, defender, options = {}) {
   const remaining = [];
   const seen = new Set();
   let mana = Math.max(0, Number(attacker?.mana) || 0);
-  let actionsSelected = Math.max(0, Number(options.attacksUsedThisTurn) || 0);
+  let actionsSelected = Number.isFinite(Number(options.attacksUsedThisTurn))
+    ? Math.max(0, Number(options.attacksUsedThisTurn))
+    : (attacker?.attacks ?? []).filter((attack) => attack.state === false).length;
   const sorted = (attacker?.attacks ?? [])
     .filter((attack) =>
       canFighterUseAttack(attacker, attack) &&
@@ -386,7 +388,10 @@ function chooseHardTeamAction(fighter, teammates, opponents = []) {
   if (!fighter || !Array.isArray(fighter.attacks)) return null;
   const livingOpponents = opponents.filter((opponent) => opponent.health > 0);
   const target = livingOpponents[0] ?? null;
-  const attack = target ? chooseHardAttack(fighter, target) : null;
+  const attacksUsedThisTurn = fighter.attacks.filter((move) => move.state === false).length;
+  const attack = target
+    ? chooseHardAttack(fighter, target, { attacksUsedThisTurn })
+    : null;
   let bestAction = attack
     ? { attack, healTargetId: null, score: getHardAttackUtility(attack, fighter, target) }
     : { attack: null, healTargetId: null, score: -Infinity };
