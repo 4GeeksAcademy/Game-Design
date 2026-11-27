@@ -410,14 +410,54 @@ function Homescreen() {
               onChange={(event) => changeAudioSetting("muted", event.target.checked)}
             />
           </label>
-          <label className="audio-mute-row motion-blur-setting-row">
+
+        </section>
+
+        <section className="visual-settings-section" aria-labelledby="visual-settings-title">
+          <p className="home-eyebrow">PERFORMANCE & APPEARANCE</p>
+          <h2 className="menu-title" id="visual-settings-title">VISUAL EFFECTS</h2>
+          <p className="menu-description">
+            Choose how Wild Cards looks and performs. These preferences save automatically.
+          </p>
+
+          <div className="quality-setting-block">
+            <div className="quality-setting-heading">
+              <div>
+                <strong>GRAPHICS QUALITY</strong>
+                <small>Current preset: {(audioSettings.quality || "normal").toUpperCase()}</small>
+              </div>
+            </div>
+            <div className="quality-setting-options" role="group" aria-label="Graphics quality">
+              {[
+                ["low", "LOW", "Best for low-memory devices"],
+                ["normal", "NORMAL", "Balanced default"],
+                ["high", "HIGH", "Maximum available detail"],
+              ].map(([value, label, description]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`quality-setting-button ${(audioSettings.quality || "normal") === value ? "is-selected" : ""}`}
+                  aria-pressed={(audioSettings.quality || "normal") === value}
+                  onClick={() => changeAudioSetting("quality", value)}
+                >
+                  <strong>{label}</strong>
+                  <small>{description}</small>
+                </button>
+              ))}
+            </div>
+            <p className="quality-setting-note">
+              Low reduces decorative effects while keeping the complete interface and gameplay visible. High enhances the visual effects supported by your device and the game's artwork.
+            </p>
+          </div>
+
+          <label className="visual-setting-toggle motion-blur-setting-row">
             <span>
-              <strong>Motion blur</strong>
-              <small>Add a subtle directional blur while characters and interface elements move. Disable it for a sharper, cleaner image.</small>
+              <strong>Motion Blur</strong>
+              <small>Optional movement blur for fighters, attacks, impacts, and transitions. Disabled by default to help lower-memory devices.</small>
             </span>
             <input
               type="checkbox"
-              checked={audioSettings.motionBlur !== false}
+              checked={audioSettings.motionBlur === true}
               onChange={(event) => changeAudioSetting("motionBlur", event.target.checked)}
               aria-label="Enable motion blur"
             />
@@ -1012,7 +1052,7 @@ const renderSinglePlayer = () => (
   };
 
   return (
-    <main className="home-screen">
+    <main className={`home-screen ${menu === "settings" ? "home-screen--settings" : ""}`}>
       <div className="arcade-background" />
 
       <header className="home-header">
@@ -1029,7 +1069,7 @@ const renderSinglePlayer = () => (
         </div>
       </header>
 
-      <section className="home-content" key={menu}>
+      <section className={`home-content ${menu === "settings" ? "home-content--settings" : ""}`} key={menu}>
         {renderMenu()}
       </section>
       {showStarterPopup && (
