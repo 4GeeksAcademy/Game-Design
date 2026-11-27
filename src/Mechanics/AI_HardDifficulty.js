@@ -104,11 +104,14 @@ function hardDefendOrEvade(attack, attacker, defender, options = {}, context = {
   const evadeCost = getHardEvadeManaCost(attack, attacker, defender);
   const canEvade = mana >= evadeCost;
   const averageSpeed = getAverageAttackSpeed(attacker);
-  // Low-health defenders keep the extra survival reserve during the incoming
-  // enemy turn as well, after having spent their own offensive actions.
-  const reserveActionCount = healthPercent <= LOW_HEALTH_THRESHOLD
-    ? Math.max(2, context.attacksUsedThisTurn ?? 0)
-    : (context.attacksUsedThisTurn ?? 0);
+  // Count the defender's own moves already spent this round. The extra
+  // low-health reserve activates only after the bot has used two attacks.
+  const attacksAlreadyUsed = Math.max(
+    Number(context.attacksUsedThisTurn) || 0,
+    Number(defender._hardAttacksUsedLastTurn) || 0,
+    (defender.attacks ?? []).filter((move) => move.state === false).length,
+  );
+  const reserveActionCount = attacksAlreadyUsed;
   const reserve = getHardManaReserve(defender, attacker, reserveActionCount);
   const manaAfterEvade = Math.max(0, mana - evadeCost);
   const evadeKeepsReserve = manaAfterEvade >= reserve;
