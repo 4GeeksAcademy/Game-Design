@@ -84,9 +84,48 @@ let audioElement = null;
 let musicSuppressed = false;
 let settings = loadSettings();
 
+function clearMotionBlur(element) {
+  element.classList.remove("wc-motion-blur-active");
+  delete element.dataset.wcMotionBlurCount;
+  element.style.removeProperty("--wc-motion-base-filter");
+}
+
+function activateMotionBlur(element, count = 1) {
+  if (!(element instanceof Element)) return;
+  if (!element.classList.contains("wc-motion-blur-active")) {
+    const computed = window.getComputedStyle(element);
+    const baseFilter = computed.filter;
+    element.style.setProperty(
+      "--wc-motion-base-filter",
+      baseFilter && baseFilter !== "none" ? baseFilter : "none",
+    );
+    element.classList.add("wc-motion-blur-active");
+  }
+  element.dataset.wcMotionBlurCount = String(
+    Math.max(Number(element.dataset.wcMotionBlurCount) || 0, count),
+  );
+}
+
 function applyMotionBlurPreference() {
   if (typeof document === "undefined") return;
-  document.documentElement.classList.toggle("wc-motion-blur-enabled", settings.motionBlur !== false);
+  const root = document.documentElement;
+  const enabled = settings.motionBlur !== false;
+  root.classList.toggle("wc-motion-blur-enabled", enabled);
+
+  // A preference can change while a fighter is already moving. Reconcile
+  // active animations so enabling blur does not require a fresh animation.
+  root.querySelectorAll(".wc-motion-blur-active").forEach((element) => {
+    if (!enabled) clearMotionBlur(element);
+  });
+  if (!enabled || typeof root.getAnimations !== "function") return;
+
+  root.querySelectorAll("*").forEach((element) => {
+    if (typeof element.getAnimations !== "function") return;
+    const activeCount = element.getAnimations().filter(
+      (animation) => animation.playState === "running" || animation.playState === "pending",
+    ).length;
+    if (activeCount > 0) activateMotionBlur(element, activeCount);
+  });
 }
 
 function installMotionBlurListeners() {
@@ -98,20 +137,21 @@ function installMotionBlurListeners() {
     const element = event.target;
     if (!(element instanceof Element)) return;
 
+    // Only add blur to animated elements and transitions. The effect is
+    // intentionally global so battle, menus, story, and tournament UI share it.
     const computed = window.getComputedStyle(element);
     const animationNames = computed.animationName.split(",").map((name) => name.trim()).filter(Boolean);
     const hasMotionAnimation = animationNames.some((name) => name !== "none");
-    const hasTransformTransition = computed.transitionProperty.split(",").some((property) =>
-      property.trim() === "transform" || property.trim() === "all"
-    );
+    const hasTransformTransition =
+      event.type === "transitionrun" &&
+      (event.propertyName === "transform" ||
+        computed.transitionProperty.split(",").some((property) =>
+          property.trim() === "transform" || property.trim() === "all"
+        ));
     if (!hasMotionAnimation && !hasTransformTransition) return;
 
-    if (!element.classList.contains("wc-motion-blur-active")) {
-      const baseFilter = computed.filter;
-      element.style.setProperty("--wc-motion-base-filter", baseFilter && baseFilter !== "none" ? baseFilter : "none");
-      element.classList.add("wc-motion-blur-active");
-    }
-    element.dataset.wcMotionBlurCount = String((Number(element.dataset.wcMotionBlurCount) || 0) + 1);
+    const currentCount = Number(element.dataset.wcMotionBlurCount) || 0;
+    activateMotionBlur(element, currentCount + 1);
   };
 
   const finish = (event) => {
@@ -122,9 +162,7 @@ function installMotionBlurListeners() {
       element.dataset.wcMotionBlurCount = String(count);
       return;
     }
-    delete element.dataset.wcMotionBlurCount;
-    element.classList.remove("wc-motion-blur-active");
-    element.style.removeProperty("--wc-motion-base-filter");
+    clearMotionBlur(element);
   };
 
   document.addEventListener("animationstart", begin, true);
