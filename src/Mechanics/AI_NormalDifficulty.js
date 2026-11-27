@@ -1,4 +1,4 @@
-import { attackCharacter, evadeAttack, canUseAttack, canFighterUseAttack } from "./Health.js";
+import { attackCharacter, evadeAttack, canFighterUseAttack } from "./Health.js";
 import { aiChooseStunTargets } from "./AI.js";
 import { getModifiedAttackStat, getModifiedCharacterStat } from "./Modifiers.js";
 
