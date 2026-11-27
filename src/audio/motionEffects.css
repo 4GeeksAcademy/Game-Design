@@ -1,0 +1,17 @@
+/*
+ * WILD CARDS — GLOBAL MOTION BLUR
+ * A lightweight, preference-controlled movement accent. The base filter is
+ * captured at animation start so character drop-shadows and other styling
+ * remain intact. Blur is intentionally subtle to protect image readability.
+ */
+:root.wc-motion-blur-enabled .wc-motion-blur-active {
+  filter: var(--wc-motion-base-filter, none) blur(1.15px) !important;
+  backface-visibility: hidden;
+}
+
+/* Avoid adding blur to static UI or accessibility-reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  :root.wc-motion-blur-enabled .wc-motion-blur-active {
+    filter: var(--wc-motion-base-filter, none) !important;
+  }
+}
