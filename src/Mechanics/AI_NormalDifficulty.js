@@ -5,6 +5,23 @@ import { getModifiedAttackStat, getModifiedCharacterStat } from "./Modifiers.js"
 const MAX_QUEUE_SIZE = 10;
 const ATTACK_TIMEOUT = 10000;
 
+function hasMeaningfulDebuff(attack, defender) {
+  if (!attack?.debuff || !defender) return false;
+
+  return Object.entries(attack.debuff).some(([stat, rawAmount]) => {
+    const amount = Math.abs(Number(rawAmount) || 0);
+    if (amount <= 0) return false;
+
+    const currentValue = getModifiedCharacterStat(defender, stat);
+    if (currentValue <= 0) return false;
+
+    // Debuffs are stored as flat reductions. Compare their actual impact
+    // against the target's current stat so a small absolute change can still
+    // be recognized as severe for a low-stat fighter.
+    return (amount / currentValue) * 100 > 5;
+  });
+}
+
 function normalDefendOrEvade(attack, attacker, defender, options = {}) {
   if (!attack || !attacker || !defender) return null;
 
@@ -15,8 +32,43 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
   const cooldown = getModifiedCharacterStat(defender, "cooldown");
   const damage = getModifiedAttackStat(attack, attacker, "damage");
 
-  // Zero-damage moves should resolve without spending defense.
-  if (damage === 0 || cooldown <= 0) {
+  const meaningfulDebuff = hasMeaningfulDebuff(attack, defender);
+
+  // A zero-damage attack can still be strategically dangerous. If its
+  // debuff is significant, spend a defensive charge when a block can stop
+  // it; otherwise evade if the available mana can guarantee success.
+  if (damage === 0) {
+    if (!meaningfulDebuff || cooldown <= 0) {
+      return attackCharacter(attack, attacker, defender, 0, options);
+    }
+
+    const attackSpeed = getModifiedAttackStat(attack, attacker, "speed");
+    const agility = getModifiedCharacterStat(defender, "agility");
+    const evadeManaNeeded = Math.max(0, attackSpeed - agility);
+    const canEvade = mana >= evadeManaNeeded;
+
+    if (attack.debuffRequiresHit === true) {
+      const result = attackCharacter(attack, attacker, defender, 0, {
+        ...options,
+        blocked: true,
+      });
+      if (result) {
+        defender.cooldown = Math.max(0, cooldown - 1);
+        result.action = "defend";
+      }
+      return result;
+    }
+
+    if (canEvade) {
+      const result = evadeAttack(attack, attacker, defender, options);
+      if (result) result.action = result.evaded ? "evade" : "take damage";
+      return result;
+    }
+
+    return attackCharacter(attack, attacker, defender, 0, options);
+  }
+
+  if (cooldown <= 0) {
     return attackCharacter(attack, attacker, defender, 0, options);
   }
 
@@ -54,7 +106,13 @@ function normalDefendOrEvade(attack, attacker, defender, options = {}) {
     // Don't spend a defensive charge on trivial damage.
     const trivialDamage = Math.max(5, health * 0.1);
 
-    if (damage <= trivialDamage) {
+    if (meaningfulDebuff && attack.debuffRequiresHit === true) {
+      // Blocking is sufficient to prevent a hit-gated debuff and costs no mana.
+      choice = "defend";
+    } else if (meaningfulDebuff && canEvade) {
+      // Ungated debuffs pass through blocks, so a successful evade is needed.
+      choice = "evade";
+    } else if (damage <= trivialDamage) {
       choice = "take-damage";
     } else if (canEvade) {
       const manaIsAffordable = evadeManaNeeded <= mana * 0.25;
