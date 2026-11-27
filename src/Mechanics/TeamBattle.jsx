@@ -2654,12 +2654,18 @@ export default function TeamBattle() {
       }
 
       defenseResolvedRef.current = true;
+      const actualDamage = result
+        ? Math.max(0, defenderHealthBefore - Math.max(0, Number(currentDefender.health) || 0))
+        : 0;
+      const hasResultFeedback = actualDamage > 0 ||
+        Object.values(result?.debuffsApplied ?? {}).some((amount) => Number(amount) !== 0);
+      const nextAttackDelay = result?.evaded && !hasResultFeedback
+        ? 1100
+        : hasResultFeedback
+          ? 3000
+          : 1300;
 
       if (result) {
-        const actualDamage = Math.max(
-          0,
-          defenderHealthBefore - Math.max(0, Number(currentDefender.health) || 0),
-        );
         const cpuAttackerEffectId = Date.now() + Math.random();
         const defenderReactionId = Date.now() + Math.random();
         const defenderResultId = Date.now() + Math.random();
@@ -2804,7 +2810,7 @@ export default function TeamBattle() {
         setDefenseOutcome(null);
         setPendingDefense(null);
         setCpuActionIndex((index) => index + 1);
-      }, 1250);
+      }, nextAttackDelay);
     },
     [pendingDefense, phase, teams.player, teams.opponent, addLog],
   );
@@ -2903,6 +2909,13 @@ export default function TeamBattle() {
         const beforeHealth = Math.max(0, Number(teams.player.find((fighter) => fighter.id === currentDefender.id)?.health) || 0);
         const afterHealth = Math.max(0, Number(currentDefender.health) || 0);
         const actualDamage = Math.max(0, beforeHealth - afterHealth);
+        const hasResultFeedback = actualDamage > 0 ||
+          Object.values(result.debuffsApplied ?? {}).some((amount) => Number(amount) !== 0);
+        const nextAttackDelay = result.evaded && !hasResultFeedback
+          ? 1100
+          : hasResultFeedback
+            ? 3000
+            : 1300;
 
         setCombatEffects((current) => ({
           ...current,
@@ -2960,7 +2973,7 @@ export default function TeamBattle() {
           setDefenseOutcome(null);
           setPendingDefense(null);
           setCpuActionIndex((index) => index + 1);
-        }, 1250);
+        }, nextAttackDelay);
       } else {
         resolveCPUDefense("timeout");
       }
