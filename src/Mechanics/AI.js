@@ -1,8 +1,8 @@
-import { attackCharacter, evadeAttack, canUseAttack } from "./Health.js";
+import { attackCharacter, evadeAttack, canUseAttack, canFighterUseAttack } from "./Health.js";
 
 function aiChooseAttack(ai) {
   let availableAttacks = ai.attacks.filter((attack) => {
-    return canUseAttack(attack) && ai.mana >= (attack.cost ?? 0);
+    return canFighterUseAttack(ai, attack);
   });
 
   if (availableAttacks.length === 0) {
