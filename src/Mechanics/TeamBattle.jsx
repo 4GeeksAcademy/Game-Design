@@ -9,6 +9,7 @@ import {
   attackCharacter,
   evadeAttack,
   canUseAttack,
+  canFighterUseAttack,
   applyHeal,
   consumeAttack,
 } from "./Health.js";
@@ -1525,7 +1526,7 @@ export default function TeamBattle() {
 
       const nextAttackIndex = attacker.attacks.findIndex(
         (candidate) =>
-          canUseAttack(candidate) && attacker.mana >= (candidate.cost ?? 0),
+          canFighterUseAttack(attacker, candidate),
       );
 
       const canAttackAgain =
@@ -1904,7 +1905,7 @@ export default function TeamBattle() {
         .map((attack, attackIndex) => ({ attack, attackIndex }))
         .filter(
           ({ attack }) =>
-            canUseAttack(attack) && cpu.mana >= (attack.cost ?? 0),
+            canFighterUseAttack(cpu, attack),
         )
         .slice(0, limit);
 
