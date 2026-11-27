@@ -141,16 +141,10 @@ function installMotionBlurListeners() {
 
     // Only add blur to animated elements and transitions. The effect is
     // intentionally global so battle, menus, story, and tournament UI share it.
-    const computed = window.getComputedStyle(element);
-    const animationNames = computed.animationName.split(",").map((name) => name.trim()).filter(Boolean);
-    const hasMotionAnimation = animationNames.some((name) => name !== "none");
-    const hasTransformTransition =
-      event.type === "transitionrun" &&
-      (event.propertyName === "transform" ||
-        computed.transitionProperty.split(",").some((property) =>
-          property.trim() === "transform" || property.trim() === "all"
-        ));
-    if (!hasMotionAnimation && !hasTransformTransition) return;
+    const isAnimation = event.type === "animationstart";
+    const isTransformTransition =
+      event.type === "transitionrun" && event.propertyName === "transform";
+    if (!isAnimation && !isTransformTransition) return;
 
     const currentCount = Number(element.dataset.wcMotionBlurCount) || 0;
     activateMotionBlur(element, currentCount + 1);
