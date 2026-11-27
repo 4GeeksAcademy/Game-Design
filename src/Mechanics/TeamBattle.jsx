@@ -933,9 +933,7 @@ export default function TeamBattle() {
         player.isCpuTeammate &&
         player.attacks.some(
           (attack) =>
-            attack.heal &&
-            canUseAttack(attack) &&
-            player.mana >= (attack.cost ?? 0),
+            attack.heal && canFighterUseAttack(player, attack),
         );
 
       return {
@@ -1640,9 +1638,7 @@ export default function TeamBattle() {
         player.isCpuTeammate &&
         player.attacks.some(
           (attack) =>
-            attack.heal &&
-            canUseAttack(attack) &&
-            player.mana >= (attack.cost ?? 0),
+            attack.heal && canFighterUseAttack(player, attack),
         );
 
       return (player.health <= 0 || (!targetAlive && !hasUsableHeal)) &&
