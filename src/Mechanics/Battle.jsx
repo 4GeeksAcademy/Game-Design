@@ -866,6 +866,7 @@ const stunOptions = {
       setCombatEffects((current) => ({
         ...current,
         opponent: {
+          target: "opponent",
           id: attackerEffectId,
           type: "attack",
           damage: 0,
@@ -879,6 +880,7 @@ const stunOptions = {
         setCombatEffects((current) => ({
           ...current,
           player: {
+            target: "player",
             id: reactionEffectId,
             type: reactionType,
             damage: 0,
@@ -898,6 +900,7 @@ const stunOptions = {
           setCombatEffects((current) => ({
             ...current,
             player: {
+              target: "player",
               id: resultEffectId,
               type: "damage",
               damage: incomingDamage,
