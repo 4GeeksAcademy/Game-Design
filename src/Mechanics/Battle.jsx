@@ -911,6 +911,20 @@ const stunOptions = {
       }, 640);
 
       window.setTimeout(() => {
+        setCombatEffects((current) => ({
+          ...current,
+          opponent: current.opponent?.id === attackerEffectId ? null : current.opponent,
+          player: current.player?.id === reactionEffectId ? null : current.player,
+        }));
+      }, 950);
+      window.setTimeout(() => {
+        setCombatEffects((current) => ({
+          ...current,
+          player: current.player?.id === resultEffectId ? null : current.player,
+        }));
+      }, 2740);
+
+      window.setTimeout(() => {
         if (choice === "defend") {
           showCombatMessage("🛡️ BLOCKED!", "blocked");
         } else if (choice === "evade") {
