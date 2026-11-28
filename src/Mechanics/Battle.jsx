@@ -17,7 +17,7 @@ import { storyBackgrounds } from "./Main Page/Story/StoryBackgrounds.js";
 import { getDamageThreat, getSpeedThreat } from "./AttackThreat.js";
 import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
-import { createHardAIController } from "./AI_HardDifficulty.js";
+import { createHardAIController, createHardSavingState, recordHardPressureOutcome } from "./AI_HardDifficulty.js";
 import { addCoins } from "./Currency.js";
 import { getEquippedAttacks, getBotEquippedAttacks, getNormalDifficultyAttacks, getHardDifficultyAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
@@ -237,6 +237,7 @@ function BattleMatch() {
 
   const aiControllerRef = useRef(null);
   const aiAttackHealthBeforeRef = useRef(null);
+  const hardSavingStateRef = useRef(createHardSavingState());
 
   useEffect(() => {
     const damageSinceLastUpdate = damageDealt - lastRewardedDamage.current;
@@ -330,6 +331,7 @@ function BattleMatch() {
     aiControllerRef.current?.stop();
     aiControllerRef.current = null;
     aiAttackHealthBeforeRef.current = null;
+    hardSavingStateRef.current = createHardSavingState();
     setCharacter(createBattleFighter(playerId, "player", location.state?.difficulty ?? "Easy"));
     setOpponent(createBattleFighter(opponentId, "opponent", location.state?.difficulty ?? "Easy"));
     setDamageDealt(0); setCombatDefense(0); setAttacksUsed(0);
@@ -463,6 +465,9 @@ function BattleMatch() {
       !comboBreakState
     ) {
       turn(character, opponent);
+      if ((location.state?.difficulty ?? "Easy") === "Hard") {
+        recordHardPressureOutcome(hardSavingStateRef.current, character);
+      }
 
       setCharacter({ ...character });
       setOpponent({ ...opponent });
@@ -573,6 +578,7 @@ function BattleMatch() {
       const controller = createController({
         getAI: () => opponentRef.current,
         getPlayer: () => characterRef.current,
+        ...(difficulty === "Hard" ? { strategyState: hardSavingStateRef.current } : {}),
 
         onShowAttack: (attack) => {
           if (attack) {
