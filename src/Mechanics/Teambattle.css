@@ -745,11 +745,11 @@ button.fighter-card { width: 100%; cursor: pointer; }
   margin-top: 8px;
 }
 
-/* Shorten the battlefield so the attack panels fit higher on screen */
-
+/* Keep fighter artwork at its intended height on shorter displays.
+   The page may scroll; portrait cards must never be compressed to fit. */
 @media (max-height: 800px) {
-  .battlefield {
-    height: 52vh;
+  .battle-bottom {
+    flex-basis: clamp(250px, 36vh, 300px);
   }
 }
 
@@ -3575,12 +3575,12 @@ battlefield > .local-coop-incoming {
 .fighter-art-button {
   position: relative;
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   width: 100%;
   min-width: 0;
-  min-height: 130px;
+  min-height: 0;
   height: auto;
   padding: 0;
   overflow: visible;
@@ -3605,8 +3605,9 @@ battlefield > .local-coop-incoming {
   align-items: flex-end;
   justify-content: center;
   width: 100%;
-  height: clamp(155px, 27vh, 285px);
-  min-height: 0;
+  flex: 0 0 auto;
+  height: clamp(170px, 26vh, 220px);
+  min-height: 170px;
   overflow: visible;
   isolation: isolate;
 }
@@ -3858,7 +3859,7 @@ battlefield > .local-coop-incoming {
 }
 
 @media (max-height: 700px) and (min-width: 621px) {
-  .fighter-portrait-stage { height: clamp(105px, 21vh, 175px); }
+  .fighter-portrait-stage { height: clamp(165px, 25vh, 190px); min-height: 165px; }
   .fighter-hud { gap: 3px; padding: 5px 7px; }
   .fighter-hud .resource-track { height: 7px; }
   .fighter-segments > span { height: 7px; }
@@ -3872,7 +3873,7 @@ battlefield > .local-coop-incoming {
   .fighter-hud .resource-row { grid-template-columns: 17px minmax(0, 1fr) auto; gap: 4px; }
   .fighter-hud .resource-value { min-width: 42px; font-size: 8px; }
   .fighter-charge-row { grid-template-columns: 1fr; gap: 4px; }
-  .fighter-portrait-stage { height: clamp(105px, 19vh, 165px); }
+  .fighter-portrait-stage { height: clamp(150px, 21vh, 180px); min-height: 150px; }
   .fighter-info-popup { right: -15%; left: -15%; max-height: 230px; }
   .fighter-info-stat-grid { gap: 5px 8px; }
   .fighter-info-stat-grid > div span { font-size: 7px; }
@@ -4470,9 +4471,10 @@ battlefield > .local-coop-incoming {
 .team-battle .fighter-portrait-wrapper {
   display:block;
   flex:0 0 auto;
-  width:min(190px,100%);
-  height:min(285px,100%);
-  max-width:190px;
+  width:auto;
+  height:100%;
+  aspect-ratio:120 / 190;
+  max-width:100%;
   max-height:100%;
   min-height:0;
   overflow:hidden;
@@ -4500,7 +4502,13 @@ battlefield > .local-coop-incoming {
   border-radius:inherit;
 }
 @media (max-width:900px) {
-  .team-battle .fighter-portrait-wrapper { width:min(160px,100%); height:min(240px,100%); }
+  .team-battle .fighter-portrait-wrapper {
+    width:auto;
+    height:100%;
+    aspect-ratio:120 / 190;
+    max-width:100%;
+    max-height:100%;
+  }
 }
 @media (prefers-reduced-motion:reduce) {
   #battleLayout .solo-portrait-wrapper > img,
