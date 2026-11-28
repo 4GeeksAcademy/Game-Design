@@ -346,6 +346,224 @@ function chooseHardAttack(attacker, defender, options = {}) {
   return best?.attack ?? null;
 }
 
+
+const HARD_WORTHWHILE_PLAN_SCORE = 34;
+
+function createHardSavingState() {
+  return {
+    mode: "normal",
+    stalledRounds: 0,
+    pressureUsedThisRound: false,
+    pendingPressure: null,
+  };
+}
+
+function getHardResourceSnapshot(fighter) {
+  if (!fighter) return null;
+  return {
+    cooldown: Math.max(0, Number(fighter.cooldown) || 0),
+    mana: Math.max(0, Number(fighter.mana) || 0),
+    maximumCooldown: Math.max(0, getModifiedCharacterStat(fighter, "maximumCooldown")),
+    recovery: Math.max(0, getModifiedCharacterStat(fighter, "recovery")),
+    manaRegen: Math.max(0, getModifiedCharacterStat(fighter, "manaRegen")),
+  };
+}
+
+function getHardSequenceValue(attacker, defender) {
+  if (!attacker || !defender) return { score: -Infinity, attack: null, sequenceLength: 0 };
+  const mana = Math.max(0, Number(attacker.mana) || 0);
+  const candidates = (attacker.attacks ?? [])
+    .filter((attack) =>
+      canFighterUseAttack(attacker, attack) &&
+      !(attack.heal && !(getModifiedAttackStat(attack, attacker, "damage") > 0))
+    )
+    .map((attack) => ({
+      attack,
+      cost: Math.max(0, getModifiedAttackStat(attack, attacker, "cost")),
+      damage: Math.max(0, getModifiedAttackStat(attack, attacker, "damage")),
+      utility: getHardAttackUtility(attack, attacker, defender),
+    }))
+    .filter((item) => item.cost <= mana)
+    .sort((a, b) => b.utility - a.utility)
+    .slice(0, 8);
+
+  let best = { score: -Infinity, attack: null, sequenceLength: 0 };
+  for (let i = 0; i < candidates.length; i++) {
+    const first = candidates[i];
+    const firstKills = first.damage >= (Number(defender.health) || 0);
+    if (first.utility > best.score) {
+      best = { score: first.utility, attack: first.attack, sequenceLength: 1 };
+    }
+    if (firstKills) continue;
+
+    for (let j = 0; j < candidates.length; j++) {
+      if (i === j) continue;
+      const second = candidates[j];
+      if (first.cost + second.cost > mana) continue;
+      const expected = getOpponentResponse(first.attack, attacker, defender).expectedDamage +
+        getOpponentResponse(second.attack, attacker, defender).expectedDamage;
+      const kills = expected >= (Number(defender.health) || 0);
+      const score = first.utility + second.utility * 0.72 +
+        (first.damage > 0 && second.damage > 0 ? 9 : 0) + (kills ? 85 : 0);
+      if (score > best.score) {
+        best = { score, attack: first.attack, sequenceLength: 2 };
+      }
+    }
+  }
+  return best;
+}
+
+function getHardPressureAttack(attacker, defender) {
+  if (!attacker || !defender) return null;
+  const regeneration = Math.max(0, getModifiedCharacterStat(attacker, "manaRegen"));
+  const pressureWeights = {
+    cooldown: 3,
+    maximumCooldown: 2.5,
+    recovery: 2.4,
+    manaRegen: 2,
+    maximumMana: 1.2,
+  };
+
+  return (attacker.attacks ?? [])
+    .filter((attack) => canFighterUseAttack(attacker, attack))
+    .map((attack) => {
+      const cost = Math.max(0, getModifiedAttackStat(attack, attacker, "cost"));
+      if (cost > regeneration) return null;
+      let pressure = 0;
+      for (const [stat, weight] of Object.entries(pressureWeights)) {
+        const amount = Math.abs(Number(attack.debuff?.[stat]) || 0);
+        const current = Math.max(0, getModifiedCharacterStat(defender, stat));
+        if (amount > 0 && current > 0) pressure += Math.min(amount, current) * weight;
+      }
+      if (pressure <= 0) return null;
+      const damage = Math.max(0, getModifiedAttackStat(attack, attacker, "damage"));
+      return { attack, score: pressure + Math.min(damage, 30) * 0.12 - cost * 0.1 };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score)[0]?.attack ?? null;
+}
+
+function chooseHardTarget(attacker, opponents = []) {
+  const living = opponents.filter((opponent) => opponent && opponent.health > 0);
+  if (!living.length) return null;
+  return living
+    .map((target) => {
+      const plan = getHardSequenceValue(attacker, target);
+      const maxHealth = Math.max(1, Number(target.maximumHealth ?? target.health) || 1);
+      const healthRatio = Math.max(0, Number(target.health) || 0) / maxHealth;
+      const defense = Math.max(0, getModifiedCharacterStat(target, "defense"));
+      const pressure = getHardPressureAttack(attacker, target);
+      const pressureValue = pressure
+        ? getHardDebuffThreat(pressure, target).score
+        : 0;
+      const score = plan.score +
+        Math.max(0, 12 - defense) * 1.15 +
+        (1 - healthRatio) * 18 +
+        pressureValue * 0.65;
+      return { target, score };
+    })
+    .sort((a, b) => b.score - a.score)[0].target;
+}
+
+function chooseHardTeamTargets(attackers = [], defenders = []) {
+  const livingAttackers = attackers.filter((fighter) => fighter && fighter.health > 0);
+  const livingDefenders = defenders.filter((fighter) => fighter && fighter.health > 0);
+  const assignments = {};
+  const projectedDamage = new Map();
+
+  for (const attacker of livingAttackers) {
+    const ranked = livingDefenders.map((target) => {
+      const plan = getHardSequenceValue(attacker, target);
+      const attack = plan.attack;
+      const damage = attack
+        ? Math.max(0, getModifiedAttackStat(attack, attacker, "damage"))
+        : 0;
+      const projected = projectedDamage.get(target.id) ?? 0;
+      const maxHealth = Math.max(1, Number(target.maximumHealth ?? target.health) || 1);
+      const nearlyDefeated = Number(target.health) <= maxHealth * 0.3;
+      const canFocusForKo = projected + damage >= Number(target.health);
+      const coordination = projected <= 0
+        ? 0
+        : (nearlyDefeated || canFocusForKo ? 24 : -14);
+      return { target, score: plan.score + coordination, damage };
+    }).sort((a, b) => b.score - a.score);
+
+    const selected = ranked[0];
+    if (!selected) continue;
+    assignments[attacker.id] = selected.target.id;
+    projectedDamage.set(
+      selected.target.id,
+      (projectedDamage.get(selected.target.id) ?? 0) + selected.damage,
+    );
+  }
+  return assignments;
+}
+
+function getHardSavingDecision(attacker, opponents = [], state = createHardSavingState()) {
+  if (!attacker || !state) return { mode: "skip", attack: null, target: null };
+  if (state.pressureUsedThisRound) {
+    return { mode: "skip", attack: null, target: null };
+  }
+
+  const target = chooseHardTarget(attacker, opponents);
+  if (!target) return { mode: "skip", attack: null, target: null };
+
+  const plan = getHardSequenceValue(attacker, target);
+  const lethal = plan.attack &&
+    Math.max(0, getModifiedAttackStat(plan.attack, attacker, "damage")) >=
+      Math.max(0, Number(target.health) || 0);
+  const worthwhile = plan.score >= HARD_WORTHWHILE_PLAN_SCORE &&
+    (plan.sequenceLength >= 2 || lethal || plan.score >= HARD_WORTHWHILE_PLAN_SCORE + 18);
+
+  if (state.mode === "recover") {
+    if (!worthwhile) return { mode: "skip", attack: null, target };
+    state.mode = "normal";
+    state.stalledRounds = 0;
+  }
+
+  if (state.mode === "normal" && !worthwhile) {
+    state.mode = "pressure";
+  }
+
+  if (state.mode === "pressure") {
+    state.pendingPressure = {
+      targetId: target.id,
+      before: getHardResourceSnapshot(target),
+    };
+    state.pressureUsedThisRound = true;
+    const pressureAttack = getHardPressureAttack(attacker, target);
+    return pressureAttack
+      ? { mode: "pressure", attack: pressureAttack, target }
+      : { mode: "skip", attack: null, target };
+  }
+
+  return {
+    mode: "normal",
+    attack: chooseHardAttack(attacker, target),
+    target,
+  };
+}
+
+function recordHardPressureOutcome(state, target) {
+  if (!state) return;
+  const pending = state.pendingPressure;
+  if (pending?.before && target && target.id === pending.targetId) {
+    const after = getHardResourceSnapshot(target);
+    const before = pending.before;
+    const meaningfulProgress =
+      before.cooldown - after.cooldown >= 1 ||
+      before.mana - after.mana >= 1 ||
+      before.maximumCooldown - after.maximumCooldown >= 1 ||
+      before.recovery - after.recovery >= 0.5 ||
+      before.manaRegen - after.manaRegen >= 0.5;
+
+    state.stalledRounds = meaningfulProgress ? 0 : (state.stalledRounds ?? 0) + 1;
+    if (state.stalledRounds >= 10) state.mode = "recover";
+  }
+  state.pendingPressure = null;
+  state.pressureUsedThisRound = false;
+}
+
 function getHardAttackPriority(attacker, defender, options = {}) {
   const remaining = [];
   const seen = new Set();
@@ -403,7 +621,7 @@ function getHardEffectiveSelfHeal(attack, fighter) {
 function chooseHardTeamAction(fighter, teammates, opponents = []) {
   if (!fighter || !Array.isArray(fighter.attacks)) return null;
   const livingOpponents = opponents.filter((opponent) => opponent.health > 0);
-  const target = livingOpponents[0] ?? null;
+  const target = chooseHardTarget(fighter, livingOpponents);
   const attacksUsedThisTurn = fighter.attacks.filter((move) => move.state === false).length;
   const attack = target
     ? chooseHardAttack(fighter, target, { attacksUsedThisTurn })
@@ -455,6 +673,7 @@ function createHardAIController({
   onShowAttack,
   onResolveAttack,
   onFinish,
+  strategyState,
 }) {
   const readAI = getAI ?? (() => ai);
   const readPlayer = getPlayer ?? (() => player);
@@ -499,9 +718,11 @@ function createHardAIController({
 
     const attacker = readAI();
     const defender = readPlayer();
-    const attack = chooseHardAttack(attacker, defender, {
-      attacksUsedThisTurn: attacksResolved,
-    });
+    const decision = strategyState
+      ? getHardSavingDecision(attacker, [defender], strategyState)
+      : { mode: "normal", attack: chooseHardAttack(attacker, defender, { attacksUsedThisTurn: attacksResolved }) };
+    const attack = decision.attack;
+    const pressureAction = decision.mode === "pressure";
 
     if (!attack || !canFighterUseAttack(attacker, attack)) {
       finishTurn();
@@ -538,7 +759,7 @@ function createHardAIController({
         onResolveAttack(liveAttack, liveAttacker, liveDefender, result);
       }
 
-      if (isBattleOver()) {
+      if (isBattleOver() || pressureAction) {
         finishTurn();
         return;
       }
@@ -587,5 +808,11 @@ export {
   chooseHardAttack,
   getHardAttackPriority,
   chooseHardTeamAction,
+  createHardSavingState,
+  getHardSavingDecision,
+  getHardResourceSnapshot,
+  recordHardPressureOutcome,
+  chooseHardTarget,
+  chooseHardTeamTargets,
   createHardAIController,
 };
