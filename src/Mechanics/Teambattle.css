@@ -2387,8 +2387,9 @@ battlefield > .local-coop-incoming {
     0 0 8px rgba(19, 213, 255, 0.35),
     inset 0 0 8px rgba(19, 213, 255, 0.12);
   height: auto;
+  min-height: 380px;
   margin-bottom: 0;
-  flex: 1 1 auto;
+  flex: 1 0 380px;
 }
 
 .team-battle-story-background {
@@ -3854,7 +3855,7 @@ battlefield > .local-coop-incoming {
   .fighter-unit { gap: 5px; }
   .fighter-hud { padding: 6px; gap: 4px; }
   .fighter-charge-row { gap: 5px; }
-  .fighter-portrait-stage { height: clamp(125px, 23vh, 205px); }
+  .fighter-portrait-stage { height: clamp(160px, 24vh, 200px); min-height: 160px; }
   .fighter-portrait { max-width: min(100%, 190px); }
 }
 
