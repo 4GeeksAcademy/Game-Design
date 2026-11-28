@@ -361,6 +361,7 @@ function createHardSavingState() {
 function getHardResourceSnapshot(fighter) {
   if (!fighter) return null;
   return {
+    health: Math.max(0, Number(fighter.health) || 0),
     cooldown: Math.max(0, Number(fighter.cooldown) || 0),
     mana: Math.max(0, Number(fighter.mana) || 0),
     maximumCooldown: Math.max(0, Number(getModifiedCharacterStat(fighter, "maximumCooldown")) || 0),
@@ -559,6 +560,7 @@ function recordHardPressureOutcome(state, target) {
     const after = getHardResourceSnapshot(target);
     const before = pending.before;
     const meaningfulProgress =
+      before.health - after.health >= 1 ||
       before.cooldown - after.cooldown >= 1 ||
       before.mana - after.mana >= 1 ||
       before.maximumCooldown - after.maximumCooldown >= 1 ||
