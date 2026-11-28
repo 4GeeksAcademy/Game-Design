@@ -45,6 +45,7 @@ import {
   createHardSavingState,
   getHardSavingDecision,
   recordHardPressureOutcome,
+  markHardPressureUsed,
   chooseHardTeamTargets,
 } from "./AI_HardDifficulty.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
@@ -1962,10 +1963,15 @@ export default function TeamBattle() {
           cpu,
           teams.player,
           getHardStateFor(cpu.id),
+          { deferPressureMark: true },
         );
         target = decision.target ?? target;
         usableAttacks = decision.attack
-          ? [{ attack: decision.attack, attackIndex: cpu.attacks.indexOf(decision.attack) }]
+          ? [{
+              attack: decision.attack,
+              attackIndex: cpu.attacks.indexOf(decision.attack),
+              pressure: decision.mode === "pressure",
+            }]
           : [];
       } else {
         if (!target) return;
@@ -1977,7 +1983,7 @@ export default function TeamBattle() {
 
       if (!target) return;
       usableAttacks.forEach(({ attackIndex }) => {
-        if (attackIndex >= 0) queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
+        if (attackIndex >= 0) queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex, pressure: usableAttacks.find((item) => item.attackIndex === attackIndex)?.pressure === true });
       });
     });
 
@@ -2152,6 +2158,7 @@ export default function TeamBattle() {
       cpuId: cpu.id,
       targetId: target.id,
       attackIndex: action.attackIndex,
+      pressure: action.pressure === true,
     });
   }, [
     phase,
@@ -2764,6 +2771,9 @@ export default function TeamBattle() {
       const resultMessageDelay = hasResultFeedback ? 3000 : 700;
 
       if (result) {
+        if (pendingDefense.pressure) {
+          markHardPressureUsed(getHardStateFor(currentAttacker.id));
+        }
         const cpuAttackerEffectId = Date.now() + Math.random();
         const defenderReactionId = Date.now() + Math.random();
         const defenderResultId = Date.now() + Math.random();
