@@ -374,6 +374,29 @@ test.describe("Hard AI", () => {
   });
 
 
+
+  test("exits pressure mode as soon as a worthwhile combo becomes affordable", () => {
+    const attacker = makeFighter({
+      mana: 100,
+      attacks: [
+        makeAttack("pressure", { damage: 0, cost: 5, debuff: { recovery: -1 } }),
+        makeAttack("combo-one", { damage: 40, cost: 10 }),
+        makeAttack("combo-two", { damage: 40, cost: 10 }),
+      ],
+    });
+    const defender = makeFighter({ id: "player", health: 100 });
+    const state = createHardSavingState();
+    state.mode = "pressure";
+    state.stalledRounds = 4;
+
+    const decision = getHardSavingDecision(attacker, [defender], state);
+
+    expect(decision.mode).toBe("normal");
+    expect(decision.attack).not.toBeNull();
+    expect(state.mode).toBe("normal");
+    expect(state.stalledRounds).toBe(0);
+  });
+
   test("leaves full recovery when a worthwhile combo becomes affordable", () => {
     const attacker = makeFighter({
       mana: 0,
