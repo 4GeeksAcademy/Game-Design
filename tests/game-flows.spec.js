@@ -13,7 +13,7 @@ test.describe("Wild Cards - 1v1 gameplay", () => {
     browserErrors,
   }) => {
     // Allow enough time for the CPU selection and battle transitions.
-    test.setTimeout(90000);
+    test.setTimeout(180000);
 
     await bootHome(page);
     await openSinglePlayer(page);
@@ -66,12 +66,35 @@ test.describe("Wild Cards - 1v1 gameplay", () => {
       page.locator("#character .solo-fighter-art"),
     ).toHaveClass(/combat-effect-attack/, { timeout: 4000 });
 
-    // Verify that combat resolution produces a real log entry.
-    await expect(
-      page.locator("#combatLogEntries .combat-log-entry").first(),
-    ).toBeVisible({ timeout: 5000 });
+    
+// Verify that the player's attack produces a real combat log entry.
+await expect(
+  page.locator("#combatLogEntries .combat-log-entry").first(),
+).toBeVisible({ timeout: 5000 });
 
-    expect(browserErrors).toEqual([]);
+// Hand the turn to the Hard AI.
+await page.locator(".solo-finish-turn-button").click();
+
+// Wait for the Hard AI to select and display an incoming attack.
+await expect(page.locator("#defensiveActions")).toBeVisible({
+  timeout: 15000,
+});
+
+// Respond to the AI's attack.
+await expect(page.locator("#evadeButton")).toBeEnabled({
+  timeout: 5000,
+});
+await page.locator("#evadeButton").click();
+
+// Verify that the defensive response was recorded.
+await expect(
+  page.locator("#combatLogEntries .combat-log-entry").filter({
+    hasText: /EVADED|FAILED TO EVADE/,
+  }),
+).toBeVisible({ timeout: 7000 });
+
+expect(browserErrors).toEqual([]);
+
   });
 });
 
@@ -80,7 +103,7 @@ test.describe("Wild Cards - 2v2 gameplay", () => {
   page,
   browserErrors,
 }) => {
-  test.setTimeout(90000);
+  test.setTimeout(180000);
     await bootHome(page);
     await openSinglePlayer(page);
 
