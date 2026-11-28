@@ -19,7 +19,7 @@ import {
   tickSelfModifiers,
 } from "./Modifiers.js";
 import { getCharacterImage } from "./SkinManager.js";
-import { getEquippedAttacks, getBotEquippedAttacks, getHardDifficultyAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getBotEquippedAttacks, getNormalDifficultyAttacks, getHardDifficultyAttacks, getAttackDisplayName, getAttackKey } from "./AttackLoadouts.js";
 import { addCoins } from "./Currency.js";
 import { playGameSound } from "../audio/audioManager.js";
 import { resetAttacks } from "./Turns.js";
@@ -78,7 +78,9 @@ function createBattleFighter(id, isCpuControlled = false, difficulty = "Easy") {
     attacks: (isCpuControlled
       ? difficulty === "Hard"
         ? getHardDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
-        : getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+        : difficulty === "Normal"
+          ? getNormalDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
+          : getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
       : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
     ).map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
       const remainingUses = Number.isInteger(attack.uses)
@@ -1144,7 +1146,11 @@ export default function TeamBattle() {
       teams.opponent.some((fighter) => fighter.id === attacker.id);
     const allowedAttackKeys = new Set(
       (cpuControlled
-        ? getBotEquippedAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
+        ? difficulty === "Hard"
+          ? getHardDifficultyAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
+          : difficulty === "Normal"
+            ? getNormalDifficultyAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
+            : getBotEquippedAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
         : getEquippedAttacks(attacker.id, rosterFighter?.data?.attacks ?? [], rosterFighter?.data?.slot)
       ).map(getAttackKey),
     );

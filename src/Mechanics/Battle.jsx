@@ -19,7 +19,7 @@ import { aiDefendOrEvade, aiTurn, aiChooseStunTargets } from "./AI.js";
 import { createNormalAIController } from "./AI_NormalDifficulty.js";
 import { createHardAIController } from "./AI_HardDifficulty.js";
 import { addCoins } from "./Currency.js";
-import { getEquippedAttacks, getBotEquippedAttacks, getHardDifficultyAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
+import { getEquippedAttacks, getBotEquippedAttacks, getNormalDifficultyAttacks, getHardDifficultyAttacks, getAttackDisplayName } from "./AttackLoadouts.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
 import ComboPopup, { ComboBreakPopup } from "./ComboPopup.jsx";
@@ -37,7 +37,9 @@ function createBattleFighter(characterId, battleId, difficulty = "Easy") {
   const sourceAttacks = battleId === "opponent"
     ? difficulty === "Hard"
       ? getHardDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
-      : getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
+      : difficulty === "Normal"
+        ? getNormalDifficultyAttacks(selected.id, data.attacks ?? [], data.slot)
+        : getBotEquippedAttacks(selected.id, data.attacks ?? [], data.slot)
     : getEquippedAttacks(selected.id, data.attacks ?? [], data.slot);
   const attacks = sourceAttacks.map((attack) => ({ ...attack, name: getAttackDisplayName(attack) })).map((attack) => {
     const remainingUses = Number.isInteger(attack.uses)

@@ -134,6 +134,26 @@ export function getBotEquippedAttacks(characterId, attacks = [], configuredSlot)
   return attacks.filter((attack) => keys.has(getAttackKey(attack))).map((attack) => ({ ...attack }));
 }
 
+// Normal CPU builds use the character's actual unlocked database attacks.
+// Bot Simulator loadouts are deliberately ignored. The character's slot cap
+// still applies, and locked or unearned festival moves remain unavailable.
+export function getNormalDifficultyAttacks(characterId, attacks = [], configuredSlot) {
+  if (!Array.isArray(attacks)) return [];
+
+  const slotLimit = getAttackSlotLimit(configuredSlot ?? attacks);
+  if (slotLimit <= 0) return [];
+
+  return attacks
+    .filter((attack) => isAttackUnlocked(characterId, attack))
+    .map((attack, index) => ({ attack, index }))
+    .sort((a, b) =>
+      scoreBotAttack(b.attack) - scoreBotAttack(a.attack) ||
+      a.index - b.index
+    )
+    .slice(0, slotLimit)
+    .map(({ attack }) => ({ ...attack }));
+}
+
 export function unlockFestivalAttack(characterId, attack) {
   if (!attack?.festivalExclusive) return false;
   const key = getAttackKey(attack);
