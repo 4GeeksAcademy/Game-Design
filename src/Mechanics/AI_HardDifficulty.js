@@ -363,9 +363,9 @@ function getHardResourceSnapshot(fighter) {
   return {
     cooldown: Math.max(0, Number(fighter.cooldown) || 0),
     mana: Math.max(0, Number(fighter.mana) || 0),
-    maximumCooldown: Math.max(0, getModifiedCharacterStat(fighter, "maximumCooldown")),
-    recovery: Math.max(0, getModifiedCharacterStat(fighter, "recovery")),
-    manaRegen: Math.max(0, getModifiedCharacterStat(fighter, "manaRegen")),
+    maximumCooldown: Math.max(0, Number(getModifiedCharacterStat(fighter, "maximumCooldown")) || 0),
+    recovery: Math.max(0, Number(getModifiedCharacterStat(fighter, "recovery")) || 0),
+    manaRegen: Math.max(0, Number(getModifiedCharacterStat(fighter, "manaRegen")) || 0),
   };
 }
 
@@ -515,10 +515,10 @@ function getHardSavingDecision(attacker, opponents = [], state = createHardSavin
   const worthwhile = plan.score >= HARD_WORTHWHILE_PLAN_SCORE &&
     (plan.sequenceLength >= 2 || lethal || plan.score >= HARD_WORTHWHILE_PLAN_SCORE + 18);
 
-  if (state.mode === "recover") {
-    if (!worthwhile) return { mode: "skip", attack: null, target };
+  if (state.mode !== "normal" && worthwhile) {
     state.mode = "normal";
     state.stalledRounds = 0;
+    state.pendingPressure = null;
   }
 
   if (state.mode === "normal" && !worthwhile) {
