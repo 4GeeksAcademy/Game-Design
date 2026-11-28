@@ -373,6 +373,33 @@ test.describe("Hard AI", () => {
     expect(state.mode).toBe("pressure");
   });
 
+
+  test("leaves full recovery when a worthwhile combo becomes affordable", () => {
+    const attacker = makeFighter({
+      mana: 0,
+      manaRegen: 5,
+      attacks: [
+        makeAttack("combo-starter", { damage: 40, cost: 10 }),
+        makeAttack("combo-finisher", { damage: 40, cost: 10 }),
+      ],
+    });
+    const defender = makeFighter({ id: "player", health: 100 });
+    const state = createHardSavingState();
+    state.mode = "recover";
+    state.stalledRounds = 10;
+
+    const waiting = getHardSavingDecision(attacker, [defender], state);
+    expect(waiting.mode).toBe("skip");
+
+    attacker.mana = 100;
+    const resumed = getHardSavingDecision(attacker, [defender], state);
+
+    expect(resumed.mode).toBe("normal");
+    expect(resumed.attack).not.toBeNull();
+    expect(state.mode).toBe("normal");
+    expect(state.stalledRounds).toBe(0);
+  });
+
   test("chooses the more vulnerable opponent when no matching resource-disruption move exists", () => {
     const attacker = makeFighter({
       mana: 100,
