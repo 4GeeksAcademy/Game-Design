@@ -1761,7 +1761,7 @@ export default function TeamBattle() {
     } else {
       // Normal evaluates healing value and chooses the best recipient.
       // Without an opponent, it considers healing attacks only.
-      const fighterToEvaluate = target
+      const fighterToEvaluate = difficulty === "Hard" || target
         ? ally
         : {
             ...ally,
@@ -1776,14 +1776,20 @@ export default function TeamBattle() {
         );
         selectedAttack = decision.attack ?? null;
         target = decision.target ?? target;
-        if (!selectedAttack) {
-          const healAction = chooseHardTeamAction(
-            { ...fighterToEvaluate, attacks: fighterToEvaluate.attacks.filter((move) => move.heal || Number(move.buff?.health) > 0) },
+
+        if (decision.mode === "normal" || !selectedAttack) {
+          const tacticalAction = chooseHardTeamAction(
+            fighterToEvaluate,
             teams.player,
-            [],
+            teams.opponent,
           );
-          selectedAttack = healAction?.attack ?? null;
-          healTargetId = healAction?.healTargetId ?? null;
+          if (
+            tacticalAction?.attack?.heal ||
+            Number(tacticalAction?.attack?.buff?.health) > 0
+          ) {
+            selectedAttack = tacticalAction.attack;
+            healTargetId = tacticalAction.healTargetId ?? null;
+          }
         }
       } else {
         const action = chooseNormalTeamAction(fighterToEvaluate, teams.player);
