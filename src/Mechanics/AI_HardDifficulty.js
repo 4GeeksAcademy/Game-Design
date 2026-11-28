@@ -499,7 +499,7 @@ function chooseHardTeamTargets(attackers = [], defenders = []) {
   return assignments;
 }
 
-function getHardSavingDecision(attacker, opponents = [], state = createHardSavingState()) {
+function getHardSavingDecision(attacker, opponents = [], state = createHardSavingState(), options = {}) {
   if (!attacker || !state) return { mode: "skip", attack: null, target: null };
   if (state.pressureUsedThisRound) {
     return { mode: "skip", attack: null, target: null };
@@ -530,7 +530,7 @@ function getHardSavingDecision(attacker, opponents = [], state = createHardSavin
       targetId: target.id,
       before: getHardResourceSnapshot(target),
     };
-    state.pressureUsedThisRound = true;
+    if (!options.deferPressureMark) state.pressureUsedThisRound = true;
     const pressureAttack = getHardPressureAttack(attacker, target);
     return pressureAttack
       ? { mode: "pressure", attack: pressureAttack, target }
@@ -542,6 +542,10 @@ function getHardSavingDecision(attacker, opponents = [], state = createHardSavin
     attack: chooseHardAttack(attacker, target),
     target,
   };
+}
+
+function markHardPressureUsed(state) {
+  if (state) state.pressureUsedThisRound = true;
 }
 
 function recordHardPressureOutcome(state, target) {
@@ -812,6 +816,7 @@ export {
   getHardSavingDecision,
   getHardResourceSnapshot,
   recordHardPressureOutcome,
+  markHardPressureUsed,
   chooseHardTarget,
   chooseHardTeamTargets,
   createHardAIController,
