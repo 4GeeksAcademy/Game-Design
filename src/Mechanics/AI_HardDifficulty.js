@@ -515,6 +515,10 @@ function getHardSavingDecision(attacker, opponents = [], state = createHardSavin
   const worthwhile = plan.score >= HARD_WORTHWHILE_PLAN_SCORE &&
     (plan.sequenceLength >= 2 || lethal || plan.score >= HARD_WORTHWHILE_PLAN_SCORE + 18);
 
+  if (state.mode === "recover" && !worthwhile) {
+    return { mode: "skip", attack: null, target };
+  }
+
   if (state.mode !== "normal" && worthwhile) {
     state.mode = "normal";
     state.stalledRounds = 0;
