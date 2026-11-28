@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap");
 
 .bot-simulator {
   min-height: 100vh;
@@ -778,7 +779,7 @@
    WILD CARDS — COMBAT RESEARCH LABORATORY
 ========================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap");
+
 
 .bot-simulator {
   --lab-blue: #168cff;

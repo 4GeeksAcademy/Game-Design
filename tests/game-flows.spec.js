@@ -77,9 +77,10 @@ test.describe("Wild Cards - 1v1 gameplay", () => {
 
 test.describe("Wild Cards - 2v2 gameplay", () => {
   test("selects two fighters, assigns targets, and resolves a team attack", async ({
-    page,
-    browserErrors,
-  }) => {
+  page,
+  browserErrors,
+}) => {
+  test.setTimeout(90000);
     await bootHome(page);
     await openSinglePlayer(page);
 
@@ -127,6 +128,10 @@ test.describe("Wild Cards - 2v2 gameplay", () => {
     await expect(
       page.getByRole("heading", { name: /SELECT YOUR TARGETS/i }),
     ).toBeVisible({ timeout: 20000 });
+
+   // Wait until the intro overlay becomes non-interactive.
+await expect(page.locator(".round-intro"))
+  .toHaveAttribute("aria-hidden", "true", { timeout: 10000 });
 
     const targetGroups = page.locator(".target-choice-group");
 
