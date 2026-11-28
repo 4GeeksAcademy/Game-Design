@@ -2783,7 +2783,7 @@ battlefield > .local-coop-incoming {
 /* Slightly reduce the panel height on shorter screens */
 @media (max-height: 800px) {
   .battle-bottom {
-    flex-basis: 270px;
+    flex-basis: 310px;
   }
 }
 
@@ -3607,8 +3607,8 @@ battlefield > .local-coop-incoming {
   justify-content: center;
   width: 100%;
   flex: 0 0 auto;
-  height: 190px;
-  min-height: 190px;
+  height: clamp(170px, 26vh, 220px);
+  min-height: 170px;
   overflow: visible;
   isolation: isolate;
 }
@@ -3855,16 +3855,15 @@ battlefield > .local-coop-incoming {
   .fighter-unit { gap: 5px; }
   .fighter-hud { padding: 6px; gap: 4px; }
   .fighter-charge-row { gap: 5px; }
-  .fighter-portrait-stage { height: 190px; min-height: 190px; }
+  .fighter-portrait-stage { height: clamp(160px, 24vh, 200px); min-height: 160px; }
   .fighter-portrait { max-width: min(100%, 190px); }
 }
 
 @media (max-height: 700px) and (min-width: 621px) {
-  .fighter-portrait-stage { height: 190px; min-height: 190px; }
+  .fighter-portrait-stage { height: clamp(165px, 25vh, 190px); min-height: 165px; }
   .fighter-hud { gap: 3px; padding: 5px 7px; }
   .fighter-hud .resource-track { height: 7px; }
   .fighter-segments > span { height: 7px; }
-  .battle-bottom { flex-basis: 245px; }
 }
 
 @media (max-width: 620px) {
@@ -3875,20 +3874,11 @@ battlefield > .local-coop-incoming {
   .fighter-hud .resource-row { grid-template-columns: 17px minmax(0, 1fr) auto; gap: 4px; }
   .fighter-hud .resource-value { min-width: 42px; font-size: 8px; }
   .fighter-charge-row { grid-template-columns: 1fr; gap: 4px; }
-  .fighter-portrait-stage { height: 190px; min-height: 190px; }
+  .fighter-portrait-stage { height: clamp(150px, 21vh, 180px); min-height: 150px; }
   .fighter-info-popup { right: -15%; left: -15%; max-height: 230px; }
   .fighter-info-stat-grid { gap: 5px 8px; }
   .fighter-info-stat-grid > div span { font-size: 7px; }
   .fighter-info-stat-grid > div b { font-size: 9px; }
-  .team-battle .battlefield {
-    min-height: 640px;
-    grid-template-rows: minmax(285px, auto) 45px minmax(285px, auto);
-    overflow: visible;
-  }
-  .team-battle .battle-bottom {
-    flex: 0 0 auto;
-    min-height: 260px;
-  }
 }
 
 
@@ -4481,13 +4471,13 @@ battlefield > .local-coop-incoming {
 .team-battle .fighter-portrait-stage { align-items:center; }
 .team-battle .fighter-portrait-wrapper {
   display:block;
-  flex:0 0 120px;
-  width:120px;
-  height:190px;
+  flex:0 0 auto;
+  width:auto;
+  height:100%;
   aspect-ratio:120 / 190;
   max-width:100%;
-  max-height:190px;
-  min-height:190px;
+  max-height:100%;
+  min-height:0;
   overflow:hidden;
   box-sizing:border-box;
   border:1px solid color-mix(in srgb,var(--fighter-accent,#ff3f61) 62%,#ffffff 12%);
@@ -4514,13 +4504,11 @@ battlefield > .local-coop-incoming {
 }
 @media (max-width:900px) {
   .team-battle .fighter-portrait-wrapper {
-    flex-basis:120px;
-    width:120px;
-    height:190px;
+    width:auto;
+    height:100%;
     aspect-ratio:120 / 190;
     max-width:100%;
-    max-height:190px;
-    min-height:190px;
+    max-height:100%;
   }
 }
 @media (prefers-reduced-motion:reduce) {
