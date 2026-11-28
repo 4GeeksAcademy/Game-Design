@@ -42,6 +42,10 @@ import {
   chooseHardTeamAction,
   hardDefendOrEvade,
   getHardAttackPriority,
+  createHardSavingState,
+  getHardSavingDecision,
+  recordHardPressureOutcome,
+  chooseHardTeamTargets,
 } from "./AI_HardDifficulty.js";
 import StoryResultsScreen from "./Main Page/Story/StoryResultScreen.jsx";
 import BattlePauseMenu from "./BattlePauseMenu.jsx";
@@ -427,6 +431,13 @@ export default function TeamBattle() {
   const [localCoopDefenses, setLocalCoopDefenses] = useState([]);
   const [localCoopDefenseTimers, setLocalCoopDefenseTimers] = useState({});
   const previousCpuAttackersRef = useRef(new Set());
+  const hardSavingStatesRef = useRef(new Map());
+  const getHardStateFor = (fighterId) => {
+    if (!hardSavingStatesRef.current.has(fighterId)) {
+      hardSavingStatesRef.current.set(fighterId, createHardSavingState());
+    }
+    return hardSavingStatesRef.current.get(fighterId);
+  };
   const localCoopExpiredRef = useRef(new Set());
   const localCoopResolvedRef = useRef(new Set());
   const localCoopTimeoutsRef = useRef([]);
@@ -964,9 +975,11 @@ export default function TeamBattle() {
 
     setRoundTargets(targetsForRound);
 
-    const newCpuTargets = assignUniqueCpuTargets(teams.opponent, teams.player, [
-      ...previousCpuAttackersRef.current,
-    ]);
+    const newCpuTargets = difficulty === "Hard" && !isLocalCoop
+      ? chooseHardTeamTargets(teams.opponent, teams.player)
+      : assignUniqueCpuTargets(teams.opponent, teams.player, [
+          ...previousCpuAttackersRef.current,
+        ]);
 
     previousCpuAttackersRef.current = new Set(Object.keys(newCpuTargets));
 
@@ -1707,7 +1720,7 @@ export default function TeamBattle() {
 
     const targetId = roundTargets[ally.id];
 
-    const target = teams.opponent.find(
+    let target = teams.opponent.find(
       (fighter) => fighter.id === targetId && fighter.health > 0,
     );
 
@@ -1754,16 +1767,28 @@ export default function TeamBattle() {
             attacks: ally.attacks.filter((attack) => attack.heal),
           };
 
-      const action = difficulty === "Hard"
-        ? chooseHardTeamAction(
-            fighterToEvaluate,
+      if (difficulty === "Hard") {
+        const decision = getHardSavingDecision(
+          fighterToEvaluate,
+          teams.opponent,
+          getHardStateFor(ally.id),
+        );
+        selectedAttack = decision.attack ?? null;
+        target = decision.target ?? target;
+        if (!selectedAttack) {
+          const healAction = chooseHardTeamAction(
+            { ...fighterToEvaluate, attacks: fighterToEvaluate.attacks.filter((move) => move.heal || Number(move.buff?.health) > 0) },
             teams.player,
-            target ? [target] : [],
-          )
-        : chooseNormalTeamAction(fighterToEvaluate, teams.player);
-
-      selectedAttack = action?.attack ?? null;
-      healTargetId = action?.healTargetId ?? null;
+            [],
+          );
+          selectedAttack = healAction?.attack ?? null;
+          healTargetId = healAction?.healTargetId ?? null;
+        }
+      } else {
+        const action = chooseNormalTeamAction(fighterToEvaluate, teams.player);
+        selectedAttack = action?.attack ?? null;
+        healTargetId = action?.healTargetId ?? null;
+      }
     }
 
     const attackIndex = selectedAttack
@@ -1928,26 +1953,31 @@ export default function TeamBattle() {
     teams.opponent.forEach((cpu) => {
       if (cpu.health <= 0) return;
 
-      const targetId = cpuTargets[cpu.id];
-
-      const target = teams.player.find(
-        (player) => player.id === targetId && player.health > 0,
+      let target = teams.player.find(
+        (player) => player.id === cpuTargets[cpu.id] && player.health > 0,
       );
+      let usableAttacks;
+      if (difficulty === "Hard") {
+        const decision = getHardSavingDecision(
+          cpu,
+          teams.player,
+          getHardStateFor(cpu.id),
+        );
+        target = decision.target ?? target;
+        usableAttacks = decision.attack
+          ? [{ attack: decision.attack, attackIndex: cpu.attacks.indexOf(decision.attack) }]
+          : [];
+      } else {
+        if (!target) return;
+        usableAttacks = cpu.attacks
+          .map((attack, attackIndex) => ({ attack, attackIndex }))
+          .filter(({ attack }) => canFighterUseAttack(cpu, attack))
+          .slice(0, limit);
+      }
 
       if (!target) return;
-
-      const usableAttacks = difficulty === "Hard"
-        ? getHardAttackPriority(cpu, target).map((attack) => ({
-            attack,
-            attackIndex: cpu.attacks.indexOf(attack),
-          }))
-        : cpu.attacks
-            .map((attack, attackIndex) => ({ attack, attackIndex }))
-            .filter(({ attack }) => canFighterUseAttack(cpu, attack))
-            .slice(0, limit);
-
       usableAttacks.forEach(({ attackIndex }) => {
-        queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
+        if (attackIndex >= 0) queue.push({ cpuId: cpu.id, targetId: target.id, attackIndex });
       });
     });
 
@@ -2064,9 +2094,29 @@ export default function TeamBattle() {
 
       const playerCount = teams.player.length;
 
+      const recoveredPlayers = resetFighters(allFighters.slice(0, playerCount));
+      const recoveredOpponents = resetFighters(allFighters.slice(playerCount));
+
+      if (difficulty === "Hard" && !isLocalCoop) {
+        recoveredOpponents.forEach((cpu) => {
+          const state = hardSavingStatesRef.current.get(cpu.id);
+          if (state?.pendingPressure) {
+            const target = recoveredPlayers.find((fighter) => fighter.id === state.pendingPressure.targetId);
+            recordHardPressureOutcome(state, target);
+          }
+        });
+        recoveredPlayers.filter((fighter) => fighter.isCpuTeammate).forEach((ally) => {
+          const state = hardSavingStatesRef.current.get(ally.id);
+          if (state?.pendingPressure) {
+            const target = recoveredOpponents.find((fighter) => fighter.id === state.pendingPressure.targetId);
+            recordHardPressureOutcome(state, target);
+          }
+        });
+      }
+
       setTeams({
-        player: resetFighters(allFighters.slice(0, playerCount)),
-        opponent: resetFighters(allFighters.slice(playerCount)),
+        player: recoveredPlayers,
+        opponent: recoveredOpponents,
       });
       setRoundTargets({});
       setCpuQueueReady(false);
