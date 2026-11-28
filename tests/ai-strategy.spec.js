@@ -17,6 +17,11 @@ import {
   getHardDebuffThreat,
   chooseHardAttack,
   hardDefendOrEvade,
+  createHardSavingState,
+  getHardSavingDecision,
+  recordHardPressureOutcome,
+  chooseHardTarget,
+  chooseHardTeamTargets,
 } from "../src/Mechanics/AI_HardDifficulty.js";
 
 function makeAttack(id, overrides = {}) {
@@ -260,6 +265,149 @@ test.describe("Hard AI", () => {
     expect(
       chooseHardAttack(attacker, makeFighter()),
     ).toBeNull();
+  });
+
+
+  test("uses a pressure debuff only when its mana cost fits one round of regeneration", () => {
+    const pressure = makeAttack("cooldown-pressure", {
+      damage: 0,
+      cost: 5,
+      debuff: { recovery: -3 },
+    });
+    const attacker = makeFighter({
+      id: "hard-cpu",
+      mana: 20,
+      manaRegen: 5,
+      attacks: [pressure],
+    });
+    const defender = makeFighter({
+      id: "player",
+      cooldown: 2,
+      recovery: 10,
+      attacks: [],
+    });
+    const state = createHardSavingState();
+
+    const decision = getHardSavingDecision(attacker, [defender], state);
+
+    expect(decision.mode).toBe("pressure");
+    expect(decision.attack).toBe(pressure);
+    expect(state.pressureUsedThisRound).toBe(true);
+  });
+
+  test("waits instead of using a pressure move that costs more than mana regeneration", () => {
+    const pressure = makeAttack("expensive-pressure", {
+      damage: 0,
+      cost: 6,
+      debuff: { recovery: -3 },
+    });
+    const attacker = makeFighter({
+      mana: 20,
+      manaRegen: 5,
+      attacks: [pressure],
+    });
+    const defender = makeFighter({ id: "player", recovery: 10 });
+
+    const decision = getHardSavingDecision(
+      attacker,
+      [defender],
+      createHardSavingState(),
+    );
+
+    expect(decision.mode).toBe("skip");
+    expect(decision.attack).toBeNull();
+  });
+
+  test("enters full recovery after ten pressure rounds without post-recovery progress", () => {
+    const pressure = makeAttack("cooldown-pressure", {
+      damage: 0,
+      cost: 5,
+      debuff: { recovery: -3 },
+    });
+    const attacker = makeFighter({
+      mana: 20,
+      manaRegen: 5,
+      attacks: [pressure],
+    });
+    const defender = makeFighter({
+      id: "player",
+      cooldown: 2,
+      recovery: 10,
+    });
+    const state = createHardSavingState();
+
+    for (let round = 0; round < 10; round += 1) {
+      const decision = getHardSavingDecision(attacker, [defender], state);
+      expect(decision.mode).toBe("pressure");
+      // No net resource change after round recovery means no real progress.
+      recordHardPressureOutcome(state, defender);
+    }
+
+    expect(state.stalledRounds).toBe(10);
+    expect(state.mode).toBe("recover");
+  });
+
+  test("resets the stalled counter when pressure creates lasting progress", () => {
+    const pressure = makeAttack("cooldown-pressure", {
+      damage: 0,
+      cost: 5,
+      debuff: { recovery: -3 },
+    });
+    const attacker = makeFighter({
+      mana: 20,
+      manaRegen: 5,
+      attacks: [pressure],
+    });
+    const defender = makeFighter({
+      id: "player",
+      cooldown: 2,
+      recovery: 10,
+    });
+    const state = createHardSavingState();
+
+    getHardSavingDecision(attacker, [defender], state);
+    defender.cooldown = 0;
+    recordHardPressureOutcome(state, defender);
+
+    expect(state.stalledRounds).toBe(0);
+    expect(state.mode).toBe("pressure");
+  });
+
+  test("chooses the more vulnerable opponent when no matching resource-disruption move exists", () => {
+    const attacker = makeFighter({
+      mana: 100,
+      attacks: [makeAttack("heavy-hit", { damage: 45, cost: 5 })],
+    });
+    const easier = makeFighter({
+      id: "easier-target",
+      defense: 1,
+      health: 100,
+    });
+    const tougher = makeFighter({
+      id: "tougher-target",
+      defense: 9,
+      health: 100,
+      manaRegen: 10,
+      recovery: 10,
+    });
+
+    expect(chooseHardTarget(attacker, [tougher, easier])).toBe(easier);
+  });
+
+  test("focuses a second CPU fighter on an opponent who can be knocked out", () => {
+    const attack = () => makeAttack("finisher", { damage: 40, cost: 5 });
+    const cpuOne = makeFighter({ id: "cpu-one", mana: 100, attacks: [attack()] });
+    const cpuTwo = makeFighter({ id: "cpu-two", mana: 100, attacks: [attack()] });
+    const lowHealth = makeFighter({ id: "low-health", health: 35, maximumHealth: 100 });
+    const healthy = makeFighter({ id: "healthy", health: 100, maximumHealth: 100 });
+
+    const assignments = chooseHardTeamTargets(
+      [cpuOne, cpuTwo],
+      [lowHealth, healthy],
+    );
+
+    expect(assignments["cpu-one"]).toBe("low-health");
+    expect(assignments["cpu-two"]).toBe("low-health");
   });
 
   test("resolves a hit when no defensive option can be funded", () => {
